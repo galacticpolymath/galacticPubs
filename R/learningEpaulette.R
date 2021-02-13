@@ -54,8 +54,7 @@ xlabels$x.lab <-xlabels$x + c(.01,.01,-.01,-.01)
 #set manual vertical spacing, otherwise distribute as steps (from 0 to 1 (0 being lowest, 1, being highest))
 #convert relative label 0, 1 scale to plot 0,1 scale units
 if(!is.null(vertSpacing)){
-  vertSpacingFormatted <- vertSpacing*.35
-}else{
+  vertSpacingFormatted <- vertSpacing*.35}else{
     vertSpacingFormatted <- seq(.35,0,length.out=4)
     }
 

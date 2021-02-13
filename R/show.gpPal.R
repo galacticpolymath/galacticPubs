@@ -7,6 +7,7 @@
 #' @param ... additional parameters for \code{\link[colorspace]{swatchplot}}
 #' @export
 show.gpPal<-function(pal=1,subset=NULL,...){
+  gpPal=NULL
   utils::data(gpPal)
   P<-gpPal[[pal]]$hex
   if(length(subset!=0)){
