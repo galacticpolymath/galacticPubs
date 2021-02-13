@@ -9,7 +9,7 @@ learningEpaulette(
   targetSubj = NULL,
   vertSpacing = c(1, 1, 1, 1),
   saveFile = TRUE,
-  destFolder = "/assets",
+  destFolder = "assets/",
   fileName = "GP_Learning_Epaulette",
   ...
 )

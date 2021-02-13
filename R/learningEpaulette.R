@@ -14,7 +14,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="/assets",fileName="GP_Learning_Epaulette",...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/",fileName="GP_Learning_Epaulette",...){
 
 #bring in empty matrix to merge in, in case some subjects are missing
 a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="GPpub"))
@@ -114,12 +114,16 @@ epaulette<-ggplot2::ggplot(rectangles)+ggGalactic()+
 #output to user
 plot(epaulette)
 #Save the file
+dir.create(destFolder,showWarnings=FALSE)#create folder if necessary
 givenExt=if(grepl(".",fileName,fixed=TRUE)){gsub(".*\\.(.{3,4}$)","\\1",fileName)}else{NULL} #extract file extension if provided
 fileOut<-gsub("(^.*)\\..*$","\\1",basename(fileName)) #strip extension and full path from provided fileName
 fileOutExt<-ifelse(is.null(givenExt),"png",givenExt) #provide png extension if not provided
-outFile<-fs::path(destFolder,paste0(fileOut,"_",paste0(compiledAlignment$grades,collapse="_"),collapse=""),ext=fileOutExt)
-ggplot2::ggsave(outFile,width=10,height=1.6,...)
+output.0<-fs::path(destFolder,"/",paste0(fileOut,"_",compiledAlignment$grades,collapse=""),ext=fileOutExt)
+output<-gsub("^[\\//](.*)","\\1",output.0)
+ggplot2::ggsave(output,width=10,height=1.6,...)
 #output object if they want to modify further
+
+message("GP Learning Epaulette saved\n@ ",output)
 return(epaulette)
 
 }

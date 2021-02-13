@@ -178,12 +178,15 @@ gridFooter<-function(bg,textCol,caption,x,y,fontsize=8,fillCol=gpColors("galacti
 
 
 learningChart<-grid::grid.grabExpr({
-plot(badge_prop)
+grid::grid.draw(badge_prop)
 gridLab(.9,.91,"CC\nMath",subjPal[1],"C3 Soc Studies",outlineCol =gpColors("galactic black") ,outlineThickness=.1) #old outline color "#090816"
 gridLab(.9,.15,"CC\nELA",subjPal[2],"C3 Soc Studies",outlineCol = gpColors("galactic black"),outlineThickness=.1)
 gridLab(.1,.15,"NGSS\nScience",subjPal[3],"C3 Soc Studies",outlineCol = gpColors("galactic black"),outlineThickness=.1)
 gridLab(.1,.91,"C3\nSoc Studies",subjPal[4],"C3 Soc Studies",outlineCol = gpColors("galactic black"),outlineThickness=.1)
-grid::grid.polygon(x=c(0,1,1,0),y=c(1,1,.06,.06),gp=grid::gpar(fill="transparent",col=gpColors("galactic black"),lwd=2))
+
+#outline of plot area
+# grid::grid.polygon(x=c(0,1,1,0),y=c(1,1,.06,.06),gp=grid::gpar(fill="transparent",col=gpColors("galactic black"),lwd=2))
+
 gridFooter(caption=caption,x=0.01,y=.0275,fontsize=9)
 invisible(sapply(targetSubj,function(x){
   d=targetDF %>% dplyr::filter(.data$subject==tolower(!!x))
@@ -193,7 +196,7 @@ invisible(sapply(targetSubj,function(x){
   ))
 })
 # output PNG of learning chart --------------------------------------------
-
+dir.create(destFolder,showWarnings=FALSE)
 outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),"_",
                                     paste0(compiledAlignment$grades),collapse=""),ext="png")
 
@@ -204,8 +207,10 @@ grDevices::dev.off()
 #output to user
 grid::grid.draw(learningChart)
 
-#return object to user
-return(learningChart)
-
+#tell user where file is saved
 message("GP Learning Chart saved\n@ ",fileName)
+
+#return object to user (wrapped in invisible to prevent meaningless gTree obj being printed)
+return(invisible(learningChart))
+
 }
