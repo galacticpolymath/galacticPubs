@@ -4,12 +4,12 @@
 \alias{gpColors}
 \title{gpColors}
 \usage{
-gpColors(colorNames, list = FALSE)
+gpColors(colorNames = NULL, List = FALSE)
 }
 \arguments{
 \item{colorNames}{a vector of quoted named colors (partial name matching is allowed)}
 
-\item{list}{T/F, do you want to list the options?}
+\item{List}{T/F, do you want to list the options?}
 }
 \value{
 a vector of hex codes for the requested colors
