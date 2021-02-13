@@ -7,7 +7,9 @@
 #' @param caption quoted text you want to go at the bottom of the chart
 #' @param centralText what you want at the center of the plot ("grades 5-12" by default)
 #' @param centralTextSize multiplier for font size of centralText
-#' @param fileName expects somefilename.png
+#' @param saveFile T/F, save file or just print to screen?
+#' @param destFolder where do you want to save the folder; by default in the "assets/" folder, 1 level up from the working directory
+#' @param fileName expects "somefilename" (file extension will be ignored)
 #' @param ... other arguments passed to \code{\link[grDevices]{png}}
 #' @return the learning chart plot object (grid format); the file is saved to assets/GP_Learning_Chart.png by default
 #' @export
@@ -15,18 +17,17 @@
 
 
 learningChart=function(compiledAlignment,targetSubj=NULL,caption,centralText="grades\n5-12",
-                       centralTextSize=3.7,fileName="assets/GP_Learning_Chart.png",...){
+                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/",fileName="GP_Learning_Chart",...){
 
 if(missing(caption)){caption="GP Learning Chart: Showing lesson interdisciplinarity by proportion of aligned standards"}
 
-#Subject MUST be ordered! (gets lost every time we join datasets for some reason)
-compiledAlignment$subject=factor(compiledAlignment$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
+
 #Import empty template to fill in for missing alignment dimensions (e.g. if there are no alignments to reading, or CCC, etc)
 a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="GPpub"))
 #super important to refactor subject on the imported data to ensure order
 a_template$subject=factor(a_template$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 
-a_summ<-compiledAlignment %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
+a_summ<-compiledAlignment$data %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
 
 #gotta combine missing rows, sort, & repeat the entries N times
 a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>%
@@ -193,7 +194,10 @@ invisible(sapply(targetSubj,function(x){
 })
 # output PNG of learning chart --------------------------------------------
 
-grDevices::png(fileName,width=7,height=4.5,units="in",res=300,...)
+outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),"_",
+                                    paste0(compiledAlignment$grades),collapse=""),ext="png")
+
+grDevices::png(outFile,width=7,height=4.5,units="in",res=300,...)
 grid::grid.draw(learningChart)
 grDevices::dev.off()
 

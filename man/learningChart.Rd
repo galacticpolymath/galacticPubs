@@ -10,7 +10,9 @@ learningChart(
   caption,
   centralText = "grades\\n5-12",
   centralTextSize = 3.7,
-  fileName = "assets/GP_Learning_Chart.png",
+  saveFile = TRUE,
+  destFolder = "assets/",
+  fileName = "GP_Learning_Chart",
   ...
 )
 }
@@ -25,7 +27,11 @@ learningChart(
 
 \item{centralTextSize}{multiplier for font size of centralText}
 
-\item{fileName}{expects somefilename.png}
+\item{saveFile}{T/F, save file or just print to screen?}
+
+\item{destFolder}{where do you want to save the folder; by default in the "assets/" folder, 1 level up from the working directory}
+
+\item{fileName}{expects "somefilename" (file extension will be ignored)}
 
 \item{...}{other arguments passed to \code{\link[grDevices]{png}}}
 }

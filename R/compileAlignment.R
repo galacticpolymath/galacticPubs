@@ -162,6 +162,10 @@ message(msg_test2,"\n  ",paste0(mismatches,collapse=", "))
 # combine final data if all grade bands selected --------------------------
 
 COMPILED<-if(length(gradeBands)>1){do.call(rbind,output)}else{output[[1]]}
+
+#Factor subjects in order which will be used for learningChart
+COMPILED$subject<-factor(COMPILED$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
+
 # concise version of final output with lots of undocumented missing values
 COMPILED
 
@@ -237,6 +241,7 @@ In_Outs<-do.call(rbind,in_out)
 message("Total of ",sum(In_Outs$output_code_entries)," standards compiled\n")
 message("JSON file saved\n@ ",fileName)
 
-return(COMPILED)
+#add grades information to output
+return(list(grades=grades,data=COMPILED))
 
 }#end compileAlignment function def
