@@ -3,16 +3,17 @@
 #' Compile alignment info from a lesson standards matrix worksheet
 #' @param lessonAlignmentMatrix file location of the lesson alignment matrix XLSX worksheet
 #' @param grades grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "all"
-#' @param fileName output filename (including path if you don't want it in the working directory)
+#' @param fileName output file name (including path if you don't want it in the working directory)
+#' @return tibble of the compiled standards data; a JSON is saved to standards/processedStandards.json
+#' @export
 #'
-compileAlignment <- function(lessonAlignmentMatrix,grades="all",fileName="processedStandards.json"){
+compileAlignment <- function(lessonAlignmentMatrix,grades="all",fileName="standards/processedStandards.json"){
 
-  .=NULL #to avoid errors with dplyr syntax
+  # .=NULL #to avoid errors with dplyr syntax
 
  # Import XLSX files -------------------------------------------------------
 #Import master alignment with ALL standards from https://github.com/galacticpolymath/standardX
 tmp<-tempfile("allStandards_temp",fileext="csv")
-
 
 utils::download.file("https://github.com/galacticpolymath/standardX/blob/master/data/allStandards.csv?raw=true",destfile=tmp)
 alignmentMaster<-utils::read.csv(tmp)
@@ -64,12 +65,12 @@ c3_matrix<-alignment_matrix[,c3Cols]
 names(c3_matrix)<-newNames
 
 alignment_matrix_stacked0=rbind(CCmath_matrix,CCela_matrix,ngss_matrix,c3_matrix)
-alignment_matrix_stacked=alignment_matrix_stacked0 %>% dplyr::filter("Codes"!="")
+alignment_matrix_stacked=alignment_matrix_stacked0 %>% dplyr::filter(.data$Codes!="")
 
 #///////////////////////////
 # Output Integrity Check 1: verify that codes have been entered for every lesson that has alignment notes
 n_code_entries<-nrow(alignment_matrix_stacked)
-n_alignmentNote_entries<-nrow(alignment_matrix_stacked0 %>% dplyr::filter("AlignmentNotes"!=""))
+n_alignmentNote_entries<-nrow(alignment_matrix_stacked0 %>% dplyr::filter(.data$AlignmentNotes!=""))
 test_code_v_alignment<-n_code_entries==n_alignmentNote_entries
 msg_code_v_alignment<-ifelse(test_code_v_alignment,"TEST 1 PASS","TEST 1 FAIL: Make sure you have codes listed for every set of alignment notes.")
 cat("\n",paste0(rep("-",30),collapse=""),"\n  Integrity Check 1\n",paste0(rep("-",30),collapse=""),"\n  N Alignment Entries: \t",
@@ -172,9 +173,11 @@ COMPILED
 allSubjects<-alignmentMaster$subject %>% unique() %>% subset(.!="")
 allDimensions<-alignmentMaster$dimension%>% unique() %>% subset(.!="")
 emptyStandardsMatrix<-lapply(allSubjects,function(x){
-                        subjDims<-alignmentMaster %>% dplyr::filter("subject"==x) %>% dplyr::select("dimension") %>%
+                        subjDims<-alignmentMaster %>% dplyr::filter(.data$subject==x) %>% dplyr::select("dimension") %>%
                           unique()%>% unlist()
-                        dplyr::tibble(subject=x,subjDims)}) %>% do.call(rbind,.) %>% dplyr::rename("dimension"="subjDims")
+                        dplyr::tibble(subject=x,subjDims)})    %>%
+                      do.call(rbind,.) %>% dplyr::rename("dimension"="subjDims")
+
 emptyStandardsMatrix<-rbind(emptyStandardsMatrix,emptyStandardsMatrix) %>% dplyr::mutate("target"=c(rep(TRUE,
                         nrow(emptyStandardsMatrix)),rep(FALSE,nrow(emptyStandardsMatrix)))) %>% dplyr::mutate(
                         code=NA,alignmentNotes=NA)
@@ -187,18 +190,18 @@ COMPILED_filled_sorted<-dplyr::bind_rows(emptyStandardsMatrix[missingDimRows,],C
 
 #iterate across target and connected standards categories
 l_ta<-lapply(unique(COMPILED_filled_sorted$target),function(ta){
-    d_ta<-COMPILED_filled_sorted %>% dplyr::filter("target"==ta)
+    d_ta<-COMPILED_filled_sorted %>% dplyr::filter(.data$target==ta)
     #iterate across unique subjects within target/nontarget types
     l_su<-lapply(unique(d_ta$subject),function(su){
-        d_su<-d_ta %>% dplyr::filter("subject"==su)
+        d_su<-d_ta %>% dplyr::filter(.data$subject==su)
           l_se<-lapply(unique(d_su$set),function(se){
-            d_se<-d_su %>% dplyr::filter("set"==se)
+            d_se<-d_su %>% dplyr::filter(.data$set==se)
               #iterate across unique dimensions within subjects
               l_di<-lapply(unique(d_se$dimension),function(di){
-                d_di<-d_su %>% dplyr::filter("dimension"==di)
+                d_di<-d_su %>% dplyr::filter(.data$dimension==di)
                 #iterate across unique groups of standards (may be indiv. or groups of substandards w/in a dimension)
                 l_gr<-lapply(unique(d_di$grouping),function(gr){
-                   d_gr<-d_di %>% dplyr::filter("grouping"==gr)
+                   d_gr<-d_di %>% dplyr::filter(.data$grouping==gr)
                      # Build inner-level standard code data
                      # use 1st alignmentNote if they're all the same, otherwise collapse alignment
                      # notes that map to diff. learning targets into a bulleted list

@@ -5,27 +5,30 @@
 #' @param targetSubj which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param vertSpacing 4 value vector ranging from 0 to 1 for manipulating label spacing
 #' @param fileName expects somefilename.png for ggsave output image file
+#' ... additional parameters for \code{\link[ggplot2]{ggsave}}
+#' @return returned plot as a ggplot object; plot saved to assets/GP_Learning_Epaulette.png by default
 #' @importFrom rlang .data
+#' @export
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),fileName="STEAM_epaulette.png"){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),fileName="assets/GP_Learning_Epaulette.png",...){
 
 #bring in empty matrix to merge in, in case some subjects are missing
-a_template <-  readRDS("emptyStandardsCountForAllDims.rds")
+a_template <-  readRDS("inst/emptyStandardsCountForAllDims.rds")
 #super important to refactor subject on the imported data to ensure order
 a_template$subject=factor(a_template$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 
-a_summ<-compiledAlignment %>% dplyr::group_by("subject","dimension") %>% dplyr::tally()
+a_summ<-compiledAlignment %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
 
 #gotta combine missing rows, sort, & repeat the entries N times
-a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>% dplyr::arrange("subject","dimension")%>% dplyr::mutate(binary=ifelse(.data$n>0,1,0))
+a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>% dplyr::arrange(.data$subject,.data$dimension)%>% dplyr::mutate(binary=ifelse(.data$n>0,1,0))
 
 #Account for bias in the number of standards
-bias<-readRDS("standardCountsByDimension.rds")
-bias_by_subj<-bias %>% dplyr::summarise(tot_n_subj=sum(.data$n))
-a_combined<-dplyr::left_join(a_combined,bias %>% dplyr::rename("tot_n_dim"="n"))
-a_combined<-dplyr::left_join(a_combined,bias_by_subj)
+bias<-readRDS("inst/standardCountsByDimension.rds")
+bias_by_subj<-bias %>% dplyr::summarise(tot_n_subj=sum(.data$n),.groups="drop")
+a_combined<-dplyr::left_join(a_combined, (bias %>% dplyr::rename("tot_n_dim"="n")),by = c("subject", "dimension") )
+a_combined<-dplyr::left_join(a_combined,bias_by_subj,by = c("subject"))
 
 #correct the lesson's n standards by Tot possible for the subject
 #*Because there aren't an equal number of standards per dimension, (and they're not all equal),
@@ -40,7 +43,7 @@ a_combined$subject <- factor(a_combined$subject,levels=c("Math","ELA","Science",
 
 
 #Calculate corrected proportions
-proportions=a_combined  %>% dplyr::group_by("subject")%>% dplyr::summarise(proportion=sum(.data$n_prop_adj) %>% round(2))
+proportions=a_combined  %>% dplyr::group_by(.data$subject)%>% dplyr::summarise(proportion=round(sum(.data$n_prop_adj),2),.groups="drop")
 xlabels<-sapply(proportions$proportion,scales::percent) %>% dplyr::as_tibble()
 xlabels$x.prop=(proportions$proportion)
 xlabels$x=cumsum(proportions$proportion)-(proportions$proportion/2)
@@ -53,7 +56,8 @@ xlabels$x.lab <-xlabels$x + c(.01,.01,-.01,-.01)
 if(!is.null(vertSpacing)){
   vertSpacingFormatted <- vertSpacing*.35
 }else{
-    vertSpacingFormatted <- seq(.35,0,length.out=4)}
+    vertSpacingFormatted <- seq(.35,0,length.out=4)
+    }
 
 
 xlabels$yend=vertSpacingFormatted
@@ -92,7 +96,7 @@ if(!is.null(targetSubj)){
 
 
 ## PLOT Epaulette
-ggplot2::ggplot(rectangles)+ggGalactic()+
+epaulette<-ggplot2::ggplot(rectangles)+ggGalactic()+
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax",fill="subject"),size=1.2,show.legend = F)+
   #Add Target border(s) if necessary
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax"),fill="transparent",colour=rectangles$border,size=2.3,show.legend = F)+
@@ -105,10 +109,12 @@ ggplot2::ggplot(rectangles)+ggGalactic()+
   ggplot2::geom_label(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust"),colour="white",fill="white",size=7,show.legend = F,nudge_y=-.3)+
   ggplot2::geom_text(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust",fontface="fontface"),size=7,show.legend = F,nudge_y=-.3,col=gpColors("galactic black"))+
   ggGalactic()+ ggplot2::theme_void()
-#
-# if(!is.null(targetSubj)){
-#     geom_text(data=NULL,x=segs$x[targetRows],y=rep(.81,length(targetRows)),label=rep("Target",length(targetRows)),                fontface=rep("bold",length(targetRows)), size=rep(6,length(targetRows)), vjust=rep(.5,length(targetRows)))}else{}+
 
+#output to user
+plot(epaulette)
+#Save the file
+ggplot2::ggsave(fileName,width=10,height=1.6,...)
+#output object if they want to modify further
+return(epaulette)
 
-ggplot2::ggsave(fileName,width=10,height=1.6)
 }
