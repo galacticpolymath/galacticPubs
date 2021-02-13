@@ -41,6 +41,9 @@ a_combined$n_prop_adj<-a_combined$n_adj/sum(a_combined$n_adj)
 #Remind r that a_combined factors are ORDERED
 a_combined$subject <- factor(a_combined$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 
+# xlabels<-xlabels %>% arrange(subj)
+clrs<-gpColors(c("math","ela","science","socstudies")) %>% as.character()
+  #c("ELA"="#d64325","Math"="#d6b824","Science"="#62d6aa","Soc. Studies"="#6812d1")
 
 #Calculate corrected proportions
 proportions=a_combined  %>% dplyr::group_by(.data$subject)%>% dplyr::summarise(proportion=round(sum(.data$n_prop_adj),2),.groups="drop")
@@ -54,9 +57,8 @@ xlabels$x.lab <-xlabels$x + c(.01,.01,-.01,-.01)
 #set manual vertical spacing, otherwise distribute as steps (from 0 to 1 (0 being lowest, 1, being highest))
 #convert relative label 0, 1 scale to plot 0,1 scale units
 if(!is.null(vertSpacing)){
-  vertSpacingFormatted <- vertSpacing*.35}else{
-    vertSpacingFormatted <- seq(.35,0,length.out=4)
-    }
+  vertSpacingFormatted =vertSpacing*.35
+  }else{vertSpacingFormatted =seq(.35,0,length.out=4)}
 
 
 xlabels$yend=vertSpacingFormatted
@@ -70,9 +72,7 @@ xlabels$strokeCol<-clrs
 xlabels$size<-9
 
 
-# xlabels<-xlabels %>% arrange(subj)
-clrs<-gpColors(c("math","ela","science","socstudies")) %>% as.character()
-  #c("ELA"="#d64325","Math"="#d6b824","Science"="#62d6aa","Soc. Studies"="#6812d1")
+
 
 
 segs<-dplyr::tibble(x=xlabels$x,xend=xlabels$x,y=.59,yend=xlabels$yend,subject=xlabels$subject,segCol=clrs)
