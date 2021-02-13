@@ -2,7 +2,10 @@
 
 export("%>%")
 export(compileAlignment)
+export(ggGalactic)
+export(gpColors)
 export(learningChart)
 export(learningEpaulette)
+export(show.gpPal)
 importFrom(magrittr,"%>%")
 importFrom(rlang,.data)

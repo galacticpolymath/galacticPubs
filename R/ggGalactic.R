@@ -1,62 +1,19 @@
 
 
-#GP Palette
-gpPal=list(main=
-  data.frame(name=c("hydrogen blue","lightning purple","flare fucsia","atomic blue","burst purple", "galactic black","sparkle white"),hex=c("#2c83c3","#6c2d82","#ff3dac","#6812d1","#cb1f8e","#363636","#f0f4ff"),rgb=c("rgb(44,131,195,maxColorValue=255)","rgb(108,45,130,maxColorValue=255)","rgb(255,61,172,maxColorValue=255)","rgb(104,18,209,maxColorValue=255)","rgb(203,31,142,maxColorValue=255)","rgb(54,54,54,maxColorValue=255)","rgb(240,244,255,maxColorValue=255)")),
-  extended=data.frame(name=c("dark hydrogen blue","hydrogen blue","light hydrogen blue","dark lightning purple","lightning purple","light lightning purple","flare fucsia","light flare fucsia","pale flare fucsia","dark atomic blue","atomic blue","light atomic blue","dark burst purple","burst purple","light burst purple","galactic black","sparkle white"),
-                      hex=c("#005792","#2c83c3","#69b2f6","#3E0D55","#6c2d82","#9c5ab2","#ff3dac","#ff5dbe","#ff78de","#291c9e","#6812d1","#9f4bff","#96195F","#cb1f8e","#c7247d","#363636","#f0f4ff"),
-                      rgb=c("rgb(0,87,46,maxColorValue=255)","rgb(44,131,195,maxColorValue=255)","rgb(105,178,246,maxColorValue=255)","rgb(62,513,85,maxColorValue=255)","rgb(108,45,130,maxColorValue=255)","rgb(156,90,178,maxColorValue=255)","rgb(255,61,172,maxColorValue=255)","rgb(255,93,190,maxColorValue=255)","rgb(255,120,222,maxColorValue=255)","rgb(41,28,158,maxColorValue=255)","rgb(104,18,209,maxColorValue=255)","rgb(159,75,255,maxColorValue=255)","rgb(150,25,95,maxColorValue=255)","rgb(203,31,142,maxColorValue=255)","rgb(199,36,125,maxColorValue=255)","rgb(54,54,54,maxColorValue=255)","rgb(240,244,255,maxColorValue=255)")),
-  subjects=data.frame(
-    name=c("math","ela","socstudies","science","extra"),
-    hex=c("#db4125","#eca14d","#633a9a","#b798e8","#f4f0d9"),
-    rgb=c("rgb(219,65,37,maxColorValue=255))","rgb(236,161,77,maxColorValue=255))","rgb(99,58,154,maxColorValue=255))","rgb(183,152,232,maxColorValue=255)","rgb(244,240,217,maxColorValue=255))"))
-  )
+#' ggGalactic
+#'
+#' Galactic Polymath stylings for ggplot2
+#'
+#' @param font Google font to use, "Montserrat" by default
+#' @param regular.wt font weight for regular font style
+#' @param bold.wt font weight for bold text
+#' @param font.cex a simple multiplier for scaling all text
+#' @param plot.margin easy access to ggplot margins
+#' @export
 
-
-#Show the GP palette
-# subset is the first n colors to show or x1:x2 or c(1,3,5) for a specific subset
-# pal is 1 by default; if 2, shows extended palette
-show.gpPal<-function(pal=1,subset=NULL,...){
-  P<-gpPal[[pal]]$hex
-  if(length(subset!=0)){
-    s <- if(length(subset)==1){eval(quote(1:subset))}else{eval(quote(subset))}
-    labs<-subset
-    }else{
-      s=1:length(P)
-      labs<-1:length(P)}
-  nColors<-length(s)
-  Pnames<-gpPal[[pal]]$name
-  Ptitle<-names(gpPal)[pal]
-
-
-  colorspace::swatchplot(P[s],...)
-  whereAtStart<-1/nColors/2
-  whereAt<-seq(whereAtStart,1-whereAtStart,1/nColors)
-  graphics::mtext(labs,side=1,line=0,at=whereAt)
-  graphics::mtext(paste0("palette = ",Ptitle),side=3,line=2,0,font=1)
-  }
-
-#output a vector of hex codes, given named colors; list=TRUE lists all options
-gpColors<-function(colorNames,list=FALSE){
-  allPal.0<-do.call(dplyr::bind_rows,gpPal)
-  allPal<-subset(allPal.0,!duplicated(allPal.0$name))
-  if(list==TRUE){cat("GP PALETTE OPTIONS",paste0(rep("-",20),collapse=""),"\n",paste(allPal[,1],collapse=", "))}
-  indx=charmatch(colorNames,allPal$name)
-  colVec<-allPal$hex[indx]
-  names(colVec)<-allPal$name[indx]
-  return(colVec)
-}
-
-
-#These are default shapes
-gpShps<-c(21,24,22,23,8,13,9)
-
-
-show.gpShapes<-function(){
-plot(0:length(gpShps),0:length(gpShps),pch=gpShps,cex=2,xlim=c(-1,length(gpShps)+1),ylim=c(-1,length(gpShps)+1))
-}
 
 ggGalactic<-function(font="Montserrat",regular.wt=400,bold.wt=700,font.cex=1,plot.margin=ggplot2::margin(t=10,r=10,b=10,l=10)){
+  utils::data(gpPal)
   showtext::showtext_auto()
   fam=font
   sysfonts::font_add_google(name=font,family=fam,regular.wt=regular.wt,bold.wt=bold.wt)
