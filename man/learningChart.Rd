@@ -10,7 +10,7 @@ learningChart(
   caption,
   centralText = "grades\\n5-12",
   centralTextSize = 3.7,
-  fileName = "GP_Learning_Chart.png",
+  fileName = "assets/GP_Learning_Chart.png",
   ...
 )
 }
@@ -30,7 +30,7 @@ learningChart(
 \item{...}{other arguments passed to \code{\link[grDevices]{png}}}
 }
 \value{
-NULL only exports the chart & tells you where it was saved
+the learning chart plot object (grid format); the file is saved to assets/GP_Learning_Chart.png by default
 }
 \description{
 Make a GP Learning Chart

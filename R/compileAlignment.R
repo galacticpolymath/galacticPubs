@@ -9,7 +9,7 @@
 #'
 compileAlignment <- function(lessonAlignmentMatrix,grades="all",fileName="standards/processedStandards.json"){
 
-  # .=NULL #to avoid errors with dplyr syntax
+   .=NULL #to avoid errors with dplyr syntax
 
  # Import XLSX files -------------------------------------------------------
 #Import master alignment with ALL standards from https://github.com/galacticpolymath/standardX

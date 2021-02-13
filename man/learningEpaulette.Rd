@@ -8,7 +8,8 @@ learningEpaulette(
   compiledAlignment,
   targetSubj = NULL,
   vertSpacing = c(1, 1, 1, 1),
-  fileName = "STEAM_epaulette.png"
+  fileName = "assets/GP_Learning_Epaulette.png",
+  ...
 )
 }
 \arguments{
@@ -19,6 +20,11 @@ learningEpaulette(
 \item{vertSpacing}{4 value vector ranging from 0 to 1 for manipulating label spacing}
 
 \item{fileName}{expects somefilename.png for ggsave output image file}
+
+\item{...}{additional parameters for \code{\link[ggplot2]{ggsave}}}
+}
+\value{
+returned plot as a ggplot object; plot saved to assets/GP_Learning_Epaulette.png by default
 }
 \description{
 Create a Galactic Polymath Learning Epaulette which is a special kind of mosaic plot showing proportion of lesson by subject

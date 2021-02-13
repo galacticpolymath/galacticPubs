@@ -7,7 +7,7 @@
 compileAlignment(
   lessonAlignmentMatrix,
   grades = "all",
-  fileName = "processedStandards.json"
+  fileName = "standards/processedStandards.json"
 )
 }
 \arguments{
@@ -15,7 +15,10 @@ compileAlignment(
 
 \item{grades}{grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "all"}
 
-\item{fileName}{output filename (including path if you don't want it in the working directory)}
+\item{fileName}{output file name (including path if you don't want it in the working directory)}
+}
+\value{
+tibble of the compiled standards data; a JSON is saved to standards/processedStandards.json
 }
 \description{
 Compile alignment info from a lesson standards matrix worksheet

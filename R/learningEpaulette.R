@@ -5,7 +5,7 @@
 #' @param targetSubj which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param vertSpacing 4 value vector ranging from 0 to 1 for manipulating label spacing
 #' @param fileName expects somefilename.png for ggsave output image file
-#' ... additional parameters for \code{\link[ggplot2]{ggsave}}
+#' @param ... additional parameters for \code{\link[ggplot2]{ggsave}}
 #' @return returned plot as a ggplot object; plot saved to assets/GP_Learning_Epaulette.png by default
 #' @importFrom rlang .data
 #' @export
