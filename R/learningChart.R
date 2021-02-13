@@ -22,7 +22,7 @@ if(missing(caption)){caption="GP Learning Chart: Showing lesson interdisciplinar
 #Subject MUST be ordered! (gets lost every time we join datasets for some reason)
 compiledAlignment$subject=factor(compiledAlignment$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 #Import empty template to fill in for missing alignment dimensions (e.g. if there are no alignments to reading, or CCC, etc)
-a_template <-  readRDS("inst/emptyStandardsCountForAllDims.rds")
+a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="GPpub"))
 #super important to refactor subject on the imported data to ensure order
 a_template$subject=factor(a_template$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 
@@ -44,7 +44,7 @@ subjPal<-gpColors(c("math","ela","science","socstudies"))
 
 # Make a proportional Learning Chart --------------------------------------
 #Account for bias in the number of standards
-bias<-readRDS("inst/standardCountsByDimension.rds")
+bias<-readRDS(system.file("standardCountsByDimension.rds",package="GPpub"))
 bias_by_subj<-bias %>% dplyr::summarise(tot_n_subj=sum(.data$n),.groups="drop")
 a_combined<-dplyr::left_join(a_combined, (bias %>% dplyr::rename("tot_n_dim"="n")),by=c("subject","dimension"))
 a_combined<-dplyr::left_join(a_combined,bias_by_subj,by="subject")
