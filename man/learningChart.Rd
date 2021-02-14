@@ -11,7 +11,7 @@ learningChart(
   centralText = "grades\\n5-12",
   centralTextSize = 3.7,
   saveFile = TRUE,
-  destFolder = "assets/",
+  destFolder = "assets/learningPlots",
   fileName = "GP_Learning_Chart",
   ...
 )
@@ -29,7 +29,7 @@ learningChart(
 
 \item{saveFile}{T/F, save file or just print to screen?}
 
-\item{destFolder}{where do you want to save the folder; by default in the "assets/" folder, 1 level up from the working directory}
+\item{destFolder}{where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory}
 
 \item{fileName}{expects "somefilename" (file extension will be ignored)}
 

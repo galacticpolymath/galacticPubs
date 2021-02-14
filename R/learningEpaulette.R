@@ -5,7 +5,7 @@
 #' @param targetSubj which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param vertSpacing 4 value vector ranging from 0 to 1 for manipulating label spacing
 #' @param saveFile T/F, save file or just print to screen?
-#' @param destFolder where do you want to save the folder; by default in the "assets/" folder, 1 level up from the working directory
+#' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" for ggsave output image file
 #' @param ... additional parameters for \code{\link[ggplot2]{ggsave}}
 #' @return returned plot as a ggplot object; plot saved to assets/GP_Learning_Epaulette.png by default
@@ -14,7 +14,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/",fileName="GP_Learning_Epaulette",...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/learningPlots",fileName="GP_Learning_Epaulette",...){
 
 #bring in empty matrix to merge in, in case some subjects are missing
 a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="GPpub"))

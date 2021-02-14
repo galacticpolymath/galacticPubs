@@ -8,7 +8,7 @@
 #' @param centralText what you want at the center of the plot ("grades 5-12" by default)
 #' @param centralTextSize multiplier for font size of centralText
 #' @param saveFile T/F, save file or just print to screen?
-#' @param destFolder where do you want to save the folder; by default in the "assets/" folder, 1 level up from the working directory
+#' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" (file extension will be ignored)
 #' @param ... other arguments passed to \code{\link[grDevices]{png}}
 #' @return the learning chart plot object (grid format); the file is saved to assets/GP_Learning_Chart.png by default
@@ -17,7 +17,7 @@
 
 
 learningChart=function(compiledAlignment,targetSubj=NULL,caption,centralText="grades\n5-12",
-                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/",fileName="GP_Learning_Chart",...){
+                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learningPlots",fileName="GP_Learning_Chart",...){
 
 if(missing(caption)){caption="GP Learning Chart: Showing lesson interdisciplinarity by proportion of aligned standards"}
 
@@ -86,7 +86,7 @@ outerFill$ymax<-10
 #make the badge!
 (badge_prop0<-ggplot2::ggplot(a_combined,ggplot2::aes_string(x="as.factor(id)",y="n_prop_adj",fill="subject"),
                               col=gpColors("galactic black"))+ggGalactic()+
-    ggplot2::theme(plot.margin = ggplot2::margin(t=0,r=0,b=0,l=-20),# not sure why this correction is necessary, but without it, the plot is not centered
+    ggplot2::theme(plot.margin = ggplot2::margin(t=0,r=0,b=-15,l=-20),# not sure why this correction is necessary, but without it, the plot is not centered
           #axis.line.y=element_line(colour="grey"),
           axis.ticks.y=ggplot2::element_blank(),
           panel.grid.major.y=ggplot2::element_line(size=.2,colour="grey"),
