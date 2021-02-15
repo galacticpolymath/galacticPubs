@@ -1,0 +1,25 @@
+---
+title: ""
+output: 
+  rmdformats::downcute:
+    self_contained: true
+    thumbnails: true
+    lightbox: true
+    gallery: false
+    highlight: pygments
+params: 
+  dirTree: NULL
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Lesson Build Summary
+
+
+
+```{r dirTreeOutput, echo=F,results="asis"}
+cat(params$dirTree)
+
+```
+
+

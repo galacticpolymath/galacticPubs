@@ -26,6 +26,7 @@ Imports:
     remotes,
     reshape2,
     rlist,
+    rmarkdown,
     scales,
     shadowtext,
     showtext,
@@ -34,8 +35,8 @@ Imports:
     viridis,
     xlsx,
     rlang
-Suggests: colorspace
+Suggests: colorspace, rmdformats
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
 RoxygenNote: 7.1.1
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5.0)
