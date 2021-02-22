@@ -178,24 +178,17 @@ COMPILED
 allSubjects<-alignmentMaster$subject %>% unique() %>% subset(.!="")
 allDimensions<-alignmentMaster$dimension%>% unique() %>% subset(.!="")
 
-emptyStandardsMatrix0<-lapply(allSubjects,function(x){
+emptyStandardsMatrix<-lapply(allSubjects,function(x){
                           alignmentMaster %>% dplyr::group_by(.data$subject,.data$set) %>%
-                          dplyr::filter(.data$subject==x) %>% dplyr::select("subject","set","dimension") %>%
+                          dplyr::filter(.data$subject==x) %>% dplyr::select("subject","set","dimension","dim") %>%
                           dplyr::filter(!duplicated(.data$dimension)) %>% tibble::as_tibble() #last step removes grouping metastructure
                           })    %>%  do.call(rbind,.)
 
-#Double stack the emptyStandardsMatrix0 to add in target, code and alignmentNotes columns
-emptyStandardsMatrix<-rbind(emptyStandardsMatrix0,emptyStandardsMatrix0) %>% dplyr::mutate(target=c(rep(TRUE,
-                        nrow(emptyStandardsMatrix0)),rep(FALSE,nrow(emptyStandardsMatrix0))) ) %>% dplyr::mutate(
-                        code=NA,alignmentNotes=NA)
-
-
-
-missingDimRows<-match(paste(emptyStandardsMatrix$target,emptyStandardsMatrix$dimension), paste(COMPILED$target,COMPILED$dimension)) %>% is.na() %>% which()
-
+missingData<-dplyr::anti_join(emptyStandardsMatrix,COMPILED,by = c("subject", "set", "dimension", "dim"))
 
 ## Final tibble with at least 1 observation (e.g. NA) for every dim for every subject 2x (for target=T,F)
-COMPILED_filled_sorted<-dplyr::bind_rows(emptyStandardsMatrix[missingDimRows,],COMPILED)%>% dplyr::arrange(dplyr::desc("target"),"subject","set","dim","grouping")
+COMPILED_filled_sorted<-dplyr::left_join(COMPILED,missingData,by = c("subject", "set", "dimension", "dim")) %>%
+                        dplyr::arrange(dplyr::desc("target"),"subject","set","dim","grouping","code")
 
 
 #iterate across target and connected standards categories
@@ -225,19 +218,22 @@ l_ta<-lapply(unique(COMPILED_filled_sorted$target),function(ta){
                 c(dimension=di,dim=d_di$dim[1],standardsGroup=list(l_gr))
                 # c(dimension=di,standardsGroup=as.list(do.call(c,l_gr)))
               })#end dimensions lapply
-            c(set=se,dimContainer.=l_di)
+            tmp_dim=c(se,l_di)
+            names(tmp_dim)<-c("set",paste0("dimContainer.",sapply(l_di,function(L) L$dim)))
+            tmp_dim
         })#end set lapply
         tmp_set=c(su,l_se)
         #extract abbreviations for the standards sets
         set_abbrevs<-sapply(l_se,function(L) {gsub("[a-z| ]","",L$set)})
         names(tmp_set)<-c("subject",paste0("setContainer.",set_abbrevs))
+        tmp_set
       })#end subjects lapply
     tmp_subj=c(ta,l_su)
     names(tmp_subj)<-c("target",paste0("subjContainer.",sapply(l_su,function(L) L$subject)))
     tmp_subj
   })#end target target lapply
 
-
+names(l_ta)<-paste0("targContainer",c(".true",".false"))
 
 # create directory if necessary & prep output filename --------------------
 dir.create(destFolder,showWarnings=FALSE)
@@ -245,7 +241,7 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 
 # Write JSON for GP Simple Lesson Plan -----------------------------------
-compiled_json<-jsonlite::toJSON(list(targContainer.=l_ta),pretty=TRUE,auto_unbox = TRUE)
+compiled_json<-jsonlite::toJSON(l_ta,pretty=TRUE,auto_unbox = TRUE)
 con<-file(fileName)
 writeLines(compiled_json,con)
 close(con)
