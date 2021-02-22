@@ -7,7 +7,8 @@
 compileAlignment(
   lessonAlignmentMatrix,
   grades = "all",
-  fileName = "standards/processedStandards.json"
+  destFolder = "standards/",
+  fileName = "processedStandards.json"
 )
 }
 \arguments{
@@ -15,7 +16,9 @@ compileAlignment(
 
 \item{grades}{grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "all"}
 
-\item{fileName}{output file name (including path if you don't want it in the working directory)}
+\item{destFolder}{where you want to save the folder; by default in the "standards/" folder, 1 level up from the working directory}
+
+\item{fileName}{output file name; default= "processedStandards.json"}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to standards/processedStandards.json

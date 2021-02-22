@@ -181,14 +181,14 @@ allDimensions<-alignmentMaster$dimension%>% unique() %>% subset(.!="")
 emptyStandardsMatrix<-lapply(allSubjects,function(x){
                           alignmentMaster %>% dplyr::group_by(.data$subject,.data$set) %>%
                           dplyr::filter(.data$subject==x) %>% dplyr::select("subject","set","dimension","dim") %>%
-                          dplyr::filter(!duplicated(.data$dimension)) %>% tibble::as_tibble() #last step removes grouping metastructure
+                          dplyr::filter(!duplicated(.data$dimension)) %>% dplyr::as_tibble() #last step removes grouping metastructure
                           })    %>%  do.call(rbind,.)
 
 missingData<-dplyr::anti_join(emptyStandardsMatrix,COMPILED,by = c("subject", "set", "dimension", "dim"))
 
 ## Final tibble with at least 1 observation (e.g. NA) for every dim for every subject 2x (for target=T,F)
 COMPILED_filled_sorted<-dplyr::left_join(COMPILED,missingData,by = c("subject", "set", "dimension", "dim")) %>%
-                        dplyr::arrange(dplyr::desc("target"),"subject","set","dim","grouping","code")
+                        dplyr::arrange(dplyr::desc(.data$target),.data$subject,.data$set,.data$dim,.data$grouping,.data$code)
 
 
 #iterate across target and connected standards categories
@@ -237,12 +237,12 @@ names(l_ta)<-paste0("targContainer",c(".true",".false"))
 
 # create directory if necessary & prep output filename --------------------
 dir.create(destFolder,showWarnings=FALSE)
-outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),"_",paste0(grades),collapse=""),ext="png")
+outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),"_",paste0(grades),collapse=""),ext="json")
 
 
 # Write JSON for GP Simple Lesson Plan -----------------------------------
 compiled_json<-jsonlite::toJSON(l_ta,pretty=TRUE,auto_unbox = TRUE)
-con<-file(fileName)
+con<-file(outFile)
 writeLines(compiled_json,con)
 close(con)
 
@@ -251,9 +251,9 @@ close(con)
 print(COMPILED)
 In_Outs<-do.call(rbind,in_out)
 message("Total of ",sum(In_Outs$output_code_entries)," standards compiled\n")
-message("JSON file saved\n@ ",fileName)
+message("JSON file saved\n@ ",outFile)
 
 #add grades information to output
-return(list(grades=grades,data=COMPILED))
+return(list(grades=grades,data_w_NA=COMPILED_filled_sorted,data=COMPILED))
 
 }#end compileAlignment function def
