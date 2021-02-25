@@ -186,54 +186,99 @@ emptyStandardsMatrix<-lapply(allSubjects,function(x){
 
 missingData<-dplyr::anti_join(emptyStandardsMatrix,COMPILED,by = c("subject", "set", "dimension", "dim"))
 
-## Final tibble with at least 1 observation (e.g. NA) for every dim for every subject 2x (for target=T,F)
+## Final tibble with at least 1 observation (e.g. NA) for every dim for every subject (all "missings" are added to target=F, not a ton of missings in target=T)
 COMPILED_filled_sorted<-dplyr::left_join(COMPILED,missingData,by = c("subject", "set", "dimension", "dim")) %>%
                         dplyr::arrange(dplyr::desc(.data$target),.data$subject,.data$set,.data$dim,.data$grouping,.data$code)
 
+#
+# #iterate across target and connected standards categories
+# l_ta<-lapply(unique(COMPILED_filled_sorted$target),function(ta){
+#     d_ta<-COMPILED_filled_sorted %>% dplyr::filter(.data$target==ta)
+#     #iterate across unique subjects within target/nontarget types
+#     l_su<-lapply(unique(d_ta$subject),function(su){
+#         d_su<-d_ta %>% dplyr::filter(.data$subject==su)
+#           l_se<-lapply(unique(d_su$set),function(se){
+#             d_se<-d_su %>% dplyr::filter(.data$set==se)
+#               #iterate across unique dimensions within subjects
+#               l_di<-lapply(unique(d_se$dimension),function(di){
+#                 d_di<-d_su %>% dplyr::filter(.data$dimension==di)
+#                 #iterate across unique groups of standards (may be indiv. or groups of substandards w/in a dimension)
+#                 l_gr<-lapply(unique(d_di$grouping),function(gr){
+#                    d_gr<-d_di %>% dplyr::filter(.data$grouping==gr)
+#                      # Build inner-level standard code data
+#                      # use 1st alignmentNote if they're all the same, otherwise collapse alignment
+#                      # notes that map to diff. learning targets into a bulleted list
+#                      if(length(unique(d_gr$alignmentNotes))==1){aNotes=d_gr$alignmentNotes[1]}else{
+#                        aNotes=paste0(unique(d_gr$alignmentNotes),collapse="\n")
+#                      }
+#                      list(codes=unique(d_gr$code),grades=unique(d_gr$grades ),statements=unique(d_gr$statement),alignmentNotes=aNotes,subcat=d_gr$subcat[1])
+#                    })#end Group lapply
+#                 #This do.call stuff is to prevent creating a bunch of standardsGroup lists
+#                 # browser()
+#                 c(dimension=di,dim=d_di$dim[1],standardsGroup=list(l_gr))
+#                 # c(dimension=di,standardsGroup=as.list(do.call(c,l_gr)))
+#               })#end dimensions lapply
+#             tmp_dim=c(se,l_di)
+#             names(tmp_dim)<-c("set",paste0("dimContainer.",sapply(l_di,function(L) L$dim)))
+#             tmp_dim
+#         })#end set lapply
+#         tmp_set=c(su,l_se)
+#         #extract abbreviations for the standards sets
+#         set_abbrevs<-sapply(l_se,function(L) {gsub("[a-z| ]","",L$set)})
+#         names(tmp_set)<-c("subject",paste0("setContainer.",set_abbrevs))
+#         tmp_set
+#       })#end subjects lapply
+#     tmp_subj=c(ta,l_su)
+#     names(tmp_subj)<-c("target",paste0("subjContainer.",sapply(l_su,function(L) L$subject)))
+#     tmp_subj
+#   })#end target target lapply
 
-#iterate across target and connected standards categories
-l_ta<-lapply(unique(COMPILED_filled_sorted$target),function(ta){
-    d_ta<-COMPILED_filled_sorted %>% dplyr::filter(.data$target==ta)
-    #iterate across unique subjects within target/nontarget types
-    l_su<-lapply(unique(d_ta$subject),function(su){
-        d_su<-d_ta %>% dplyr::filter(.data$subject==su)
-          l_se<-lapply(unique(d_su$set),function(se){
-            d_se<-d_su %>% dplyr::filter(.data$set==se)
-              #iterate across unique dimensions within subjects
-              l_di<-lapply(unique(d_se$dimension),function(di){
-                d_di<-d_su %>% dplyr::filter(.data$dimension==di)
-                #iterate across unique groups of standards (may be indiv. or groups of substandards w/in a dimension)
-                l_gr<-lapply(unique(d_di$grouping),function(gr){
-                   d_gr<-d_di %>% dplyr::filter(.data$grouping==gr)
-                     # Build inner-level standard code data
-                     # use 1st alignmentNote if they're all the same, otherwise collapse alignment
-                     # notes that map to diff. learning targets into a bulleted list
-                     if(length(unique(d_gr$alignmentNotes))==1){aNotes=d_gr$alignmentNotes[1]}else{
-                       aNotes=paste0(unique(d_gr$alignmentNotes),collapse="\n")
-                     }
-                     list(codes=unique(d_gr$code),grades=unique(d_gr$grades ),statements=unique(d_gr$statement),alignmentNotes=aNotes,subcat=d_gr$subcat[1])
-                   })#end Group lapply
-                #This do.call stuff is to prevent creating a bunch of standardsGroup lists
-                # browser()
-                c(dimension=di,dim=d_di$dim[1],standardsGroup=list(l_gr))
-                # c(dimension=di,standardsGroup=as.list(do.call(c,l_gr)))
-              })#end dimensions lapply
-            tmp_dim=c(se,l_di)
-            names(tmp_dim)<-c("set",paste0("dimContainer.",sapply(l_di,function(L) L$dim)))
-            tmp_dim
-        })#end set lapply
-        tmp_set=c(su,l_se)
-        #extract abbreviations for the standards sets
-        set_abbrevs<-sapply(l_se,function(L) {gsub("[a-z| ]","",L$set)})
-        names(tmp_set)<-c("subject",paste0("setContainer.",set_abbrevs))
-        tmp_set
-      })#end subjects lapply
-    tmp_subj=c(ta,l_su)
-    names(tmp_subj)<-c("target",paste0("subjContainer.",sapply(l_su,function(L) L$subject)))
-    tmp_subj
-  })#end target target lapply
+l_ta <- list()
+for(ta_i in 1:length(unique(COMPILED_filled_sorted$target))) {
+  d_ta <- COMPILED_filled_sorted %>% dplyr::filter(.data$target == unique(COMPILED_filled_sorted$target)[ta_i])
+  l_su<-list()
+  for (su_i in 1:length(unique(d_ta$subject))) {
+    d_su <- d_ta %>% dplyr::filter(.data$subject == unique(d_ta$subject)[su_i])
+    l_se <- list()
+    for (se_i in 1:length(unique(d_su$set))) {
+      d_se <- d_su %>% dplyr::filter(.data$set == unique(d_su$set)[se_i])
+      l_di <- list()
+      for (di_i in 1:length(unique(d_se$dimension))) {
+        d_di <-
+          d_su %>% dplyr::filter(.data$dimension == unique(d_se$dimension)[di_i])
+        l_gr <- lapply(unique(d_di$grouping), function(gr) {
+          d_gr <- d_di %>% dplyr::filter(.data$grouping == gr)
+          # Build inner-level standard code data
+          # use 1st alignmentNote if they're all the same, otherwise collapse alignment
+          # notes that map to diff. learning targets into a bulleted list
+          if (length(unique(d_gr$alignmentNotes)) == 1) {
+            aNotes = d_gr$alignmentNotes[1]
+          } else{
+            aNotes = paste0(unique(d_gr$alignmentNotes), collapse = "\n")
+          }
+          list(
+            codes = unique(d_gr$code),
+            grades = unique(d_gr$grades),
+            statements = unique(d_gr$statement),
+            alignmentNotes = aNotes,
+            subcat = d_gr$subcat[1]
+          )
+        })#end Group lapply
 
-names(l_ta)<-paste0("targContainer",c(".true",".false"))
+        l_di[[di_i]] <- c(slug = d_di$dim[1],name = di,standardsGroup = list(l_gr))
+      }#end dimension loop
+
+      set_abbrev <- gsub("[a-z| ]", "", d_se$set[[1]])
+      l_se[[se_i]] <- c(slug = set_abbrev,name = d_se$set[[1]], dimensions = l_di)
+    }#end set loop
+    l_su[[su_i]]<-c(subject=d_su$subject[[1]],target=d_su$target[[1]],sets=l_se)
+  }#end subject loop
+  l_ta[[ta_i]]<-l_su
+}#end target loop
+
+
+
+out<-c(l_ta[[1]],l_ta[[2]])
 
 # create directory if necessary & prep output filename --------------------
 dir.create(destFolder,showWarnings=FALSE)
