@@ -10,6 +10,7 @@
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" (file extension will be ignored)
+#' @param dpi what resolution would you like the output in dots per inch? 300 by default
 #' @param ... other arguments passed to \code{\link[grDevices]{png}}
 #' @return the learning chart plot object (grid format); the file is saved to assets/GP_Learning_Chart.png by default
 #' @export
@@ -17,7 +18,7 @@
 
 
 learningChart=function(compiledAlignment,targetSubj=NULL,caption,centralText="grades\n5-12",
-                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learningPlots",fileName="GP_Learning_Chart",...){
+                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learningPlots/",fileName="GP_Learning_Chart",dpi=300,...){
 
 if(missing(caption)){caption="GP Learning Chart: Showing lesson interdisciplinarity by proportion of aligned standards"}
 
@@ -196,11 +197,11 @@ invisible(sapply(targetSubj,function(x){
   ))
 })
 # output PNG of learning chart --------------------------------------------
-dir.create(destFolder,showWarnings=FALSE)
+dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
 outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),"_",
                                     paste0(compiledAlignment$grades),collapse=""),ext="png")
 
-grDevices::png(outFile,width=7,height=4.5,units="in",res=300,...)
+grDevices::png(outFile,width=7,height=4.5,units="in",res=dpi,...)
 grid::grid.draw(learningChart)
 grDevices::dev.off()
 
@@ -208,7 +209,7 @@ grDevices::dev.off()
 grid::grid.draw(learningChart)
 
 #tell user where file is saved
-message("GP Learning Chart saved\n@ ",fileName)
+message("GP Learning Chart saved\n@ ",outFile)
 
 #return object to user (wrapped in invisible to prevent meaningless gTree obj being printed)
 return(invisible(learningChart))

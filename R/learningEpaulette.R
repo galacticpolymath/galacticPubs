@@ -7,6 +7,10 @@
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" for ggsave output image file
+#' @param thickness is how thick to make the epaulette bar (range from 0 to 0.5), 0.2 or 20% of vertical plot space by default
+#' @param width plot width in inches
+#' @param height plot height in inches
+#' @param dpi resolution in dots per inch; by default 150
 #' @param ... additional parameters for \code{\link[ggplot2]{ggsave}}
 #' @return returned plot as a ggplot object; plot saved to assets/GP_Learning_Epaulette.png by default
 #' @importFrom rlang .data
@@ -14,7 +18,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/learningPlots",fileName="GP_Learning_Epaulette",...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/learningPlots/",fileName="GP_Learning_Epaulette",thickness=0.2,width=11,height=1.6,dpi=200,...){
 
 #bring in empty matrix to merge in, in case some subjects are missing
 a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="GPpub"))
@@ -59,8 +63,8 @@ xlabels$x.lab <-xlabels$x + c(.01,.01,-.01,-.01)
 #set manual vertical spacing, otherwise distribute as steps (from 0 to 1 (0 being lowest, 1, being highest))
 #convert relative label 0, 1 scale to plot 0,1 scale units
 if(!is.null(vertSpacing)){
-  vertSpacingFormatted =vertSpacing*.35
-  }else{vertSpacingFormatted =seq(.35,0,length.out=4)}
+  vertSpacingFormatted =vertSpacing*.5
+  }else{vertSpacingFormatted =seq(.5,0,length.out=4)}
 
 
 xlabels$yend=vertSpacingFormatted
@@ -77,12 +81,11 @@ xlabels$size<-9
 
 
 
-segs<-dplyr::tibble(x=xlabels$x,xend=xlabels$x,y=.59,yend=xlabels$yend,subject=xlabels$subject,segCol=clrs)
-
-
-rectangles<-dplyr::tibble(xmin=c(0,cumsum(proportions$proportion)[-4]),xmax=cumsum(proportions$proportion),ymin=.6,ymax=1,subject=c("Math","ELA","Science","Soc. Studies"))
+rectangles<-dplyr::tibble(xmin=c(0,cumsum(proportions$proportion)[-4]),xmax=cumsum(proportions$proportion),ymin=1-thickness,ymax=1,subject=c("Math","ELA","Science","Soc. Studies"))
 rectangles$subject<-factor(rectangles$subject,ordered=T,levels=c("Math","ELA","Science","Soc. Studies"))
 rectangles$border<-"transparent"
+
+segs<-dplyr::tibble(x=xlabels$x,xend=xlabels$x,y=1-thickness-0.04,yend=xlabels$yend,subject=xlabels$subject,segCol=clrs)
 
 #boldenize & embiggenate if targetSubj indicated
 if(!is.null(targetSubj)){
@@ -107,20 +110,24 @@ epaulette<-ggplot2::ggplot(rectangles)+ggGalactic()+
   ggplot2::scale_colour_manual(values=clrs,aesthetics=c("color","fill"))+
   ggplot2::geom_point(data=xlabels,ggplot2::aes_string(x="x",y="yend",fill="subject"),stroke=xlabels$stroke,col=xlabels$strokeCol,
              size=xlabels$size,pch=21,show.legend = F)+
-  ggplot2::geom_label(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust"),colour="white",fill="white",size=7,show.legend = F,nudge_y=-.3)+
-  ggplot2::geom_text(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust",fontface="fontface"),size=7,show.legend = F,nudge_y=-.3,col=gpColors("galactic black"))+
-  ggGalactic()+ ggplot2::theme_void()
+  ggplot2::geom_label(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust"),colour="white",fill="white",size=7,show.legend = F,nudge_y=-.35)+
+  ggplot2::geom_text(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust",fontface="fontface"),size=7,show.legend = F,nudge_y=-.35,col=gpColors("galactic black"))+
+  ggGalactic()+ ggplot2::theme_void()+ggplot2::theme(aspect.ratio=1.6/11)
 
 #output to user
 plot(epaulette)
-#Save the file
-dir.create(destFolder,showWarnings=FALSE)#create folder if necessary
+#create folder if necessary
+dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
+
+
 givenExt=if(grepl(".",fileName,fixed=TRUE)){gsub(".*\\.(.{3,4}$)","\\1",fileName)}else{NULL} #extract file extension if provided
 fileOut<-gsub("(^.*)\\..*$","\\1",basename(fileName)) #strip extension and full path from provided fileName
 fileOutExt<-ifelse(is.null(givenExt),"png",givenExt) #provide png extension if not provided
 output.0<-fs::path(destFolder,"/",paste0(fileOut,"_",compiledAlignment$grades,collapse=""),ext=fileOutExt)
 output<-gsub("^[\\//](.*)","\\1",output.0)
-ggplot2::ggsave(output,width=10,height=1.6,...)
+
+#save the file
+ggplot2::ggsave(output,width=width, height=height,dpi=dpi,...)
 #output object if they want to modify further
 
 message("GP Learning Epaulette saved\n@ ",output)

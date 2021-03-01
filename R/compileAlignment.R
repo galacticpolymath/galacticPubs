@@ -265,7 +265,7 @@ for(ta_i in 1:length(unique(COMPILED_filled_sorted$target))) {
           )
         })#end Group lapply
 
-        l_di[[di_i]] <- c(slug = d_di$dim[1],name = di,standardsGroup = list(l_gr))
+        l_di[[di_i]] <- c(slug = d_di$dim[1],name = d_di$dimension[1],standardsGroup = list(l_gr))
       }#end dimension loop
 
       set_abbrev <- gsub("[a-z| ]", "", d_se$set[[1]])
