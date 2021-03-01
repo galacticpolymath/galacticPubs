@@ -269,9 +269,9 @@ for(ta_i in 1:length(unique(COMPILED_filled_sorted$target))) {
       }#end dimension loop
 
       set_abbrev <- gsub("[a-z| ]", "", d_se$set[[1]])
-      l_se[[se_i]] <- c(slug = set_abbrev,name = d_se$set[[1]], dimensions = l_di)
+      l_se[[se_i]] <- c(slug = set_abbrev,name = d_se$set[[1]], dimensions = list(l_di))
     }#end set loop
-    l_su[[su_i]]<-c(subject=d_su$subject[[1]],target=d_su$target[[1]],sets=l_se)
+    l_su[[su_i]]<-c(subject=d_su$subject[[1]],target=d_su$target[[1]],sets=list(l_se))
   }#end subject loop
   l_ta[[ta_i]]<-l_su
 }#end target loop
@@ -286,7 +286,7 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 
 # Write JSON for GP Simple Lesson Plan -----------------------------------
-compiled_json<-jsonlite::toJSON(l_ta,pretty=TRUE,auto_unbox = TRUE)
+compiled_json<-jsonlite::toJSON(out,pretty=TRUE,auto_unbox = TRUE)
 con<-file(outFile)
 writeLines(compiled_json,con)
 close(con)
