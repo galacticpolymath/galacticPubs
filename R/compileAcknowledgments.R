@@ -3,11 +3,11 @@
 #' Compile acknowledgments from an XLSX to a JSON file
 #' @param inputFileName file location of the lesson alignment matrix XLSX worksheet; include full path if not in working directory
 #' @param destFolder where you want to save the folder; by default in the "JSON/" folder
-#' @param fileName output file name; default= "acknowledgments.json"
+#' @param outputFileName output file name; default= "acknowledgments.json"
 #' @return acknowledgment list object; a JSON is saved to standards/acknowledgments.json
 #' @export
 #'
-compileAcknowledgements <- function(inputFileName="acknowledgments.xlsx",destFolder="JSON/",outputFileName="acknowledgements.json"){
+compileAcknowledgements <- function(inputFileName="acknowledgments.xlsx",destFolder="JSON/",outputFileName="acknowledgments.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -21,7 +21,7 @@ roles<-unique(ack$Role)
 out<-list()
 for(i in 1:length(roles)){
   role_i<-roles[i]
-  ack_i<-subset(ack,Role==role_i)
+  ack_i<-subset(ack,ack$Role==role_i)
   def_i<-ack_i$Role_def[1]
   #capitalize first letter if necessary
   if(!substr(def_i,1,1)%in%LETTERS){substr(def_i,1,1) <- toupper(substr(def_i,1,1))}
@@ -53,7 +53,7 @@ close(con)
 printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
 
 # return compiled output --------------------------------------------------
-message("Acknowledgements imported:")
+message("Acknowledgments imported:")
 print(printToScreenTable)
 message("JSON file saved\n@ ",outFile)
 

@@ -2,16 +2,17 @@
 #'
 #' Create a Galactic Polymath Learning Epaulette which is a special kind of mosaic plot showing proportion of lesson by subject
 #' @param compiledAlignment the output of \code{\link{compileAlignment}}
-#' @param targetSubj which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"
+#' @param targetSubj which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param vertSpacing 4 value vector ranging from 0 to 1 for manipulating label spacing
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" for ggsave output image file
-#' @param thickness is how thick to make the epaulette bar (range from 0 to 0.5), 0.2 or 20% of vertical plot space by default
+#' @param thickness is how thick to make the epaulette bar `(`range from 0 to 0.5`)`, 0.2 or 20\% of vertical plot space by default
 #' @param width plot width in inches
 #' @param height plot height in inches
 #' @param dpi resolution in dots per inch; by default 150
 #' @param ... additional parameters for \code{\link[ggplot2]{ggsave}}
+#'
 #' @return returned plot as a ggplot object; plot saved to assets/GP_Learning_Epaulette.png by default
 #' @importFrom rlang .data
 #' @export

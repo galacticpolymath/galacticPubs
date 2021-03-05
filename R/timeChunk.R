@@ -9,6 +9,7 @@
 #' @param Color color of current step bar graph fill color
 #' @param fadedColor color of prior, completed steps bar graph fill color
 #' @param lineWidth width of each bar in the graph
+#' @return NULL; saves timeChunk
 #'
 timeChunk <- function(totTime,segLengths,destFolder="assets/timeChunk/",prefix,Color="#2c83c3",fadedColor="#1A4E75",lineWidth=7){
   if(missing(prefix)){prefix<-""}else{prefix<-paste0(prefix,"_")}

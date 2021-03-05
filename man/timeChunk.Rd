@@ -29,6 +29,9 @@ timeChunk(
 
 \item{lineWidth}{width of each bar in the graph}
 }
+\value{
+NULL; saves timeChunk
+}
 \description{
 create visuals to show how lesson breakdown into chunks
 }

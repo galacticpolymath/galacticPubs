@@ -11,8 +11,9 @@ learningChart(
   centralText = "grades\\n5-12",
   centralTextSize = 3.7,
   saveFile = TRUE,
-  destFolder = "assets/learningPlots",
+  destFolder = "assets/learningPlots/",
   fileName = "GP_Learning_Chart",
+  dpi = 300,
   ...
 )
 }
@@ -32,6 +33,8 @@ learningChart(
 \item{destFolder}{where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory}
 
 \item{fileName}{expects "somefilename" (file extension will be ignored)}
+
+\item{dpi}{what resolution would you like the output in dots per inch? 300 by default}
 
 \item{...}{other arguments passed to \code{\link[grDevices]{png}}}
 }
