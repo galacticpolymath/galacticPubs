@@ -15,7 +15,7 @@ compileAcknowledgements(
 
 \item{destFolder}{where you want to save the folder; by default in the "JSON/" folder}
 
-\item{fileName}{output file name; default= "acknowledgments.json"}
+\item{outputFileName}{output file name; default= "acknowledgments.json"}
 }
 \value{
 acknowledgment list object; a JSON is saved to standards/acknowledgments.json

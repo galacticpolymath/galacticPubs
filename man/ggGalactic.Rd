@@ -9,6 +9,7 @@ ggGalactic(
   regular.wt = 400,
   bold.wt = 700,
   font.cex = 1,
+  font.col = "#363636",
   plot.margin = ggplot2::margin(t = 10, r = 10, b = 10, l = 10)
 )
 }
@@ -20,6 +21,8 @@ ggGalactic(
 \item{bold.wt}{font weight for bold text}
 
 \item{font.cex}{a simple multiplier for scaling all text}
+
+\item{font.col}{color of all axis label and title text}
 
 \item{plot.margin}{easy access to ggplot margins}
 }
