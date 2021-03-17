@@ -19,7 +19,7 @@ tmp<-tempfile("allStandards_temp",fileext="csv")
 utils::download.file("https://github.com/galacticpolymath/standardX/blob/master/data/allStandards.csv?raw=true",destfile=tmp)
 alignmentMaster<-utils::read.csv(tmp)
 
-gradeBands<-switch(grades,"5-6"="grades 5-6","7-8"="grades 7-8","9-12"="grades 9-12","5-12"=paste0("grades ",c("5-6","7-8","9-12")))
+gradeBands<-switch(grades,"5-6"="grades 5-6","7-8"="grades 7-8","9-12"="grades 9-12","grades 5-12"=paste0("grades ",c("5-6","7-8","9-12")))
 
 #initialize list for output
 output=list() #initialize list
@@ -190,48 +190,7 @@ missingData<-dplyr::anti_join(emptyStandardsMatrix,COMPILED,by = c("subject", "s
 COMPILED_filled_sorted<-dplyr::left_join(COMPILED,missingData,by = c("subject", "set", "dimension", "dim")) %>%
                         dplyr::arrange(dplyr::desc(.data$target),.data$subject,.data$set,.data$dim,.data$grouping,.data$code)
 
-#
-# #iterate across target and connected standards categories
-# l_ta<-lapply(unique(COMPILED_filled_sorted$target),function(ta){
-#     d_ta<-COMPILED_filled_sorted %>% dplyr::filter(.data$target==ta)
-#     #iterate across unique subjects within target/nontarget types
-#     l_su<-lapply(unique(d_ta$subject),function(su){
-#         d_su<-d_ta %>% dplyr::filter(.data$subject==su)
-#           l_se<-lapply(unique(d_su$set),function(se){
-#             d_se<-d_su %>% dplyr::filter(.data$set==se)
-#               #iterate across unique dimensions within subjects
-#               l_di<-lapply(unique(d_se$dimension),function(di){
-#                 d_di<-d_su %>% dplyr::filter(.data$dimension==di)
-#                 #iterate across unique groups of standards (may be indiv. or groups of substandards w/in a dimension)
-#                 l_gr<-lapply(unique(d_di$grouping),function(gr){
-#                    d_gr<-d_di %>% dplyr::filter(.data$grouping==gr)
-#                      # Build inner-level standard code data
-#                      # use 1st alignmentNote if they're all the same, otherwise collapse alignment
-#                      # notes that map to diff. learning targets into a bulleted list
-#                      if(length(unique(d_gr$alignmentNotes))==1){aNotes=d_gr$alignmentNotes[1]}else{
-#                        aNotes=paste0(unique(d_gr$alignmentNotes),collapse="\n")
-#                      }
-#                      list(codes=unique(d_gr$code),grades=unique(d_gr$grades ),statements=unique(d_gr$statement),alignmentNotes=aNotes,subcat=d_gr$subcat[1])
-#                    })#end Group lapply
-#                 #This do.call stuff is to prevent creating a bunch of standardsGroup lists
-#                 # browser()
-#                 c(dimension=di,dim=d_di$dim[1],standardsGroup=list(l_gr))
-#                 # c(dimension=di,standardsGroup=as.list(do.call(c,l_gr)))
-#               })#end dimensions lapply
-#             tmp_dim=c(se,l_di)
-#             names(tmp_dim)<-c("set",paste0("dimContainer.",sapply(l_di,function(L) L$dim)))
-#             tmp_dim
-#         })#end set lapply
-#         tmp_set=c(su,l_se)
-#         #extract abbreviations for the standards sets
-#         set_abbrevs<-sapply(l_se,function(L) {gsub("[a-z| ]","",L$set)})
-#         names(tmp_set)<-c("subject",paste0("setContainer.",set_abbrevs))
-#         tmp_set
-#       })#end subjects lapply
-#     tmp_subj=c(ta,l_su)
-#     names(tmp_subj)<-c("target",paste0("subjContainer.",sapply(l_su,function(L) L$subject)))
-#     tmp_subj
-#   })#end target target lapply
+
 
 l_ta <- list()
 for(ta_i in 1:length(unique(COMPILED_filled_sorted$target))) {
