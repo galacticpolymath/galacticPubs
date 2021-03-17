@@ -1,4 +1,4 @@
-#' compileAcknowledgements
+#' compileAcknowledgments
 #'
 #' Compile acknowledgments from an XLSX to a JSON file
 #' @param inputFileName file location of the lesson alignment matrix XLSX worksheet; include full path if not in working directory
@@ -7,7 +7,7 @@
 #' @return acknowledgment list object; a JSON is saved to standards/acknowledgments.json
 #' @export
 #'
-compileAcknowledgements <- function(inputFileName="acknowledgments.xlsx",destFolder="JSON/",outputFileName="acknowledgments.json"){
+compileAcknowledgments <- function(inputFileName="acknowledgments.xlsx",destFolder="JSON/",outputFileName="acknowledgments.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -15,7 +15,7 @@ compileAcknowledgements <- function(inputFileName="acknowledgments.xlsx",destFol
 
 #Import the acknowledgments sheet, checking that it w
 ack<-xlsx::read.xlsx2(normalizePath(inputFileName),1)
-if(is.null(ack)){stop("Something went wrong. Check your filenames and that the acknowledgements spreadsheet is not empty.")}
+if(is.null(ack)){stop("Something went wrong. Check your filenames and that the acknowledgments spreadsheet is not empty.")}
 
 roles<-unique(ack$Role)
 out<-list()
