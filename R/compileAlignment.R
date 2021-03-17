@@ -3,12 +3,12 @@
 #' Compile alignment info from a lesson standards matrix worksheet
 #' @param lessonAlignmentMatrix file location of the lesson alignment matrix XLSX worksheet
 #' @param grades grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "5-12"
-#' @param destFolder where you want to save the folder; by default in the "standards/" folder, 1 level up from the working directory
+#' @param destFolder where you want to save the folder; by default in the "JSON/" folder, 1 level up from the working directory
 #' @param fileName output file name; default= "processedStandards.json"
 #' @return tibble of the compiled standards data; a JSON is saved to standards/processedStandards.json
 #' @export
 #'
-compileAlignment <- function(lessonAlignmentMatrix,grades="5-12",destFolder="standards/" ,fileName="processedStandards.json"){
+compileAlignment <- function(lessonAlignmentMatrix,grades="5-12",destFolder="JSON/" ,fileName="processedStandards.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -19,7 +19,7 @@ tmp<-tempfile("allStandards_temp",fileext="csv")
 utils::download.file("https://github.com/galacticpolymath/standardX/blob/master/data/allStandards.csv?raw=true",destfile=tmp)
 alignmentMaster<-utils::read.csv(tmp)
 
-gradeBands<-switch(grades,"5-6"="grades 5-6","7-8"="grades 7-8","9-12"="grades 9-12","grades 5-12"=paste0("grades ",c("5-6","7-8","9-12")))
+gradeBands<-switch(grades,"5-6"="grades 5-6","7-8"="grades 7-8","9-12"="grades 9-12","5-12"=paste0("grades ",c("5-6","7-8","9-12")))
 
 #initialize list for output
 output=list() #initialize list
@@ -135,6 +135,10 @@ for (i in 1:nrow(alignment_matrix_stacked)){
   #Now combine grouped standards info with lesson standards matrix data for final output
   out_i<-cbind(learningTargets=d$LearningTargets,target=ifelse(tolower(d$Target)=="y",TRUE,FALSE),
                master_data_i,alignmentNotes=d$AlignmentNotes) %>% dplyr::tibble()
+
+  #Add gradeBand to out_i
+  out_i$gradeBand<-gradeBands[grades_i]
+
   #Add this output to growing tibble (data frame)
   compiled<-dplyr::bind_rows(compiled,out_i)
   }#end test for nonempty good_rows vector

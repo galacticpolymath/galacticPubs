@@ -5,7 +5,7 @@
 #' @param compiledAlignment the output of \code{\link{compileAlignment}}
 #' @param targetSubj which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param caption quoted text you want to go at the bottom of the chart
-#' @param captionN T/F, add the number of standards used to make the plot to caption?
+#' @param captionN T/F, add the range of the number of standards per grade used to make the plot to caption?
 #' @param centralText what you want at the center of the plot ("grades 5-12" by default)
 #' @param centralTextSize multiplier for font size of centralText
 #' @param saveFile T/F, save file or just print to screen?
@@ -24,7 +24,9 @@ learningChart=function(compiledAlignment,targetSubj=NULL,caption,captionN=T,cent
 #deal with missing caption and add sample size if requested
 if(missing(caption)){caption="GP Learning Chart: Knowledge & skills taught in this lesson"}
 
-if(captionN){caption <- paste0(caption," (Tot. standards=",nrow(compiledAlignment$data),")")}
+if(captionN){
+  avgN<-table(compiledAlignment$data$gradeBand) %>% mean() %>% floor()
+  caption <- paste0(caption," (~",avgN," standards per grade)")}
 
 #Import empty template to fill in for missing alignment dimensions (e.g. if there are no alignments to reading, or CCC, etc)
 a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="GPpub"))
