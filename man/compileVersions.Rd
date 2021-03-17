@@ -5,7 +5,7 @@
 \title{compileVersions}
 \usage{
 compileVersions(
-  inputFileName = "version_info.xlsx",
+  inputFileName = "meta/version_info.xlsx",
   destFolder = "JSON/",
   outputFileName = "version_info.json"
 )

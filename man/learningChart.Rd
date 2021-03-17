@@ -8,6 +8,7 @@ learningChart(
   compiledAlignment,
   targetSubj = NULL,
   caption,
+  captionN = T,
   centralText = "grades\\n5-12",
   centralTextSize = 3.7,
   saveFile = TRUE,
@@ -23,6 +24,8 @@ learningChart(
 \item{targetSubj}{which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"}
 
 \item{caption}{quoted text you want to go at the bottom of the chart}
+
+\item{captionN}{T/F, add the range of the number of standards per grade used to make the plot to caption?}
 
 \item{centralText}{what you want at the center of the plot ("grades 5-12" by default)}
 

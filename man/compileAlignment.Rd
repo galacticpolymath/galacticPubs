@@ -6,17 +6,17 @@
 \usage{
 compileAlignment(
   lessonAlignmentMatrix,
-  grades = "all",
-  destFolder = "standards/",
+  grades = "5-12",
+  destFolder = "JSON/",
   fileName = "processedStandards.json"
 )
 }
 \arguments{
 \item{lessonAlignmentMatrix}{file location of the lesson alignment matrix XLSX worksheet}
 
-\item{grades}{grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "all"}
+\item{grades}{grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "5-12"}
 
-\item{destFolder}{where you want to save the folder; by default in the "standards/" folder, 1 level up from the working directory}
+\item{destFolder}{where you want to save the folder; by default in the "JSON/" folder, 1 level up from the working directory}
 
 \item{fileName}{output file name; default= "processedStandards.json"}
 }
