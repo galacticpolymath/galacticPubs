@@ -5,7 +5,7 @@
 \title{compileAcknowledgments}
 \usage{
 compileAcknowledgments(
-  inputFileName = "acknowledgments.xlsx",
+  inputFileName = "meta/acknowledgments.xlsx",
   destFolder = "JSON/",
   outputFileName = "acknowledgments.json"
 )
