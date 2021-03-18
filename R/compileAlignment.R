@@ -35,7 +35,8 @@ gradeBandSheetName<-gradeBands[grades_i]
 cat("\n",paste0(c(rep("#",40),"\n"),collapse = "")," Compiling ",gradeBandSheetName,"\n",paste0(c(rep("#",40),"\n"),collapse = ""))
 
 #Import the sheet, removing blank columns that start with X.
-alignment_matrix0<-xlsx::read.xlsx2(alignmentMatrixFile,startRow=2,sheetName=gradeBandSheetName) %>% dplyr::select(-dplyr::starts_with("X."))
+fileLoc<-normalizePath(fs::path("meta/",alignmentMatrixFile))
+alignment_matrix0<-xlsx::read.xlsx2(fileLoc,startRow=2,sheetName=gradeBandSheetName) %>% dplyr::select(-dplyr::starts_with("X."))
 # subject order
 subj_order<-c("CCmath","CCela","NGSSsci","C3ss")
 begin_subj_colnames<-c("Learn","Target","Codes","How")#start of column names to select them
