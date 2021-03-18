@@ -12,8 +12,8 @@ learningChart(
   centralText = "grades\\n5-12",
   centralTextSize = 3.7,
   saveFile = TRUE,
-  destFolder = "assets/learningPlots/",
-  fileName = "GP_Learning_Chart",
+  destFolder = "assets/learning-plots/",
+  fileName = "GP-Learning-Chart",
   dpi = 300,
   ...
 )

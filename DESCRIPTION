@@ -1,7 +1,7 @@
-Package: GPpub
+Package: galacticPubs
 Type: Package
 Title: Galactic Polymath Lesson Publishing Tools
-Version: 0.1.1
+Version: 0.1.2
 Author: Matthew R Wilkins, PhD
 Maintainer: Matthew R Wilkins, PhD <matt@galacticpolymath.com>
 Description: Code to compile standards information from a lesson alignment matrix

@@ -6,7 +6,7 @@
 \usage{
 compileAcknowledgments(
   inputFileName = "meta/acknowledgments.xlsx",
-  destFolder = "JSON/",
+  destFolder = "assembled-lesson-materials/JSON/",
   outputFileName = "acknowledgments.json"
 )
 }

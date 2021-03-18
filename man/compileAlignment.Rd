@@ -5,14 +5,14 @@
 \title{compileAlignment}
 \usage{
 compileAlignment(
-  lessonAlignmentMatrix,
+  alignmentMatrixFile,
   grades = "5-12",
-  destFolder = "JSON/",
+  destFolder = "assembled-lesson-materials/JSON/",
   fileName = "processedStandards.json"
 )
 }
 \arguments{
-\item{lessonAlignmentMatrix}{file location of the lesson alignment matrix XLSX worksheet}
+\item{alignmentMatrixFile}{file location of the lesson alignment matrix XLSX worksheet}
 
 \item{grades}{grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "5-12"}
 
