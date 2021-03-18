@@ -19,7 +19,7 @@
 
 
 learningChart=function(compiledAlignment,targetSubj=NULL,caption,captionN=T,centralText="grades\n5-12",
-                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learningPlots/",fileName="GP_Learning_Chart",dpi=300,...){
+                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Chart",dpi=300,...){
 
 #deal with missing caption and add sample size if requested
 if(missing(caption)){caption="GP Learning Chart: Knowledge & skills taught in this lesson"}

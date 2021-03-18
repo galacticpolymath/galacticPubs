@@ -7,7 +7,7 @@
 #' @return acknowledgment list object; a JSON is saved to standards/acknowledgments.json
 #' @export
 #'
-compileAcknowledgments <- function(inputFileName="meta/acknowledgments.xlsx",destFolder="JSON/",outputFileName="acknowledgments.json"){
+compileAcknowledgments <- function(inputFileName="meta/acknowledgments.xlsx",destFolder="assembled-lesson-materials/JSON/",outputFileName="acknowledgments.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -40,7 +40,7 @@ out
 # Make json structured output ----------------------------------------------
 
 # create directory if necessary & prep output filename --------------------
-dir.create(destFolder,showWarnings=FALSE)
+dir.create(destFolder,showWarnings=FALSE,recursive=T)
 outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(outputFileName))),ext="json")
 
 

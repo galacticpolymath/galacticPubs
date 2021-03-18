@@ -1,14 +1,14 @@
 #' compileAlignment
 #'
 #' Compile alignment info from a lesson standards matrix worksheet
-#' @param lessonAlignmentMatrix file location of the lesson alignment matrix XLSX worksheet
+#' @param alignmentMatrixFile file location of the lesson alignment matrix XLSX worksheet
 #' @param grades grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "5-12"
 #' @param destFolder where you want to save the folder; by default in the "JSON/" folder, 1 level up from the working directory
 #' @param fileName output file name; default= "processedStandards.json"
 #' @return tibble of the compiled standards data; a JSON is saved to standards/processedStandards.json
 #' @export
 #'
-compileAlignment <- function(lessonAlignmentMatrix,grades="5-12",destFolder="JSON/" ,fileName="processedStandards.json"){
+compileAlignment <- function(alignmentMatrixFile,grades="5-12",destFolder="assembled-lesson-materials/JSON/" ,fileName="processedStandards.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -35,7 +35,7 @@ gradeBandSheetName<-gradeBands[grades_i]
 cat("\n",paste0(c(rep("#",40),"\n"),collapse = "")," Compiling ",gradeBandSheetName,"\n",paste0(c(rep("#",40),"\n"),collapse = ""))
 
 #Import the sheet, removing blank columns that start with X.
-alignment_matrix0<-xlsx::read.xlsx2(lessonAlignmentMatrix,startRow=2,sheetName=gradeBandSheetName) %>% dplyr::select(-dplyr::starts_with("X."))
+alignment_matrix0<-xlsx::read.xlsx2(alignmentMatrixFile,startRow=2,sheetName=gradeBandSheetName) %>% dplyr::select(-dplyr::starts_with("X."))
 # subject order
 subj_order<-c("CCmath","CCela","NGSSsci","C3ss")
 begin_subj_colnames<-c("Learn","Target","Codes","How")#start of column names to select them
@@ -244,7 +244,7 @@ for(ta_i in 1:length(unique(COMPILED_filled_sorted$target))) {
 out<-c(l_ta[[1]],l_ta[[2]])
 
 # create directory if necessary & prep output filename --------------------
-dir.create(destFolder,showWarnings=FALSE)
+dir.create(destFolder,showWarnings=FALSE,recursive=T)
 outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),"_",paste0(grades),collapse=""),ext="json")
 
 

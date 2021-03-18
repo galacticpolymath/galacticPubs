@@ -19,7 +19,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/learningPlots/",fileName="GP_Learning_Epaulette",thickness=0.2,width=11,height=1.6,dpi=200,...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",thickness=0.2,width=11,height=1.6,dpi=200,...){
 
 #bring in empty matrix to merge in, in case some subjects are missing
 a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="GPpub"))
