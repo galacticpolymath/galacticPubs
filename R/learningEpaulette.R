@@ -111,11 +111,10 @@ epaulette<-ggplot2::ggplot(rectangles)+ggGalactic()+
   ggplot2::scale_colour_manual(values=clrs,aesthetics=c("color","fill"))+
   ggplot2::geom_point(data=xlabels,ggplot2::aes_string(x="x",y="yend",fill="subject"),stroke=xlabels$stroke,col=xlabels$strokeCol,
              size=xlabels$size,pch=21,show.legend = F)+
-  ggplot2::geom_label(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust"),colour="white",fill="white",size=7,show.legend = F,nudge_y=-.35)+
+  # ggplot2::geom_label(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust"),colour="transparent",fill="transparent",size=7,show.legend = F,nudge_y=-.35)+
   ggplot2::geom_text(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust",fontface="fontface"),size=7,show.legend = F,nudge_y=-.35,col=gpColors("galactic black"))+
-  ggGalactic()+ ggplot2::theme_void()+ggplot2::theme(aspect.ratio=1.6/11)
+  ggGalactic()+ ggplot2::theme_void()+ggplot2::theme(aspect.ratio=1.6/11,plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
 
-#output to user
 plot(epaulette)
 #create folder if necessary
 dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
@@ -128,7 +127,8 @@ output.0<-fs::path(destFolder,"/",paste0(fileOut,"_",compiledAlignment$grades,co
 output<-gsub("^[\\//](.*)","\\1",output.0)
 
 #save the file
-ggplot2::ggsave(output,width=width, height=height,dpi=dpi,...)
+ggplot2::ggsave(filename=output,plot=epaulette,width=width, height=height,dpi=dpi,bg="transparent"
+                ,...)
 #output object if they want to modify further
 
 message("GP Learning Epaulette saved\n@ ",output)
