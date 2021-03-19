@@ -88,8 +88,9 @@ compiled<-dplyr::tibble()
 #Piece apart code entries, row by row
 for (i in 1:nrow(alignment_matrix_stacked)){
   d<-alignment_matrix_stacked[i,]
-  #split codes separated by a comma
-  code_vec_i<-d$Codes %>% stringr::str_split(pattern="[ ]*,[ ]*",simplify=T)
+  #split codes separated by a comma & remove extra spaces
+  code_vec_i<-d$Codes %>% stringr::str_split(pattern="[ ]*,[ ]*",simplify=T) %>%
+   stringr::str_remove_all(stringr::fixed(" "))
   code_master_rows<-sapply(code_vec_i,function(x){match(tolower(x),tolower(alignmentMaster$code))})
   #build list of mismatches b/w lesson alignment Matrix and alignment Master to output in Test 2
   if(NA%in%code_master_rows){mismatches<-append(mismatches,names(code_master_rows)[which(is.na(code_master_rows))])}
