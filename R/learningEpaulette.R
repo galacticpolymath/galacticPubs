@@ -22,7 +22,7 @@
 learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",thickness=0.2,width=11,height=1.6,dpi=200,...){
 
 #bring in empty matrix to merge in, in case some subjects are missing
-a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="GPpub"))
+a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="galacticPubs"))
 #super important to refactor subject on the imported data to ensure order
 a_template$subject=factor(a_template$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 
@@ -32,7 +32,7 @@ a_summ<-compiledAlignment$data %>% dplyr::group_by(.data$subject,.data$dimension
 a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>% dplyr::arrange(.data$subject,.data$dimension)%>% dplyr::mutate(binary=ifelse(.data$n>0,1,0))
 
 #Account for bias in the number of standards
-bias<-readRDS(system.file("standardCountsByDimension.rds",package="GPpub"))
+bias<-readRDS(system.file("standardCountsByDimension.rds",package="galacticPubs"))
 bias_by_subj<-bias %>% dplyr::summarise(tot_n_subj=sum(.data$n),.groups="drop")
 a_combined<-dplyr::left_join(a_combined, (bias %>% dplyr::rename("tot_n_dim"="n")),by = c("subject", "dimension") )
 a_combined<-dplyr::left_join(a_combined,bias_by_subj,by = c("subject"))
