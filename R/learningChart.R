@@ -25,7 +25,7 @@ learningChart=function(compiledAlignment,targetSubj=NULL,caption,captionN=T,cent
 if(missing(caption)){caption="GP Learning Chart: Knowledge & skills taught in this lesson"}
 
 if(captionN){
-  avgN<-table(compiledAlignment$data$gradeBand) %>% mean(.data) %>% floor(.data)
+  avgN<-table(compiledAlignment$data$gradeBand) %>% mean() %>% floor()
   caption <- paste0(caption," (~",avgN," standards per grade)")}
 
 #Import empty template to fill in for missing alignment dimensions (e.g. if there are no alignments to reading, or CCC, etc)
