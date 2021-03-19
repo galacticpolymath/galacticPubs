@@ -8,7 +8,7 @@
 #' @export
 gpColors<-function(colorNames=NULL,List=FALSE){
   gpPal=NULL
-  utils::data(gpPal,package="GPpub",envir = environment())
+  utils::data(gpPal,package="galacticPubs",envir = environment())
   allPal.0<-do.call(rbind,gpPal)
   allPal<-subset(allPal.0,!duplicated(allPal.0$name))
   if(List==TRUE|is.null(colorNames)){

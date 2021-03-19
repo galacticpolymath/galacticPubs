@@ -40,7 +40,7 @@ twee <- function(path = getwd(), level = Inf) {
 
 
   P<-list(dirTree=dirTree)
-  rmarkdown::render(input=system.file("lessonBuildSummary.Rmd",package="GPpub"),output_file="Lesson_Build_Summary.html",
+  rmarkdown::render(input=system.file("lessonBuildSummary.Rmd",package="galacticPubs"),output_file="Lesson_Build_Summary.html",
                     params=P,encoding="UTF-8")
 
 }

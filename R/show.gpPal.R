@@ -8,7 +8,7 @@
 #' @export
 show.gpPal<-function(pal=1,subset=NULL,...){
   gpPal=NULL
-  utils::data(gpPal,package="GPpub",envir = environment())
+  utils::data(gpPal,package="galacticPubs",envir = environment())
   P<-gpPal[[pal]]$hex
   if(length(subset!=0)){
     s <- if(length(subset)==1){eval(quote(1:subset))}else{eval(quote(subset))}
