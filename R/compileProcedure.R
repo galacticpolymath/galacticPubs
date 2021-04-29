@@ -15,6 +15,15 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
 
    .=NULL #to avoid errors with dplyr syntax
 
+   #Function to change shorthand word=def into bulleted list with bold word ("- **word:** definition")
+   formatVocab<-function(vocabTextVector){
+     sapply(1:length(vocabTextVector),function(i){
+       vocab_i<-vocabTextVector[i]
+       stringr::str_replace_all(vocab_i,"(.*)=[ ]*(.*\n?)","- **\\1:** \\2")
+     })
+   }
+
+
   #read in main procedure
   proc<-xlsx::read.xlsx2(procedureFile,sheetName="Procedure") %>% dplyr::tibble() %>% dplyr::filter(.data$Part!="")%>% dplyr::select(-dplyr::starts_with("X."))
   #read in Part titles and lesson + Part prefaces
@@ -24,11 +33,17 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
   nPartsTest<-length(unique(proc$Part))==length(unique(procTitles$Part))
   message("TEST: Num. Parts in 'NamesAndNotes' = 'Procedure'?   ** ",ifelse(nPartsTest,"PASS","FAIL")," **")
 
+  #####
   #Parse all the text columns to expand {vidN} notation into full video links
   proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")]<-apply(proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")],2,function(x) parseGPmarkdown(x))
 
+  ####
+  #Parse vocab shorthand into reasonably formatted markdown with bullets
+  proc$Vocab<-formatVocab(proc$Vocab)
+
   #Let's make a list that we'll convert to JSON
   out<-list()
+  out$lessonPreface=procTitles$LessonPreface[1]
   for(i in 1:length(unique(procTitles$Part))){
     part <- i
     title <- procTitles$PartTitle[i]
@@ -41,9 +56,11 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
               steps<-d %>% dplyr::select("Step","StepTitle","StepQuickDescription","StepDetails","Vocab","VariantNotes",
                                          "TeachingTips")
               list(title=title,dur=dur,steps=list(steps))
-              })
-    out[[i]]<-list(part=part,title=title,dur=dur,preface=preface,chunks=chunks)
+              }) %>% list()
+    out[[i+1]]<-c(part=part,title=title,dur=dur,preface=preface,chunks=chunks)
   }
+
+  # OUT<-c()
 
 # Make json structured output ----------------------------------------------
 

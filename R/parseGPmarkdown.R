@@ -34,5 +34,6 @@ parseGPmarkdown<-function(x,linksFile="meta/teaching-resource-links.xlsx"){
                     })
 
   vidReplaced<-stringr::str_replace_all(x,"\\{vid[^\\{]*\\}",function(x){vidReplacements[match(x,names(vidReplacements))]})
+
   return(vidReplaced)
 }
