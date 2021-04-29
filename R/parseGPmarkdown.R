@@ -16,23 +16,23 @@ parseGPmarkdown<-function(x,linksFile="meta/teaching-resource-links.xlsx"){
 
   #extract all video GP mardown syntax captures (e.g. "{vid1}")
   vidCaptures<-stringr::str_extract_all(x,"\\{vid[^\\{]*\\}")
-  vidReplacements<-lapply(vidCaptures,function(refs){
-                    #extract numbers
-                    vidN<-stringr::str_extract_all(refs,"\\d*",simplify=T) %>% as.vector()
+  uniqueVidCaptures<-unique(unlist(vidCaptures))
+  #create a key for video markdown replacements
+  vidReplacements<-sapply(uniqueVidCaptures,function(refs){
+                    #extract number
+                    vidN<-stringr::str_extract_all(refs,"\\d*") %>% unlist() %>%  paste0(collapse="")
                     #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
-                    indices<-ifelse(vidN=="","",match(vidN,vidLinks$order,nomatch=999))
-                    #record which {vidX} have no match in the multimedia links
-                    bad_indices<-which(indices==999)
-                    indices<-as.numeric(indices)
-                    URL<-vidLinks$ytLink[indices]
-                    title<-vidLinks$Title[indices]
+                    index<-match(vidN,vidLinks$order,nomatch=999)
+                    if(index!=999&!is.na(index)){
+                    URL<-vidLinks$ytLink[index]
+                    title<-vidLinks$Title[index]
                     replace<-ifelse(is.na(title),NA,paste0('[▶"',title,'"](',URL,')'))
-                    #tag bad replacement text
-                    replace[bad_indices]<-"[ERROR: CHECK \\{VID #\\} REFERENCE. NO YT-LINK FOUND]()"
+                    }else{
+                    replace<-paste0("[ERROR: CHECK *",refs,"* REFERENCE. NO YT-LINK FOUND]()")
+                    }
                     replace
-                    }) %>% unlist()
+                    })
 
-
-  vidReplaced<-stringr::str_replace_all(x,"\\{vid[^\\{]*\\}",vidReplacements)
+  vidReplaced<-stringr::str_replace_all(x,"\\{vid[^\\{]*\\}",function(x){vidReplacements[match(x,names(vidReplacements))]})
   return(vidReplaced)
 }

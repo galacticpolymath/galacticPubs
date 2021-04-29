@@ -10,8 +10,7 @@ gpLogo(
   yNPC = 0.9,
   which = "horiz_logoWords_gradWhite",
   size = 0.1,
-  cloudinaryString = NULL,
-  ...
+  cloudinaryString = NULL
 )
 }
 \arguments{

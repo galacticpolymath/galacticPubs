@@ -8,6 +8,7 @@
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param fileName output file name; default= "processedProcedure.json"
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/processedProcedure.json
+#' @importFrom rlang .data
 #' @export
 #'
 compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta/teaching-resource-links.xlsx",destFolder="meta/JSON/" ,fileName="processedProcedure.json"){
@@ -15,10 +16,11 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
    .=NULL #to avoid errors with dplyr syntax
 
   #read in main procedure
-  proc<-xlsx::read.xlsx2(procedureFile,sheetName="Procedure")
-  procTitles<-xlsx::read.xlsx2(procedureFile,sheetName="NamesAndNotes")
+  proc<-xlsx::read.xlsx2(procedureFile,sheetName="Procedure") %>% dplyr::tibble() %>% dplyr::filter(.data$Part!="")%>% dplyr::select(-dplyr::starts_with("X."))
+  #read in Part titles and lesson + Part prefaces
+  procTitles<-xlsx::read.xlsx2(procedureFile,sheetName="NamesAndNotes")%>% dplyr::tibble() %>% dplyr::filter(.data$Part!="") %>% dplyr::select(-dplyr::starts_with("X."))
 
+  #Parse all the text columns to expand {vidN} notation into full video links
+  proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")]<-apply(proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")],2,function(x) parseGPmarkdown(x))
 
-  #read in multimedia links
-  mediaLinks<-xlsx::read.xlsx2(linksFile,sheetName="multimedia")
    }
