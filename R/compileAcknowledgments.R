@@ -2,12 +2,12 @@
 #'
 #' Compile acknowledgments from an XLSX to a JSON file
 #' @param inputFileName file location of the lesson alignment matrix XLSX worksheet; include full path if not in working directory
-#' @param destFolder where you want to save the folder; by default in the "JSON/" folder
+#' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "acknowledgments.json"
-#' @return acknowledgment list object; a JSON is saved to standards/acknowledgments.json
+#' @return acknowledgment list object; a JSON is saved to destFolder
 #' @export
 #'
-compileAcknowledgments <- function(inputFileName="meta/acknowledgments.xlsx",destFolder="assembled-lesson-materials/JSON/",outputFileName="acknowledgments.json"){
+compileAcknowledgments <- function(inputFileName="meta/acknowledgments.xlsx",destFolder="meta/JSON/",outputFileName="acknowledgments.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 

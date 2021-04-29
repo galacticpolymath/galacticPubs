@@ -3,6 +3,7 @@
 export("%>%")
 export(compileAcknowledgments)
 export(compileAlignment)
+export(compileProcedure)
 export(compileVersions)
 export(ggGalactic)
 export(gpColors)
