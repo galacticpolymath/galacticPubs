@@ -26,7 +26,7 @@ parseGPmarkdown<-function(x,linksFile="meta/teaching-material-links.xlsx"){
                     if(index!=999&!is.na(index)){
                     URL<-vidLinks$ytLink[index]
                     title<-vidLinks$Title[index]
-                    replace<-ifelse(is.na(title),NA,paste0('[▶"',title,'"](',URL,')'))
+                    replace<-ifelse(is.na(title),NA,paste0('[\u25B6"',title,'"](',URL,')'))
                     }else{
                     replace<-paste0("[ERROR: CHECK *",refs,"* REFERENCE. NO YT-LINK FOUND]()")
                     }
