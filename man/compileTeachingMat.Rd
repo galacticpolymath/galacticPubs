@@ -5,10 +5,10 @@
 \title{compileTeachingMat}
 \usage{
 compileTeachingMat(
-  linksFile = "meta/teaching-material-links.xlsx",
+  linksFile = "meta/teaching-materials.xlsx",
   procedureFile = "meta/procedure.xlsx",
   destFolder = "meta/JSON/",
-  outputFileName = "processedTeachingMaterial.json"
+  outputFileName = "processedTeachingMaterials.json"
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ compileTeachingMat(
 
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
 
-\item{outputFileName}{output file name; default= "processedTeachingMaterial.json"}
+\item{outputFileName}{output file name; default= "processedTeachingMaterials.json"}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/processedResources.json

@@ -3,13 +3,13 @@
 #' Function to replace custom expressions with appropriate links or text
 #'
 #' @param x a text string to parse
-#' @param linksFile file location of the lesson teaching-material-links XLSX worksheet. This is used for our custom
+#' @param linksFile file location of the lesson teaching-materials XLSX worksheet. This is used for our custom
 #' markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 #' that has order=1
 #' @return formatted replacement text
 #' @export
 #'
-parseGPmarkdown<-function(x,linksFile="meta/teaching-material-links.xlsx"){
+parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx"){
   #read in multimedia links
   mediaLinks<-openxlsx::read.xlsx(linksFile,sheet="multimedia")%>% dplyr::tibble()
   vidLinks<-mediaLinks %>% dplyr::filter(.data$Type=="video")

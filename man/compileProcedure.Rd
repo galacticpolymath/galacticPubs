@@ -6,7 +6,7 @@
 \usage{
 compileProcedure(
   procedureFile = "meta/procedure.xlsx",
-  linksFile = "meta/teaching-material-links.xlsx",
+  linksFile = "meta/teaching-materials.xlsx",
   destFolder = "meta/JSON/",
   outputFileName = "processedProcedure.json"
 )
@@ -14,7 +14,7 @@ compileProcedure(
 \arguments{
 \item{procedureFile}{file location of the lesson procedure XLSX worksheet}
 
-\item{linksFile}{file location of the lesson teaching-material-links XLSX worksheet. This is used for our custom
+\item{linksFile}{file location of the lesson teaching-materials XLSX worksheet. This is used for our custom
 markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 that has order=1}
 

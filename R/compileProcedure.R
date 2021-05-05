@@ -2,7 +2,7 @@
 #'
 #' Compile lesson procedural steps from the XLSX spreadsheet template
 #' @param procedureFile file location of the lesson procedure XLSX worksheet
-#' @param linksFile file location of the lesson teaching-material-links XLSX worksheet. This is used for our custom
+#' @param linksFile file location of the lesson teaching-materials XLSX worksheet. This is used for our custom
 #' markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 #' that has order=1
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
@@ -11,7 +11,7 @@
 #' @importFrom rlang .data
 #' @export
 #'
-compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta/teaching-material-links.xlsx",destFolder="meta/JSON/" ,outputFileName="processedProcedure.json"){
+compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta/teaching-materials.xlsx",destFolder="meta/JSON/" ,outputFileName="processedProcedure.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 

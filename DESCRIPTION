@@ -1,15 +1,12 @@
 Package: galacticPubs
 Type: Package
 Title: Galactic Polymath Lesson Publishing Tools
-Version: 0.2.0
+Version: 0.2.1
 Author: Matthew R Wilkins, PhD
 Maintainer: Matthew R Wilkins, PhD <matt@galacticpolymath.com>
-Description: Code to compile standards information from a lesson alignment matrix
-    worksheet, match with data from the StandardX repository, and output structured
-    tibbles and JSON for use downstream. Tibbles can be used to generate a GP Learning
-    Chart or Epaulette and the JSON output is used for the standards section of our
-    GP Sensible Lesson Plan format. There are also functions for working with color
-    and styling for ggplot2 and other R-based outputs.
+Description: Code to enable the GP Nexus education publishing workflow. Outputs are highly structured
+             JSON files and custom graphics for visualizing knowledge transferred in lessons. There are
+             also numerous helper functions to style ggplots or create particular learning assets.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
