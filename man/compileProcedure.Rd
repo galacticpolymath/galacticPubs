@@ -6,21 +6,21 @@
 \usage{
 compileProcedure(
   procedureFile = "meta/procedure.xlsx",
-  linksFile = "meta/teaching-resource-links.xlsx",
+  linksFile = "meta/teaching-material-links.xlsx",
   destFolder = "meta/JSON/",
-  fileName = "processedProcedure.json"
+  outputFileName = "processedProcedure.json"
 )
 }
 \arguments{
 \item{procedureFile}{file location of the lesson procedure XLSX worksheet}
 
-\item{linksFile}{file location of the lesson teaching-resource-links XLSX worksheet. This is used for our custom
+\item{linksFile}{file location of the lesson teaching-material-links XLSX worksheet. This is used for our custom
 markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 that has order=1}
 
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
 
-\item{fileName}{output file name; default= "processedProcedure.json"}
+\item{outputFileName}{output file name; default= "processedProcedure.json"}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/processedProcedure.json

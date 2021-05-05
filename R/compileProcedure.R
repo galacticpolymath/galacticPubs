@@ -2,7 +2,7 @@
 #'
 #' Compile lesson procedural steps from the XLSX spreadsheet template
 #' @param procedureFile file location of the lesson procedure XLSX worksheet
-#' @param linksFile file location of the lesson teaching-resource-links XLSX worksheet. This is used for our custom
+#' @param linksFile file location of the lesson teaching-material-links XLSX worksheet. This is used for our custom
 #' markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 #' that has order=1
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
@@ -11,7 +11,7 @@
 #' @importFrom rlang .data
 #' @export
 #'
-compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta/teaching-resource-links.xlsx",destFolder="meta/JSON/" ,outputFileName="processedProcedure.json"){
+compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta/teaching-material-links.xlsx",destFolder="meta/JSON/" ,outputFileName="processedProcedure.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -25,9 +25,9 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
 
 
   #read in main procedure
-  proc<-xlsx::read.xlsx2(procedureFile,sheetName="Procedure") %>% dplyr::tibble() %>% dplyr::filter(.data$Part!="")%>% dplyr::select(-dplyr::starts_with("X."))
+  proc<-openxlsx::read.xlsx(procedureFile,sheet="Procedure") %>% dplyr::tibble()
   #read in Part titles and lesson + Part prefaces
-  procTitles<-xlsx::read.xlsx2(procedureFile,sheetName="NamesAndNotes")%>% dplyr::tibble() %>% dplyr::filter(.data$Part!="") %>% dplyr::select(-dplyr::starts_with("X."))
+  procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble()
 
   #Basic test
   nPartsTest<-length(unique(proc$Part))==length(unique(procTitles$Part))
@@ -41,24 +41,42 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
   #Parse vocab shorthand into reasonably formatted markdown with bullets
   proc$Vocab<-formatVocab(proc$Vocab)
 
+  ####
+  #Figure out lesson duration string
+  partDurations<-proc$PartDur[which(proc$PartDur!="")] %>% as.numeric()
+  lessonDur <- if(length(partDurations)==1){paste0(partDurations," min") #if just 1 part listed, do X min
+    }else{
+      #if more than 1 part, but they're all the same, combine them
+      if(length(unique(partDurations))==1){
+      paste0(length(partDurations)," x ",partDurations[1]," min")
+        }else{
+          #otherwise state each length separately
+          sapply(1:length(partDurations),function(x) {
+            paste0("Part ", x,": ",partDurations[x]," min")}) %>% paste0( collapse=", ")
+      }
+    }
+  lessonDur
+
   #Let's make a list that we'll convert to JSON
   out<-list()
   out$lessonPreface=procTitles$LessonPreface[1]
-  for(i in 1:length(unique(procTitles$Part))){
-    part <- i
-    title <- procTitles$PartTitle[i]
-    dur <- proc$PartDur[i]
-    preface<-procTitles$PartPreface[i]
-    chunks<-lapply(unique(subset(proc,Part==i)$Chunk),function(chunk_i){
-              d<-subset(proc,Part==i&Chunk==chunk_i)
-              title<-d$ChunkTitle[1]
-              dur<-d$ChunkDur[1]
+  out$lessonDur=lessonDur
+  out$parts<-lapply(1:length(unique(procTitles$Part)),function(i){
+    partNum <- i
+    partTitle <- procTitles$PartTitle[i]
+    partDur <- proc$PartDur[i]
+    partPreface<-procTitles$PartPreface[i]
+    chunks<-lapply(unique(subset(proc,proc$Part==i)$Chunk),function(chunk_i){
+              d<-subset(proc,proc$Part==i&proc$Chunk==chunk_i)
+              chunkTitle<-d$ChunkTitle[1]
+              chunkDur<-d$ChunkDur[1]
               steps<-d %>% dplyr::select("Step","StepTitle","StepQuickDescription","StepDetails","Vocab","VariantNotes",
                                          "TeachingTips")
-              list(title=title,dur=dur,steps=list(steps))
+              list(chunkTitle=chunkTitle,chunkDur=chunkDur,steps=list(steps))
               }) %>% list()
-    out[[i+1]]<-c(part=part,title=title,dur=dur,preface=preface,chunks=chunks)
-  }
+    c(partNum=partNum,partTitle=partTitle,partDur=partDur,partPreface=partPreface,chunks=chunks)
+
+  })
 
   # OUT<-c()
 

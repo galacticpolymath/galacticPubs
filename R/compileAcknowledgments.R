@@ -14,7 +14,7 @@ compileAcknowledgments <- function(inputFileName="meta/acknowledgments.xlsx",des
  # Import XLSX files -------------------------------------------------------
 
 #Import the acknowledgments sheet, checking that it w
-ack<-xlsx::read.xlsx2(normalizePath(inputFileName),1)
+ack<-openxlsx::read.xlsx(normalizePath(inputFileName),sheet=1)
 if(is.null(ack)){stop("Something went wrong. Check your filenames and that the acknowledgments spreadsheet is not empty.")}
 
 roles<-unique(ack$Role)

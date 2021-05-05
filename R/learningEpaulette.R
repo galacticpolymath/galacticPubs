@@ -93,10 +93,10 @@ if(!is.null(targetSubj)){
   (targetRows<-which(!is.na(charmatch(tolower(xlabels$subj),tolower(targetSubj))) ))
   segs$segCol[targetRows]<-gpColors("galactic black")
   xlabels$stroke[targetRows]<-4
-  xlabels$strokeCol[targetRows] <- gpColors("galactic black")
+  xlabels$strokeCol[targetRows] <- "#707070" #gpColors("galactic black")
   xlabels$fontface[targetRows]<-"bold"
   xlabels$size[targetRows]<-11
-  rectangles$border[targetRows]<-gpColors("galactic black")
+  rectangles$border[targetRows]<-"#707070" #gpColors("galactic black")
 }
 
 

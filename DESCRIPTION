@@ -21,6 +21,7 @@ Imports:
     htmltools,
     jsonlite,
     magrittr,
+    openxlsx,
     png,
     RCurl,
     remotes,
@@ -33,7 +34,6 @@ Imports:
     sysfonts,
     stringr,
     viridis,
-    xlsx,
     rlang
 Suggests: colorspace, rmdformats
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
