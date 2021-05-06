@@ -14,6 +14,7 @@ Imports:
     dplyr,
     fs,
     ggplot2,
+    googledrive,
     grid,
     htmltools,
     jsonlite,

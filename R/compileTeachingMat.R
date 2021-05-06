@@ -14,20 +14,24 @@ compileTeachingMat <- function(linksFile="meta/teaching-materials.xlsx",procedur
    .=NULL #to avoid errors with dplyr syntax
 
   #read in links
-  rsrcSummary<-openxlsx::read.xlsx(linksFile,sheet="rsrcSummary")%>% dplyr::tibble()
+  rsrcSummary<-openxlsx::read.xlsx(linksFile,sheet="rsrcSummary",startRow=2)%>% dplyr::tibble()
   linksD<-openxlsx::read.xlsx(linksFile,sheet="download",startRow=2)%>% dplyr::tibble()
-  linksC<-openxlsx::read.xlsx(linksFile,sheet="c_pres")%>% dplyr::tibble()
-  linksCH<-openxlsx::read.xlsx(linksFile,sheet="c_handouts")%>% dplyr::tibble()
-  linksR<-openxlsx::read.xlsx(linksFile,sheet="r_pres")%>% dplyr::tibble()
-  linksRH<-openxlsx::read.xlsx(linksFile,sheet="r_handouts")%>% dplyr::tibble()
-  linksMedia<-openxlsx::read.xlsx(linksFile,sheet="multimedia")%>% dplyr::tibble()
+  linksC<-openxlsx::read.xlsx(linksFile,sheet="c_pres",startRow=2)%>% dplyr::tibble()
+  linksCH<-openxlsx::read.xlsx(linksFile,sheet="c_handouts",startRow=2)%>% dplyr::tibble()
+  linksR<-openxlsx::read.xlsx(linksFile,sheet="r_pres",startRow=2)%>% dplyr::tibble()
+  linksRH<-openxlsx::read.xlsx(linksFile,sheet="r_handouts",startRow=2)%>% dplyr::tibble()
+  linksMedia<-openxlsx::read.xlsx(linksFile,sheet="multimedia",startRow=2)%>% dplyr::tibble()
   #read in procedure Part titles, etc
-  procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble() %>% dplyr::filter(.data$Part!="") %>% dplyr::select(-dplyr::starts_with("X."))
+  procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble()
+
+
+########################################################################
+# CLASSROOM ---------------------------------------------------------------
 
   # Get resource summary from teaching-materials.xlsx
-  s <- subset(rsrcSummary,rsrcSummary$envir=="classroom")
-  rsrcSumm_C <- lapply(unique(s$itemCat),function(x){
-    d<-subset(s,s$itemCat==x)
+  s_C <- subset(rsrcSummary,rsrcSummary$envir=="classroom")
+  rsrcSumm_C <- lapply(unique(s_C$itemCat),function(x){
+    d<-subset(s_C,s_C$itemCat==x)
     d$nItem<-sapply(d$nItem,function(x) ifelse(is.na(x),1,x))
     catCount<-sum(as.numeric(d$nItem))
     itemBundle=list(nItems=catCount, itemCat=d$itemCat[1],itemsGroup=lapply(1:length(d$item),function(i){
@@ -41,8 +45,7 @@ compileTeachingMat <- function(linksFile="meta/teaching-materials.xlsx",procedur
       lapply(1:nrow(procTitles),function(i){list(part=procTitles$Part[i],partGradeVarNotes=procTitles$PartGradeVarNotes[i])})
     }
   }
-#####################
-# classroom resources -----------------------------------------------------
+# resources -----------------------------------------------------
 
 coveredGrades<-unique(c(linksC$grades,linksCH$grades))[which(!is.na(unique(c(linksC$grades,linksCH$grades))))]
 #Build classroom resources list
@@ -56,21 +59,23 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
           title<-procTitles$PartTitle[part_i]
           preface<-procTitles$PartPreface[part_i]
           currPresentations<-subset(linksC,linksC$part==part_i&linksC$grades==currGradeBand)
-          currPresentations2<-lapply(1:nrow(currPresentations), function(i){
+          currPresentations2<-if(nrow(currPresentations)==0){}else{
+                              lapply(1:nrow(currPresentations), function(i){
                               list(itemTitle="Presentation",
-                                   itemCat=currPresentations$category[i],
+                                   itemCat="presentation",
                                    links=list(
                                             list(
                                               linkText="Present Now",
-                                              url=currPresentations$presentLink[i]),
+                                              url=currPresentations$gPresentLink[i]),
                                             list(
                                               linkText="Copy to My Google Drive",
-                                              url=currPresentations$shareLink[i])
+                                              url=currPresentations$gShareLink[i])
                                               )
                               )
-                              })
+                              })}
           currHandouts<-subset(linksCH,linksCH$part==part_i&linksCH$grades==currGradeBand)
-          currHandouts2<-lapply(1:nrow(currHandouts),function(i){
+          currHandouts2<-if(nrow(currHandouts)==0){}else{
+                          lapply(1:nrow(currHandouts),function(i){
                           list(itemTitle=currHandouts$title[i],
                                itemCat=currHandouts$type[i],
                                links=list(
@@ -79,10 +84,10 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
                                             url=currHandouts$pdfLink[i]),
                                           list(
                                             linkText="Copy to My Google Drive",
-                                            url=currHandouts$templateLink[i])
+                                            url=currHandouts$gShareLink[i])
                                           )
                             )
-                          })
+                          })}
           itemList<-c(currPresentations2,currHandouts2)
 
           #return assets for part_i
@@ -110,24 +115,109 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
 
   })#end classroom lapply
 
+########################################################################
+# REMOTE ---------------------------------------------------------------
 
-
-
-# remote resources --------------------------------------------------------
-
-
-
-
-
-out<-list(classroom=list(resourceSummary=rsrcSumm_C,gradeVariantNotes=gradeVariantNotes,resources=resourcesC))
-
-
+  # Get resource summary from teaching-materials.xlsx
+  s_R <- subset(rsrcSummary,rsrcSummary$envir=="remote")
+  rsrcSumm_R <- lapply(unique(s_R$itemCat),function(x){
+    d<-subset(s_R,s_R$itemCat==x)
+    d$nItem<-sapply(d$nItem,function(x) ifelse(is.na(x),1,x))
+    catCount<-sum(as.numeric(d$nItem))
+    itemBundle=list(nItems=catCount, itemCat=d$itemCat[1],itemsGroup=lapply(1:length(d$item),function(i){
+      list(item=d$item[i],itemExplanation=d$itemExplanation[i])}
+      ))
+    itemBundle
+    })
+  # #Get grade level variation notes from Procedure.xlsx
+  # gradeVariantNotes<-if(is.na(procTitles$PartGradeVarNotes[1])){NA}else{
+  #   if(length(which(complete.cases(procTitles$PartGradeVarNotes)))==1){list(part=NA,partGradeVarNotes=procTitles$PartGradeVarNotes[1])}else{
+  #     lapply(1:nrow(procTitles),function(i){list(part=procTitles$Part[i],partGradeVarNotes=procTitles$PartGradeVarNotes[i])})
+  #   }
   # }
-  # rsrcSumm_C<-s
-  # for(grades in coveredGrades){
-  #   d_C<-subset(linksC,linksC$grades==grades)
-  #
-  # }
+
+# resources -----------------------------------------------------
+coveredGrades.R<-unique(c(linksR$grades,linksRH$grades))[which(!is.na(unique(c(linksR$grades,linksRH$grades))))]
+#Build classroom resources list
+resourcesR<-lapply(coveredGrades.R, function(currGradeBand.R){
+  #not currently supporting batch downloads for remote lesson
+
+  # currDownloadRemote<-linksD %>% dplyr::filter(.data$envir=="remote")
+  # currDownloadAll<-currDownloadRemote %>% dplyr::filter(.data$grades==currGradeBand.R&.data$part=="all") %>% dplyr::select(.data$gDriveFolderLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
+
+  #aggregate data for all parts
+  parts<-lapply(1: length(procTitles$PartTitle),function(part_i){
+          part<-procTitles$Part[part_i]
+          title<-procTitles$PartTitle[part_i]
+          preface<-procTitles$PartPreface[part_i]
+          currPresentations<-subset(linksR,linksR$part==part_i&linksR$grades==currGradeBand.R)
+          currPresentations2<-if(nrow(currPresentations)==0){}else{
+                              lapply(1:nrow(currPresentations), function(i){
+                              list(itemTitle="Presentation",
+                                   itemCat="presentation",
+                                   links=list(
+                                            list(
+                                              linkText="Present Now",
+                                              url=currPresentations$nPresentLink[i]),
+                                            list(
+                                              linkText="Add to My Nearpod Library",
+                                              url=currPresentations$nShareLink[i]),
+                                            list(
+                                              linkText="Edit in My Google Drive",
+                                              url=currPresentations$gShareLink[i])
+                                              )
+                              )
+                              })
+                              }
+          currHandouts<-subset(linksRH,linksRH$part==part_i&(linksRH$grades==currGradeBand.R|is.na(linksRH$grades)))
+          currHandouts2<-if(nrow(currHandouts)==0){}else{
+                          lapply(1:nrow(currHandouts),function(i){
+                          list(itemTitle=currHandouts$title[i],
+                               itemCat=currHandouts$type[i],
+                               links=list(
+                                          list(
+                                            linkText=paste0("Download as .",currHandouts$fileType[i]),
+                                            url=currHandouts$distrLink[i])#,
+                                          # list(
+                                          #   linkText="Copy to My Google Drive",
+                                          #   url=currHandouts$templateLink[i])
+                                          )
+                            )
+                          })
+                          }
+          itemList<-c(currPresentations2,currHandouts2)
+
+          #return assets for part_i
+          # currDownloadAll.part_i<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand.R&.data$part==part_i) %>% dplyr::select(.data$gDriveFolderLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
+
+          list(part=part,
+               title=title,
+               preface=preface,
+               itemList=itemList#,
+               #links=list(linkText=paste0("Download All Part ",part_i,", ",gradePrefix," Materials for All Parts"),
+                          # url=currDownloadAll.part_i)
+                 )
+  })#end parts lapply
+
+  #return list for the classroom lapply
+  gradePrefix=paste0("G",currGradeBand)
+  list(grades=paste0("Grades ",currGradeBand),
+       gradePrefix=gradePrefix,
+       # links=list(
+       #        linkText=paste0("Download ",gradePrefix," Materials for All Parts"),
+       #        url=currDownloadAll
+       #        ),
+       parts=parts)
+
+
+  })#end remote lapply
+
+
+
+
+out<-list(classroom=list(resourceSummary=rsrcSumm_C,gradeVariantNotes=gradeVariantNotes,resources=resourcesC),
+          remote=list(resourceSummary=rsrcSumm_R,gradeVariantNotes=gradeVariantNotes,resources=resourcesR))
+
 
 
 # Make json structured output ----------------------------------------------
