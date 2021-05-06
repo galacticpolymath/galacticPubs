@@ -60,10 +60,13 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
                               list(itemTitle="Presentation",
                                    itemCat=currPresentations$category[i],
                                    links=list(
-                                          linkText="Present Now",
-                                          url=currPresentations$presentLink[i],
-                                          linkText="Copy to My Google Drive",
-                                          url=currPresentations$shareLink[i])
+                                            list(
+                                              linkText="Present Now",
+                                              url=currPresentations$presentLink[i]),
+                                            list(
+                                              linkText="Copy to My Google Drive",
+                                              url=currPresentations$shareLink[i])
+                                              )
                               )
                               })
           currHandouts<-subset(linksCH,linksCH$part==part_i&linksCH$grades==currGradeBand)
@@ -71,10 +74,13 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
                           list(itemTitle=currHandouts$title[i],
                                itemCat=currHandouts$type[i],
                                links=list(
-                                          linkText="PDF",
-                                          url=currHandouts$pdfLink[i],
-                                          linkText="Copy to My Google Drive",
-                                          url=currHandouts$templateLink[i])
+                                          list(
+                                            linkText="PDF",
+                                            url=currHandouts$pdfLink[i]),
+                                          list(
+                                            linkText="Copy to My Google Drive",
+                                            url=currHandouts$templateLink[i])
+                                          )
                             )
                           })
           itemList<-c(currPresentations2,currHandouts2)
