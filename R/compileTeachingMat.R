@@ -14,8 +14,8 @@ compileTeachingMat <- function(linksFile="meta/teaching-materials.xlsx",procedur
    .=NULL #to avoid errors with dplyr syntax
 
   #read in links
-  rsrcSummary<-openxlsx::read.xlsx(linksFile,sheet="rsrcSummary",startRow=2)%>% dplyr::tibble()
-  linksD<-openxlsx::read.xlsx(linksFile,sheet="download",startRow=2)%>% dplyr::tibble()
+  rsrcSummary<-openxlsx::read.xlsx(linksFile,sheet="rsrcSumm",startRow=2)%>% dplyr::tibble()
+  linksD<-openxlsx::read.xlsx(linksFile,sheet="dL",startRow=2)%>% dplyr::tibble()
   linksC<-openxlsx::read.xlsx(linksFile,sheet="c_pres",startRow=2)%>% dplyr::tibble()
   linksCH<-openxlsx::read.xlsx(linksFile,sheet="c_handouts",startRow=2)%>% dplyr::tibble()
   linksR<-openxlsx::read.xlsx(linksFile,sheet="r_pres",startRow=2)%>% dplyr::tibble()
