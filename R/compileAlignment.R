@@ -1,14 +1,14 @@
 #' compileAlignment
 #'
 #' Compile alignment info from a lesson standards matrix worksheet
-#' @param alignmentMatrixFile file location of the lesson alignment matrix XLSX worksheet; default: "alignment-matrix.xlsx"
+#' @param alignmentMatrixFile file location of the lesson alignment matrix XLSX worksheet; default: "meta/alignment-matrix.xlsx"
 #' @param grades grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "5-12"
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder, 1 level up from the working directory
 #' @param fileName output file name; default= "processedStandards.json"
 #' @return tibble of the compiled standards data; a JSON is saved to the destFolder location
 #' @export
 #'
-compileAlignment <- function(alignmentMatrixFile="alignment-matrix.xlsx",grades="5-12",destFolder="meta/JSON/" ,fileName="processedStandards.json"){
+compileAlignment <- function(alignmentMatrixFile="meta/alignment-matrix.xlsx",grades="5-12",destFolder="meta/JSON/" ,fileName="processedStandards.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 
