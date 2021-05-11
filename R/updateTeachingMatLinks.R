@@ -80,6 +80,7 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
         #For all dataCats that are not "download"
         path<-materialsPaths[k]
         pathDribble<-googledrive::drive_ls(path)
+
         #handle quickprep "data category"
         if(dataCat_k=="quickPrep_feedback"){
             excelTab<-tmKey$tab[match(paste(dataCat_k,""),paste(tmKey$dataCat,tmKey$subCat))]
@@ -140,10 +141,10 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
 
 
     #Read in tabs from the teaching-materials.xlsx for selected data types
+    #Remove rows that are totally NA
     tmImported<-lapply(1:length(tmKey.selected$tab),function(i) {
       d<-openxlsx::read.xlsx(linksFile,sheet=tmKey.selected$tab[i],startRow=2)
-      goodRows<-apply(d,1,function(x) sum(is.na(x))!=ncol(d))
-      d[goodRows,]
+      rmNArows(d)
     })
 
     #add google drive ID for merging to imported data

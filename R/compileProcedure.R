@@ -25,9 +25,9 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
 
 
   #read in main procedure
-  proc<-openxlsx::read.xlsx(procedureFile,sheet="Procedure") %>% dplyr::tibble()
+  proc<-openxlsx::read.xlsx(procedureFile,sheet="Procedure") %>% dplyr::tibble() %>% rmNArows()
   #read in Part titles and lesson + Part prefaces
-  procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble()
+  procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble() %>% rmNArows()
 
   #Basic test
   nPartsTest<-length(unique(proc$Part))==length(unique(procTitles$Part))
