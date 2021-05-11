@@ -62,8 +62,8 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
           envir
           # Get folder links for all grade subdirectories
           gradeFolderDribble<-googledrive::drive_ls(assembledDribble[which(assembledDribble$name==envir),])%>% dplyr::filter(grepl(paste0(envir,"_"),.data$name))
-          grades<-gsub("^.*_(.*)","\\1",gradeFolders$name)
-          out.grades<-lapply(1:nrow(gradeFolders),function(i){
+          grades<-gsub("^.*_(.*)","\\1",gradeFolderDribble$name)
+          out.grades<-lapply(1:nrow(gradeFolderDribble),function(i){
             gradeFolderLink_i<-googledrive::drive_link(gradeFolderDribble[i,])
             #output each grades sub-dataframe
             data.frame(envir=envir,grades=grades[i],part="all",filename=paste0("/",fs::path(envir,gradeFolderDribble$name[i]),"/"),filetype="folder", gDriveLink=gradeFolderLink_i,excelTab=excelTab)
