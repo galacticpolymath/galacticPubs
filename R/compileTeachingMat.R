@@ -51,7 +51,7 @@ coveredGrades<-unique(c(linksC$grades,linksCH$grades))[which(!is.na(unique(c(lin
 #Build classroom resources list
 resourcesC<-lapply(coveredGrades, function(currGradeBand){
   currDownloadClass<-linksD %>% dplyr::filter(.data$envir=="classroom")
-  currDownloadAll<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand&.data$part=="all") %>% dplyr::select(.data$gDriveFolderLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
+  currDownloadAll<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand&.data$part=="all") %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
 
   #aggregate data for all parts
   parts<-lapply(1: length(procTitles$PartTitle),function(part_i){
@@ -91,7 +91,7 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
           itemList<-c(currPresentations2,currHandouts2)
 
           #return assets for part_i
-          currDownloadAll.part_i<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand&.data$part==part_i) %>% dplyr::select(.data$gDriveFolderLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
+          currDownloadAll.part_i<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand&.data$part==part_i) %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
 
           list(part=part,
                title=title,
@@ -143,7 +143,7 @@ resourcesR<-lapply(coveredGrades.R, function(currGradeBand.R){
   #not currently supporting batch downloads for remote lesson
 
   # currDownloadRemote<-linksD %>% dplyr::filter(.data$envir=="remote")
-  # currDownloadAll<-currDownloadRemote %>% dplyr::filter(.data$grades==currGradeBand.R&.data$part=="all") %>% dplyr::select(.data$gDriveFolderLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
+  # currDownloadAll<-currDownloadRemote %>% dplyr::filter(.data$grades==currGradeBand.R&.data$part=="all") %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
 
   #aggregate data for all parts
   parts<-lapply(1: length(procTitles$PartTitle),function(part_i){
@@ -176,7 +176,7 @@ resourcesR<-lapply(coveredGrades.R, function(currGradeBand.R){
                                itemCat=currHandouts$type[i],
                                links=list(
                                           list(
-                                            linkText=paste0("Download as .",currHandouts$fileType[i]),
+                                            linkText=paste0("Download as .",tools::file_ext(currHandouts$distrLink[i])),
                                             url=currHandouts$distrLink[i])#,
                                           # list(
                                           #   linkText="Copy to My Google Drive",
@@ -188,7 +188,7 @@ resourcesR<-lapply(coveredGrades.R, function(currGradeBand.R){
           itemList<-c(currPresentations2,currHandouts2)
 
           #return assets for part_i
-          # currDownloadAll.part_i<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand.R&.data$part==part_i) %>% dplyr::select(.data$gDriveFolderLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
+          # currDownloadAll.part_i<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand.R&.data$part==part_i) %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
 
           list(part=part,
                title=title,
