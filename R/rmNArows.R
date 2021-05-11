@@ -7,6 +7,6 @@
 #' @export
 #'
 rmNArows<-function(d){
-  goodRows<-apply(d,1,function(x) sum(is.na(x))!=ncol(d))
+  goodRows<-apply(d,1,function(x) sum((x==""|is.na(x)))!=ncol(d))
   d[goodRows,]
 }

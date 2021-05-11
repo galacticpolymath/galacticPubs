@@ -11,7 +11,7 @@
 #'
 parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx"){
   #read in multimedia links
-  mediaLinks<-openxlsx::read.xlsx(linksFile,sheet="multimedia")%>% dplyr::tibble()
+  mediaLinks<-openxlsx::read.xlsx(linksFile,sheet="multimedia",startRow=2)%>% dplyr::tibble()
   vidLinks<-mediaLinks %>% dplyr::filter(.data$Type=="video")
 
   #extract all video GP mardown syntax captures (e.g. "{vid1}")
