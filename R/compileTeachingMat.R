@@ -50,6 +50,7 @@ compileTeachingMat <- function(linksFile="meta/teaching-materials.xlsx",procedur
 coveredGrades<-unique(c(linksC$grades,linksCH$grades))[which(!is.na(unique(c(linksC$grades,linksCH$grades))))]
 #Build classroom resources list
 resourcesC<-lapply(coveredGrades, function(currGradeBand){
+  gradePrefix=paste0("G",currGradeBand)
   currDownloadClass<-linksD %>% dplyr::filter(.data$envir=="classroom")
   currDownloadAll<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand&.data$part=="all") %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
 
@@ -103,7 +104,6 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
   })#end parts lapply
 
   #return list for the classroom lapply
-  gradePrefix=paste0("G",currGradeBand)
   list(grades=paste0("Grades ",currGradeBand),
        gradePrefix=gradePrefix,
        links=list(
