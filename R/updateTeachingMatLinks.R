@@ -111,7 +111,14 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
               links<-googledrive::drive_link(currCatFiles)
               currCatFiles_mimeTypes<-sapply(currCatFiles$drive_resource,function(x){x$mimeType})
               filetypes<-mimeKey$human_type[match(currCatFiles_mimeTypes,mimeKey$mime_type)]
-              data.frame(dataCat=dataCat_k,grades=grades[i],part=part,filename=currCatFiles$name,filetype=filetypes,gDriveLink=links,excelTab=excelTab)
+              #extract SvT (student vs teacher) version from filename
+              if(category=="handouts"){
+                SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",currCatFiles$name,perl=T),
+                        gsub(".*(TEACHER|STUDENT).*","\\1",currCatFiles$name,perl=T),NA)
+                data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=tolower(SvT),filename=currCatFiles$name,filetype=filetypes,gDriveLink=links,excelTab=excelTab)
+              }else{
+              data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=NA,filename=currCatFiles$name,filetype=filetypes,gDriveLink=links,excelTab=excelTab)
+              }
             })
             do.call(rbind,out.category)
           })
@@ -134,7 +141,9 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
 
     #Read in tabs from the teaching-materials.xlsx for selected data types
     tmImported<-lapply(1:length(tmKey.selected$tab),function(i) {
-      openxlsx::read.xlsx(linksFile,sheet=tmKey.selected$tab[i],startRow=2)
+      d<-openxlsx::read.xlsx(linksFile,sheet=tmKey.selected$tab[i],startRow=2)
+      goodRows<-apply(d,1,function(x) sum(is.na(x))!=ncol(d))
+      d[goodRows,]
     })
 
     #add google drive ID for merging to imported data

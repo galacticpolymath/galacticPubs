@@ -12,7 +12,7 @@ compileTeachingMat(
 )
 }
 \arguments{
-\item{linksFile}{file location of the lesson teaching-resource-links XLSX worksheet.}
+\item{linksFile}{file location of the lesson teaching-materials XLSX worksheet.}
 
 \item{procedureFile}{file location of the lesson procedure XLSX worksheet}
 
@@ -24,5 +24,5 @@ compileTeachingMat(
 tibble of the compiled standards data; a JSON is saved to meta/JSON/processedResources.json
 }
 \description{
-Compile lesson procedural steps from the XLSX spreadsheet template
+Compile Teaching Materials data from teaching-materials.xlsx
 }

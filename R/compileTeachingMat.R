@@ -1,7 +1,7 @@
 #' compileTeachingMat
 #'
-#' Compile lesson procedural steps from the XLSX spreadsheet template
-#' @param linksFile file location of the lesson teaching-resource-links XLSX worksheet.
+#' Compile Teaching Materials data from teaching-materials.xlsx
+#' @param linksFile file location of the lesson teaching-materials XLSX worksheet.
 #' @param procedureFile file location of the lesson procedure XLSX worksheet
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedTeachingMaterials.json"
@@ -41,7 +41,7 @@ compileTeachingMat <- function(linksFile="meta/teaching-materials.xlsx",procedur
     })
   #Get grade level variation notes from Procedure.xlsx
   gradeVariantNotes<-if(is.na(procTitles$PartGradeVarNotes[1])){NA}else{
-    if(length(which(complete.cases(procTitles$PartGradeVarNotes)))==1){list(part=NA,partGradeVarNotes=procTitles$PartGradeVarNotes[1])}else{
+    if(length(which(stats::complete.cases(procTitles$PartGradeVarNotes)))==1){list(part=NA,partGradeVarNotes=procTitles$PartGradeVarNotes[1])}else{
       lapply(1:nrow(procTitles),function(i){list(part=procTitles$Part[i],partGradeVarNotes=procTitles$PartGradeVarNotes[i])})
     }
   }
@@ -200,8 +200,8 @@ resourcesR<-lapply(coveredGrades.R, function(currGradeBand.R){
   })#end parts lapply
 
   #return list for the classroom lapply
-  gradePrefix=paste0("G",currGradeBand)
-  list(grades=paste0("Grades ",currGradeBand),
+  gradePrefix=paste0("G",currGradeBand.R)
+  list(grades=paste0("Grades ",currGradeBand.R),
        gradePrefix=gradePrefix,
        # links=list(
        #        linkText=paste0("Download ",gradePrefix," Materials for All Parts"),
