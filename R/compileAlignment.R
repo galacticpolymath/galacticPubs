@@ -36,7 +36,7 @@ cat("\n",paste0(c(rep("#",40),"\n"),collapse = "")," Compiling ",gradeBandSheetN
 
 #Import the sheet, removing blank columns that start with X.
 # fileLoc<-normalizePath(fs::path("meta/",alignmentMatrixFile))
-alignment_matrix0<-openxlsx::read.xlsx(alignmentMatrixFile,startRow=2,sheetName=gradeBandSheetName)
+alignment_matrix0<-openxlsx::read.xlsx(alignmentMatrixFile,startRow=2,sheet=gradeBandSheetName,check.names=T)
 # subject order
 subj_order<-c("CCmath","CCela","NGSSsci","C3ss")
 begin_subj_colnames<-c("Learn","Target","Codes","How")#start of column names to select them
@@ -135,7 +135,7 @@ for (i in 1:nrow(alignment_matrix_stacked)){
 
 
   #Now combine grouped standards info with lesson standards matrix data for final output
-  out_i<-cbind(learningTargets=d$LearningTargets,target=ifelse(tolower(d$Target)=="y",TRUE,FALSE),
+  out_i<-cbind(learningTargets=d$LearningTargets,target=ifelse((tolower(d$Target) != "n"&!is.na(d$Target)),TRUE,FALSE),
                master_data_i,alignmentNotes=d$AlignmentNotes) %>% dplyr::tibble()
 
   #Add gradeBand to out_i
