@@ -91,16 +91,16 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
                           })}
           itemList<-c(currPresentations2,currHandouts2)
 
-          #return assets for part_i
-          currDownloadAll.part_i<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand&.data$part==part_i) %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
+          # #return assets for part_i
+          # currDownloadAll.part_i<-currDownloadClass %>% dplyr::filter(.data$grades==currGradeBand&.data$part==part_i) %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
 
-          list(part=part,
-               title=title,
-               preface=preface,
-               itemList=itemList,
-               links=list(linkText=paste0("Download All Part ",part_i,", ",gradePrefix," Materials for All Parts"),
-                          url=currDownloadAll.part_i)
-                 )
+          # list(part=part,
+          #      title=title,
+          #      preface=preface,
+          #      itemList=itemList,
+          #      links=list(linkText=paste0("Download All Part ",part_i,", ",gradePrefix," Materials for All Parts"),
+          #                 url=currDownloadAll.part_i)
+          #        )
   })#end parts lapply
 
   #return list for the classroom lapply
