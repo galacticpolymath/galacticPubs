@@ -10,7 +10,7 @@
 #' @param returnWorkbook Logical; if T, returns the list which was written to linksFile
 #' @export
 #'
-updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.xlsx",dataCat=c("quickPrep_feedback","download","remote","classroom"),returnWorkbook=F){
+updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.xlsx",dataCat=c("download","quickPrep_feedback","remote","classroom"),returnWorkbook=F){
 
 
 #define dplyr::coalesce function that doesn't crash with 2 NAs!
@@ -20,6 +20,9 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
       if(is.na(x[i])&is.na(y[i])){NA}else{ifelse(!is.na(x[i]),x[i],y[i])}
     })
   }}
+
+# try to avoid OutOfMemoryError w/ options from https://stackoverflow.com/questions/7963393/out-of-memory-error-java-when-using-r-and-xlconnect-package
+    options(java.parameters = "-Xmx1024m")
 
 
   ### CONSTANTS ###
@@ -37,10 +40,19 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
 
 
 
-  #Extract filenames, links, etc. for all
-    lessonFolder<-googledrive::drive_ls("~/Edu/Lessons/",pattern=shortTitle)
-    lessonFolderPath<-paste0("~/Edu/Lessons/",lessonFolder$name)
-    materialsPaths<-fs::path(lessonFolderPath,"assembled-lesson-materials/",dataCat)
+# Query Google Drive to find locations ------------------------------------
+    EduDirID<-googledrive::drive_find(q=paste0("name='Edu' and mimeType= 'application/vnd.google-apps.folder' and 'root' in parents"))$id
+    LessonsDirID<-googledrive::drive_find(q=paste0("name='Lessons' and mimeType= 'application/vnd.google-apps.folder' and '",EduDirID,"' in parents"))$id
+    currLessonDir<-googledrive::drive_find(q=paste0("mimeType='application/vnd.google-apps.folder' and '",LessonsDirID,"' in parents"),pattern=shortTitle)
+    currLessonDirID<-currLessonDir$id
+
+    #Test if valid "shortTitle" was provided
+    if(length(currLessonDir)==0){stop(paste0("No lessons matching \"",shortTitle,"\" found."))}else{
+      message("\n>> ",nrow(currLessonDir)," lesson(s) found: ",paste(currLessonDir$name),"\n")
+    }
+
+    assembledMatDirID<-googledrive::drive_find(q=paste0("name= 'assembled-lesson-materials' and mimeType='application/vnd.google-apps.folder' and '",currLessonDirID,"' in parents"))$id
+
 
 ###########################################################################
 # gDrive Data Extraction Step for all dataCats ----------------------------
@@ -51,25 +63,25 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
       # get Download links for dL tab
       if(dataCat_k=="download"){
           excelTab<-tmKey$tab[match(paste(dataCat_k,""),paste(tmKey$dataCat,tmKey$subCat))]
-          assembledPath<-fs::path(lessonFolderPath,"assembled-lesson-materials/")
-          assembledDribble<-googledrive::drive_ls(assembledPath)
+          assembledMatDribble<-googledrive::drive_find(q=paste0("mimeType='application/vnd.google-apps.folder' and '",assembledMatDirID,"' in parents"))
 
-          # lapply "loop" across classroom and remote teachign environments
-          dLdata<-lapply(c("classroom","remote"),function(envir){
+          # lapply "loop" across classroom and remote teaching environments that exist in the folder
+          existingEnvirs<-c("classroom","remote")[c("classroom","remote") %in% assembledMatDribble$name]
+          dLdata<-lapply(existingEnvirs,function(envir){
           # Get Folder link for entire environment (all grades)
-          envirFolderName <- paste0("/",envir,"/")
-          envirFolderLink<-googledrive::drive_link(assembledDribble[which(assembledDribble$name==envir),])
-          envir
+          envirIndex<-which(assembledMatDribble$name==envir)
+          envirDirLink<-assembledMatDribble[envirIndex,"drive_resource"][[1]][[1]]$webViewLink
           # Get folder links for all grade subdirectories
-          gradeFolderDribble<-googledrive::drive_ls(assembledDribble[which(assembledDribble$name==envir),])%>% dplyr::filter(grepl(paste0(envir,"_"),.data$name))
-          grades<-gsub("^.*_(.*)","\\1",gradeFolderDribble$name)
-          out.grades<-lapply(1:nrow(gradeFolderDribble),function(i){
-            gradeFolderLink_i<-googledrive::drive_link(gradeFolderDribble[i,])
+          gradeDirDribble<-googledrive::drive_find(q=paste0("mimeType='application/vnd.google-apps.folder' and '",assembledMatDribble$id[envirIndex],"' in parents"))
+
+          grades<-gsub("^.*_(.*)","\\1",gradeDirDribble$name)
+          out.grades<-lapply(1:nrow(gradeDirDribble),function(i){
+            gradeDirLink_i<-assembledMatDribble[i,"drive_resource"][[1]][[1]]$webViewLink
             #output each grades sub-dataframe
-            data.frame(envir=envir,grades=grades[i],part="all",filename=paste0("/",fs::path(envir,gradeFolderDribble$name[i]),"/"),filetype="folder", gDriveLink=gradeFolderLink_i,excelTab=excelTab)
+            data.frame(envir=envir,grades=grades[i],part="all",path=paste0("/",fs::path(envir,gradeDirDribble$name[i]),"/"),filetype="folder", gDriveLink=gradeDirLink_i,excelTab=excelTab)
           })
           #make a root data frame for the link to all parts, all grades
-          out.root<-data.frame(envir=envir,grades="all",part="all",filename=envirFolderName,filetype="folder",gDriveLink=envirFolderLink,excelTab=excelTab)
+          out.root<-data.frame(envir=envir,grades="all",part="all",path=paste0("/",envir,"/"),filetype="folder",gDriveLink=envirDirLink,excelTab=excelTab)
           #combine everything
           rbind(out.root,do.call(rbind,out.grades))
             })#End dLdata lapply
@@ -95,17 +107,17 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
 
         #handle all remote and classroom environments differently
         }else{
-          gradeFolders<-pathDribble %>% dplyr::filter(grepl(paste0(dataCat_k,"_"),.data$name))
-          # dataCat<-sub("(^.*)_.*","\\1",gradeFolders$name[1])
-          grades<-gsub("^.*_(.*)","\\1",gradeFolders$name)
-          out.grades<-lapply(1:nrow(gradeFolders),function(i){
-            gradeFolder_i_path<-fs::path(path,gradeFolders$name[i])
-            gradeFolder_i<-googledrive::drive_ls(gradeFolder_i_path)
+          gradeDirs<-pathDribble %>% dplyr::filter(grepl(paste0(dataCat_k,"_"),.data$name))
+          # dataCat<-sub("(^.*)_.*","\\1",gradeDirs$name[1])
+          grades<-gsub("^.*_(.*)","\\1",gradeDirs$name)
+          out.grades<-lapply(1:nrow(gradeDirs),function(i){
+            gradeDir_i_path<-fs::path(path,gradeDirs$name[i])
+            gradeDir_i<-googledrive::drive_ls(gradeDir_i_path)
 
             #lapply "loop" for materials types (presentations & handouts)
             out.category<-pbapply::pblapply(c("presentations","handouts"),function(category){
               excelTab<-tmKey$tab[match(paste(dataCat_k,category),paste(tmKey$dataCat,tmKey$subCat))]
-              currCatFiles<-googledrive::drive_ls(fs::path(gradeFolder_i_path,gradeFolder_i$name[which(gradeFolder_i$name==category)]))
+              currCatFiles<-googledrive::drive_ls(fs::path(gradeDir_i_path,gradeDir_i$name[which(gradeDir_i$name==category)]))
               #extract part numbers from _P1_ in file name
               part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",currCatFiles$name,perl=T),
                         gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",currCatFiles$name,perl=T),NA)
@@ -158,8 +170,7 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
 # merge data and write to appropriate tab ---------------------------------
 
     ### open the whole workbook to be edited
-    # try to avoid OutOfMemoryError w/ options from https://stackoverflow.com/questions/7963393/out-of-memory-error-java-when-using-r-and-xlconnect-package
-    options(java.parameters = "-Xmx1024m")
+
     tmXLSX<-XLConnect::loadWorkbook(linksFile)
 
 
