@@ -52,18 +52,18 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
     }
 
     assembledMatDirID<-googledrive::drive_find(q=paste0("name= 'assembled-lesson-materials' and mimeType='application/vnd.google-apps.folder' and '",currLessonDirID,"' in parents"))$id
+    assembledMatDribble<-googledrive::drive_find(q=paste0("mimeType='application/vnd.google-apps.folder' and '",assembledMatDirID,"' in parents"))
 
 
 ###########################################################################
 # gDrive Data Extraction Step for all dataCats ----------------------------
     # Lapply "loop" through all the dataCat elements (downloads, quickPrep, classroom, remote)
-    out.dataCat <- pbapply::pblapply(1:length(dataCat),FUN=function(k){
+    gData <- pbapply::pblapply(1:length(dataCat),FUN=function(k){
       dataCat_k<-dataCat[k]
 
       # get Download links for dL tab
       if(dataCat_k=="download"){
           excelTab<-tmKey$tab[match(paste(dataCat_k,""),paste(tmKey$dataCat,tmKey$subCat))]
-          assembledMatDribble<-googledrive::drive_find(q=paste0("mimeType='application/vnd.google-apps.folder' and '",assembledMatDirID,"' in parents"))
 
           # lapply "loop" across classroom and remote teaching environments that exist in the folder
           existingEnvirs<-c("classroom","remote")[c("classroom","remote") %in% assembledMatDribble$name]
@@ -73,15 +73,16 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
           envirDirLink<-assembledMatDribble[envirIndex,"drive_resource"][[1]][[1]]$webViewLink
           # Get folder links for all grade subdirectories
           gradeDirDribble<-googledrive::drive_find(q=paste0("mimeType='application/vnd.google-apps.folder' and '",assembledMatDribble$id[envirIndex],"' in parents"))
-
           grades<-gsub("^.*_(.*)","\\1",gradeDirDribble$name)
+
+          #lapply for each grade
           out.grades<-lapply(1:nrow(gradeDirDribble),function(i){
-            gradeDirLink_i<-assembledMatDribble[i,"drive_resource"][[1]][[1]]$webViewLink
-            #output each grades sub-dataframe
-            data.frame(envir=envir,grades=grades[i],part="all",path=paste0("/",fs::path(envir,gradeDirDribble$name[i]),"/"),filetype="folder", gDriveLink=gradeDirLink_i,excelTab=excelTab)
+            gradeDirLink_i<-gradeDirDribble[i,"drive_resource"][[1]][[1]]$webViewLink
+            #output each grade's sub-dataframe
+            data.frame(envir=envir,grades=grades[i],part="all",path=paste0("/",fs::path(envir,gradeDirDribble$name[i]),"/"),filetype="folder", gDriveLink=gradeDirLink_i,gID=gradeDirDribble$id[i],excelTab=excelTab)
           })
           #make a root data frame for the link to all parts, all grades
-          out.root<-data.frame(envir=envir,grades="all",part="all",path=paste0("/",envir,"/"),filetype="folder",gDriveLink=envirDirLink,excelTab=excelTab)
+          out.root<-data.frame(envir=envir,grades="all",part="all",path=paste0("/",envir,"/"),filetype="folder",gDriveLink=envirDirLink,gID=assembledMatDribble$id[envirIndex],excelTab=excelTab)
           #combine everything
           rbind(out.root,do.call(rbind,out.grades))
             })#End dLdata lapply
@@ -89,67 +90,83 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
           do.call(rbind,dLdata)
 
           }else{
-        #For all dataCats that are not "download"
-        path<-materialsPaths[k]
-        pathDribble<-googledrive::drive_ls(path)
+        #google drive ID for the current data cat folder
+        dirID<-assembledMatDribble$id[which(substr(assembledMatDribble$name,1,3)==substr(dataCat_k,1,3))]
+        dirDribble<-googledrive::drive_find(q=paste0("'",dirID,"' in parents"))
 
         #handle quickprep "data category"
         if(dataCat_k=="quickPrep_feedback"){
             excelTab<-tmKey$tab[match(paste(dataCat_k,""),paste(tmKey$dataCat,tmKey$subCat))]
             #If the filename has "-part 1-" in it, extract part, otherwise put an NA (i.e. for forms)
-            qp_part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",pathDribble$name,perl=T),
-                        gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",pathDribble$name,perl=T),NA)
-            qp_links<-googledrive::drive_link(pathDribble)
-            qp_mimeTypes<-sapply(pathDribble$drive_resource,function(x){x$mimeType})
+            qp_part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",dirDribble$name,perl=T),
+                        gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",dirDribble$name,perl=T),NA)
+            qp_links<-sapply(dirDribble$drive_resource,function(x) {x$webViewLink})
+            qp_mimeTypes<-sapply(dirDribble$drive_resource,function(x){x$mimeType})
             qp_filetypes<-mimeKey$human_type[match(qp_mimeTypes,mimeKey$mime_type)]
             #output Quickprep & Feedback Table
-            data.frame(dataCat=dataCat_k,grades=NA,part=qp_part,filename=pathDribble$name,filetype=qp_filetypes,gDriveLink=qp_links,excelTab=excelTab)
+            data.frame(dataCat=dataCat_k,grades=NA,part=qp_part,filename=dirDribble$name,filetype=qp_filetypes,
+                       gDriveLink=qp_links,gID=dirDribble$id,excelTab=excelTab)
 
         #handle all remote and classroom environments differently
         }else{
-          gradeDirs<-pathDribble %>% dplyr::filter(grepl(paste0(dataCat_k,"_"),.data$name))
-          # dataCat<-sub("(^.*)_.*","\\1",gradeDirs$name[1])
-          grades<-gsub("^.*_(.*)","\\1",gradeDirs$name)
-          out.grades<-lapply(1:nrow(gradeDirs),function(i){
-            gradeDir_i_path<-fs::path(path,gradeDirs$name[i])
-            gradeDir_i<-googledrive::drive_ls(gradeDir_i_path)
+          gradeDirs<-dirDribble[sapply(dirDribble$drive_resource,function(x) x$mimeType=="application/vnd.google-apps.folder"),]
+          grades0<-gsub("^.*_(.*)","\\1",gradeDirs$name)
+          grades<-grades0[which(grades0!="")]
 
-            #lapply "loop" for materials types (presentations & handouts)
-            out.category<-pbapply::pblapply(c("presentations","handouts"),function(category){
+          # lapply loop for grades
+          out.grades<-lapply(1:nrow(gradeDirs),function(i){
+            gradeDirID<-gradeDirs$id[i]
+            gradeDirDribble_i<-googledrive::drive_find(q=paste0("'",gradeDirID,"' in parents"))
+
+            #lapply "loop" for materials categories (presentations & handouts)
+            existingCategories<-c("presentations","handouts")[c("presentations","handouts") %in% gradeDirDribble_i$name]
+            out.category<-pbapply::pblapply(existingCategories,function(category){
               excelTab<-tmKey$tab[match(paste(dataCat_k,category),paste(tmKey$dataCat,tmKey$subCat))]
-              currCatFiles<-googledrive::drive_ls(fs::path(gradeDir_i_path,gradeDir_i$name[which(gradeDir_i$name==category)]))
+              currCatFiles<-googledrive::drive_find(q=paste0("'",gradeDirDribble_i$id[which(gradeDirDribble_i$name==category)],"' in parents"))
               #extract part numbers from _P1_ in file name
               part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",currCatFiles$name,perl=T),
                         gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",currCatFiles$name,perl=T),NA)
-              links<-googledrive::drive_link(currCatFiles)
+              link<-sapply(currCatFiles$drive_resource,function(x) x$webViewLink)
               currCatFiles_mimeTypes<-sapply(currCatFiles$drive_resource,function(x){x$mimeType})
-              filetypes<-mimeKey$human_type[match(currCatFiles_mimeTypes,mimeKey$mime_type)]
+              filetype<-mimeKey$human_type[match(currCatFiles_mimeTypes,mimeKey$mime_type)]
               #extract SvT (student vs teacher) version from filename
-              if(category=="handouts"){
-                SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",currCatFiles$name,perl=T),
-                        gsub(".*(TEACHER|STUDENT).*","\\1",currCatFiles$name,perl=T),NA)
-                data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=tolower(SvT),filename=currCatFiles$name,filetype=filetypes,gDriveLink=links,excelTab=excelTab)
-              }else{
-              data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=NA,filename=currCatFiles$name,filetype=filetypes,gDriveLink=links,excelTab=excelTab)
-              }
-            })
-            do.call(rbind,out.category)
+              baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",link,perl=T)
+              gShareLink<-paste0(baseLink,"template/preview")
+                if(category=="handouts"){
+                  SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",currCatFiles$name,perl=T),
+                          gsub(".*(TEACHER|STUDENT).*","\\1",currCatFiles$name,perl=T),NA)
+                  pdfLink<-gShareLink<-paste0(baseLink,"export?format=pdf")
+                  #for all handouts, add a pdfLink...For remote lessons, we don't (yet) have access to distrLink for cloudinary.
+                  # This needs to be added manually
+                  data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=SvT,filename=currCatFiles$name,filetype=filetype,gDriveLink=link,gID=currCatFiles$id,gShareLink=gShareLink,pdfLink=pdfLink,excelTab=excelTab)
+                }else{
+                  #for presentations, there's no student/teacher versioning
+                  SvT=NA
+                  #different share links for the 2 environments
+                  if(dataCat_k=="classroom"){
+                    gPresentLink<-paste0(baseLink,"present")
+                    data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=SvT,filename=currCatFiles$name,filetype=filetype,gDriveLink=link,gID=currCatFiles$id,gShareLink=gShareLink,gPresentLink=gPresentLink,excelTab=excelTab)
+                  }else{
+                    #for remote environment, we don't have access to nearpod share links to create nShareLink
+                    data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=SvT,filename=currCatFiles$name,filetype=filetype,gDriveLink=link,gID=currCatFiles$id,gShareLink=gShareLink,excelTab=excelTab)
+                  }
+                }# end handout vs. presentation handling
+            })#end out.category lapply
+            names(out.category)<-existingCategories
+            out.category
           })
-          do.call(rbind,out.grades)
+          names(out.grades)<-paste0("g",grades)
+          out.grades
           }#end "remote/classroom" else{}
         }#end "not download" else{}
 
-    })#end out.dataCat def
+    })#end gData def
+    names(gData)<-gData
 ###########################################################################
 
     message("Gdrive file info imported")
 
-    #extract google id from ../d/IDNUMBER/... & add to each dataframe
-    gData<-lapply(out.dataCat,function(L){
-      L$gID<-gsub("^.*\\/d\\/([^\\/]*)\\/.*$","\\1",L$gDriveLink)
-      L
-      })
-    names(gData)<-dataCat
+
 
 
     #Read in tabs from the teaching-materials.xlsx for selected data types

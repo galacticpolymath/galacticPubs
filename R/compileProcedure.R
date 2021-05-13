@@ -35,7 +35,7 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
 
   #####
   #Parse all the text columns to expand {vidN} notation into full video links
-  proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")]<-apply(proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")],2,function(x) parseGPmarkdown(x))
+  proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")]<-apply(proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")],2,function(x) galacticPubs::parseGPmarkdown(x))
 
   ####
   #Parse vocab shorthand into reasonably formatted markdown with bullets
@@ -72,7 +72,7 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
               chunkDur<-d$ChunkDur[1]
               steps<-d %>% dplyr::select("Step","StepTitle","StepQuickDescription","StepDetails","Vocab","VariantNotes",
                                          "TeachingTips")
-              list(chunkTitle=chunkTitle,chunkDur=chunkDur,steps=list(steps))
+              list(chunkTitle=chunkTitle,chunkDur=chunkDur,steps=steps)
               }) %>% list()
     c(partNum=partNum,partTitle=partTitle,partDur=partDur,partPreface=partPreface,chunks=chunks)
 
