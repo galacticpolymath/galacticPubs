@@ -175,7 +175,7 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
 
 
 # now, reorganize gData by XLtab ------------------------------------------
-gData<-reshape2::melt(gData0)
+gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
 
 
@@ -204,19 +204,27 @@ gData<-reshape2::melt(gData0)
 # Merge missing gDrive data into existing teaching-materials.xlsx  --------
     # lapply loop for each excelTab in the imported list
     tmImported.merged<-lapply(1:length(tmImported2),function(i){
+
       excelData_i<-tmImported2[[i]] %>% dplyr::tibble()
       excelTab_i<-names(tmImported2)[i]
-      class(excelData_i$filename)<-"character"
+
       dataCat_i<-tmKey$dataCat[which(tmKey$tab==excelTab_i)]
-      gData_i<-gData %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble()
+
+
+      gData_i<-gData %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble() %>% mutate(updateNotes=NA)
 
       #add missing data to Spreadsheet dataframe from gDrive meta info
       excel_Data_i.aug <- dplyr::left_join(excelData_i,gData_i,by="gID") #%>% print(Inf)
+
+      #which columns overlap (besides gID)? which will need to be coalesced
+      insct<-intersect(names(excelData_i),names(gData_i))[-which(intersect(names(excelData_i),names(gData_i))=="gID")]
+
+
         if(nrow(excel_Data_i.aug)>0){
-          #which columns overlap (besides gID)? which will need to be coalesced
-          insct<-intersect(names(excelData_i),names(gData_i))[-which(intersect(names(excelData_i),names(gData_i))=="gID")]
 
           #merge .x and .y into 1 coalesced column for variables that overlap
+          #(added as new colName (without .x/.y); those cols still there)
+
           for (colName in insct){
           fullColNames<-paste0("excel_Data_i.aug$",colName,c(".x",".y"))
           replacement<-discardNA(x=eval(parse(text=fullColNames[1])),y=eval(parse(text=fullColNames[2])))
@@ -229,30 +237,31 @@ gData<-reshape2::melt(gData0)
           #add updateNotes for trashed
           excel_Data_i.aug$updateNotes[excel_Data_i.aug$gID%in%trashed$gID]<-"trashed?"
         }
+
+
       #which rows exist on gDrive, but not the Excel sheet, and should be added?
       missing<-dplyr::anti_join(gData_i,excelData_i,by="gID")
 
-      excelCols<-names(excelData_i)[1:which(names(excelData_i)=="updateNotes")]
+
       #if there are missing data, prep a compatible dataframe
         if(nrow(missing)>=1){
         #make missing a compatible df to bind to final df
-        missing.df<-matrix(nrow=nrow(missing),ncol=length(excelCols)) %>% as.data.frame()
-        names(missing.df)<-excelCols
-        missing.df[,intersect(excelCols,names(missing))]<-missing[,intersect(excelCols,names(missing))]
+        missing.df<-matrix(nrow=nrow(missing),ncol=ncol(excelData_i)) %>% as.data.frame()
+        names(missing.df)<-names(excelData_i)
+        missing.df[,insct]<-missing[,insct]
         missing.df$updateNotes<-date()
           #if the excel data isn't empty, bind the old excel data with the new missing data from gdrive info
           if(nrow(excel_Data_i.aug)>0){
-            final<-rbind(excel_Data_i.aug[,excelCols],missing.df)
+            final<-rbind(excel_Data_i.aug[names(excelData_i)],missing.df)
           #if excel data is empty, the only data to output is the missing data
           }else{
              final<-missing.df
           }
         #otherwise, the output data is just the augmented excel data (with bits filled in from gdrive info)
         }else{
-          final<-excel_Data_i.aug[,excelCols]
+          final<-excel_Data_i.aug[,names(excelData_i)]
         }
 
-      # browser()
 
 
       #overwrite old data with final
