@@ -42,6 +42,17 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
   proc$Vocab<-formatVocab(proc$Vocab)
 
   ####
+  #Add Chunk Start Times
+  proc$ChunkStart<-sapply(unique(proc$Part),function(p) {
+                    p_i<-subset(proc,proc$Part==p)
+                    newChunkIndx<-sapply(1:nrow(p_i),function(i) which.max(p_i$Chunk[1:i])) %>% unique()
+                    chunkStart<-rep(NA,nrow(p_i))
+                    shiftedChunkDur<-c(0,p_i$ChunkDur[newChunkIndx[1:(length(newChunkIndx)-1)]])
+                    chunkStart[newChunkIndx]<-cumsum(shiftedChunkDur)
+                    chunkStart
+                    }) %>% unlist()
+
+  ####
   #Figure out lesson duration string
   partDurations<-proc$PartDur[which(proc$PartDur!="")] %>% as.numeric()
   lessonDur <- if(length(partDurations)==1){paste0(partDurations," min") #if just 1 part listed, do X min
@@ -69,10 +80,11 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
     chunks<-lapply(unique(subset(proc,proc$Part==i)$Chunk),function(chunk_i){
               d<-subset(proc,proc$Part==i&proc$Chunk==chunk_i)
               chunkTitle<-d$ChunkTitle[1]
+              chunkStart<-d$ChunkStart[1]
               chunkDur<-d$ChunkDur[1]
               steps<-d %>% dplyr::select("Step","StepTitle","StepQuickDescription","StepDetails","Vocab","VariantNotes",
                                          "TeachingTips")
-              list(chunkTitle=chunkTitle,chunkDur=chunkDur,steps=steps)
+              list(chunkTitle=chunkTitle,chunkStart=chunkStart,chunkDur=chunkDur,steps=steps)
               }) %>% list()
     c(partNum=partNum,partTitle=partTitle,partDur=partDur,partPreface=partPreface,chunks=chunks)
 
