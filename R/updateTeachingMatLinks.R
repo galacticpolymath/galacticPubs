@@ -58,7 +58,7 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
 ###########################################################################
 # gDrive Data Extraction Step for all dataCats ----------------------------
     # Lapply "loop" through all the dataCat elements (downloads, quickPrep, classroom, remote)
-    gData <- pbapply::pblapply(1:length(dataCat),FUN=function(k){
+    gData0 <- pbapply::pblapply(1:length(dataCat),FUN=function(k){
       dataCat_k<-dataCat[k]
 
       # get Download links for dL tab
@@ -103,9 +103,15 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
             qp_links<-sapply(dirDribble$drive_resource,function(x) {x$webViewLink})
             qp_mimeTypes<-sapply(dirDribble$drive_resource,function(x){x$mimeType})
             qp_filetypes<-mimeKey$human_type[match(qp_mimeTypes,mimeKey$mime_type)]
+            qp_baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",qp_links,perl=T)
+
+            qp_gPresentLink=paste0(qp_baseLink,"present")
+            # Make PresentLink NA for non-presentation files
+            qp_gPresentLink[which(googledrive::drive_reveal(dirDribble,"mime_type")$mime_type!="application/vnd.google-apps.presentation")]<-NA
+
             #output Quickprep & Feedback Table
             data.frame(dataCat=dataCat_k,grades=NA,part=qp_part,filename=dirDribble$name,filetype=qp_filetypes,
-                       gDriveLink=qp_links,gID=dirDribble$id,excelTab=excelTab)
+                       gDriveLink=qp_links,gPresentLink=qp_gPresentLink,gID=dirDribble$id,excelTab=excelTab)
 
         #handle all remote and classroom environments differently
         }else{
@@ -127,10 +133,10 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
               part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",currCatFiles$name,perl=T),
                         gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",currCatFiles$name,perl=T),NA)
               link<-sapply(currCatFiles$drive_resource,function(x) x$webViewLink)
+              baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",link,perl=T)
               currCatFiles_mimeTypes<-sapply(currCatFiles$drive_resource,function(x){x$mimeType})
               filetype<-mimeKey$human_type[match(currCatFiles_mimeTypes,mimeKey$mime_type)]
               #extract SvT (student vs teacher) version from filename
-              baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",link,perl=T)
               gShareLink<-paste0(baseLink,"template/preview")
                 if(category=="handouts"){
                   SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",currCatFiles$name,perl=T),
@@ -161,15 +167,19 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
         }#end "not download" else{}
 
     })#end gData def
-    names(gData)<-gData
+    names(gData0)<-dataCat
+
 ###########################################################################
 
     message("Gdrive file info imported")
 
 
+# now, reorganize gData by XLtab ------------------------------------------
+gData<-reshape2::melt(gData0)
 
 
-    #Read in tabs from the teaching-materials.xlsx for selected data types
+
+     #Read in tabs from the teaching-materials.xlsx for selected data types
     #Remove rows that are totally NA
     tmImported<-lapply(1:length(tmKey.selected$tab),function(i) {
       d<-openxlsx::read.xlsx(linksFile,sheet=tmKey.selected$tab[i],startRow=2)
@@ -198,7 +208,7 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
       excelTab_i<-names(tmImported2)[i]
       class(excelData_i$filename)<-"character"
       dataCat_i<-tmKey$dataCat[which(tmKey$tab==excelTab_i)]
-      gData_i<-gData[[ dataCat_i ]] %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble()
+      gData_i<-gData %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble()
 
       #add missing data to Spreadsheet dataframe from gDrive meta info
       excel_Data_i.aug <- dplyr::left_join(excelData_i,gData_i,by="gID") #%>% print(Inf)
