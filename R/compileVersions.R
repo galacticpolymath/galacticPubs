@@ -7,7 +7,7 @@
 #' @return acknowledgment list object; a JSON is saved to standards/acknowledgments.json
 #' @export
 #'
-compileVersions <- function(inputFileName="meta/version-info.xlsx",destFolder="assembled-lesson-materials/JSON/",outputFileName="version-info.json"){
+compileVersions <- function(inputFileName="meta/version-info.xlsx",destFolder="meta/JSON/",outputFileName="versions.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 

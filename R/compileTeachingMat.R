@@ -9,7 +9,7 @@
 #' @importFrom rlang .data
 #' @export
 #'
-compileTeachingMat <- function(linksFile="meta/teaching-materials.xlsx",procedureFile="meta/procedure.xlsx",destFolder="meta/JSON/" ,outputFileName="processedTeachingMaterials.json"){
+compileTeachingMat <- function(linksFile="meta/teaching-materials.xlsx",procedureFile="meta/procedure.xlsx",destFolder="meta/JSON/" ,outputFileName="teachingMaterials.json"){
 
    .=NULL #to avoid errors with dplyr syntax
 
