@@ -1,7 +1,7 @@
 #' learningEpaulette
 #'
 #' Create a Galactic Polymath Learning Epaulette which is a special kind of mosaic plot showing proportion of lesson by subject
-#' @param compiledAlignment the output of \code{\link{compileAlignment}}
+#' @param compiledAlignment the output of \code{\link{compileStandards}}
 #' @param targetSubj which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param vertSpacing 4 value vector ranging from 0 to 1 for manipulating label spacing
 #' @param saveFile T/F, save file or just print to screen?

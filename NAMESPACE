@@ -2,8 +2,9 @@
 
 export("%>%")
 export(compileAcknowledgments)
-export(compileAlignment)
+export(compileJSON)
 export(compileProcedure)
+export(compileStandards)
 export(compileTeachingMat)
 export(compileVersions)
 export(ggGalactic)

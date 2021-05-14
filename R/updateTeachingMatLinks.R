@@ -211,7 +211,7 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
       dataCat_i<-tmKey$dataCat[which(tmKey$tab==excelTab_i)]
 
 
-      gData_i<-gData %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble() %>% mutate(updateNotes=NA)
+      gData_i<-gData %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble() %>% dplyr::mutate(updateNotes=NA)
 
       #add missing data to Spreadsheet dataframe from gDrive meta info
       excel_Data_i.aug <- dplyr::left_join(excelData_i,gData_i,by="gID") #%>% print(Inf)

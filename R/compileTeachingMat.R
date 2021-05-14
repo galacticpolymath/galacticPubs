@@ -236,9 +236,11 @@ close(con)
 # printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
 
 # return compiled output --------------------------------------------------
-message("Procedures compiled:")
+message(" ",rep("-",30))
+message(" Procedures compiled:")
 # print(printToScreenTable)
-message("JSON file saved\n@ ",outFile)
+message(" JSON file saved\n @ ",outFile,"\n")
+message(" ",rep("-",30))
 
 
 }

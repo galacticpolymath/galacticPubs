@@ -2,7 +2,7 @@
 #'
 #' Make a GP Learning Chart
 #'
-#' @param compiledAlignment the output of \code{\link{compileAlignment}}
+#' @param compiledAlignment the output of \code{\link{compileStandards}}
 #' @param targetSubj which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param caption quoted text you want to go at the bottom of the chart
 #' @param captionN T/F, add the range of the number of standards per grade used to make the plot to caption?

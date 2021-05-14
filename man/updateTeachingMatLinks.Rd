@@ -7,7 +7,7 @@
 updateTeachingMatLinks(
   shortTitle,
   linksFile = "meta/teaching-materials.xlsx",
-  dataCat = c("quickPrep_feedback", "download", "remote", "classroom"),
+  dataCat = c("download", "quickPrep_feedback", "remote", "classroom"),
   returnWorkbook = F
 )
 }

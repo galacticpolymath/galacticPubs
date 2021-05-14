@@ -8,7 +8,7 @@ compileTeachingMat(
   linksFile = "meta/teaching-materials.xlsx",
   procedureFile = "meta/procedure.xlsx",
   destFolder = "meta/JSON/",
-  outputFileName = "processedTeachingMaterials.json"
+  outputFileName = "teachingMaterials.json"
 )
 }
 \arguments{

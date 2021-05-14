@@ -19,7 +19,7 @@ learningChart(
 )
 }
 \arguments{
-\item{compiledAlignment}{the output of \code{\link{compileAlignment}}}
+\item{compiledAlignment}{the output of \code{\link{compileStandards}}}
 
 \item{targetSubj}{which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"}
 

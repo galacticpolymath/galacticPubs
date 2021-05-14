@@ -8,7 +8,7 @@ compileProcedure(
   procedureFile = "meta/procedure.xlsx",
   linksFile = "meta/teaching-materials.xlsx",
   destFolder = "meta/JSON/",
-  outputFileName = "processedProcedure.json"
+  outputFileName = "procedure.json"
 )
 }
 \arguments{

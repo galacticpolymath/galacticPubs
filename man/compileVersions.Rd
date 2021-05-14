@@ -6,8 +6,8 @@
 \usage{
 compileVersions(
   inputFileName = "meta/version-info.xlsx",
-  destFolder = "assembled-lesson-materials/JSON/",
-  outputFileName = "version-info.json"
+  destFolder = "meta/JSON/",
+  outputFileName = "versions.json"
 )
 }
 \arguments{
