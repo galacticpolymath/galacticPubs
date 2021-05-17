@@ -6,17 +6,20 @@
 \usage{
 updateTeachingMatLinks(
   shortTitle,
-  linksFile = "meta/teaching-materials.xlsx",
   dataCat = c("download", "quickPrep_feedback", "remote", "classroom"),
+  linksFile = "meta/teaching-materials.xlsx",
+  sortOutput = T,
   returnWorkbook = F
 )
 }
 \arguments{
 \item{shortTitle}{The unique short title of this lesson which is prefixed on the lesson folder name in the shared}
 
+\item{dataCat}{which info do you want to merge with your teaching-materials spreadsheet? Options= "quickPrep_feedback", "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.}
+
 \item{linksFile}{file location of the lesson teaching-resource-links XLSX worksheet. gdrive; *CaseSensitive!}
 
-\item{dataCat}{which info do you want to merge with your teaching-materials spreadsheet? Options= "quickPrep_feedback", "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.}
+\item{sortOutput}{logical; if T, outputs are sorted by grade, part, filetype, then filename}
 
 \item{returnWorkbook}{Logical; if T, returns the list which was written to linksFile}
 }

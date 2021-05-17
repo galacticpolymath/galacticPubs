@@ -5,12 +5,13 @@
 #' Just a note that I'm using 2 libraries to handle XLSX files. Not ideal, but the imported data from openxlsx::read.xlsx is nicer than XLConnect::readWorksheetFromFile, but the editing of data from a complex spreadsheet is MUCH better in XLConnect.
 #'
 #' @param shortTitle The unique short title of this lesson which is prefixed on the lesson folder name in the shared
-#' @param linksFile file location of the lesson teaching-resource-links XLSX worksheet. gdrive; *CaseSensitive!
 #' @param dataCat which info do you want to merge with your teaching-materials spreadsheet? Options= "quickPrep_feedback", "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.
+#' @param linksFile file location of the lesson teaching-resource-links XLSX worksheet. gdrive; *CaseSensitive!
+#' @param sortOutput logical; if T, outputs are sorted by grade, part, filetype, then filename
 #' @param returnWorkbook Logical; if T, returns the list which was written to linksFile
 #' @export
 #'
-updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.xlsx",dataCat=c("download","quickPrep_feedback","remote","classroom"),returnWorkbook=F){
+updateTeachingMatLinks<-function(shortTitle,dataCat=c("download","quickPrep_feedback","remote","classroom"),linksFile="meta/teaching-materials.xlsx",sortOutput=T, returnWorkbook=F){
 
 
 #define dplyr::coalesce function that doesn't crash with 2 NAs!
@@ -35,7 +36,14 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
     dataCat<-unique(tmKey$dataCat)[pmatch(dataCat,unique(tmKey$dataCat))]
     #filter key to only the selected dataCats
     tmKey.selected<-tmKey[tmKey$dataCat %in% dataCat,]
-  #needed to
+  #If sorting output, what's the order of column sorting?
+    sortStringL<-list(quickPrep_Fb=c("filetype","part"),
+                      dL=c("envir","grades","part"),
+                      c_pres=c("stage","grades","part","type"),
+                      c_handouts=c("stage","grades","part","type","SvT"),
+                      r_pres=c("stage","grades","part","type"),
+                      r_handouts=c("stage","grades","part","type","SvT")
+                      )
   #################
 
 
@@ -136,12 +144,14 @@ updateTeachingMatLinks<-function(shortTitle,linksFile="meta/teaching-materials.x
               baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",link,perl=T)
               currCatFiles_mimeTypes<-sapply(currCatFiles$drive_resource,function(x){x$mimeType})
               filetype<-mimeKey$human_type[match(currCatFiles_mimeTypes,mimeKey$mime_type)]
-              #extract SvT (student vs teacher) version from filename
               gShareLink<-paste0(baseLink,"template/preview")
+
                 if(category=="handouts"){
-                  SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",currCatFiles$name,perl=T),
-                          gsub(".*(TEACHER|STUDENT).*","\\1",currCatFiles$name,perl=T),NA)
-                  pdfLink<-gShareLink<-paste0(baseLink,"export?format=pdf")
+                  #extract SvT (student vs teacher) version from filename
+                  SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",toupper(currCatFiles$name),perl=T),
+                          gsub(".*(TEACHER|STUDENT).*","\\1",toupper(currCatFiles$name),perl=T),NA)
+                  pdfLink<-paste0(baseLink,"export?format=pdf")
+                  gShareLink=baseLink
                   #for all handouts, add a pdfLink...For remote lessons, we don't (yet) have access to distrLink for cloudinary.
                   # This needs to be added manually
                   data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=SvT,filename=currCatFiles$name,filetype=filetype,gDriveLink=link,gID=currCatFiles$id,gShareLink=gShareLink,pdfLink=pdfLink,excelTab=excelTab)
@@ -262,13 +272,26 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
           final<-excel_Data_i.aug[,names(excelData_i)]
         }
 
+      #Sort output if requested, otherwise output whatcha got
+      if(sortOutput){
+        indx<-match(unlist(sortStringL[which(names(sortStringL)==excelTab_i)]),names(final))
 
+        # if index names for sorting don't match, throw an error
+        if((length(stats::complete.cases(indx))<length(indx))|(length(indx)==0)){
+          stop("Sorting column names: '",sortStringL[which(names(sortStringL)==excelTab_i)],
+                "' don't match '",excelTab_i,"' Tab's column names: ",paste0(names(excelData_i),collapse=", "))
+          }
+        #annoying how arrange() syntax keeps changing. Doing this the hard way
+        out<-final[eval(parse(text=   paste0("order(",paste0("final[,",indx,"]",collapse=", "),")")   )), ]
+      }else{out<-final}
+      #remove NA rows
+      out<-rmNArows(out)[,-which(names(out)=="gID")]
 
       #overwrite old data with final
-      XLConnect::writeWorksheet(tmXLSX,sheet=excelTab_i,data=final,startCol=1,startRow=3,header=F)
+      XLConnect::writeWorksheet(tmXLSX,sheet=excelTab_i,data=out,startCol=1,startRow=3,header=F)
 
       #output final tab dataset
-      final
+      out
 
     })#end tmImported.merged lapply
 
@@ -278,6 +301,6 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
     message(linksFile," Updated and Saved")
 
-    if(returnWorkbook){tmImported.merged}else{message(">> Link Updating Complete")}
+    if(returnWorkbook){tmImported.merged; message(">> Link Updating Complete")}else{message(">> Link Updating Complete")}
 
 }

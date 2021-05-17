@@ -31,7 +31,7 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
 
   #Basic test
   nPartsTest<-length(unique(proc$Part))==length(unique(procTitles$Part))
-  message("TEST: Num. Parts in 'NamesAndNotes' = 'Procedure'?   ** ",ifelse(nPartsTest,"PASS","FAIL")," **")
+  message("\n  TEST: Num. Parts in 'NamesAndNotes' = 'Procedure'?   ** ",ifelse(nPartsTest,"PASS","FAIL")," **\n")
 
   #####
   #Parse all the text columns to expand {vidN} notation into full video links
