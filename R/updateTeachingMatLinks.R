@@ -198,7 +198,8 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
     #add google drive ID for merging to imported data
     tmImported2<-lapply(1:length(tmImported),function(i) {
-      tmImported[[i]]$gID <- gsub("^.*\\/d\\/([^\\/]*)\\/.*$","\\1",tmImported[[i]]$gDriveLink)
+      #regex accounts for diff. link structures for downloads links (/folders/) vs file sharing (/d/)
+      tmImported[[i]]$gID <- gsub("^.*\\/(?:d|folders)\\/([^\\/\n]*)\\/?.*$","\\1",tmImported[[i]]$gDriveLink)
       tmImported[[i]]
       })
     names(tmImported2)<-tmKey.selected$tab
