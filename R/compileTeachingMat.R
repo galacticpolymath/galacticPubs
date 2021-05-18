@@ -24,6 +24,13 @@ compileTeachingMat <- function(linksFile="meta/teaching-materials.xlsx",procedur
   #read in procedure Part titles, etc
   procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble()
 
+  #define helper function
+  catchLinkNA<-function(linkText,url){
+    if(is.na(url)){list(linkText=paste0("ERROR: '",linkText,"' link missing"),url=url)}else{
+      list(linkText=linkText,url=url)
+    }
+  }
+
 
 ########################################################################
 # CLASSROOM ---------------------------------------------------------------
@@ -65,10 +72,10 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
                               list(itemTitle="Presentation",
                                    itemCat="presentation",
                                    links=list(
-                                            list(
+                                            catchLinkNA(
                                               linkText="Present Now",
                                               url=currPresentations$gPresentLink[i]),
-                                            list(
+                                            catchLinkNA(
                                               linkText="Copy to My Google Drive",
                                               url=currPresentations$gShareLink[i])
                                               )
@@ -80,10 +87,10 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
                           list(itemTitle=currHandouts$title[i],
                                itemCat=currHandouts$type[i],
                                links=list(
-                                          list(
+                                          catchLinkNA(
                                             linkText="PDF",
                                             url=currHandouts$pdfLink[i]),
-                                          list(
+                                          catchLinkNA(
                                             linkText="Copy to My Google Drive",
                                             url=currHandouts$gShareLink[i])
                                           )
@@ -107,7 +114,8 @@ resourcesC<-lapply(coveredGrades, function(currGradeBand){
   list(grades=paste0("Grades ",currGradeBand),
        gradePrefix=gradePrefix,
        links=list(
-              linkText=paste0("Download ",gradePrefix," Materials for All Parts"),
+              linkText=ifelse(is.na(currDownloadAll),paste0("Error: 'Download ",gradePrefix," Materials for All Parts' Link Missing"),
+                              paste0("Download ",gradePrefix," Materials for All Parts")),
               url=currDownloadAll
               ),
        parts=parts)
@@ -146,7 +154,7 @@ resourcesR<-lapply(coveredGrades.R, function(currGradeBand.R){
   # currDownloadAll<-currDownloadRemote %>% dplyr::filter(.data$grades==currGradeBand.R&.data$part=="all") %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
 
   #aggregate data for all parts
-  parts<-lapply(1: length(procTitles$PartTitle),function(part_i){
+  parts<-lapply(1: length(procTitles$Part),function(part_i){
           part<-procTitles$Part[part_i]
           title<-procTitles$PartTitle[part_i]
           preface<-procTitles$PartPreface[part_i]
@@ -156,16 +164,15 @@ resourcesR<-lapply(coveredGrades.R, function(currGradeBand.R){
                               list(itemTitle="Presentation",
                                    itemCat="presentation",
                                    links=list(
-                                            list(
-                                              linkText="Present Now",
+                                            catchLinkNA(
+                                              linkText="Preview Now with Nearpod",
                                               url=currPresentations$nPresentLink[i]),
-                                            list(
+                                            catchLinkNA(
                                               linkText="Add to My Nearpod Library",
                                               url=currPresentations$nShareLink[i]),
-                                            list(
-                                              linkText="Edit in My Google Drive",
-                                              url=currPresentations$gShareLink[i])
-                                              )
+                                            catchLinkNA("Edit in My Google Drive",
+                                                        url=currPresentations$gShareLink[i])
+                                            )
                               )
                               })
                               }
@@ -175,13 +182,13 @@ resourcesR<-lapply(coveredGrades.R, function(currGradeBand.R){
                           list(itemTitle=currHandouts$title[i],
                                itemCat=currHandouts$type[i],
                                links=list(
-                                          list(
-                                            linkText=paste0("Download as .",tools::file_ext(currHandouts$distrLink[i])),
+                                            linkText=ifelse(is.na(currHandouts$distrLink[i]),"ERROR: Distribution Link Missing",
+                                                      paste0("Download as .",tools::file_ext(currHandouts$distrLink[i]))),
                                             url=currHandouts$distrLink[i])#,
                                           # list(
                                           #   linkText="Copy to My Google Drive",
                                           #   url=currHandouts$templateLink[i])
-                                          )
+
                             )
                           })
                           }
