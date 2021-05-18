@@ -18,11 +18,10 @@ clearTeachingMatExcelData <- function(tabsToClear="all"){
   fileLoc<-"meta/teaching-materials.xlsx"
   backupLoc<-"meta/teaching-materials_backup.xlsx"
 
-  XLC=NULL#to avoid error check build warning in setStyleAction
   teachingMat<- XLConnect::loadWorkbook(fileLoc)
 
   #save without overwriting formatting
-  XLConnect::setStyleAction(teachingMat,XLC$"STYLE_ACTION.NONE")
+  XLConnect::setStyleAction(teachingMat,XLConnect::XLC$"STYLE_ACTION.NONE")
   #save a backup
   XLConnect::saveWorkbook(teachingMat,backupLoc)
   sapply(tabs,function(xlTab){
