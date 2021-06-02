@@ -150,7 +150,9 @@ updateTeachingMatLinks<-function(shortTitle,dataCat=c("download","quickPrep_feed
                   #extract SvT (student vs teacher) version from filename
                   SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",toupper(currCatFiles$name),perl=T),
                           gsub(".*(TEACHER|STUDENT).*","\\1",toupper(currCatFiles$name),perl=T),NA)
-                  pdfLink<-paste0(baseLink,"export?format=pdf")
+                  #PDF export syntax is different for google presentations compared to google docs :/
+                  pdfExportString<-ifelse((filetype=="ppt"|filetype=="pptx"|filetype=="presentation"),"export/pdf","export?format=pdf")
+                  pdfLink<-paste0(baseLink,pdfExportString)
                   gShareLink=baseLink
                   #for all handouts, add a pdfLink...For remote lessons, we don't (yet) have access to distrLink for cloudinary.
                   # This needs to be added manually

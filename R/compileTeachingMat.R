@@ -244,7 +244,7 @@ close(con)
 
 # return compiled output --------------------------------------------------
 message(" ",rep("-",30))
-message(" Procedures compiled:")
+message(" Teaching Material Compiled:")
 # print(printToScreenTable)
 message(" JSON file saved\n @ ",outFile,"\n")
 message(" ",rep("-",30))
