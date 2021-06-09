@@ -16,7 +16,7 @@ compileStandards <- function(alignmentMatrixFile="meta/alignment-matrix.xlsx",gr
 #Import master alignment with ALL standards from https://github.com/galacticpolymath/standardX
 tmp<-tempfile("allStandards_temp",fileext="csv")
 
-utils::download.file("https://github.com/galacticpolymath/standardX/blob/master/data/allStandards.csv?raw=true",destfile=tmp)
+utils::download.file("https://github.com/galacticpolymath/standardX/blob/master/allStandards.csv?raw=true",destfile=tmp)
 alignmentMaster<-utils::read.csv(tmp)
 
 gradeBands<-switch(grades,"5-6"="grades 5-6","7-8"="grades 7-8","9-12"="grades 9-12","5-12"=paste0("grades ",c("5-6","7-8","9-12")))
