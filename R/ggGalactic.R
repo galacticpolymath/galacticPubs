@@ -15,7 +15,7 @@
 
 ggGalactic<-function(font="Montserrat",regular.wt=400,bold.wt=700,font.cex=1,font.col="#363636",plot.margin=ggplot2::margin(t=10,r=10,b=10,l=10)){
   gpPal=NULL
-  utils::data(gpPal)
+  utils::data(gpPal,package="galacticPubs")
   showtext::showtext_auto()
   fam=font
   sysfonts::font_add_google(name=font,family=fam,regular.wt=regular.wt,bold.wt=bold.wt)
