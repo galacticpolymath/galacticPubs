@@ -4,32 +4,45 @@
 #'
 #' Galactic Polymath stylings for ggplot2
 #'
+#' @param grid.thickness.maj How heavy do you want grid lines to be? (in case printer makes things lighter); default=.8
+#' @param grid.thickness.min How heavy do you want grid lines to be? (in case printer makes things lighter); default=.6
+#' @param grid.col What color do you want the grid to be? Default: same as font (#363636)
+#' @param border.thickness How heavy do you want the plot border to be?
+#' @param border.col  Color of plot border. Default: same as font (#363636)
 #' @param font Google font to use, "Montserrat" by default
 #' @param regular.wt font weight for regular font style
 #' @param bold.wt font weight for bold text
 #' @param font.cex a simple multiplier for scaling all text
-#' @param font.col color of all axis label and title text
+#' @param axis.lab.col color of axis labels (and title)
+#' @param axis.text.col color of axis text (numbers, dates, etc)
 #' @param plot.margin easy access to ggplot margins
 #' @export
 
 
-ggGalactic<-function(font="Montserrat",regular.wt=400,bold.wt=700,font.cex=1,font.col="#363636",plot.margin=ggplot2::margin(t=10,r=10,b=10,l=10)){
+ggGalactic<-function(grid.thickness.maj=.7,grid.thickness.min=.4,grid.col="#C3C3C3",border.thickness=1.8,border.col="#6D6D6D",font="Montserrat",regular.wt=400,bold.wt=700,font.cex=1,axis.lab.col="#363636",axis.text.col="#6D6D6D",axis.tick.length=10,plot.margin=ggplot2::margin(t=10,r=10,b=10,l=10)){
   gpPal=NULL
   utils::data(gpPal,package="galacticPubs")
   showtext::showtext_auto()
   fam=font
   sysfonts::font_add_google(name=font,family=fam,regular.wt=regular.wt,bold.wt=bold.wt)
-ggplot2::theme_linedraw()+ggplot2::theme(
+
+ggplot2::theme_linedraw()+ #base theme to modify
+  ggplot2::theme(
     text=ggplot2::element_text(family=font),
+    panel.border=ggplot2::element_rect(size=border.thickness,colour=border.col),
+    panel.grid.major=ggplot2::element_line(size=grid.thickness.maj,colour = grid.col),
+    panel.grid.minor=ggplot2::element_line(size=grid.thickness.min,colour = grid.col),
     plot.margin=plot.margin,
-    plot.title=ggplot2::element_text(family=font,size=30*font.cex,face="bold",color=font.col),
+    plot.title=ggplot2::element_text(family=font,size=30*font.cex,face="bold",color=axis.lab.col),
     plot.subtitle=ggplot2::element_text(family=font,size=22*font.cex,color=gpPal[[1]]$hex[5]),
-    axis.title=ggplot2::element_text(family=font,size=28*font.cex,face="bold",color=font.col),
-    axis.text=ggplot2::element_text(family=font,size=18*font.cex,color=font.col),
+    axis.title=ggplot2::element_text(family=font,size=28*font.cex,face="plain",color=axis.lab.col),
+    axis.text=ggplot2::element_text(family=font,size=18*font.cex,color=axis.text.col),
+    axis.ticks=ggplot2::element_line(color=grid.col,size=grid.thickness.maj),
+    axis.ticks.length=ggplot2::unit(axis.tick.length,"pt"),
     axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 10, r = 0, b = 0, l = 0)),
     axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 20, r = 10, b = 0, l = 0)),
-    legend.text=ggplot2::element_text(family=font,color=font.col,size=18*font.cex),
-    legend.title=ggplot2::element_text(family=font,color=font.col,face="bold",size=18*font.cex),
+    legend.text=ggplot2::element_text(family=font,color=axis.text.col,size=18*font.cex),
+    legend.title=ggplot2::element_text(family=font,color=axis.lab.col,face="bold",size=18*font.cex),
     legend.position = "right", legend.text.align = 0, legend.background =ggplot2::element_blank()
   )
 }

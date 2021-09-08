@@ -5,15 +5,32 @@
 \title{ggGalactic}
 \usage{
 ggGalactic(
+  grid.thickness.maj = 0.7,
+  grid.thickness.min = 0.4,
+  grid.col = "#C3C3C3",
+  border.thickness = 1.8,
+  border.col = "#6D6D6D",
   font = "Montserrat",
   regular.wt = 400,
   bold.wt = 700,
   font.cex = 1,
-  font.col = "#363636",
+  axis.lab.col = "#363636",
+  axis.text.col = "#6D6D6D",
+  axis.tick.length = 10,
   plot.margin = ggplot2::margin(t = 10, r = 10, b = 10, l = 10)
 )
 }
 \arguments{
+\item{grid.thickness.maj}{How heavy do you want grid lines to be? (in case printer makes things lighter); default=.8}
+
+\item{grid.thickness.min}{How heavy do you want grid lines to be? (in case printer makes things lighter); default=.6}
+
+\item{grid.col}{What color do you want the grid to be? Default: same as font (#363636)}
+
+\item{border.thickness}{How heavy do you want the plot border to be?}
+
+\item{border.col}{Color of plot border. Default: same as font (#363636)}
+
 \item{font}{Google font to use, "Montserrat" by default}
 
 \item{regular.wt}{font weight for regular font style}
@@ -22,7 +39,9 @@ ggGalactic(
 
 \item{font.cex}{a simple multiplier for scaling all text}
 
-\item{font.col}{color of all axis label and title text}
+\item{axis.lab.col}{color of axis labels (and title)}
+
+\item{axis.text.col}{color of axis text (numbers, dates, etc)}
 
 \item{plot.margin}{easy access to ggplot margins}
 }
