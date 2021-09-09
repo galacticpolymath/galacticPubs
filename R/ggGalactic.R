@@ -9,7 +9,7 @@
 #' @param grid.col What color do you want the grid to be? Default: same as font (#363636)
 #' @param border.thickness How heavy do you want the plot border to be?
 #' @param border.col  Color of plot border. Default: same as font (#363636)
-#' @param font Google font to use, "Montserrat" by default
+#' @param font Google font to use, "Montserrat" by default; see options with sysfonts::font_families_google()
 #' @param regular.wt font weight for regular font style
 #' @param bold.wt font weight for bold text
 #' @param font.cex a simple multiplier for scaling all text
@@ -24,7 +24,18 @@ ggGalactic<-function(grid.thickness.maj=.7,grid.thickness.min=.4,grid.col="#C3C3
   utils::data(gpPal,package="galacticPubs")
   showtext::showtext_auto()
   fam=font
-  sysfonts::font_add_google(name=font,family=fam,regular.wt=regular.wt,bold.wt=bold.wt)
+    #Only try to download font if online and not already available
+  if(is.na(match(font,sysfonts::font_families()))){
+    isOnline=RCurl::url.exists("https://www.google.com")
+    if(isOnline){
+        tryCatch(
+        sysfonts::font_add_google(name=font,family=fam,regular.wt=regular.wt,bold.wt=bold.wt),
+        error=function(e) cat("\nFont: '",font,"' unavailable."))
+    }else{
+        cat("\nYou don't seem to be online. Can't download your requested font.")
+    }
+  }
+
 
 ggplot2::theme_linedraw()+ #base theme to modify
   ggplot2::theme(
