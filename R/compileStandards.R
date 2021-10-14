@@ -110,7 +110,7 @@ A$subject<-factor(A$subject,levels=c("Math","ELA","Science","Social Studies"),or
 A <- A %>% dplyr::arrange(.data$subject)
 
 # Make json structured output ----------------------------------------------
-ta_i=su_i=se_i=di_i
+# ta_i=su_i=se_i=di_i=NA
 l_ta <- list()
 for(ta_i in 1:length(unique(A$target))) {
   d_ta <- A %>% dplyr::filter(.data$target == unique(A$target)[ta_i])
