@@ -8,7 +8,11 @@
 #' @return list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." colum). A JSON is saved to the destFolder location.
 #' @export
 #'
-compileStandards <- function(standardsFile="meta/standards_GSheetsOnly.xlsx",destFolder="meta/JSON/" ,fileName="standards.json",standardsRef="standardX"){
+compileStandards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
+                             destFolder = "meta/JSON/" ,
+                             fileName = "standards.json",
+                             standardsRef = "standardX") {
+
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -27,9 +31,6 @@ compileStandards <- function(standardsFile="meta/standards_GSheetsOnly.xlsx",des
   } else{
     stop("standardsRef must be 'standardX' or 'myFile'")
   }
-
-
-
 
 
 # #initialize list for output
@@ -70,9 +71,9 @@ a1<-a0[!undoc&!tbds,]
 
 # a2 has markdown bullets ("- ") added if missing
 # Add markdown bullet to front of lines that don't start with it
+# Figure out grade band(s)
 a2<-a1
 a2$how<-ifelse(!grepl("^- ",a1$how),paste0("- ",a1$how),a1$how)
-
 
 
 # #///////////////////////////
@@ -108,6 +109,33 @@ A<-dplyr::left_join(a3[,c("code_set","lg","lg_stmnt","target","grp","grouping","
 #factor subjects for desired order
 A$subject<-factor(A$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 A <- A %>% dplyr::arrange(.data$subject)
+
+
+# Add grade band to final data set ----------------------------------------
+gradeBandBreaks<-list(5:6,7:8,9:12)
+gradeBandTxt<-sapply(gradeBandBreaks,function(x) paste0(x[1],"-",x[length(x)]))
+gradeL<-sapply(A$grade, function(x) {
+  #Ignore K-12 wide standards for assigning grade bands
+  if (grepl("K", x, ignore.case = TRUE)) {
+    NA
+  } else{
+    grades <- unlist(strsplit(x, ",", fixed = T))
+    bands<-sapply(grades, function(g_i) {
+      hits = unlist(sapply(gradeBandBreaks, FUN=function(brk) {
+        g_i %in% brk
+      }))
+      gradeBandTxt[which(hits)]
+    })
+    unique(bands)
+  }
+})
+
+
+# Define grade bands this alignment touches ------------
+
+A$gradeBand<-sapply(gradeL,function(x) paste(x,collapse=","))%>% unlist()
+
+
 
 # Make json structured output ----------------------------------------------
 # ta_i=su_i=se_i=di_i=NA

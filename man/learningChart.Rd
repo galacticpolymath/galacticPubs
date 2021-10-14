@@ -9,7 +9,7 @@ learningChart(
   targetSubj = NULL,
   caption,
   captionN = T,
-  centralText = "grades\\n5-12",
+  centralText,
   centralTextSize = 3.7,
   saveFile = TRUE,
   destFolder = "assets/learning-plots/",
@@ -27,7 +27,7 @@ learningChart(
 
 \item{captionN}{T/F, add the range of the number of standards per grade used to make the plot to caption?}
 
-\item{centralText}{what you want at the center of the plot ("grades 5-12" by default)}
+\item{centralText}{specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment}
 
 \item{centralTextSize}{multiplier for font size of centralText}
 

@@ -6,7 +6,7 @@
 #' @param targetSubj which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param caption quoted text you want to go at the bottom of the chart
 #' @param captionN T/F, add the range of the number of standards per grade used to make the plot to caption?
-#' @param centralText what you want at the center of the plot ("grades 5-12" by default)
+#' @param centralText specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment
 #' @param centralTextSize multiplier for font size of centralText
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
@@ -18,22 +18,27 @@
 #' @importFrom rlang .data
 
 
-learningChart=function(compiledAlignment,targetSubj=NULL,caption,captionN=T,centralText="grades\n5-12",
+learningChart=function(compiledAlignment,targetSubj=NULL,caption,captionN=T,centralText,
                        centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Chart",dpi=300,...){
 
 #deal with missing caption and add sample size if requested
 if(missing(caption)){caption="GP Learning Chart: Knowledge & skills taught in this lesson"}
 
 if(captionN){
-  avgN<-table(compiledAlignment$data$gradeBand) %>% mean() %>% floor()
+  avgN<-table(compiledAlignment$compiled$gradeBand) %>% mean() %>% floor()
   caption <- paste0(caption," (~",avgN," standards per grade)")}
+
+if(missing(centralText)){
+  t_gradeBands<-compiledAlignment$compiled$gradeBand %>% table
+  centralText<-paste0("grades\n",names(t_gradeBands)[which.max(t_gradeBands)])
+}
 
 #Import empty template to fill in for missing alignment dimensions (e.g. if there are no alignments to reading, or CCC, etc)
 a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="galacticPubs"))
 #super important to refactor subject on the imported data to ensure order
 a_template$subject=factor(a_template$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 
-a_summ<-compiledAlignment$data %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
+a_summ<-compiledAlignment$compiled %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
 
 #gotta combine missing rows, sort, & repeat the entries N times
 a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>%
@@ -151,7 +156,7 @@ for(i in 1:nrow(outerFill)){
     # Central Text label
     ggplot2::annotate("text",x=Inf,y=-Inf,label=centralText,size=centralTextSize,fontface="bold",
                       col=gpColors("galactic black"))+
-    ggplot2::coord_polar(clip="off")+ggplot2::guides(fill=F)
+    ggplot2::coord_polar(clip="off")+ggplot2::guides(fill="none")
   )
     #geom_label_npc(data=data.frame(x=.5,y=1),aes(npcx=x,npcy=y),label="djskfjadlsjldf")
 

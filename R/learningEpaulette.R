@@ -26,7 +26,7 @@ a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="
 #super important to refactor subject on the imported data to ensure order
 a_template$subject=factor(a_template$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 
-a_summ<-compiledAlignment$data %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
+a_summ<-compiledAlignment$compiled %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
 
 #gotta combine missing rows, sort, & repeat the entries N times
 a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>% dplyr::arrange(.data$subject,.data$dimension)%>% dplyr::mutate(binary=ifelse(.data$n>0,1,0))
