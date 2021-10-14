@@ -16,7 +16,6 @@ ggGalactic(
   font.cex = 1,
   axis.lab.col = "#363636",
   axis.text.col = "#6D6D6D",
-  axis.tick.length = 10,
   plot.margin = ggplot2::margin(t = 10, r = 10, b = 10, l = 10)
 )
 }
@@ -31,7 +30,7 @@ ggGalactic(
 
 \item{border.col}{Color of plot border. Default: same as font (#363636)}
 
-\item{font}{Google font to use, "Montserrat" by default}
+\item{font}{Google font to use, "Montserrat" by default; see options with sysfonts::font_families_google()}
 
 \item{regular.wt}{font weight for regular font style}
 
@@ -46,5 +45,5 @@ ggGalactic(
 \item{plot.margin}{easy access to ggplot margins}
 }
 \description{
-Galactic Polymath stylings for ggplot2
+Galactic Polymath stylings for ggplot2; deprecated and moved to galacticEdTools package; use galacticEdTools::theme_galactic() instead
 }

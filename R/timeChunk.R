@@ -31,7 +31,8 @@ timeChunk <- function(totTime,segLengths,destFolder="assets/timeChunk/",prefix,C
 
   #plot
   g<-ggplot2::ggplot(df)+ggplot2::geom_segment(ggplot2::aes_string(x="x",xend="x",y=0,yend=.5),colour=Color,lwd=lineWidth,show.legend=F)+
-    ggplot2::geom_segment(inherit.aes=F,data=faded_x,ggplot2::aes_string(x="x",xend="x",y=0,yend=.15),colour=faded_col,lwd=lineWidth,show.legend=F)+ggplot2::scale_y_continuous(expand=c(0,0))+ggplot2::scale_x_continuous(breaks=cust_breaks,labels=cust_labels,limits=c(0,totTime+.5),expand=ggplot2::expansion(add=.6,mult=0))+ggplot2::xlab("")+ggplot2::ylab("")+ggGalactic()+
+    ggplot2::geom_segment(inherit.aes=F,data=faded_x,ggplot2::aes_string(x="x",xend="x",y=0,yend=.15),colour=faded_col,lwd=lineWidth,show.legend=F)+ggplot2::scale_y_continuous(expand=c(0,0))+ggplot2::scale_x_continuous(breaks=cust_breaks,labels=cust_labels,limits=c(0,totTime+.5),expand=ggplot2::expansion(add=.6,mult=0))+ggplot2::xlab("")+ggplot2::ylab("")+
+    galacticEdTools::theme_galactic()+
   ggplot2::theme(
     axis.text.y=ggplot2::element_blank(),
     axis.title=ggplot2::element_blank(),

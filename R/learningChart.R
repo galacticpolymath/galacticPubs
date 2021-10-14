@@ -91,7 +91,8 @@ outerFill$ymax<-10
 
 #make the badge!
 (badge_prop0<-ggplot2::ggplot(a_combined,ggplot2::aes_string(x="as.factor(id)",y="n_prop_adj",fill="subject"),
-                              col=gpColors("galactic black"))+ggGalactic()+
+                              col=gpColors("galactic black"))+
+    galacticEdTools::theme_galactic()+
     ggplot2::theme(plot.margin = ggplot2::margin(t=0,r=0,b=-15,l=-20),# not sure why this correction is necessary, but without it, the plot is not centered
           #axis.line.y=element_line(colour="grey"),
           axis.ticks.y=ggplot2::element_blank(),

@@ -2,7 +2,7 @@
 
 #' ggGalactic
 #'
-#' Galactic Polymath stylings for ggplot2
+#' Galactic Polymath stylings for ggplot2; deprecated and moved to galacticEdTools package; use galacticEdTools::theme_galactic() instead
 #'
 #' @param grid.thickness.maj How heavy do you want grid lines to be? (in case printer makes things lighter); default=.8
 #' @param grid.thickness.min How heavy do you want grid lines to be? (in case printer makes things lighter); default=.6
@@ -19,7 +19,7 @@
 #' @export
 
 
-ggGalactic<-function(grid.thickness.maj=.7,grid.thickness.min=.4,grid.col="#C3C3C3",border.thickness=1.8,border.col="#6D6D6D",font="Montserrat",regular.wt=400,bold.wt=700,font.cex=1,axis.lab.col="#363636",axis.text.col="#6D6D6D",axis.tick.length=10,plot.margin=ggplot2::margin(t=10,r=10,b=10,l=10)){
+ggGalactic<-function(grid.thickness.maj=.7,grid.thickness.min=.4,grid.col="#C3C3C3",border.thickness=1.8,border.col="#6D6D6D",font="Montserrat",regular.wt=400,bold.wt=700,font.cex=1,axis.lab.col="#363636",axis.text.col="#6D6D6D",plot.margin=ggplot2::margin(t=10,r=10,b=10,l=10)){
   gpPal=NULL
   utils::data(gpPal,package="galacticPubs")
   showtext::showtext_auto()

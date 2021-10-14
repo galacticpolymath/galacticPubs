@@ -101,7 +101,7 @@ if(!is.null(targetSubj)){
 
 
 ## PLOT Epaulette
-epaulette<-ggplot2::ggplot(rectangles)+ggGalactic()+
+epaulette<-ggplot2::ggplot(rectangles)+galacticEdTools::theme_galactic()+
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax",fill="subject"),size=1.2,show.legend = F)+
   #Add Target border(s) if necessary
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax"),fill="transparent",colour=rectangles$border,size=2.3,show.legend = F)+
@@ -113,7 +113,7 @@ epaulette<-ggplot2::ggplot(rectangles)+ggGalactic()+
              size=xlabels$size,pch=21,show.legend = F)+
   # ggplot2::geom_label(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust"),colour="transparent",fill="transparent",size=7,show.legend = F,nudge_y=-.35)+
   ggplot2::geom_text(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust",fontface="fontface"),size=7,show.legend = F,nudge_y=-.35,col=gpColors("galactic black"))+
-  ggGalactic()+ ggplot2::theme_void()+ggplot2::theme(aspect.ratio=1.6/11,plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
+  galacticEdTools::theme_galactic()+ ggplot2::theme_void()+ggplot2::theme(aspect.ratio=1.6/11,plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
 
 plot(epaulette)
 #create folder if necessary
