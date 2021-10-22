@@ -18,10 +18,12 @@ potential_paths <- c(fs::path(getwd(), "meta/front-matter.yaml"),
 meta_path_test<-sapply(potential_paths,function(x) file.exists(x))
 if(sum(meta_path_test)==0){
     warning(paste("Failed to import `meta/front-matter.yaml`\n  *You're starting from scratch.*"))
+    #set meta_path relative to wd
+    meta_path<-fs::path("meta/front-matter.yaml")
     y<-sapply(default_y_args,function(x) x="",simplify=F)
 }else{
-    meta_path_test=potential_paths[which(meta_path_test==TRUE)]
-    y<-yaml::read_yaml(fs::path(getwd(), "meta/front-matter.yaml"), eval.expr =TRUE)
+    meta_path=potential_paths[which(meta_path_test==TRUE)]
+    y<-yaml::read_yaml(meta_path, eval.expr =TRUE)
 }
 
 
@@ -29,9 +31,9 @@ if(sum(meta_path_test)==0){
 ui <- navbarPage(
     title = "GP Front Matter Editor",
 
+# TAB 1: EDIT -------------------------------------------------------------
     tabPanel(
-        "Setup",
-        width = 12,
+        "Edit",
         #Custom styling
         tags$head(tags$style(HTML({
             "
@@ -41,8 +43,7 @@ ui <- navbarPage(
     .bad{background-color: #960061}
     .good{background-color: #3DFF90}
     .info{border: 3px solid #3e0055;background-color:#f0f4ff;}
-    #override width defaults
-    .shiny-input-container{margin-right: 1rem;width:100% !important;}
+    .shiny-input-container {margin-right: 1rem;width:100% !important;}
       "
         }))),
 
@@ -67,14 +68,14 @@ ui <- navbarPage(
             value = y$Subtitle
         ),
         textInput(
-            inputId = "shortTitle",
-            label = "shortTitle",
-            value = y$shortTitle
+            inputId = "ShortTitle",
+            label = "ShortTitle",
+            value = y$ShortTitle
         ),
         dateInput(
-            inputId = "publishDate",
+            inputId = "PublicationDate",
             label = "Publication Date",
-            value = y$publishDate
+            value = y$PublicationDate
         ),
         textInput(
             "EstLessonTime",
@@ -92,14 +93,16 @@ ui <- navbarPage(
         # h3("Step 3:"),
         # verbatimTextOutput("console"),
         h3("Step 3:"),
-        actionButton('save', tags$table(tags$tr(
-            tags$td(img(src = 'gpicon.ico', style = "max-height:30px")), tags$td(p(strong("Save"), style =
-                                                                                       "font-size: 100%;"))
-        ))),
+        actionButton('save', tags$div(style="display: flex",
+            img(src = 'gpicon.ico', style = "max-height:30px;padding-right:0.5rem;"),
+            p(strong("Save"), style = "font-size: 100%;margin-top:auto;margin-bottom:auto;")
+        )),
 
-        uiOutput("dlprog")
+        div(style="margin-top:1.5rem;color: gray;", textOutput("confirm_yaml_update"))
     ),
     #End Setup Panel
+
+# TAB 2: PREVIEW ----------------------------------------------------------
 
     tabPanel("Preview",
              htmlOutput("preview")),
@@ -124,8 +127,8 @@ ui <- navbarPage(
 )
 
 
-
-# Define server logic required to draw a histogram
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# SERVER LOGIC ------------------------------------------------------------
 server <- function(input, output) {
 
     output$x<-renderPrint(y)
@@ -138,13 +141,19 @@ server <- function(input, output) {
         hist(x, breaks = bins, col = 'darkgray', border = 'white')
     })
 
-    #save input and update preview
-    doIT<-eventReactive(input$save,
-  {
-    yaml::write_yaml()
-  }
 
-)
+# Save YAML when button clicked -------------------------------------------
+    doIT<-observe({
+
+    # browser()
+    new_y<-reactiveValuesToList(input)[intersect(names(y),names(input))]
+    Y<-y
+    Y[names(new_y)]<-new_y #add new entries/mods to existing list
+    yaml::write_yaml(lapply(Y,function(x)as.character(x)), meta_path)
+    output$confirm_yaml_update <- renderText(paste("front-matter.yaml updated ", Sys.time()))
+  }) %>% bindEvent(input$save)
+
+
 
   output$preview<-renderUI({
     prevHTML<-doIT()
