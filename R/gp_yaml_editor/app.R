@@ -27,16 +27,19 @@ if(sum(meta_path_test)==0){
 }
 
 
+# UI SECTION --------------------------------------------------------------
+
 # Define UI for application that draws a histogram
 ui <- navbarPage(
-    title = "GP Front Matter Editor",
 
-# TAB 1: EDIT -------------------------------------------------------------
-    tabPanel(
-        "Edit",
-        #Custom styling
-        tags$head(tags$style(HTML({
-            "
+# Custom Styles -----------------------------------------------------------
+
+
+    title = "GP Front Matter Editor",
+    position="fixed-top",
+    header = div(class="header_save",
+                      tags$style(HTML({
+        "
     box{   width:350px;padding:10px 10px 0px 10px;
             margin:5px;vertical-align:middle;text-align:center;
     }
@@ -44,11 +47,32 @@ ui <- navbarPage(
     .good{background-color: #3DFF90}
     .info{border: 3px solid #3e0055;background-color:#f0f4ff;}
     .shiny-input-container {margin-right: 1rem;width:100% !important;}
+    .header_button_container {display:flex;content-fit:contain;}
+    .header_save{position: fixed;top:8px ;right: 15%; z-index:3000;}
+    .header_save img{max-height: 15px;margin-top:auto; margin-bottom:auto;}
+    .header_save p{padding-left: 0.75rem;margin-top:auto; margin-bottom:auto;}
+    .yaml_update{color: gray;position: fixed;top:8px ;right: 25%; z-index:3001;}
+
       "
-        }))),
+    })),
+
+# Save Button--------------------------------------------------
+    div(class="header_button_container",
+        #save time stamp to left of button
+        span(class="yaml_update", htmlOutput("confirm_yaml_update")),
+        #save button
+        actionButton('save', div(class="header_button_container",
+            img(src = 'gpicon.ico'),
+            p(strong("Save"))
+        )))
+    ),#end header
+
+# TAB 1: EDIT -------------------------------------------------------------
+    tabPanel(
+        "Edit",
 
         # Boxes need to be put in a row (or column)
-        div(img(src = "GPlogo.png", width = 400), style = "padding:10px"),
+        # div(img(src = "GPlogo.png", width = 400), style = "padding:10px"),
         # div(id="box",class="info",
         #   p("Edit lesson title, overview, tags, etc. for lessons",style="font-weight:500;color:#3e0055;")
         #   ),
@@ -83,6 +107,10 @@ ui <- navbarPage(
             value = y$EstLessonTime,
             placeholder = "format= '3 x 45 min'"
         ),
+        textAreaInput("DrivingQuestion","Driving question(s):"),
+        textAreaInput("DrivingQuestion2",
+                      a("Essential question(s):",
+                        href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53")),
         h3("Step 2:"),
         p(
             "Choose which GP webquest you want to grade or upload your own custom key"
@@ -93,35 +121,15 @@ ui <- navbarPage(
         # h3("Step 3:"),
         # verbatimTextOutput("console"),
         h3("Step 3:"),
-        actionButton('save', tags$div(style="display: flex",
-            img(src = 'gpicon.ico', style = "max-height:30px;padding-right:0.5rem;"),
-            p(strong("Save"), style = "font-size: 100%;margin-top:auto;margin-bottom:auto;")
-        )),
 
-        div(style="margin-top:1.5rem;color: gray;", textOutput("confirm_yaml_update"))
+        hr()
     ),
     #End Setup Panel
 
 # TAB 2: PREVIEW ----------------------------------------------------------
 
     tabPanel("Preview",
-             htmlOutput("preview")),
-    #End Preview Panel
-
-    tabPanel(
-        "Export",
-        h2("Choose format to export your report"),
-        br(),
-        textInput(
-            "custfn",
-            "Enter custom filename",
-            value = "Webquest_Grades",
-            placeholder = "Webquest_Grades"
-        ),
-        radioButtons('format', 'Document format', c('PDF', 'HTML', 'Word'),
-                     inline = TRUE),
-        downloadButton('downloadReport')
-    )#End Export Panel
+             htmlOutput("preview"))
 
 
 )
@@ -150,8 +158,12 @@ server <- function(input, output) {
     Y<-y
     Y[names(new_y)]<-new_y #add new entries/mods to existing list
     yaml::write_yaml(lapply(Y,function(x)as.character(x)), meta_path)
-    output$confirm_yaml_update <- renderText(paste("front-matter.yaml updated ", Sys.time()))
-  }) %>% bindEvent(input$save)
+    output$confirm_yaml_update <-
+        renderText(paste0(
+            "front-matter.yaml updated:<br>",
+            format(Sys.time(), "%Y-%b-%d %r")
+        ))
+    }) %>% bindEvent(input$save)
 
 
 
