@@ -111,6 +111,7 @@ ui <- navbarPage(
         textAreaInput("DrivingQuestion2",
                       a("Essential question(s):",
                         href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53")),
+        selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE),
         h3("Step 2:"),
         p(
             "Choose which GP webquest you want to grade or upload your own custom key"
