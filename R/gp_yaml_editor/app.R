@@ -15,7 +15,12 @@ default_y_args<-c("Title","author","date","updated","SponsoredBy","Subtitle","Es
 #then import existing yaml or empty list
 potential_paths <- c(fs::path(getwd(), "meta/front-matter.yaml"),
                     "../../meta/front-matter.yaml")
+#if meta_path_test[2] TRUE, running in development enviro (wd is the app subfolder)
 meta_path_test<-sapply(potential_paths,function(x) file.exists(x))
+WD<-ifelse(meta_path_test[2],"../../","") #WD is working directory
+img_loc<-paste0(getwd(),"/www/",collapse="/")
+#create image preview directory
+dir.create(img_loc,showWarnings =FALSE)
 if(sum(meta_path_test)==0){
     warning(paste("Failed to import `meta/front-matter.yaml`\n  *You're starting from scratch.*"))
     #set meta_path relative to wd
@@ -26,6 +31,7 @@ if(sum(meta_path_test)==0){
     y<-yaml::read_yaml(meta_path, eval.expr =TRUE)
 }
 
+print(y)
 
 # UI SECTION --------------------------------------------------------------
 
@@ -52,6 +58,7 @@ ui <- navbarPage(
     .header_save img{max-height: 15px;margin-top:auto; margin-bottom:auto;}
     .header_save p{padding-left: 0.75rem;margin-top:auto; margin-bottom:auto;}
     .yaml_update{color: gray;position: fixed;top:8px ;right: 25%; z-index:3001;}
+    .lesson-banner{max-height: 300px;}
 
       "
     })),
@@ -101,6 +108,24 @@ ui <- navbarPage(
             label = "Publication Date",
             value = y$PublicationDate
         ),
+        textInput("LessonBanner","Lesson Banner",
+                  value=ifelse(
+                          y$LessonBanner=="",
+                          list.files(paste0(WD,"assets/",collapse="/"),
+                                             pattern="^.*[lesson|Lesson].*[b|B]anner.*\\.[png|PNG|jpeg|jpg]",
+                                        full.names=T),
+
+                        y$LessonBanner
+                      )),
+        textAreaInput("SponsoredBy","Sponsored By: (Add multiple entries with `- `, i.e. hyphen+space)",y$SponsoredBy),
+        textAreaInput("SponsorLogo",label="Sponsor Logo(s)— (add images to assets/orig-client-media_NoEdit; reorder as needed for multiple logos)",
+                  value=ifelse(
+                      y$SponsorLogo=="",
+                      yaml::as.yaml(list.files(fs::path(WD,"/assets/orig-client-media_NoEdit/"),full.names=T,
+                                         pattern="^.*logo.*\\.[png|PNG|jpeg|jpg]")),
+                      y$SponsorLogo)
+                    ),
+
         textInput(
             "EstLessonTime",
             "Estimated Lesson Time",
@@ -169,10 +194,17 @@ server <- function(input, output) {
 
 
   output$preview<-renderUI({
-    prevHTML<-doIT()
-    v$path<-prevHTML
-    includeHTML(path=prevHTML)
+    list(
+        div(style = "margin-top: 60px;"),
+        h2(input$Title),
+        h5(input$Subtitle),
+        img(class="lesson-banner",src=basename(input$LessonBanner))
+    )
   })
+
+  observe(
+    fs::file_copy(input$LessonBanner,img_loc,overwrite=TRUE)
+  )
 
 }
 
