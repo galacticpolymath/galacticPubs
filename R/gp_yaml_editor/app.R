@@ -6,6 +6,15 @@
 #
 #    http://shiny.rstudio.com/
 #
+# Helper function for markdown text
+md_txt <- function(label,txt){
+    if(label==""){
+    shiny::markdown(txt)
+    }else{
+    shiny::markdown(paste0(c(paste0('**',gsub("[ ]*$","", label),':** '),txt)))
+    }
+}
+
 
 library(shiny)
 #import when editor is run from galacticPubs package
@@ -59,6 +68,10 @@ ui <- navbarPage(
     .header_save p{padding-left: 0.75rem;margin-top:auto; margin-bottom:auto;}
     .yaml_update{color: gray;position: fixed;top:8px ;right: 25%; z-index:3001;}
     .lesson-banner{max-height: 300px;}
+    .sponsor{display: flex;margin-top: 2rem;}
+    .sponsor-logo{max-height: 150px;}
+    .sponsor-text{width: 50%;}
+
 
       "
     })),
@@ -125,17 +138,23 @@ ui <- navbarPage(
                                          pattern="^.*logo.*\\.[png|PNG|jpeg|jpg]")),
                       y$SponsorLogo)
                     ),
-
+        textInput(inputId = "ForGrades",
+                  label = "For Grades",
+                  value = y$ForGrades),
+        textInput(inputId = "TargetSubject",
+                  label = "Target Subject",
+                  value = y$TargetSubject),
         textInput(
             "EstLessonTime",
             "Estimated Lesson Time",
             value = y$EstLessonTime,
             placeholder = "format= '3 x 45 min'"
-        ),
-        textAreaInput("DrivingQuestion","Driving question(s):"),
-        textAreaInput("DrivingQuestion2",
+            ),
+        textAreaInput("DrivingQ","Driving question(s):",y$DrivingQ),
+        textAreaInput("EssentialQ",
                       a("Essential question(s):",
-                        href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53")),
+                        href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
+                      y$EssentialQ),
         selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE),
         h3("Step 2:"),
         p(
@@ -194,17 +213,33 @@ server <- function(input, output) {
 
 
   output$preview<-renderUI({
-    list(
+     sponsoredByTxt<-yaml::yaml.load(input$SponsoredBy)
+      print(h2(shiny::markdown(paste0(c('Driving Question(s):',input$DrivingQ)))))
+     list(
         div(style = "margin-top: 60px;"),
         h2(input$Title),
         h5(input$Subtitle),
-        img(class="lesson-banner",src=basename(input$LessonBanner))
+        img(class="lesson-banner",src=basename(input$LessonBanner)),
+        lapply(1:length(sponsoredByTxt),function(i){
+            div(class="sponsor",
+            p(class="sponsor-text",sponsoredByTxt[i]),
+            div(class="sponsor-logo-container",
+            img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]))
+            ))}),
+        md_txt("Est. Lesson Time", input$EstLessonTime),
+        md_txt('For grades',input$ForGrades),
+        md_txt('Target subject',input$TargetSubject),
+        md_txt('Driving Question(s)',input$DrivingQ)
+
+
     )
   })
 
-  observe(
+  observe({
     fs::file_copy(input$LessonBanner,img_loc,overwrite=TRUE)
-  )
+    fs::file_copy(yaml::yaml.load(input$SponsorLogo),img_loc,overwrite=TRUE)
+
+  })
 
 }
 
