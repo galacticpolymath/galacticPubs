@@ -52,6 +52,7 @@ ui <- navbarPage(
 
     title = "GP Front Matter Editor",
     position="fixed-top",
+    # Define custom CSS styles
     header = div(class="header_save",
                       tags$style(HTML({
         "
@@ -70,7 +71,7 @@ ui <- navbarPage(
     .lesson-banner{max-height: 300px;}
     .sponsor{display: flex;margin-top: 2rem;}
     .sponsor-logo{max-height: 150px;}
-    .sponsor-text{width: 50%;}
+    .sponsor-text{width: 50%;align: left;}
 
 
       "
@@ -211,10 +212,10 @@ server <- function(input, output) {
     }) %>% bindEvent(input$save)
 
 
-
+  # Output the preview of the lesson plan
   output$preview<-renderUI({
      sponsoredByTxt<-yaml::yaml.load(input$SponsoredBy)
-      print(h2(shiny::markdown(paste0(c('Driving Question(s):',input$DrivingQ)))))
+      # print(h2(shiny::markdown(paste0(c('Driving Question(s):',input$DrivingQ)))))
      list(
         div(style = "margin-top: 60px;"),
         h2(input$Title),
@@ -222,14 +223,21 @@ server <- function(input, output) {
         img(class="lesson-banner",src=basename(input$LessonBanner)),
         lapply(1:length(sponsoredByTxt),function(i){
             div(class="sponsor",
-            p(class="sponsor-text",sponsoredByTxt[i]),
+            span(class="sponsor-text",shiny::markdown(sponsoredByTxt[i])),
             div(class="sponsor-logo-container",
             img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]))
             ))}),
         md_txt("Est. Lesson Time", input$EstLessonTime),
         md_txt('For grades',input$ForGrades),
         md_txt('Target subject',input$TargetSubject),
-        md_txt('Driving Question(s)',input$DrivingQ)
+        div(p(strong("These sections combined in JSON output")),
+          md_txt('Driving Question(s)',input$DrivingQ),
+          md_txt('Essential Question(s)',input$EssentialQ),
+          md_txt('Learning Targets(s)',input$LearningTarg),
+          md_txt('Additional MarkDown Comments',input$MiscMD)
+        ),
+        shiny::selectizeInput("Tags","Tags:",choices=input$Tags,selected=input$Tags,options=list(create=FALSE),multiple=TRUE)
+
 
 
     )

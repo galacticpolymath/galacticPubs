@@ -10,4 +10,4 @@ if (interactive()) {
   options(device.ask.default = FALSE)
   shiny::runApp('R/gp_yaml_editor')
 }
-D}
+}
