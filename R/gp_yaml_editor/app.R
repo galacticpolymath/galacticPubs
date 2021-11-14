@@ -56,7 +56,7 @@ meta_path_test<-sapply(potential_paths,function(x) dir.exists(x))
 meta_path <- potential_paths[which(meta_path_test==TRUE)]
 yaml_path<-paste0(meta_path,"front-matter.yaml")
 yaml_test<-file.exists(yaml_path)
-# WD<-ifelse(meta_path_test[2],"../../","") #WD is working directory
+WD<-ifelse(meta_path_test[2],"../../","") #WD is working directory
 if(yaml_test==FALSE){
     warning(paste("Failed to import `meta/front-matter.yaml`\n  *You're starting from scratch.*"))
     y<-NULL #sapply(default_y_args,function(x) x="",simplify=F)
@@ -96,11 +96,13 @@ ui <- navbarPage(
     .header_save img{max-height: 15px;margin-top:auto; margin-bottom:auto;}
     .header_save p{padding-left: 0.75rem;margin-top:auto; margin-bottom:auto;}
     .yaml_update{color: gray;position: fixed;top:8px ;right: 25%; z-index:3001;}
-    .lesson-banner{max-height: 300px;}
-    .sponsor{display: flex;margin-top: 2rem;}
-    .sponsor-logo{max-height: 150px;}
+    .lesson-banner{max-height: 20vh;}
+    .sponsor-section{}
+    .sponsor{display:flex;margin-top: 2rem;}
+    .sponsor-logo-container{}
+    .sponsor-logo{max-height: 10vh;}
     .sponsor-text{width: 50%;align: left;}
-    .text-block{border: 2px solid lightgray; border-radius:6px;padding:0.5rem;}
+    .text-block{border: 2px solid #a6a6a6; border-radius:6px;padding:1rem;background-color:#f2f2f2;}
     .text-block-title{color: gray;}
     .keyword-cloud{margin: 0.75rem 0;}
     .keyword{
@@ -175,6 +177,7 @@ ui <- navbarPage(
                         y$LessonBanner
                       )),
         textAreaInput("SponsoredBy","Sponsored By: (Add multiple entries with `- `, i.e. hyphen+space)",y$SponsoredBy),
+
         textAreaInput("SponsorLogo",label="Sponsor Logo(s)— (add images to assets/orig-client-media_NoEdit; reorder as needed for multiple logos)",
                   value=ifelse(
                       y$SponsorLogo=="",
@@ -194,13 +197,8 @@ ui <- navbarPage(
             value = y$EstLessonTime,
             placeholder = "format= '3 x 45 min'"
             ),
-        textAreaInput("DrivingQ","Driving question(s):",y$DrivingQ),
-        textAreaInput("EssentialQ",
-                      a("Essential question(s):",
-                        href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
-                      y$EssentialQ),
-        textAreaInput("LearningTarg","Learning Targets:",y$LearningTarg),
-        textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD),
+        #text block
+        htmlOutput("overview_text_block"),
 
         selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE),
         h3("Step 2:"),
@@ -276,41 +274,52 @@ server <- function(input, output) {
         ))
     }) %>% bindEvent(input$save)
 
+  output$overview_text_block<-renderUI({
+    div(class="text-block",p(class="text-block-title",strong("These sections combined in JSON output as 'Text'")),
+          textAreaInput("DrivingQ","Driving question(s):",y$DrivingQ),
+          textAreaInput("EssentialQ",
+                        a("Essential question(s):",
+                          href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
+                        y$EssentialQ),
+          textAreaInput("LearningTarg","Learning Targets:",y$LearningTarg),
+          textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD)
+        )
+  })
 
   # Output the preview of the lesson plan
   output$preview<-renderUI({
-     sponsoredByTxt<-yaml::yaml.load(input$SponsoredBy)
+    #copy images over to www folder for previewing
+    fs::file_copy(input$LessonBanner,img_loc,overwrite=TRUE)
+    fs::file_copy(yaml::yaml.load(input$SponsorLogo),img_loc,overwrite=TRUE)
+
+
+    sponsoredByTxt<-yaml::yaml.load(input$SponsoredBy)
       # print(h2(shiny::markdown(paste0(c('Driving Question(s):',input$DrivingQ)))))
      list(
         div(style = "margin-top: 60px;"),
         h2(input$Title),
         h5(input$Subtitle),
         img(class="lesson-banner",src=basename(input$LessonBanner)),
+        div(class="sponsor-section",
         lapply(1:length(sponsoredByTxt),function(i){
             div(class="sponsor",
             span(class="sponsor-text",shiny::markdown(sponsoredByTxt[i])),
             div(class="sponsor-logo-container",
             img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]))
-            ))}),
+            ))})
+        ),
         md_txt("Est. Lesson Time", input$EstLessonTime),
         md_txt('For grades',input$ForGrades),
         md_txt('Target subject',input$TargetSubject),
-        div(class="text-block",p(class="text-block-title",strong("These sections combined in JSON output as 'Text'")),
-          md_txt('Driving Question(s)',input$DrivingQ),
-          md_txt('Essential Question(s)',input$EssentialQ),
-          md_txt('Learning Targets(s)',input$LearningTarg),
-          md_txt('',input$MiscMD)
-        ),
+        md_txt('Driving Question(s)',input$DrivingQ),
+        md_txt('Essential Question(s)',input$EssentialQ),
+        md_txt('Learning Targets(s)',input$LearningTarg),
+        md_txt('',input$MiscMD),
         # browser(),
         div(class="keyword-cloud",lapply(input$Tags,function(x){span(class="keyword",x)}))
     )
   })
 
-  observe({
-    fs::file_copy(input$LessonBanner,img_loc,overwrite=TRUE)
-    fs::file_copy(yaml::yaml.load(input$SponsorLogo),img_loc,overwrite=TRUE)
-
-  })
 
 }
 
