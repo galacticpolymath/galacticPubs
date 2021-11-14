@@ -11,9 +11,36 @@ md_txt <- function(label,txt){
     if(label==""){
     shiny::markdown(txt)
     }else{
-    shiny::markdown(paste0(c(paste0('**',gsub("[ ]*$","", label),':** '),txt)))
+      #remove spaces from end of label and add a colon
+    shiny::markdown(paste0(c(paste0('#### ',gsub("[ ]*$","", label),':'),txt)))
     }
 }
+
+# Helper function for lumping separate markdown/YAML entries (which are separated for end user continuity)
+# into a single list item for the JSON output for the web
+lumpItems<-function(items,item.labs,list.obj,new.name){
+
+     applicable00<- match(items,names(list.obj))
+     #remove empty items (not just NA)
+     applicable0<-as.vector(na.omit(ifelse(list.obj[applicable00]=="",NA,applicable00)))
+     applicable <- names(list.obj)[applicable0]
+     applicableLabs<-item.labs[as.vector(na.omit(match(items,applicable)))]
+     lumped<-sapply(1:length(applicable),function(i){
+              # add H4 to label (only if there is a label provided)
+              paste0(ifelse(applicableLabs[i]=="","",
+                            paste0("#### ",applicableLabs[i],"\n")),
+                     list.obj[applicable[i]])
+              }) %>%  paste(list.obj[applicable],collapse="\n")
+     #remove lumped list items
+     first.applicable<-sort(applicable0)[1]
+     #rearrange to insert the lumped section
+     out<-list.obj
+     out[first.applicable]<-lumped #replace first applicable value with new item
+     names(out)[first.applicable]<-new.name #rename inserted item according to user defined var new.name
+     #remove remaining lumped columns (by name to avoid index issues)
+     OUT<-out[-(sort(applicable0)[-1])]
+     OUT
+    }#end lumpItems()
 
 
 library(shiny)
@@ -21,24 +48,25 @@ library(shiny)
 default_y_args<-c("Title","author","date","updated","SponsoredBy","Subtitle","EstLessonTime","ForGrades","TargetSubject","Text","Tags")
 
 #find path to meta/ folder, which depends on whether running it in development enviro or from galacticPubs
-#then import existing yaml or empty list
-potential_paths <- c(fs::path(getwd(), "meta/front-matter.yaml"),
-                    "../../meta/front-matter.yaml")
+#then import existing yaml or NULL
+potential_paths <- c(fs::path(getwd(), "meta/"),
+                    "../../meta/")
 #if meta_path_test[2] TRUE, running in development enviro (wd is the app subfolder)
-meta_path_test<-sapply(potential_paths,function(x) file.exists(x))
-WD<-ifelse(meta_path_test[2],"../../","") #WD is working directory
+meta_path_test<-sapply(potential_paths,function(x) dir.exists(x))
+meta_path <- potential_paths[which(meta_path_test==TRUE)]
+yaml_path<-paste0(meta_path,"front-matter.yaml")
+yaml_test<-file.exists(yaml_path)
+# WD<-ifelse(meta_path_test[2],"../../","") #WD is working directory
+if(yaml_test==FALSE){
+    warning(paste("Failed to import `meta/front-matter.yaml`\n  *You're starting from scratch.*"))
+    y<-NULL #sapply(default_y_args,function(x) x="",simplify=F)
+}else{
+
+    y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)
+}
 img_loc<-paste0(getwd(),"/www/",collapse="/")
 #create image preview directory
 dir.create(img_loc,showWarnings =FALSE)
-if(sum(meta_path_test)==0){
-    warning(paste("Failed to import `meta/front-matter.yaml`\n  *You're starting from scratch.*"))
-    #set meta_path relative to wd
-    meta_path<-fs::path("meta/front-matter.yaml")
-    y<-sapply(default_y_args,function(x) x="",simplify=F)
-}else{
-    meta_path=potential_paths[which(meta_path_test==TRUE)]
-    y<-yaml::read_yaml(meta_path, eval.expr =TRUE)
-}
 
 print(y)
 
@@ -72,6 +100,21 @@ ui <- navbarPage(
     .sponsor{display: flex;margin-top: 2rem;}
     .sponsor-logo{max-height: 150px;}
     .sponsor-text{width: 50%;align: left;}
+    .text-block{border: 2px solid lightgray; border-radius:6px;padding:0.5rem;}
+    .text-block-title{color: gray;}
+    .keyword-cloud{margin: 0.75rem 0;}
+    .keyword{
+          font-size: 1.2rem;
+          font-weight: 400;
+          color: #6812d1;
+          border: 2px
+       solid #6812d1;
+          border-radius: 5rem;
+          padding: 0.15rem 0.65rem;
+          margin: 0.25rem;
+          white-space: nowrap;
+          display: inline-block;
+    }
 
 
       "
@@ -156,6 +199,9 @@ ui <- navbarPage(
                       a("Essential question(s):",
                         href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
                       y$EssentialQ),
+        textAreaInput("LearningTarg","Learning Targets:",y$LearningTarg),
+        textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD),
+
         selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE),
         h3("Step 2:"),
         p(
@@ -196,17 +242,36 @@ server <- function(input, output) {
     })
 
 
-# Save YAML when button clicked -------------------------------------------
+# Save YAML & JSON when button clicked -------------------------------------------
     doIT<-observe({
 
     # browser()
-    new_y<-reactiveValuesToList(input)[intersect(names(y),names(input))]
-    Y<-y
-    Y[names(new_y)]<-new_y #add new entries/mods to existing list
-    yaml::write_yaml(lapply(Y,function(x)as.character(x)), meta_path)
+    # operational input variables we don't want to output
+    op_var<-c("save")
+    Y <- reactiveValuesToList(input)[!names(input) %in% op_var]
+    # if (is.null(y)) {
+    #   Y <- reactiveValuesToList(input)[!names(input) %in% op_var]
+    # } else{
+    #   new_y <- reactiveValuesToList(input)[intersect(names(y), names(input))]
+    #   Y <- y
+    #   Y[names(new_y)] <- new_y #add new entries/mods to existing list
+    #   #write YAML
+    # }
+    yaml::write_yaml(lapply(Y,function(x)as.character(x)), paste0(meta_path,"front-matter.yaml"))
+
+    ##Create list for JSON output (a little different, bc we want to combine some YAML sections to simplify web output of similar text types)
+    # first combine some parts to have desired flexible JSON output
+
+    Y2<-lumpItems(items=c("DrivingQ","EssentialQ","LearningTarg","MiscMD"),
+                  item.labs=c("Driving Question","Essential Question(s)","Learning Target(s)",""),
+                  list.obj=Y,
+                  new.name="Text")
+    # browser()
+
+    jsonlite::write_json(Y2,paste0(meta_path,"JSON/front-matter.json"))
     output$confirm_yaml_update <-
         renderText(paste0(
-            "front-matter.yaml updated:<br>",
+            "front-matter.yaml&json updated:<br>",
             format(Sys.time(), "%Y-%b-%d %r")
         ))
     }) %>% bindEvent(input$save)
@@ -230,16 +295,14 @@ server <- function(input, output) {
         md_txt("Est. Lesson Time", input$EstLessonTime),
         md_txt('For grades',input$ForGrades),
         md_txt('Target subject',input$TargetSubject),
-        div(p(strong("These sections combined in JSON output")),
+        div(class="text-block",p(class="text-block-title",strong("These sections combined in JSON output as 'Text'")),
           md_txt('Driving Question(s)',input$DrivingQ),
           md_txt('Essential Question(s)',input$EssentialQ),
           md_txt('Learning Targets(s)',input$LearningTarg),
-          md_txt('Additional MarkDown Comments',input$MiscMD)
+          md_txt('',input$MiscMD)
         ),
-        shiny::selectizeInput("Tags","Tags:",choices=input$Tags,selected=input$Tags,options=list(create=FALSE),multiple=TRUE)
-
-
-
+        # browser(),
+        div(class="keyword-cloud",lapply(input$Tags,function(x){span(class="keyword",x)}))
     )
   })
 
