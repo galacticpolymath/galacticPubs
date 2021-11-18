@@ -21,7 +21,7 @@ compileStandards_OLD(
 \item{fileName}{output file name; default= "processedStandards.json"}
 }
 \value{
-
+Compiled standards
 }
 \description{
 Compile alignment info from a lesson standards matrix worksheet. This was the first compilation method, used for the assumptionsMatter lesson, and it's basically garbage. Keeping it here till I can update that lesson for the new workflow.

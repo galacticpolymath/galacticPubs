@@ -6,7 +6,7 @@
 #' @param grades grade band on alignment matrix worksheet options= "5-6", "7-8", "9-12" or "5-12"
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder, 1 level up from the working directory
 #' @param fileName output file name; default= "processedStandards.json"
-#' @return
+#' @return Compiled standards
 #' @export
 #'
 compileStandards_OLD <- function(alignmentMatrixFile="meta/alignment-matrix.xlsx",grades="5-12",destFolder="meta/JSON/" ,fileName="standards.json"){

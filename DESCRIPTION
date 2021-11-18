@@ -1,7 +1,7 @@
 Package: galacticPubs
 Type: Package
 Title: Galactic Polymath Lesson Publishing Tools
-Version: 0.5.0
+Version: 0.5.1
 Author: Matthew R Wilkins, PhD
 Maintainer: Matthew R Wilkins, PhD <matt@galacticpolymath.com>
 Description: Code to enable the GP Nexus education publishing workflow. Outputs are highly structured
@@ -17,23 +17,19 @@ Imports:
     ggplot2,
     googledrive,
     grid,
-    htmltools,
     jsonlite,
     magrittr,
     openxlsx,
     pbapply,
     png,
     RCurl,
-    remotes,
     reshape2,
-    rlist,
     rmarkdown,
     scales,
     shadowtext,
     showtext,
     sysfonts,
     stringr,
-    viridis,
     rlang,
     XLConnect,
     shiny,
