@@ -49,7 +49,7 @@ default_y_args<-c("Title","author","date","updated","SponsoredBy","Subtitle","Es
 
 #find path to meta/ folder, which depends on whether running it in development enviro or from galacticPubs
 #then import existing yaml or NULL
-potential_paths <- c(fs::path(getwd(), "meta/"),
+potential_paths <- c(paste0(getwd(), "/meta/"),
                     "../../meta/")
 #if meta_path_test[2] TRUE, running in development enviro (wd is the app subfolder)
 meta_path_test<-sapply(potential_paths,function(x) dir.exists(x))
@@ -209,31 +209,53 @@ server <- function(input, output) {
 
 # Save YAML & JSON when button clicked -------------------------------------------
     doIT<-observe({
+    #read in existing front-matter.yml if it exists (just to be sure we're up to date)
+    if(file.exists(yaml_path)){y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)}
 
-    # browser()
     # operational input variables we don't want to output
     op_var<-c("save")
+    #make nonreactive list of everything except our "Operational" input items
     Y <- reactiveValuesToList(input)[!names(input) %in% op_var]
-    # if (is.null(y)) {
-    #   Y <- reactiveValuesToList(input)[!names(input) %in% op_var]
-    # } else{
-    #   new_y <- reactiveValuesToList(input)[intersect(names(y), names(input))]
-    #   Y <- y
-    #   Y[names(new_y)] <- new_y #add new entries/mods to existing list
-    #   #write YAML
-    # }
-    yaml::write_yaml(lapply(Y,function(x)as.character(x)), paste0(meta_path,"front-matter.yml"))
+    #import YAML template to get a canonical order for output
+    #template file is in 'extdata/'  ('inst/extdata' if you're developing package)
+    template_fields<-names(yaml::read_yaml(system.file("extdata","front-matter_TEMPLATE.yml",package="galacticPubs")))
+      # #debugging example
+      # template_fields<-template_fields[-c(2,9)]
+
+    ## Test template versions for matching fields (ignoring NAs for fields in template, but not in 'input')
+    Y_order_indx0<-as.vector(na.omit(match(template_fields,names(Y))))
+    #if the template doesn't have values for a given input, give a warning
+    if(sum(is.na(Y_order_indx0))>0){warning("Your template ver: ",y$TemplateVer,
+                                           " is missing the field(s):\n\t- ",paste0(names(Y)[which(is.na(Y_order_indx0))],collapse="\n\t- "),
+                                           "\nUpdate galacticPubs to upgrade your template to ensure fields are in the right order.")}
+
+    #Put any missing fields that are in 'input', but not the template yml, at the end
+    Y_order_indx<-Y_order_indx0
+    for(i in 1:length(Y_order_indx)){if(is.na(Y_order_indx[i])){Y_order_indx[i]<-max(Y_order_indx,na.rm=T)+1}}
+    #Now we have a robust index vector to reorder Y before outputting to YAML
+    Y2<-Y[Y_order_indx]
+    #Finally, preserve any manually added fields on YML before overwriting
+    y_not_in_Y2<-which(is.na(match(names(y),names(Y2))))
+    Y3<-Y2 #initialize w/ old vector (for loop is destructive)
+    for(i in y_not_in_Y2){
+      #Add y value at beginning or insert it among Y3 fields, 1 by 1
+      if(i==1){Y3<-c(y[i],Y3)
+      }else{Y3<-c(Y3[1:(i-1)],y[i],
+                  if((i-1)==length(Y3)){}else{Y3[i:length(Y3)]})}
+    }
+
+    yaml::write_yaml(lapply(Y3,function(x)as.character(x)), paste0(meta_path,"front-matter.yml"))
 
     ##Create list for JSON output (a little different, bc we want to combine some YAML sections to simplify web output of similar text types)
     # first combine some parts to have desired flexible JSON output
 
-    Y2<-lumpItems(items=c("DrivingQ","EssentialQ","LearningObj","MiscMD"),
+    Y3_lumped<-lumpItems(items=c("DrivingQ","EssentialQ","LearningObj","MiscMD"),
                   item.labs=c("Driving Question","Essential Question(s)","Learning Objective(s)",""),
-                  list.obj=Y,
+                  list.obj=Y3,
                   new.name="Text")
     # browser()
 
-    jsonlite::write_json(Y2,paste0(meta_path,"JSON/front-matter.json"))
+    jsonlite::write_json(Y3_lumped,paste0(meta_path,"JSON/front-matter.json"))
     output$confirm_yaml_update <-
         renderText(paste0(
             "front-matter.yml&json updated:<br>",
