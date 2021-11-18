@@ -49,7 +49,7 @@ ggplot2::theme_linedraw()+ #base theme to modify
     axis.title=ggplot2::element_text(family=font,size=28*font.cex,face="plain",color=axis.lab.col),
     axis.text=ggplot2::element_text(family=font,size=18*font.cex,color=axis.text.col),
     axis.ticks=ggplot2::element_line(color=grid.col,size=grid.thickness.maj),
-    axis.ticks.length=ggplot2::unit(axis.tick.length,"pt"),
+    # axis.ticks.length=ggplot2::unit(axis.tick.length,"pt"),
     axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 10, r = 0, b = 0, l = 0)),
     axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 20, r = 10, b = 0, l = 0)),
     legend.text=ggplot2::element_text(family=font,color=axis.text.col,size=18*font.cex),

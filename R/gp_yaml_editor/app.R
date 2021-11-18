@@ -75,12 +75,12 @@ print(y)
 # Define UI for application that draws a histogram
 ui <- navbarPage(
     theme = shinytheme("yeti"),
-    title = "GP Front Matter Editor",
+    title = "GP Lesson Editor",
     position="fixed-top",
-    # Define custom CSS styles
-    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
 # Save Button--------------------------------------------------
     header = div(class="header_save",
+    # Define custom CSS styles
+    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
     div(class="header_button_container",
         #save time stamp to left of button
         span(class="yaml_update", htmlOutput("confirm_yaml_update")),
@@ -128,7 +128,7 @@ ui <- navbarPage(
         textInput("LessonBanner","Lesson Banner",
                   value=ifelse(
                           y$LessonBanner=="",
-                          list.files(paste0(WD,"assets/",collapse="/"),
+                          list.files(paste0(WD,"assets/banners_etc",collapse="/"),
                                              pattern="^.*[lesson|Lesson].*[b|B]anner.*\\.[png|PNG|jpeg|jpg]",
                                         full.names=T),
 
@@ -140,24 +140,23 @@ ui <- navbarPage(
                   value=ifelse(
                       y$SponsorLogo=="",
                       yaml::as.yaml(list.files(fs::path(WD,"/assets/orig-client-media_NoEdit/"),full.names=T,
-                                         pattern="^.*logo.*\\.[png|PNG|jpeg|jpg]")),
+                                         pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]")),
                       y$SponsorLogo)
                     ),
-        textInput("LearningEpaulette","Learning Epaulette",
+        textAreaInput("LearningEpaulette","Learning Epaulette",
                   value=ifelse(
                           y$LearningEpaulette=="",
-                          list.files(paste0(WD,"assets/learning-plots",collapse="/"),
-                                             pattern="^.*epaulet.*\\.[png|PNG|jpeg|jpg]",
-                                        full.names=T),
-
+                          yaml::as.yaml(list.files(fs::path(WD,"/assets/learning-plots/"),
+                                             pattern="^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
+                                        full.names=T)),
                         y$LearningEpaulette
                       )),
-        textInput("LearningChart","Learning Chart (Shows much lower on Preview page, with Standards)",
+        textAreaInput("LearningChart","Learning Chart (Shows much lower on Preview page, with Standards)",
                   value=ifelse(
                           y$LearningEpaulette=="",
-                          list.files(paste0(WD,"assets/learning-plots",collapse="/"),
-                                             pattern="^.*chart.*\\.[png|PNG|jpeg|jpg]",
-                                        full.names=T),
+                           yaml::as.yaml(list.files(fs::path(WD,"/assets/learning-plots/"),
+                                             pattern="^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
+                                        full.names=T)),
 
                         y$LearningChart
                       )),
@@ -205,15 +204,7 @@ ui <- navbarPage(
 # SERVER LOGIC ------------------------------------------------------------
 server <- function(input, output) {
 
-    output$x<-renderPrint(y)
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    })
+    # output$x<-renderPrint(y)
 
 
 # Save YAML & JSON when button clicked -------------------------------------------
@@ -236,8 +227,8 @@ server <- function(input, output) {
     ##Create list for JSON output (a little different, bc we want to combine some YAML sections to simplify web output of similar text types)
     # first combine some parts to have desired flexible JSON output
 
-    Y2<-lumpItems(items=c("DrivingQ","EssentialQ","LearningTarg","MiscMD"),
-                  item.labs=c("Driving Question","Essential Question(s)","Learning Target(s)",""),
+    Y2<-lumpItems(items=c("DrivingQ","EssentialQ","LearningObj","MiscMD"),
+                  item.labs=c("Driving Question","Essential Question(s)","Learning Objective(s)",""),
                   list.obj=Y,
                   new.name="Text")
     # browser()
@@ -257,17 +248,33 @@ server <- function(input, output) {
                         a("Essential question(s):",
                           href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
                         y$EssentialQ),
-          textAreaInput("LearningTarg","Learning Targets:",y$LearningTarg),
+          textAreaInput("LearningObj","Learning Objective(s):",y$LearningObj),
           textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD)
         )
   })
 
+  #####################################
   # Output the preview of the lesson plan
   output$preview<-renderUI({
     #copy images over to www folder for previewing
     fs::file_copy(input$LessonBanner,img_loc,overwrite=TRUE)
-    fs::file_copy(yaml::yaml.load(input$SponsorLogo),img_loc,overwrite=TRUE)
-
+    # browser()
+    items2copy<-c("SponsorLogo","LearningEpaulette","LearningChart")
+    items2copy_filenames<-lapply(items2copy,function(x) {yaml::yaml.load(input[[x]])})
+    names(items2copy_filenames)<-items2copy
+    #Test if all the files to copy exist; otherwise through a useful error
+    lapply(1:length(items2copy_filenames),function(i){
+      filez<-items2copy_filenames[[i]]
+      errs<-!file.exists(filez)
+      if(sum(errs)>0){
+        stop("The following files for field '",names(items2copy_filenames)[[i]],
+             "' do not exist:\n\t- ",
+             paste(items2copy_filenames[[i]][errs],collapse="\n\t- ")
+        )
+      }else{
+        fs::file_copy(filez,img_loc,overwrite=TRUE)
+      }
+    })
 
     sponsoredByTxt<-yaml::yaml.load(input$SponsoredBy)
       # print(h2(shiny::markdown(paste0(c('Driving Question(s):',input$DrivingQ)))))
@@ -277,19 +284,30 @@ server <- function(input, output) {
         h5(input$Subtitle),
         img(class="lesson-banner",src=basename(input$LessonBanner)),
         div(class="sponsor-section",
-        lapply(1:length(sponsoredByTxt),function(i){
+            h4("Sponsored by:"),
+        lapply(1:max(length(sponsoredByTxt),length(yaml::yaml.load(input$SponsorLogo))),function(i){
             div(class="sponsor",
             span(class="sponsor-text",shiny::markdown(sponsoredByTxt[i])),
             div(class="sponsor-logo-container",
             img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]))
             ))})
         ),
-        md_txt("Est. Lesson Time", input$EstLessonTime),
-        md_txt('For grades',input$ForGrades),
-        md_txt('Target subject',input$TargetSubject),
+        div(class="section",h1("1. Overview")),
+        div(class="stats",
+          img(class="learning-epaulette",src=basename(input$LearningEpaulette)),
+          div(class="triad border-right",
+            md_txt('Target subject',input$TargetSubject)
+          ),
+          div(class="triad border-right",
+            md_txt('For grades',input$ForGrades)
+            ),
+          div(class="triad",
+            md_txt("Est. Lesson Time", input$EstLessonTime))
+            ),
+
         md_txt('Driving Question(s)',input$DrivingQ),
         md_txt('Essential Question(s)',input$EssentialQ),
-        md_txt('Learning Targets(s)',input$LearningTarg),
+        md_txt('Learning Objective(s)',input$LearningObj),
         md_txt('',input$MiscMD),
         # browser(),
         div(class="keyword-cloud",lapply(input$Tags,function(x){span(class="keyword",x)}))
