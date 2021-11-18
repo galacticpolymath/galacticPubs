@@ -43,7 +43,7 @@ lumpItems<-function(items,item.labs,list.obj,new.name){
     }#end lumpItems()
 
 
-library(shiny)
+library(shiny);library(shinythemes)
 #import when editor is run from galacticPubs package
 default_y_args<-c("Title","author","date","updated","SponsoredBy","Subtitle","EstLessonTime","ForGrades","TargetSubject","Text","Tags")
 
@@ -54,12 +54,12 @@ potential_paths <- c(fs::path(getwd(), "meta/"),
 #if meta_path_test[2] TRUE, running in development enviro (wd is the app subfolder)
 meta_path_test<-sapply(potential_paths,function(x) dir.exists(x))
 meta_path <- potential_paths[which(meta_path_test==TRUE)]
-yaml_path<-paste0(meta_path,"front-matter.yaml")
+yaml_path<-paste0(meta_path,"front-matter.yml")
 yaml_test<-file.exists(yaml_path)
 WD<-ifelse(meta_path_test[2],"../../","") #WD is working directory
 if(yaml_test==FALSE){
-    warning(paste("Failed to import `meta/front-matter.yaml`\n  *You're starting from scratch.*"))
-    y<-NULL #sapply(default_y_args,function(x) x="",simplify=F)
+    warning(paste("Failed to import `meta/front-matter.yml`\n  *You're starting from scratch.*"))
+    y<-yaml::read_yaml(paste0(meta_path,"front-matter_TEMPLATE.yml")) #sapply(default_y_args,function(x) x="",simplify=F)
 }else{
 
     y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)
@@ -74,55 +74,13 @@ print(y)
 
 # Define UI for application that draws a histogram
 ui <- navbarPage(
-
-# Custom Styles -----------------------------------------------------------
-
-
+    theme = shinytheme("yeti"),
     title = "GP Front Matter Editor",
     position="fixed-top",
     # Define custom CSS styles
-    header = div(class="header_save",
-                      tags$style(HTML({
-        "
-    box{   width:350px;padding:10px 10px 0px 10px;
-            margin:5px;vertical-align:middle;text-align:center;
-    }
-    .bad{background-color: #960061}
-    .good{background-color: #3DFF90}
-    .info{border: 3px solid #3e0055;background-color:#f0f4ff;}
-    .shiny-input-container {margin-right: 1rem;width:100% !important;}
-    .header_button_container {display:flex;content-fit:contain;}
-    .header_save{position: fixed;top:8px ;right: 15%; z-index:3000;}
-    .header_save img{max-height: 15px;margin-top:auto; margin-bottom:auto;}
-    .header_save p{padding-left: 0.75rem;margin-top:auto; margin-bottom:auto;}
-    .yaml_update{color: gray;position: fixed;top:8px ;right: 25%; z-index:3001;}
-    .lesson-banner{max-height: 20vh;}
-    .sponsor-section{}
-    .sponsor{display:flex;margin-top: 2rem;}
-    .sponsor-logo-container{}
-    .sponsor-logo{max-height: 10vh;}
-    .sponsor-text{width: 50%;align: left;}
-    .text-block{border: 2px solid #a6a6a6; border-radius:6px;padding:1rem;background-color:#f2f2f2;}
-    .text-block-title{color: gray;}
-    .keyword-cloud{margin: 0.75rem 0;}
-    .keyword{
-          font-size: 1.2rem;
-          font-weight: 400;
-          color: #6812d1;
-          border: 2px
-       solid #6812d1;
-          border-radius: 5rem;
-          padding: 0.15rem 0.65rem;
-          margin: 0.25rem;
-          white-space: nowrap;
-          display: inline-block;
-    }
-
-
-      "
-    })),
-
+    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
 # Save Button--------------------------------------------------
+    header = div(class="header_save",
     div(class="header_button_container",
         #save time stamp to left of button
         span(class="yaml_update", htmlOutput("confirm_yaml_update")),
@@ -142,10 +100,10 @@ ui <- navbarPage(
         # div(id="box",class="info",
         #   p("Edit lesson title, overview, tags, etc. for lessons",style="font-weight:500;color:#3e0055;")
         #   ),
-        h3("Step 1: Enter info"),
-        p(
-            "(markdown allowed)",
-            a("add reference", href = "", target = "_blank")
+        h3('Step 1: Enter "Front Matter" Overview Info'),
+        p(class="help-text",
+            "Most text fields accept",
+            a("markdown formatting", href = "https://www.markdownguide.org/basic-syntax/")
         ),
         textInput(
             inputId = "Title",
@@ -185,6 +143,24 @@ ui <- navbarPage(
                                          pattern="^.*logo.*\\.[png|PNG|jpeg|jpg]")),
                       y$SponsorLogo)
                     ),
+        textInput("LearningEpaulette","Learning Epaulette",
+                  value=ifelse(
+                          y$LearningEpaulette=="",
+                          list.files(paste0(WD,"assets/learning-plots",collapse="/"),
+                                             pattern="^.*epaulet.*\\.[png|PNG|jpeg|jpg]",
+                                        full.names=T),
+
+                        y$LearningEpaulette
+                      )),
+        textInput("LearningChart","Learning Chart (Shows much lower on Preview page, with Standards)",
+                  value=ifelse(
+                          y$LearningEpaulette=="",
+                          list.files(paste0(WD,"assets/learning-plots",collapse="/"),
+                                             pattern="^.*chart.*\\.[png|PNG|jpeg|jpg]",
+                                        full.names=T),
+
+                        y$LearningChart
+                      )),
         textInput(inputId = "ForGrades",
                   label = "For Grades",
                   value = y$ForGrades),
@@ -255,7 +231,7 @@ server <- function(input, output) {
     #   Y[names(new_y)] <- new_y #add new entries/mods to existing list
     #   #write YAML
     # }
-    yaml::write_yaml(lapply(Y,function(x)as.character(x)), paste0(meta_path,"front-matter.yaml"))
+    yaml::write_yaml(lapply(Y,function(x)as.character(x)), paste0(meta_path,"front-matter.yml"))
 
     ##Create list for JSON output (a little different, bc we want to combine some YAML sections to simplify web output of similar text types)
     # first combine some parts to have desired flexible JSON output
@@ -269,7 +245,7 @@ server <- function(input, output) {
     jsonlite::write_json(Y2,paste0(meta_path,"JSON/front-matter.json"))
     output$confirm_yaml_update <-
         renderText(paste0(
-            "front-matter.yaml&json updated:<br>",
+            "front-matter.yml&json updated:<br>",
             format(Sys.time(), "%Y-%b-%d %r")
         ))
     }) %>% bindEvent(input$save)
