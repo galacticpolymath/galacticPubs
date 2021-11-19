@@ -8,11 +8,12 @@
 #' that has order=1
 #' @return formatted replacement text
 #' @export
+#' @importFrom rlang .data
 #'
 parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx"){
   #read in multimedia links
   mediaLinks<-openxlsx::read.xlsx(linksFile,sheet="multimedia",startRow=2)%>% dplyr::tibble()
-  vidLinks<-mediaLinks %>% dplyr::filter(.data$Type=="video")
+  vidLinks<-mediaLinks %>% dplyr::filter(tolower(.data$Type)=="video")
 
   #extract all video GP mardown syntax captures (e.g. "{vid1}")
   vidCaptures<-stringr::str_extract_all(x,"\\{vid[^\\{]*\\}")
