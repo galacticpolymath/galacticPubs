@@ -213,7 +213,7 @@ server <- function(input, output,session) {
                   new.name="Text")
     # browser()
 
-    jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"))
+    jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"),pretty=TRUE,auto_unbox = TRUE)
     #Storing yaml update text in reactive values and output, so it gets printed & can be
     #accessed from another server function
     vals$yaml_update_txt <-output$yaml_update_txt <-

@@ -219,9 +219,36 @@ resourcesR<-lapply(coveredGrades.R, function(currGradeBand.R){
 
 
 
+# Multimedia --------------------------------------------------------------
+ #if "by" is left blank, add Galactic Polymath by default
+  m<-linksMedia
+  m$by<-ifelse(is.na(m$by),"Galactic Polymath",m$by)
+  #if byLink is blank, but by is galactic polymath, add our Youtube channel
+  m$byLink <- ifelse(is.na(m$byLink)&!is.na(m$by),"https://www.youtube.com/channel/UCfyBNvN3CH4uWmwOCQVhmhg/featured",m$byLink)
+
+multimedia<-lapply(1:nrow(linksMedia),function(i){
+  d<-m[i,]
+  list(order=d$order,
+    type=d$type,
+    title=d$title,
+    description=d$description,
+    lessonRelevance=d$lessonRelevance,
+    by=d$by,
+    #if byLink left blank, but
+    byLink=d$byLink,
+    keywords=d$keywords,
+    mainLink=d$mainLink,
+    vimeoLink=d$vimeoLink,
+    filename=d$filename,
+    otherLink=d$otherLink)
+})
+
+
+
 
 out<-list(classroom=list(resourceSummary=rsrcSumm_C,gradeVariantNotes=gradeVariantNotes,resources=resourcesC),
-          remote=list(resourceSummary=rsrcSumm_R,gradeVariantNotes=gradeVariantNotes,resources=resourcesR))
+          remote=list(resourceSummary=rsrcSumm_R,gradeVariantNotes=gradeVariantNotes,resources=resourcesR),
+          multimedia=multimedia)
 
 
 
