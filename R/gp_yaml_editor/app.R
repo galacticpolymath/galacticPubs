@@ -87,12 +87,6 @@ ui <- navbarPage(
             label = "ShortTitle",
             value = y$ShortTitle
         ),
-        checkboxGroupInput("LessonEnvir","Lesson Environment",choices = c("Classroom","Remote"),selected=y$LessonEnvir,inline=TRUE),
-        dateInput(
-            inputId = "PublicationDate",
-            label = "Publication Date",
-            value = y$PublicationDate
-        ),
         textInput("LessonBanner","Lesson Banner",
                   value=ifelse(
                           y$LessonBanner=="",
@@ -128,6 +122,12 @@ ui <- navbarPage(
 
                         y$LearningChart
                       )),
+        checkboxGroupInput("LessonEnvir","Lesson Environment",choices = c("Classroom","Remote"),selected=y$LessonEnvir,inline=TRUE),
+        dateInput(
+            inputId = "PublicationDate",
+            label = "Publication Date",
+            value = y$PublicationDate
+        ),
         textInput(inputId = "ForGrades",
                   label = "For Grades",
                   value = y$ForGrades),
@@ -179,11 +179,16 @@ ui <- navbarPage(
 server <- function(input, output,session) {
   vals<-reactiveValues()
   vals$yaml_update_txt<-renderText("")
-  #check whether file has been saved
+
+  #check whether there are unsaved changes
   observe({
     data_check<-prep_input(isolate(input),yaml_path,y)
     # browser()
-    count_outOfDate<-do.call(sum,lapply(1:length(data_check[[1]]),function(i){!identical(data_check[[1]][i],data_check[[2]][i])}))
+    outOfDate<-lapply(1:length(data_check[[1]]),function(i){
+      #each element of the list should be identical or of length 0 (accounting for character(0)& NULL )
+      !(identical(data_check[[1]][i],data_check[[2]][i]) | sum(length(data_check[[1]][[i]]),length(data_check[[2]][[i]]))==0)
+      })
+    count_outOfDate<-do.call(sum,outOfDate)
     if(count_outOfDate>0){output$yaml_update_txt <-vals$yaml_update_txt <- renderText("Not saved, yo ->")
     }else if(substr(vals$yaml_update_txt(),1,1)=="N"){vals$yaml_update_txt <-output$yaml_update_txt <- renderText("")}
   })
