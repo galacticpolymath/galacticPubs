@@ -45,3 +45,47 @@ robust_img<-function(class,src,label){
     )
   }else{img(class=class,src=src)}
 }
+
+# Prep 'input' for comparing to YAML read in from hard drive (y)
+# The result is a list that contains the 'input' fields, ordered based on a Template,
+# with additional insertions (like template version and other custom fields) that are we
+# want to keep in the YAML file, but are not used interactively in the shiny app.
+# This result can then be compared to y, which has been read in to see if they are identical.
+prep_input<-function(input,yaml_path,y){
+    #read in existing front-matter.yml if it exists (just to be sure we're up to date)
+    #If this is the user's first time editing, they will have read in y at the top, but not written yet
+    if(file.exists(yaml_path)){y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)}
+
+    # operational input variables we don't want to output
+    op_var<-c("save")
+    #make nonreactive list of everything except our "Operational" input items
+    Y <- reactiveValuesToList(input)[!names(input) %in% op_var]
+    #import YAML template to get a canonical order for output
+    #template file is in 'extdata/'  ('inst/extdata' if you're developing package)
+    template_fields<-names(yaml::read_yaml(system.file("extdata","front-matter_TEMPLATE.yml",package="galacticPubs")))
+      # #debugging example
+      # template_fields<-template_fields[-c(2,9)]
+
+    ## Test template versions for matching fields (ignoring NAs for fields in template, but not in 'input')
+    Y_order_indx0<-as.vector(na.omit(match(template_fields,names(Y))))
+    #if the template doesn't have values for a given input, give a warning
+    if(sum(is.na(Y_order_indx0))>0){warning("Your template ver: ",y$TemplateVer,
+                                           " is missing the field(s):\n\t- ",paste0(names(Y)[which(is.na(Y_order_indx0))],collapse="\n\t- "),
+                                           "\nUpdate galacticPubs to upgrade your template to ensure fields are in the right order.")}
+
+    #Put any missing fields that are in 'input', but not the template yml, at the end
+    Y_order_indx<-Y_order_indx0
+    for(i in 1:length(Y_order_indx)){if(is.na(Y_order_indx[i])){Y_order_indx[i]<-max(Y_order_indx,na.rm=T)+1}}
+    #Now we have a robust index vector to reorder Y before outputting to YAML
+    Y2<-Y[Y_order_indx]
+    #Finally, preserve any manually added fields on YML before overwriting
+    y_not_in_Y2<-which(is.na(match(names(y),names(Y2))))
+    Y3<-Y2 #initialize w/ old vector (for loop is destructive)
+    for(i in y_not_in_Y2){
+      #Add y value at beginning or insert it among Y3 fields, 1 by 1
+      if(i==1){Y3<-c(y[i],Y3)
+      }else{Y3<-c(Y3[1:(i-1)],y[i],
+                  if((i-1)==length(Y3)){}else{Y3[i:length(Y3)]})}
+    }
+    Y3
+}

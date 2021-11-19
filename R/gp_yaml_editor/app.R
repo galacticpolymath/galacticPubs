@@ -25,7 +25,8 @@ yaml_test<-file.exists(yaml_path)
 WD<-ifelse(meta_path_test[2],"../../","") #WD is working directory
 if(yaml_test==FALSE){
     warning(paste("Failed to import `meta/front-matter.yml`\n  *You're starting from scratch.*"))
-    y<-yaml::read_yaml(paste0(meta_path,"front-matter_TEMPLATE.yml")) #sapply(default_y_args,function(x) x="",simplify=F)
+    #use the front matter template supplied with galacticPubs as a starting point
+    y<-yaml::read_yaml(system.file("extdata","front-matter_TEMPLATE.yml",package="galacticPubs"))
 }else{
 
     y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)
@@ -144,6 +145,7 @@ ui <- navbarPage(
         selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE),
 
         textAreaInput("Description",label="Lesson Description:",placeholder="Try to keep it as short as possible",value=y$Description,height="300px"),
+        textAreaInput("QuickPrep",label="Teach It in 15 Quick Prep:",value=y$QuickPrep,height="150px"),
 
         h3("Step 2:"),
         p(
@@ -175,58 +177,35 @@ ui <- navbarPage(
 # SERVER LOGIC ------------------------------------------------------------
 server <- function(input, output) {
 
-    # output$x<-renderPrint(y)
+  # Set elapse time to prod user to save (5 sec)
+  autoCheck<-reactiveTimer(5e3)
+
+  # #check whether saved file is up to date when autoCheck triggered
+  # observe({
+  #   autoCheck()
+  #
+  # })
+  #
+
 
   #######################################
   # Save YAML & JSON when button clicked -------------------------------------------
     doIT<-observe({
-    #read in existing front-matter.yml if it exists (just to be sure we're up to date)
-    if(file.exists(yaml_path)){y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)}
 
-    # operational input variables we don't want to output
-    op_var<-c("save")
-    #make nonreactive list of everything except our "Operational" input items
-    Y <- reactiveValuesToList(input)[!names(input) %in% op_var]
-    #import YAML template to get a canonical order for output
-    #template file is in 'extdata/'  ('inst/extdata' if you're developing package)
-    template_fields<-names(yaml::read_yaml(system.file("extdata","front-matter_TEMPLATE.yml",package="galacticPubs")))
-      # #debugging example
-      # template_fields<-template_fields[-c(2,9)]
-
-    ## Test template versions for matching fields (ignoring NAs for fields in template, but not in 'input')
-    Y_order_indx0<-as.vector(na.omit(match(template_fields,names(Y))))
-    #if the template doesn't have values for a given input, give a warning
-    if(sum(is.na(Y_order_indx0))>0){warning("Your template ver: ",y$TemplateVer,
-                                           " is missing the field(s):\n\t- ",paste0(names(Y)[which(is.na(Y_order_indx0))],collapse="\n\t- "),
-                                           "\nUpdate galacticPubs to upgrade your template to ensure fields are in the right order.")}
-
-    #Put any missing fields that are in 'input', but not the template yml, at the end
-    Y_order_indx<-Y_order_indx0
-    for(i in 1:length(Y_order_indx)){if(is.na(Y_order_indx[i])){Y_order_indx[i]<-max(Y_order_indx,na.rm=T)+1}}
-    #Now we have a robust index vector to reorder Y before outputting to YAML
-    Y2<-Y[Y_order_indx]
-    #Finally, preserve any manually added fields on YML before overwriting
-    y_not_in_Y2<-which(is.na(match(names(y),names(Y2))))
-    Y3<-Y2 #initialize w/ old vector (for loop is destructive)
-    for(i in y_not_in_Y2){
-      #Add y value at beginning or insert it among Y3 fields, 1 by 1
-      if(i==1){Y3<-c(y[i],Y3)
-      }else{Y3<-c(Y3[1:(i-1)],y[i],
-                  if((i-1)==length(Y3)){}else{Y3[i:length(Y3)]})}
-    }
-
-    yaml::write_yaml(lapply(Y3,function(x)as.character(x)), paste0(meta_path,"front-matter.yml"))
+    current_data<-prep_input(input,yaml_path,y)
+    #write current data
+    yaml::write_yaml(lapply(current_data,function(x)as.character(x)), paste0(meta_path,"front-matter.yml"))
 
     ##Create list for JSON output (a little different, bc we want to combine some YAML sections to simplify web output of similar text types)
     # first combine some parts to have desired flexible JSON output
 
-    Y3_lumped<-lumpItems(items=c("DrivingQ","EssentialQ","LearningObj","MiscMD"),
+    current_data_lumped<-lumpItems(items=c("DrivingQ","EssentialQ","LearningObj","MiscMD"),
                   item.labs=c("Driving Question","Essential Question(s)","Learning Objective(s)",""),
-                  list.obj=Y3,
+                  list.obj=current_data,
                   new.name="Text")
     # browser()
 
-    jsonlite::write_json(Y3_lumped,paste0(meta_path,"JSON/front-matter.json"))
+    jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"))
     output$confirm_yaml_update <-
         renderText(paste0(
             "front-matter.yml&json updated:<br>",
@@ -308,8 +287,12 @@ server <- function(input, output) {
         md_txt('Learning Objective(s)',input$LearningObj),
         md_txt('',input$MiscMD),
         # browser(),
-        div(class="keyword-cloud",lapply(input$Tags,function(x){span(class="keyword",x)})),
-        md_txt('Description',input$Description)
+        # Keyword tags (w/ logic for adding placeholder if no values provided)
+        if(is.null(input$Tags)){div(class="placeholder",h3("Keywords missing"))
+          }else{div(class="keyword-cloud",h4("Keywords:"),lapply(input$Tags,function(x){span(class="keyword",x)}))},
+        md_txt('Description',input$Description),
+        md_txt('"Teach It in 15" Quick Prep',input$QuickPrep),
+        div(class="spacer")
     )
   })
 
