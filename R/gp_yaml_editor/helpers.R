@@ -87,5 +87,6 @@ prep_input<-function(input,yaml_path,y){
       }else{Y3<-c(Y3[1:(i-1)],y[i],
                   if((i-1)==length(Y3)){}else{Y3[i:length(Y3)]})}
     }
-    Y3
+    #gotta make sure all Y3 elements are characters, cuz the publication date will invoke pesky POSIX issues :/
+    list(saved_data=y,current_data=lapply(Y3,function(x)as.character(x)))
 }

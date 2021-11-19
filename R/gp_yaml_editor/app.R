@@ -50,7 +50,7 @@ ui <- navbarPage(
     tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
     div(class="header_button_container",
         #save time stamp to left of button
-        span(class="yaml_update", htmlOutput("confirm_yaml_update")),
+        span(class="yaml_update", htmlOutput("yaml_update_txt")),
         #save button
         actionButton('save', div(class="header_button_container",
             img(src = 'gpicon.ico'),
@@ -175,26 +175,27 @@ ui <- navbarPage(
 ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # SERVER LOGIC ------------------------------------------------------------
-server <- function(input, output) {
+server <- function(input, output,session) {
+  vals<-reactiveValues()
+  vals$yaml_update_txt<-renderText("")
+  #check whether file has been saved
+  observe({
+    data_check<-prep_input(isolate(input),yaml_path,y)
+    # browser()
+    count_outOfDate<-do.call(sum,lapply(1:length(data_check[[1]]),function(i){!identical(data_check[[1]][i],data_check[[2]][i])}))
+    if(count_outOfDate>0){output$yaml_update_txt <-vals$yaml_update_txt <- renderText("Not saved, yo ->")
+    }else if(substr(vals$yaml_update_txt(),1,1)=="N"){vals$yaml_update_txt <-output$yaml_update_txt <- renderText("")}
+  })
 
-  # Set elapse time to prod user to save (5 sec)
-  autoCheck<-reactiveTimer(5e3)
-
-  # #check whether saved file is up to date when autoCheck triggered
-  # observe({
-  #   autoCheck()
-  #
-  # })
-  #
 
 
   #######################################
   # Save YAML & JSON when button clicked -------------------------------------------
     doIT<-observe({
 
-    current_data<-prep_input(input,yaml_path,y)
+    current_data<-prep_input(input,yaml_path,y)$current_data
     #write current data
-    yaml::write_yaml(lapply(current_data,function(x)as.character(x)), paste0(meta_path,"front-matter.yml"))
+    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
 
     ##Create list for JSON output (a little different, bc we want to combine some YAML sections to simplify web output of similar text types)
     # first combine some parts to have desired flexible JSON output
@@ -206,11 +207,14 @@ server <- function(input, output) {
     # browser()
 
     jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"))
-    output$confirm_yaml_update <-
-        renderText(paste0(
+    #Storing yaml update text in reactive values and output, so it gets printed & can be
+    #accessed from another server function
+    vals$yaml_update_txt <-output$yaml_update_txt <-
+        txt<-renderText(paste0(
             "front-matter.yml&json updated:<br>",
             format(Sys.time(), "%Y-%b-%d %r")
         ))
+
     }) %>% bindEvent(input$save)
 
   output$overview_text_block<-renderUI({
