@@ -142,9 +142,12 @@ ui <- navbarPage(
         htmlOutput("overview_text_block"),
 
         selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE),
+
+        textAreaInput("Description",label="Lesson Description:",placeholder="Try to keep it as short as possible",value=y$Description,height="300px"),
+
         h3("Step 2:"),
         p(
-            "Choose which GP webquest you want to grade or upload your own custom key"
+            "Do more stuff"
         ),
         fluidRow(style = "padding-left:5em", {
 
@@ -238,7 +241,7 @@ server <- function(input, output) {
                         a("Essential question(s):",
                           href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
                         y$EssentialQ),
-          textAreaInput("LearningObj","Learning Objective(s):",y$LearningObj),
+          textAreaInput("LearningObj","Learning Objective(s):",y$LearningObj,height="300px"),
           textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD)
         )
   })
@@ -273,7 +276,7 @@ server <- function(input, output) {
      list(
         div(style = "margin-top: 60px;"),
         h2(input$Title),
-        h5(input$Subtitle),
+        h4(input$Subtitle),
          # browser(),
         robust_img(class="lesson-banner",src=basename(input$LessonBanner), label="Lesson Banner"),
         div(class="sponsor-section",
@@ -305,7 +308,8 @@ server <- function(input, output) {
         md_txt('Learning Objective(s)',input$LearningObj),
         md_txt('',input$MiscMD),
         # browser(),
-        div(class="keyword-cloud",lapply(input$Tags,function(x){span(class="keyword",x)}))
+        div(class="keyword-cloud",lapply(input$Tags,function(x){span(class="keyword",x)})),
+        md_txt('Description',input$Description)
     )
   })
 
