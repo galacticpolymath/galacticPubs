@@ -6,42 +6,8 @@
 #
 #    http://shiny.rstudio.com/
 #
-# Helper function for markdown text
-md_txt <- function(label,txt){
-    if(label==""){
-    shiny::markdown(txt)
-    }else{
-      #remove spaces from end of label and add a colon
-    shiny::markdown(paste0(c(paste0('#### ',gsub("[ ]*$","", label),':'),txt)))
-    }
-}
-
-# Helper function for lumping separate markdown/YAML entries (which are separated for end user continuity)
-# into a single list item for the JSON output for the web
-lumpItems<-function(items,item.labs,list.obj,new.name){
-
-     applicable00<- match(items,names(list.obj))
-     #remove empty items (not just NA)
-     applicable0<-as.vector(na.omit(ifelse(list.obj[applicable00]=="",NA,applicable00)))
-     applicable <- names(list.obj)[applicable0]
-     applicableLabs<-item.labs[as.vector(na.omit(match(items,applicable)))]
-     lumped<-sapply(1:length(applicable),function(i){
-              # add H4 to label (only if there is a label provided)
-              paste0(ifelse(applicableLabs[i]=="","",
-                            paste0("#### ",applicableLabs[i],"\n")),
-                     list.obj[applicable[i]])
-              }) %>%  paste(list.obj[applicable],collapse="\n")
-     #remove lumped list items
-     first.applicable<-sort(applicable0)[1]
-     #rearrange to insert the lumped section
-     out<-list.obj
-     out[first.applicable]<-lumped #replace first applicable value with new item
-     names(out)[first.applicable]<-new.name #rename inserted item according to user defined var new.name
-     #remove remaining lumped columns (by name to avoid index issues)
-     OUT<-out[-(sort(applicable0)[-1])]
-     OUT
-    }#end lumpItems()
-
+# Load helper functions
+source("helpers.R")
 
 library(shiny);library(shinythemes)
 #import when editor is run from galacticPubs package
@@ -201,13 +167,15 @@ ui <- navbarPage(
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # SERVER LOGIC ------------------------------------------------------------
 server <- function(input, output) {
 
     # output$x<-renderPrint(y)
 
-
-# Save YAML & JSON when button clicked -------------------------------------------
+  #######################################
+  # Save YAML & JSON when button clicked -------------------------------------------
     doIT<-observe({
     #read in existing front-matter.yml if it exists (just to be sure we're up to date)
     if(file.exists(yaml_path)){y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)}
@@ -275,23 +243,25 @@ server <- function(input, output) {
         )
   })
 
+
   #####################################
   # Output the preview of the lesson plan
   output$preview<-renderUI({
     #copy images over to www folder for previewing
-    fs::file_copy(input$LessonBanner,img_loc,overwrite=TRUE)
-    # browser()
-    items2copy<-c("SponsorLogo","LearningEpaulette","LearningChart")
+    items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart")
+    #read in filenames
     items2copy_filenames<-lapply(items2copy,function(x) {yaml::yaml.load(input[[x]])})
+    # browser()
     names(items2copy_filenames)<-items2copy
     #Test if all the files to copy exist; otherwise through a useful error
     lapply(1:length(items2copy_filenames),function(i){
       filez<-items2copy_filenames[[i]]
-      errs<-!file.exists(filez)
+      errs<-ifelse(is.null(filez),TRUE,!file.exists(filez))
       if(sum(errs)>0){
-        stop("The following files for field '",names(items2copy_filenames)[[i]],
+        errFiles<-items2copy_filenames[[i]][which(errs)]
+        warning("The following files for field '",names(items2copy_filenames)[i],
              "' do not exist:\n\t- ",
-             paste(items2copy_filenames[[i]][errs],collapse="\n\t- ")
+             ifelse(is.null(errFiles),"NO FILE CHOSEN", paste(errFiles,collapse="\n\t- "))
         )
       }else{
         fs::file_copy(filez,img_loc,overwrite=TRUE)
@@ -304,28 +274,31 @@ server <- function(input, output) {
         div(style = "margin-top: 60px;"),
         h2(input$Title),
         h5(input$Subtitle),
-        img(class="lesson-banner",src=basename(input$LessonBanner)),
+         # browser(),
+        robust_img(class="lesson-banner",src=basename(input$LessonBanner), label="Lesson Banner"),
         div(class="sponsor-section",
             h4("Sponsored by:"),
-        lapply(1:max(length(sponsoredByTxt),length(yaml::yaml.load(input$SponsorLogo))),function(i){
-            div(class="sponsor",
-            span(class="sponsor-text",shiny::markdown(sponsoredByTxt[i])),
-            div(class="sponsor-logo-container",
-            img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]))
-            ))})
+            lapply(1:max(length(sponsoredByTxt),length(yaml::yaml.load(input$SponsorLogo))),function(i){
+                div(class="sponsor",
+                span(class="sponsor-text",shiny::markdown(sponsoredByTxt[i])),
+                div(class="sponsor-logo-container",
+                robust_img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]),"Sponsor Logo")
+                ))})
         ),
         div(class="section",h1("1. Overview")),
         div(class="stats",
-          img(class="learning-epaulette",src=basename(input$LearningEpaulette)),
-          div(class="triad border-right",
-            md_txt('Target subject',input$TargetSubject)
+          robust_img(class="learning-epaulette",src=basename(input$LearningEpaulette),"Learning Epaulette"),
+          div(class="triad-container",
+            div(class="triad border-right",
+              md_txt('Target subject',input$TargetSubject)
+            ),
+            div(class="triad border-right",
+              md_txt('For grades',input$ForGrades)
+              ),
+            div(class="triad",
+              md_txt("Est. Lesson Time", input$EstLessonTime))
+              )
           ),
-          div(class="triad border-right",
-            md_txt('For grades',input$ForGrades)
-            ),
-          div(class="triad",
-            md_txt("Est. Lesson Time", input$EstLessonTime))
-            ),
 
         md_txt('Driving Question(s)',input$DrivingQ),
         md_txt('Essential Question(s)',input$EssentialQ),
