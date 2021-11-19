@@ -87,6 +87,7 @@ ui <- navbarPage(
             label = "ShortTitle",
             value = y$ShortTitle
         ),
+        checkboxGroupInput("LessonEnvir","Lesson Environment",choices = c("Classroom","Remote"),selected=y$LessonEnvir,inline=TRUE),
         dateInput(
             inputId = "PublicationDate",
             label = "Publication Date",
@@ -194,6 +195,7 @@ server <- function(input, output,session) {
     doIT<-observe({
 
     current_data<-prep_input(input,yaml_path,y)$current_data
+    # browser()
     #write current data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
 
@@ -271,6 +273,7 @@ server <- function(input, output,session) {
                 robust_img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]),"Sponsor Logo")
                 ))})
         ),
+        ## 1. OVERVIEW
         div(class="section",h1("1. Overview")),
         div(class="stats",
           robust_img(class="learning-epaulette",src=basename(input$LearningEpaulette),"Learning Epaulette"),
@@ -295,6 +298,8 @@ server <- function(input, output,session) {
         if(is.null(input$Tags)){div(class="placeholder",h3("Keywords missing"))
           }else{div(class="keyword-cloud",h4("Keywords:"),lapply(input$Tags,function(x){span(class="keyword",x)}))},
         md_txt('Description',input$Description),
+        ## 2. LESSON PREVIEW
+        div(class="section",h1("2. Lesson Preview")),
         md_txt('"Teach It in 15" Quick Prep',input$QuickPrep),
         div(class="spacer")
     )

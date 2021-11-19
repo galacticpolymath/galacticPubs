@@ -1,7 +1,8 @@
 #Default values for new lesson front matter
-TemplateVer: 0.1.1
+TemplateVer: 0.1.2
 Title: ''
 ShortTitle: ''
+LessonEnvir: ''
 SponsoredBy: ''
 TargetSubject: ''
 DrivingQ: ''
