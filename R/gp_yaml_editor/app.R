@@ -163,10 +163,23 @@ ui <- navbarPage(
     ),
     #End Setup Panel
 
-# TAB 2: PREVIEW ----------------------------------------------------------
+# TAB 2: COMPILE ----------------------------------------------------------
+
+    tabPanel("Compile",
+             htmlOutput("preview")),
+# TAB 3: PREVIEW ----------------------------------------------------------
 
     tabPanel("Preview",
-             htmlOutput("preview"))
+             htmlOutput("preview")),
+# TAB 4: PUBLISH ----------------------------------------------------------
+
+    tabPanel("Publish",
+             actionButton('stageForPublication',
+                          label=div(
+                                      img(src = 'gpicon.ico'),
+                                      p(strong("Stage for Publication"))),
+                          class = "publish-button")
+    )
 
 
 )
