@@ -1,20 +1,28 @@
 #' runLessonScripts
 #'
 #' Run all scripts in the scripts/ subfolder in the lesson directory. Scripts must not have any interdependencies, as a general design rule.
+#' @param scripts a vector of scripts (no path needed, just basenames)
 #' @param skip filename of a script to skip
 #' @export
 #'
 
-runLessonScripts<-function(skip=NULL){
-  scripts<-list.files("scripts/",pattern=".R")
-  if(!is.null(skip)){scripts<-scripts[-pmatch(skip,scripts,duplicates.ok = TRUE)]}
+runLessonScripts<-function(scripts,skip=NULL){
+  # If run with gp editor, set working directory to 2 steps below scripts, to avoid issues
+  origWD<-getwd()
+  if(grepl("gp_yaml_editor",origWD)){setwd("../..")}
+  # browser()
+  if(!is.null(skip)){scripts<-scripts[-pmatch(skip,basename(scripts),duplicates.ok = TRUE)]}
   message("\nRUNNING LESSON SCRIPTS:")
   output<-pbapply::pbsapply(1:length(scripts),function(i){
     message("  -",scripts[i])
-    tmp<-source(fs::path("scripts",scripts[i]))
-    invisible(tmp)
+    tmp<-tryCatch(source(paste0("scripts/",scripts[i])),error=function(e){e})
+    if("error"%in%class(tmp)){"Fail"}else{"Success"}
   })
   names(output)<-scripts
-  message("\n",rep("-",30),"  \n  ",length(scripts)," scripts run successfully\n",rep("-",30),"\n")
+   #Reset working directory
+  setwd(origWD)
+
+  results<-data.frame(successes=sum(output=="Success"),failures=sum(output=="Fail"))
+  message("\n",rep("-",35),"  \n  ",results$successes," of ",length(scripts)," scripts run successfully\n",rep("-",35),"\n")
   invisible(output)
 }

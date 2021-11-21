@@ -166,7 +166,7 @@ ui <- navbarPage(
 # TAB 2: COMPILE ----------------------------------------------------------
 
     tabPanel("Compile",
-             htmlOutput("preview")),
+             htmlOutput("compile")),
 # TAB 3: PREVIEW ----------------------------------------------------------
 
     tabPanel("Preview",
@@ -174,6 +174,7 @@ ui <- navbarPage(
 # TAB 4: PUBLISH ----------------------------------------------------------
 
     tabPanel("Publish",
+             radioButtons("publication_status","Lesson Status for Staging",choices=c("Live","Draft"),selected="Draft"),
              actionButton('stageForPublication',
                           label=div(
                                       img(src = 'gpicon.ico'),
@@ -249,9 +250,56 @@ server <- function(input, output,session) {
         )
   })
 
+  #####################################
+  # 2. Compile stuff
+  output$console_text<-renderPrint("") #placeholder for future outputting to main window
+  # see: https://gist.github.com/jcheng5/3830244757f8ca25d4b00ce389ea41b3
+  #
+
+  output$compile<-renderUI({
+    scriptFiles<-list.files(path = paste0(WD, "scripts"),pattern=".R")
+    tagList(
+    h3("Step 2: Compile working documents and lesson assets"),
+    fluidPage(
+      column(width=5,
+        #choose scripts to run
+        div(class="compile-section",
+          h4("Run all lesson scripts"),
+          checkboxGroupInput("ScriptsToRun",
+                             "Uncheck to skip:",
+                             choices = scriptFiles,
+                             selected=scriptFiles[which(scriptFiles %in% y$ScriptsToRun)] ),
+            actionButton("run_lesson_scripts","Run Lesson Scripts",class="compile-button")
+          ),
+        #choose which elements are completed
+        div(class="compile-section",
+          h4("What to include:"),
+          checkboxGroupInput("ReadyToCompile",
+                             "(Which items are done and should be compiled?)",
+                             choices = c("Front Matter","Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"),
+                             selected=y$ReadyToCompile)
+          )),
+    column(width=7      # verbatimTextOutput("console_text"))
+    )
+    )
+    )
+
+  })
+
+  # Define action buttons for compiling stuff--------------------------------------------------
+  # Scripts
+
+  observe({
+    # browser()
+    scripts<-list.files(paste0(WD,"scripts"),pattern=".R")
+    script_subset <- scripts[scripts %in% input$ScriptsToRun]
+    runLessonScripts(script_subset)
+    } ) %>% bindEvent(input$run_lesson_scripts)
+
+
 
   #####################################
-  # Output the preview of the lesson plan
+  # 3. Output the preview of the lesson plan
   output$preview<-renderUI({
     #copy images over to www folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart")
@@ -276,8 +324,13 @@ server <- function(input, output,session) {
 
     sponsoredByTxt<-yaml::yaml.load(input$SponsoredBy)
       # print(h2(shiny::markdown(paste0(c('Driving Question(s):',input$DrivingQ)))))
+
+
+
+
+    # Output the lesson preview page to UI ---------------------------------------------------
      list(
-        div(style = "margin-top: 60px;"),
+        div(class="lesson-preview-container",
         h2(input$Title),
         h4(input$Subtitle),
          # browser(),
@@ -320,9 +373,8 @@ server <- function(input, output,session) {
         div(class="section",h1("2. Lesson Preview")),
         md_txt('"Teach It in 15" Quick Prep',input$QuickPrep),
         div(class="spacer")
-    )
+  ))
   })
-
 
 }
 
