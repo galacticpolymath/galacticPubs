@@ -264,7 +264,7 @@ server <- function(input, output,session) {
       column(width=5,
         #choose scripts to run
         div(class="compile-section",
-          h4("Run all lesson scripts"),
+          h4("Run R Scripts to Generate Lesson Assets"),
           checkboxGroupInput("ScriptsToRun",
                              "Uncheck to skip:",
                              choices = scriptFiles,
@@ -277,7 +277,8 @@ server <- function(input, output,session) {
           checkboxGroupInput("ReadyToCompile",
                              "(Which items are done and should be compiled?)",
                              choices = c("Front Matter","Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"),
-                             selected=y$ReadyToCompile)
+                             selected=y$ReadyToCompile),
+          actionButton("compile","Compile Materials",class="compile-button")
           )),
     column(width=7      # verbatimTextOutput("console_text"))
     )
@@ -288,13 +289,20 @@ server <- function(input, output,session) {
 
   # Define action buttons for compiling stuff--------------------------------------------------
   # Scripts
-
   observe({
-    # browser()
     scripts<-list.files(paste0(WD,"scripts"),pattern=".R")
     script_subset <- scripts[scripts %in% input$ScriptsToRun]
     runLessonScripts(script_subset)
     } ) %>% bindEvent(input$run_lesson_scripts)
+
+  # Compile Materials
+  observe({
+    #Save data before compiling
+    current_data<-prep_input(input,yaml_path,y)$current_data
+    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
+    browser()
+    batchCompile(input,choices=input$ReadyToCompile)
+    } ) %>% bindEvent(input$compile)
 
 
 
