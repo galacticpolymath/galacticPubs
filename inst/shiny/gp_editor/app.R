@@ -311,25 +311,29 @@ server <- function(input, output,session) {
 
   #####################################
   # 3. Output the preview of the lesson plan
-  output$preview<-renderUI({
+   output$preview<-renderUI({
     #delete preexisting images
     #pattern excludes directories
     oldFiles<-list.files(img_loc,pattern="\\.",full.names = TRUE)
     if(length(oldFiles)>0){unlink(oldFiles)}
+    # browser()
     #copy images over to www folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart")
-    #read in filenames
-    items2copy_filenames<-lapply(items2copy,function(x) {paste0(WD,yaml::yaml.load(input[[x]]))})
+    #read in filenames; if empty, return empty; else add WD to create full path
+    items2copy_filenames<-lapply(items2copy,function(x) {
+      item<-yaml::yaml.load(input[[x]])
+      if(is.null(item)){NA}else{ paste0(WD,item)}
+     })
     names(items2copy_filenames)<-items2copy
     #Test if all the files to copy exist; otherwise through a useful error
     lapply(1:length(items2copy_filenames),function(i){
       filez<-items2copy_filenames[[i]]
-      errs<-ifelse(is.null(filez),TRUE,!file.exists(filez))
+      errs<-ifelse(is.na(filez),TRUE,!file.exists(filez))
       if(sum(errs)>0){
         errFiles<-items2copy_filenames[[i]][which(errs)]
         warning("The following files for field '",names(items2copy_filenames)[i],
              "' do not exist:\n\t- ",
-             ifelse(is.null(errFiles),"NO FILE CHOSEN", paste(errFiles,collapse="\n\t- "))
+             ifelse(is.na(errFiles),"NO FILE CHOSEN", paste(errFiles,collapse="\n\t- "))
         )
       }else{
         fs::file_copy(filez,img_loc,overwrite=TRUE)
