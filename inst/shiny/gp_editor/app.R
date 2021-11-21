@@ -46,7 +46,6 @@ ui <- navbarPage(
 # Save Button--------------------------------------------------
     header = div(class="header_save",
     # Define custom CSS styles
-    # browser(),
     tags$link(rel = "stylesheet", type = "text/css", href = "rsrc/custom.css"),
     div(class="header_button_container",
         #save time stamp to left of button
@@ -199,7 +198,6 @@ server <- function(input, output,session) {
   #check whether there are unsaved changes
   observe({
     data_check<-prep_input(isolate(input),yaml_path,y)
-    # browser()
     outOfDate<-lapply(1:length(data_check[[1]]),function(i){
       #each element of the list should be identical or of length 0 (accounting for character(0)& NULL )
       !(identical(data_check[[1]][i],data_check[[2]][i]) | sum(length(data_check[[1]][[i]]),length(data_check[[2]][[i]]))==0)
@@ -316,7 +314,6 @@ server <- function(input, output,session) {
     #pattern excludes directories
     oldFiles<-list.files(img_loc,pattern="\\.",full.names = TRUE)
     if(length(oldFiles)>0){unlink(oldFiles)}
-    # browser()
     #copy images over to www folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart")
     #read in filenames; if empty, return empty; else add WD to create full path
@@ -349,15 +346,14 @@ server <- function(input, output,session) {
     # Output the lesson preview page to UI ---------------------------------------------------
      list(
         div(class="lesson-preview-container",
-        h2(input$Title),
-        h4(input$Subtitle),
-         # browser(),
+        h2(robust_txt(input$Title,"Title")),
+        h4(robust_txt(input$Subtitle,"Subtitle")),
         robust_img(class="lesson-banner",src=basename(input$LessonBanner), label="Lesson Banner"),
         div(class="sponsor-section",
             h4("Sponsored by:"),
             lapply(1:max(length(sponsoredByTxt),length(yaml::yaml.load(input$SponsorLogo))),function(i){
                 div(class="sponsor",
-                span(class="sponsor-text",shiny::markdown(sponsoredByTxt[i])),
+                span(class="sponsor-text",md_txt("Sponsor Text",sponsoredByTxt[i])),
                 div(class="sponsor-logo-container",
                 robust_img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]),"Sponsor Logo")
                 ))})
@@ -381,8 +377,7 @@ server <- function(input, output,session) {
         md_txt('Driving Question(s)',input$DrivingQ),
         md_txt('Essential Question(s)',input$EssentialQ),
         md_txt('Learning Objective(s)',input$LearningObj),
-        md_txt('',input$MiscMD),
-        # browser(),
+        md_txt('',input$MiscMD,required=FALSE),# no label and required=F makes this invisible if no text in input
         # Keyword tags (w/ logic for adding placeholder if no values provided)
         if(is.null(input$Tags)){div(class="placeholder",h3("Keywords missing"))
           }else{div(class="keyword-cloud",h4("Keywords:"),lapply(input$Tags,function(x){span(class="keyword",x)}))},

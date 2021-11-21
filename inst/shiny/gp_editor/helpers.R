@@ -1,10 +1,14 @@
 # Editor app helper functions
-md_txt <- function(label,txt){
-    if(label==""){
+# The required part is a flag to put a "Missing TXT" div (call robust_txt)
+md_txt <- function(label,txt,required=TRUE){
+    if(is.null(txt)){txt=""}
+    if((txt==""|is.na(txt))&required){
+      robust_txt(txt,label)
+    }else if(label==""){
     shiny::markdown(txt)
     }else{
       #remove spaces from end of label and add a colon
-    shiny::markdown(paste0(c(paste0('#### ',gsub("[ ]*$","", label),':'),txt)))
+    shiny::markdown(paste0(c(paste0('#### ',gsub("[ ]*$","", label)),txt)))
     }
 }
 
@@ -45,6 +49,17 @@ robust_img<-function(class,src,label){
     )
   }else{img(class=class,src=src)}
 }
+
+# More general form to test txt inputs
+robust_txt<-function(input_txt,label="Some Text"){
+  if(is.null(input_txt)){input_txt=""}
+  if(input_txt==""|is.na(input_txt)){
+    div(class="placeholder",
+    h3(paste0(label," Missing"))
+    )
+  }else{input_txt}
+}
+
 
 # Prep 'input' for comparing to YAML read in from hard drive (y)
 # The result is a list that contains the 'input' fields, ordered based on a Template,

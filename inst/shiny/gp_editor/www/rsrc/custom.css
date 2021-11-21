@@ -91,11 +91,13 @@ box{   width:350px;padding:10px 10px 0px 10px;
   border: 1px solid rgba(13,86,233,1);
   background-color: rgba(13,86,233,0.2);
   color: blue;
-
+  min-height: 4rem;
+  border-radius:6px;
 }
 .placeholder *{
   display: flex;
   align-items: center;
+  margin: 0;
 }
 
 .sponsor-section{
