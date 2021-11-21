@@ -6,14 +6,13 @@
 #' @param choices one or more of the following: c("Front Matter","Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @return a JSON is saved to meta/JSON/LESSON.json
 #' @importFrom rlang .data
 #' @export
 #'
-batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json"){
-  # If run with gp editor, set working directory to 2 steps below scripts, to avoid issues
-  origWD<-getwd()
-  if(grepl("gp_yaml_editor",origWD)){setwd("../..")}
+batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd()){
+
   #Now, we can always create paths from the project directory and now worry about going up 2 levels in the app
 
   if("Front Matter"%in% choices){
@@ -80,7 +79,5 @@ message(" ",rep("-",30),"\n Lesson successfully compiled:")
 # print(printToScreenTable)
 message("\n JSON file saved\n @ ",outFile,"\n")
 message(" ",rep("-",30))
-   #Reset working directory
-  setwd(origWD)
 
 }

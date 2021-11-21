@@ -3,26 +3,28 @@
 #' Run all scripts in the scripts/ subfolder in the lesson directory. Scripts must not have any interdependencies, as a general design rule.
 #' @param scripts a vector of scripts (no path needed, just basenames)
 #' @param skip filename of a script to skip
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @export
 #'
 
-runLessonScripts<-function(scripts,skip=NULL){
-  # If run with gp editor, set working directory to 2 steps below scripts, to avoid issues
+runLessonScripts<-function(scripts,skip=NULL,WD=getwd()){
+  # temporarily reset wd while sourcing scripts to allow relative refs to work
   origWD<-getwd()
-  if(grepl("gp_yaml_editor",origWD)){setwd("../..")}
+  setwd(WD)
   # browser()
   if(!is.null(skip)){scripts<-scripts[-pmatch(skip,basename(scripts),duplicates.ok = TRUE)]}
   message("\nRUNNING LESSON SCRIPTS:")
   output<-pbapply::pbsapply(1:length(scripts),function(i){
     message("  -",scripts[i])
-    tmp<-tryCatch(source(paste0("scripts/",scripts[i])),error=function(e){e})
+    tmp<-tryCatch(source(paste0(WD,"scripts/",scripts[i])),error=function(e){e})
     if("error"%in%class(tmp)){"Fail"}else{"Success"}
   })
   names(output)<-scripts
-   #Reset working directory
-  setwd(origWD)
+
 
   results<-data.frame(successes=sum(output=="Success"),failures=sum(output=="Fail"))
   message("\n",rep("-",35),"  \n  ",results$successes," of ",length(scripts)," scripts run successfully\n",rep("-",35),"\n")
   invisible(output)
+  #reset working directory
+  setwd(origWD)
 }

@@ -10,19 +10,17 @@
 source("helpers.R")
 
 library(shiny);library(shinythemes)
+
 #import when editor is run from galacticPubs package
 default_y_args<-c("Title","author","date","updated","SponsoredBy","Subtitle","EstLessonTime","ForGrades","TargetSubject","Text","Tags")
 
-#find path to meta/ folder, which depends on whether running it in development enviro or from galacticPubs
-#then import existing yaml or NULL
-potential_paths <- c(paste0(getwd(), "/meta/"),
-                    "../../meta/")
-#if meta_path_test[2] TRUE, running in development enviro (wd is the app subfolder)
-meta_path_test<-sapply(potential_paths,function(x) dir.exists(x))
-meta_path <- potential_paths[which(meta_path_test==TRUE)]
+# WD is the Rstudio project folder, which is different from the Shiny app's working directory
+WD<-paste0(rstudioapi::getActiveProject(),"/")
+
+meta_path <- paste0(WD,"meta/")
 yaml_path<-paste0(meta_path,"front-matter.yml")
 yaml_test<-file.exists(yaml_path)
-WD<-ifelse(meta_path_test[2],"../../","") #WD is working directory
+
 if(yaml_test==FALSE){
     warning(paste("Failed to import `meta/front-matter.yml`\n  *You're starting from scratch.*"))
     #use the front matter template supplied with galacticPubs as a starting point
@@ -31,6 +29,7 @@ if(yaml_test==FALSE){
 
     y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)
 }
+#Image storage is temporary, in the app working directory
 img_loc<-paste0(getwd(),"/www/",collapse="/")
 #create image preview directory
 dir.create(img_loc,showWarnings =FALSE)
@@ -90,9 +89,9 @@ ui <- navbarPage(
         textInput("LessonBanner","Lesson Banner",
                   value=ifelse(
                           y$LessonBanner=="",
-                          list.files(paste0(WD,"assets/banners_etc",collapse="/"),
+                          fs::path_rel(list.files(paste0(WD,"assets/banners_etc",collapse="/"),
                                              pattern="^.*[lesson|Lesson].*[b|B]anner.*\\.[png|PNG|jpeg|jpg]",
-                                        full.names=T),
+                                        full.names=T),WD),
 
                         y$LessonBanner
                       )),
@@ -101,24 +100,23 @@ ui <- navbarPage(
         textAreaInput("SponsorLogo",label="Sponsor Logo(s)— (add images to assets/orig-client-media_NoEdit; reorder as needed for multiple logos)",
                   value=ifelse(
                       y$SponsorLogo=="",
-                      yaml::as.yaml(list.files(fs::path(WD,"/assets/orig-client-media_NoEdit/"),full.names=T,
-                                         pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]")),
-                      y$SponsorLogo)
-                    ),
+                      yaml::as.yaml(fs::path_rel(list.files(paste0(WD,"assets/orig-client-media_NoEdit/"),
+                                         pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",full.names=T),WD)),
+                      y$SponsorLogo)),
         textAreaInput("LearningEpaulette","Learning Epaulette",
                   value=ifelse(
                           y$LearningEpaulette=="",
-                          yaml::as.yaml(list.files(fs::path(WD,"/assets/learning-plots/"),
+                          yaml::as.yaml(fs::path_rel(list.files(fs::path(WD,"assets/learning-plots/"),
                                              pattern="^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
-                                        full.names=T)),
+                                        full.names=T),WD)),
                         y$LearningEpaulette
                       )),
         textAreaInput("LearningChart","Learning Chart (Shows much lower on Preview page, with Standards)",
                   value=ifelse(
                           y$LearningEpaulette=="",
-                           yaml::as.yaml(list.files(fs::path(WD,"/assets/learning-plots/"),
+                           yaml::as.yaml(fs::path_rel(list.files(paste0(WD,"assets/learning-plots/"),
                                              pattern="^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
-                                        full.names=T)),
+                                        full.names=T),WD)),
 
                         y$LearningChart
                       )),
@@ -214,7 +212,6 @@ server <- function(input, output,session) {
     doIT<-observe({
 
     current_data<-prep_input(input,yaml_path,y)$current_data
-    # browser()
     #write current data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
 
@@ -225,7 +222,6 @@ server <- function(input, output,session) {
                   item.labs=c("Driving Question","Essential Question(s)","Learning Objective(s)",""),
                   list.obj=current_data,
                   new.name="Text")
-    # browser()
 
     jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"),pretty=TRUE,auto_unbox = TRUE)
     #Storing yaml update text in reactive values and output, so it gets printed & can be
@@ -290,9 +286,13 @@ server <- function(input, output,session) {
   # Define action buttons for compiling stuff--------------------------------------------------
   # Scripts
   observe({
+    #Save selections
+    current_data<-prep_input(input,yaml_path,y)$current_data
+    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
+
     scripts<-list.files(paste0(WD,"scripts"),pattern=".R")
     script_subset <- scripts[scripts %in% input$ScriptsToRun]
-    runLessonScripts(script_subset)
+    runLessonScripts(script_subset,WD = WD)
     } ) %>% bindEvent(input$run_lesson_scripts)
 
   # Compile Materials
@@ -300,7 +300,6 @@ server <- function(input, output,session) {
     #Save data before compiling
     current_data<-prep_input(input,yaml_path,y)$current_data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
-    browser()
     batchCompile(input,choices=input$ReadyToCompile)
     } ) %>% bindEvent(input$compile)
 
