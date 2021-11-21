@@ -1,0 +1,172 @@
+
+box{   width:350px;padding:10px 10px 0px 10px;
+            margin:5px;vertical-align:middle;text-align:center;
+    }
+
+
+.help-text{background-color:#ECECE2;
+      object-fit: contain;
+      padding: 1rem;
+      border-radius: 6px;
+      width: 100%;
+      margin: 0.75rem 0.25rem;
+}
+/* The whole document style */
+.tab-content{
+  margin-top: 60px;
+}
+/* small devices */
+@media only screen and (max-width: 770px){
+ .tab-content {
+   margin: 175px 8rem 0;
+ }
+}
+
+
+
+
+/* More custom styles */
+.bad{background-color: #960061}
+.good{background-color: #3DFF90}
+.info{border: 3px solid #3e0055;background-color:#f0f4ff;}
+.shiny-bound-input:{
+  height:100%;
+}
+.shiny-input-container {margin-right: 1rem;width:100% !important;}
+.header_button_container {
+  display:flex;
+    position: fixed;
+    padding:.8rem;
+    top:.35rem ;
+    right: 1%;
+    z-index:3000;
+    background-color: white;
+    border-radius:16px;
+  }
+.header_save{
+
+}
+.header_save img{max-height: 15px;margin-top:auto; margin-bottom:auto;}
+.header_save p{padding-left: 0.75rem;margin-top:auto; margin-bottom:auto;}
+
+.yaml_update{color: gray;position: fixed;top:.35rem ;right: 10%; z-index:3001;}
+
+/* COMPILE TAB STYLE */
+
+.compile-section{
+  padding: 1.5rem;
+  border-radius: 16px;
+  background-color: #f7f7f7;
+  border: 1px solid gray;
+  margin: 3rem 0.5rem;
+}
+
+.compile-button{
+  border-radius: 16px;
+  margin: 1.5rem 0 0.5rem;
+}
+
+
+
+/* Lesson Preview styling */
+.lesson-preview-container{
+
+  margin: 60px 8rem 0;
+}
+
+.lesson-banner{height: 20vh;}
+
+/* Lesson major section */
+.section{
+  margin: 1rem -9rem;
+  padding: 1.5rem 6rem;
+  background-color: #f0f4ff;
+}
+
+/* For missing images and whatnot...style placeholder text*/
+.placeholder{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  border: 1px solid rgba(13,86,233,1);
+  background-color: rgba(13,86,233,0.2);
+  color: blue;
+
+}
+.placeholder *{
+  display: flex;
+  align-items: center;
+}
+
+.sponsor-section{
+  padding:3.5rem 1rem 1rem;
+}
+.sponsor{display:flex;margin-top: 2rem;}
+.sponsor-logo-container{}
+.sponsor-logo{max-height: 10vh;}
+.sponsor-text{width: 50%;align: left;}
+
+.stats{
+    display: flex;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 2px 0 rgb(54 54 54 / 14%), 0 3px 1px -2px rgb(54 54 54 / 20%), 0 1px 5px 0 rgb(54 54 54 / 12%);
+    margin: 0.5rem 0 1rem;
+    padding: 0.5rem 0.5rem 1rem;
+    border-radius: 6px;
+    background-color:#f4f4f4;
+    text-align: center;
+
+}
+
+.triad-container{
+  display:flex;
+  width: 100%;
+
+}
+.triad{
+  flex-wrap:wrap;
+  max-width: 33.33%;
+  flex-basis: 33.333333%;
+  flex-grow: 0;
+}
+
+.border-right{
+  border-right: 1px solid #3c4858;
+}
+
+.learning-epaulette{
+  display: block;
+  width: 100%;
+  height:100%;
+}
+
+.text-block{border: 2px solid #a6a6a6; border-radius:6px;padding:1rem;background-color:#f2f2f2;}
+.text-block-title{color: gray;}
+.keyword-cloud{margin: 0.75rem 0;}
+.keyword{
+          font-size: 1.2rem;
+          font-weight: 400;
+          color: #6812d1;
+          border: 2px solid #6812d1;
+          border-radius: 5rem;
+          padding: 0.15rem 0.65rem;
+          margin: 0.25rem;
+          white-space: nowrap;
+          display: inline-block;
+    }
+
+.spacer{
+  margin: 10rem 0;
+}
+
+.publish-button {
+  display:flex;
+    position: fixed;
+    padding:.8rem;
+    z-index:3000;
+    background-color: white;
+    border-radius:16px;
+  }
+.publish-button img{
+  height: 2rem;
+}

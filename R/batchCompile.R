@@ -3,6 +3,7 @@
 #' Processes a subset of data chosen by user using the GP Shiny Editor
 #'
 #' Combines functionality of compileProcedure, compileStandards, compileAcknowledgements, compileJSON, etc.
+#' @param input the input from the shiny app environment
 #' @param choices one or more of the following: c("Front Matter","Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"

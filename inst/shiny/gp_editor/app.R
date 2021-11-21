@@ -46,13 +46,14 @@ ui <- navbarPage(
 # Save Button--------------------------------------------------
     header = div(class="header_save",
     # Define custom CSS styles
-    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+    # browser(),
+    tags$link(rel = "stylesheet", type = "text/css", href = "rsrc/custom.css"),
     div(class="header_button_container",
         #save time stamp to left of button
         span(class="yaml_update", htmlOutput("yaml_update_txt")),
         #save button
         actionButton('save', div(class="header_button_container",
-            img(src = 'gpicon.ico'),
+            img(src = "rsrc/gpicon.ico"),
             p(strong("Save"))
         )))
     ),#end header
@@ -157,25 +158,28 @@ ui <- navbarPage(
         # verbatimTextOutput("console"),
         h3("Step 3:"),
 
-        hr()
+        hr(),
+        div(class="spacer")
     ),
     #End Setup Panel
 
 # TAB 2: COMPILE ----------------------------------------------------------
 
     tabPanel("Compile",
-             htmlOutput("compile")),
+             htmlOutput("compile"),
+             div(class="spacer")),
 # TAB 3: PREVIEW ----------------------------------------------------------
 
     tabPanel("Preview",
-             htmlOutput("preview")),
+             htmlOutput("preview"),
+             div(class="spacer")),
 # TAB 4: PUBLISH ----------------------------------------------------------
 
     tabPanel("Publish",
              radioButtons("publication_status","Lesson Status for Staging",choices=c("Live","Draft"),selected="Draft"),
              actionButton('stageForPublication',
                           label=div(
-                                      img(src = 'gpicon.ico'),
+                                      img(src = 'rsrc/gpicon.ico'),
                                       p(strong("Stage for Publication"))),
                           class = "publish-button")
     )
@@ -308,11 +312,14 @@ server <- function(input, output,session) {
   #####################################
   # 3. Output the preview of the lesson plan
   output$preview<-renderUI({
+    #delete preexisting images
+    #pattern excludes directories
+    oldFiles<-list.files(img_loc,pattern="\\.",full.names = TRUE)
+    if(length(oldFiles)>0){unlink(oldFiles)}
     #copy images over to www folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart")
     #read in filenames
-    items2copy_filenames<-lapply(items2copy,function(x) {yaml::yaml.load(input[[x]])})
-    # browser()
+    items2copy_filenames<-lapply(items2copy,function(x) {paste0(WD,yaml::yaml.load(input[[x]]))})
     names(items2copy_filenames)<-items2copy
     #Test if all the files to copy exist; otherwise through a useful error
     lapply(1:length(items2copy_filenames),function(i){
