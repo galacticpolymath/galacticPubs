@@ -10,5 +10,5 @@ editor()
 Outputs to meta/front-matter.yaml
 }
 \description{
-Start a Shiny app to edit front matter for a lesson. Accepts markdown syntax.
+Start a Shiny app to edit front matter for a lesson. Accepts markdown syntax. The code is found in inst/shiny/gp_editor
 }

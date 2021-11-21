@@ -4,10 +4,14 @@
 \alias{runLessonScripts}
 \title{runLessonScripts}
 \usage{
-runLessonScripts(skip = NULL)
+runLessonScripts(scripts, skip = NULL, WD = getwd())
 }
 \arguments{
+\item{scripts}{a vector of scripts (no path needed, just basenames)}
+
 \item{skip}{filename of a script to skip}
+
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 }
 \description{
 Run all scripts in the scripts/ subfolder in the lesson directory. Scripts must not have any interdependencies, as a general design rule.
