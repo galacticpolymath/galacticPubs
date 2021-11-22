@@ -66,7 +66,7 @@ ui <- navbarPage(
         # div(id="box",class="info",
         #   p("Edit lesson title, overview, tags, etc. for lessons",style="font-weight:500;color:#3e0055;")
         #   ),
-        h3('Step 1: Enter "Front Matter" Overview Info'),
+        h3('Step 1: Enter "Front Matter" Overview Info, Teach It in 15, Etc.'),
         p(class="help-text",
             "Most text fields accept",
             a("markdown formatting", href = "https://www.markdownguide.org/basic-syntax/")
@@ -135,20 +135,14 @@ ui <- navbarPage(
         selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE),
 
         textAreaInput("Description",label="Lesson Description:",placeholder="Try to keep it as short as possible",value=y$Description,height="300px"),
+        hr(class="blhr"),
+        h3("Lesson Preview"),
         textAreaInput("QuickPrep",label="Teach It in 15 Quick Prep:",value=y$QuickPrep,height="150px"),
-
-        h3("Step 2:"),
-        p(
-            "Do more stuff"
-        ),
-        fluidRow(style = "padding-left:5em", {
-
-        }),
-        # h3("Step 3:"),
-        # verbatimTextOutput("console"),
-        h3("Step 3:"),
-
-        hr(),
+        hr(class="blhr"),
+        h3("Bonus + Extensions"),
+        textAreaInput("Bonus",label="Bonus Material:",placeholder="Optional.",value=y$Bonus,height="150px"),
+        textAreaInput("Extensions",label="Extensions:",placeholder="Optional.",value=y$Extensions,height="150px"),
+        hr(class="blhr"),
         div(class="spacer")
     ),
     #End Setup Panel

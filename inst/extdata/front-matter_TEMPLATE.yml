@@ -1,5 +1,5 @@
 #Default values for new lesson front matter
-TemplateVer: 0.1.2
+TemplateVer: 0.1.3
 Title: ''
 ShortTitle: ''
 SponsoredBy: ''
@@ -27,6 +27,8 @@ QuickPrep: |
   3. Look over [Procedure](#procedure)
   4. [Teach it!](#teaching_materials)
   5. Repeat for each part and [tell us what you think.](#feedback)
+Bonus: ''
+Extensions: ''
 ScriptsToRun: ''
 ReadyToCompile:
 - Front Matter
