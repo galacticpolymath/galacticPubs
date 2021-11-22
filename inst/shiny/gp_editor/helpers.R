@@ -1,4 +1,17 @@
 # Editor app helper functions
+
+#Safe read yaml simplifies all null and missing data to ''
+safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
+  y<-yaml::read_yaml(yaml_path,eval.expr=eval.expr)
+  y2<-sapply(1:length(y), function(i){
+    yi<-y[[i]]
+    if(identical(yi,NULL)|identical(yi,"")|identical(yi,NA)){yi<-''
+    }else{yi}
+  })
+  names(y2)<-names(y)
+  y2
+}
+
 # The required part is a flag to put a "Missing TXT" div (call robust_txt)
 md_txt <- function(label,txt,required=TRUE){
     if(is.null(txt)){txt=""}

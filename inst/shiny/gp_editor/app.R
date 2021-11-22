@@ -24,10 +24,10 @@ yaml_test<-file.exists(yaml_path)
 if(yaml_test==FALSE){
     warning(paste("Failed to import `meta/front-matter.yml`\n  *You're starting from scratch.*"))
     #use the front matter template supplied with galacticPubs as a starting point
-    y<-yaml::read_yaml(system.file("extdata","front-matter_TEMPLATE.yml",package="galacticPubs"))
+    y<-safe_read_yaml(system.file("extdata","front-matter_TEMPLATE.yml",package="galacticPubs"))
 }else{
 
-    y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)
+    y<-safe_read_yaml(yaml_path, eval.expr =TRUE)
 }
 #Image storage is temporary, in the app working directory
 img_loc<-paste0(getwd(),"/www/",collapse="/")
