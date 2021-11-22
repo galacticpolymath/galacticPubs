@@ -5,7 +5,7 @@ safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
   y<-yaml::read_yaml(yaml_path,eval.expr=eval.expr)
   y2<-sapply(1:length(y), function(i){
     yi<-y[[i]]
-    if(identical(yi,NULL)|identical(yi,"")|identical(yi,NA)){yi<-''
+    if(identical(yi,NULL)|identical(yi,"")|identical(yi,NA)|identical(yi,"\n")){yi<-''
     }else{yi}
   })
   names(y2)<-names(y)
