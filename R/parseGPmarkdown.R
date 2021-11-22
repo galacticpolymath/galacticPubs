@@ -25,11 +25,11 @@ parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx"){
                     #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
                     index<-match(vidN,vidLinks$order,nomatch=999)
                     if(index!=999&!is.na(index)){
-                    URL<-vidLinks$ytLink[index]
+                    URL<-vidLinks$mainLink[index]
                     title<-vidLinks$Title[index]
                     replace<-ifelse(is.na(title),NA,paste0('[\u25B6"',title,'"](',URL,')'))
                     }else{
-                    replace<-paste0("[ERROR: CHECK *",refs,"* REFERENCE. NO YT-LINK FOUND]()")
+                    replace<-paste0("[ERROR: CHECK *",refs,"* REFERENCE. NO LINK FOUND]()")
                     }
                     replace
                     })
