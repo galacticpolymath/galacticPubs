@@ -98,11 +98,7 @@ ui <- navbarPage(
         textAreaInput("SponsoredBy","Sponsored By: (Add multiple entries with `- `, i.e. hyphen+space)",y$SponsoredBy),
 
         textAreaInput("SponsorLogo",label="Sponsor Logo(s)— (add images to assets/orig-client-media_NoEdit; reorder as needed for multiple logos)",
-                  value=ifelse(
-                      y$SponsorLogo=="",
-                      yaml::as.yaml(fs::path_rel(list.files(paste0(WD,"assets/orig-client-media_NoEdit/"),
-                                         pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",full.names=T),WD)),
-                      y$SponsorLogo)),
+                  value=matching_files("SponsorLogo","assets/orig-client-media_NoEdit/",pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",WD)),
         textAreaInput("LearningEpaulette","Learning Epaulette",
                   value=ifelse(
                           y$LearningEpaulette=="",
@@ -319,9 +315,10 @@ server <- function(input, output,session) {
     #read in filenames; if empty, return empty; else add WD to create full path
     items2copy_filenames<-lapply(items2copy,function(x) {
       item<-yaml::yaml.load(input[[x]])
-      if(is.null(item)){NA}else{ paste0(WD,item)}
+      if(identical(item,NULL)|identical(item,"")){NA}else{ paste0(WD,item)}
      })
     names(items2copy_filenames)<-items2copy
+
     #Test if all the files to copy exist; otherwise through a useful error
     lapply(1:length(items2copy_filenames),function(i){
       filez<-items2copy_filenames[[i]]
@@ -339,8 +336,6 @@ server <- function(input, output,session) {
 
     sponsoredByTxt<-yaml::yaml.load(input$SponsoredBy)
       # print(h2(shiny::markdown(paste0(c('Driving Question(s):',input$DrivingQ)))))
-
-
 
 
     # Output the lesson preview page to UI ---------------------------------------------------

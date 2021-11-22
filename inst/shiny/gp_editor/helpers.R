@@ -12,6 +12,17 @@ safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
   y2
 }
 
+#Function to find files that match a pattern and read them in if YAML entry is blank
+matching_files<-function(yaml_item,rel_path,pattern,WD){
+  if(y[yaml_item]==""){
+    search_results<-fs::path_rel(list.files(paste0(WD,rel_path,collapse="/"),
+                                             pattern=pattern,full.names=T),WD)
+    if(length(search_results)<1){out<-""}else{out <- search_results}
+    yaml::as.yaml(out)
+  }
+}
+
+
 # The required part is a flag to put a "Missing TXT" div (call robust_txt)
 md_txt <- function(label,txt,required=TRUE){
     if(is.null(txt)){txt=""}
