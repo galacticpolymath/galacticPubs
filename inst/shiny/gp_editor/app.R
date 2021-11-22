@@ -99,7 +99,6 @@ ui <- navbarPage(
                                        "assets/orig-client-media_NoEdit/",
                                        pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
                                        WD)),
-        browser(),
         textAreaInput("LearningEpaulette",label="Learning Epaulette (should be in assets/learning-plots)",
                   value=matching_files(y,yaml_item="LearningEpaulette",
                                        rel_path="assets/learning-plots/",
