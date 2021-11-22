@@ -13,13 +13,13 @@ safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
 }
 
 #Function to find files that match a pattern and read them in if YAML entry is blank
-matching_files<-function(yaml_item,rel_path,pattern,WD){
+matching_files<-function(y,yaml_item,rel_path,pattern,WD){
   if(y[yaml_item]==""){
     search_results<-fs::path_rel(list.files(paste0(WD,rel_path,collapse="/"),
                                              pattern=pattern,full.names=T),WD)
     if(length(search_results)<1){out<-""}else{out <- search_results}
     yaml::as.yaml(out)
-  }
+  }else{y[yaml_item]}
 }
 
 

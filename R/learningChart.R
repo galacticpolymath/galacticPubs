@@ -25,7 +25,7 @@ learningChart=function(compiledAlignment,targetSubj=NULL,caption,captionN=T,cent
 if(missing(caption)){caption="GP Learning Chart: Knowledge & skills taught in this lesson"}
 
 if(captionN){
-  avgN<-table(compiledAlignment$compiled$gradeBand) %>% mean() %>% floor(.data)
+  avgN<-table(compiledAlignment$compiled$gradeBand) %>% mean() %>% floor()
   caption <- paste0(caption," (~",avgN," standards per grade)")}
 
 if(missing(centralText)){
