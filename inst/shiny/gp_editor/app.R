@@ -87,35 +87,30 @@ ui <- navbarPage(
             value = y$ShortTitle
         ),
         textInput("LessonBanner","Lesson Banner",
-                  value=ifelse(
-                          y$LessonBanner=="",
-                          fs::path_rel(list.files(paste0(WD,"assets/banners_etc",collapse="/"),
-                                             pattern="^.*[lesson|Lesson].*[b|B]anner.*\\.[png|PNG|jpeg|jpg]",
-                                        full.names=T),WD),
+                  value=matching_files(yaml_item="LessonBanner",
+                                       rel_path="assets/banners_etc",
+                                       pattern="^.*[lesson|Lesson].*[b|B]anner.*\\.[png|PNG|jpeg|jpg]",
+                                       WD)),
 
-                        y$LessonBanner
-                      )),
         textAreaInput("SponsoredBy","Sponsored By: (Add multiple entries with `- `, i.e. hyphen+space)",y$SponsoredBy),
 
         textAreaInput("SponsorLogo",label="Sponsor Logo(s)— (add images to assets/orig-client-media_NoEdit; reorder as needed for multiple logos)",
-                  value=matching_files("SponsorLogo","assets/orig-client-media_NoEdit/",pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",WD)),
+                  value=matching_files("SponsorLogo",
+                                       "assets/orig-client-media_NoEdit/",
+                                       pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
+                                       WD)),
         textAreaInput("LearningEpaulette","Learning Epaulette",
-                  value=ifelse(
-                          y$LearningEpaulette=="",
-                          yaml::as.yaml(fs::path_rel(list.files(fs::path(WD,"assets/learning-plots/"),
-                                             pattern="^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
-                                        full.names=T),WD)),
-                        y$LearningEpaulette
-                      )),
-        textAreaInput("LearningChart","Learning Chart (Shows much lower on Preview page, with Standards)",
-                  value=ifelse(
-                          y$LearningEpaulette=="",
-                           yaml::as.yaml(fs::path_rel(list.files(paste0(WD,"assets/learning-plots/"),
-                                             pattern="^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
-                                        full.names=T),WD)),
+                  value=matching_files("LearningEpaulette",
+                                       "assets/learning-plots/",
+                                       "^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
+                                       WD)),
 
-                        y$LearningChart
-                      )),
+        textAreaInput("LearningChart","Learning Chart (Shows much lower on Preview page, with Standards)",
+                  value=matching_files("LearningChart",
+                                       "assets/learning-plots",
+                                       "^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
+                                       WD)),
+
         checkboxGroupInput("LessonEnvir","Lesson Environment",choices = c("Classroom","Remote"),selected=y$LessonEnvir,inline=TRUE),
         dateInput(
             inputId = "PublicationDate",
