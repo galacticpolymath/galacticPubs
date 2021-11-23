@@ -5,13 +5,26 @@
 #' @param procedureFile file location of the lesson procedure XLSX worksheet
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedTeachingMaterials.json"
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/processedResources.json
 #' @importFrom rlang .data
 #' @export
 #'
-compileTeachingMat <- function(linksFile="meta/teaching-materials.xlsx",procedureFile="meta/procedure.xlsx",destFolder="meta/JSON/" ,outputFileName="teachingMaterials.json"){
+compileTeachingMat <- function(linksFile = "meta/teaching-materials.xlsx",
+                               procedureFile = "meta/procedure.xlsx",
+                               destFolder = "meta/JSON/" ,
+                               outputFileName = "teaching-materials.json",
+                               WD = getwd()) {
+
 
    .=NULL #to avoid errors with dplyr syntax
+
+   #if WD supplied, append it to destFolder
+   if(!identical(WD, getwd())) {
+     linksFile<- paste0(WD,linksFile)
+     procedureFile<-paste0(WD,procedureFile)
+     destFolder <- paste0(WD, destFolder)
+   }
 
   #read in links
   rsrcSummary<-openxlsx::read.xlsx(linksFile,sheet="rsrcSumm",startRow=2)%>% dplyr::tibble()

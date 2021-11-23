@@ -36,6 +36,15 @@ md_txt <- function(label,txt,required=TRUE){
     }
 }
 
+make_null_json<-function(name,WD,destFolder="meta/JSON/"){
+  if(missing(WD)){stop("Must supply 'WD' (working directory)")}
+
+  l<-list(NULL)
+  outFile<-fs::path(WD,destFolder,name,ext="json")
+  jsonlite::write_json(l,path=outFile,auto_unbox=TRUE)
+  message(" Empty json saved for unfinished section\n  - ",outFile,"")
+}
+
 # Helper function for lumping separate markdown/YAML entries (which are separated for end user continuity)
 # into a single list item for the JSON output for the web
 lumpItems<-function(items,item.labs,list.obj,new.name){

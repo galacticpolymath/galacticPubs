@@ -7,12 +7,24 @@
 #' @param shortTitle The unique short title of this lesson which is prefixed on the lesson folder name in the shared
 #' @param dataCat which info do you want to merge with your teaching-materials spreadsheet? Options= "quickPrep_feedback", "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.
 #' @param linksFile file location of the lesson teaching-resource-links XLSX worksheet. gdrive; *CaseSensitive!
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param sortOutput logical; if T, outputs are sorted by grade, part, filetype, then filename
 #' @param returnWorkbook Logical; if T, returns the list which was written to linksFile
 #' @export
 #'
-updateTeachingMatLinks<-function(shortTitle,dataCat=c("download","quickPrep_feedback","remote","classroom"),linksFile="meta/teaching-materials.xlsx",sortOutput=T, returnWorkbook=F){
+updateTeachingMatLinks<-function(shortTitle,
+                                 dataCat = c("download", "quickPrep_feedback", "remote", "classroom"),
+                                 linksFile = "meta/teaching-materials.xlsx",
+                                 WD = getwd(),
+                                 sortOutput = T,
+                                 returnWorkbook = F
+){
 
+
+  #if WD supplied, append it to destFolder
+  if(!identical(WD, getwd())) {
+    linksFile <-  paste0(WD, linksFile)
+  }
 
 #define dplyr::coalesce function that doesn't crash with 2 NAs!
   discardNA<-function(x,y){
@@ -75,31 +87,65 @@ updateTeachingMatLinks<-function(shortTitle,dataCat=c("download","quickPrep_feed
 
           # lapply "loop" across classroom and remote teaching environments that exist in the folder
           existingEnvirs<-c("classroom","remote")[c("classroom","remote") %in% assembledMatDribble$name]
-          dLdata<-lapply(existingEnvirs,function(envir){
-          # Get Folder link for entire environment (all grades)
-          envirIndex<-which(assembledMatDribble$name==envir)
-          envirDirLink<-assembledMatDribble[envirIndex,"drive_resource"][[1]][[1]]$webViewLink
-          # Get folder links for all grade subdirectories
-          gradeDirDribble<-googledrive::drive_find(q=paste0("mimeType='application/vnd.google-apps.folder' and '",assembledMatDribble$id[envirIndex],"' in parents"))
-          grades<-gsub("^.*_(.*)","\\1",gradeDirDribble$name)
+          dLdata<-lapply(existingEnvirs, function(envir) {
+            # Get Folder link for entire environment (all grades)
+            envirIndex <- which(assembledMatDribble$name == envir)
+            envirDirLink <-
+              assembledMatDribble[envirIndex, "drive_resource"][[1]][[1]]$webViewLink
+            # Get folder links for all grade subdirectories
+            gradeDirDribble <-
+              googledrive::drive_find(
+                q = paste0(
+                  "mimeType='application/vnd.google-apps.folder' and '",
+                  assembledMatDribble$id[envirIndex],
+                  "' in parents"
+                )
+              )
+            grades <- gsub("^.*_(.*)", "\\1", gradeDirDribble$name)
 
-          #lapply for each grade
-          out.grades<-lapply(1:nrow(gradeDirDribble),function(i){
-            gradeDirLink_i<-gradeDirDribble[i,"drive_resource"][[1]][[1]]$webViewLink
-            #output each grade's sub-dataframe
-            data.frame(envir=envir,grades=grades[i],part="all",path=paste0("/",fs::path(envir,gradeDirDribble$name[i]),"/"),filetype="folder", gDriveLink=gradeDirLink_i,gID=gradeDirDribble$id[i],excelTab=excelTab)
-          })
-          #make a root data frame for the link to all parts, all grades
-          out.root<-data.frame(envir=envir,grades="all",part="all",path=paste0("/",envir,"/"),filetype="folder",gDriveLink=envirDirLink,gID=assembledMatDribble$id[envirIndex],excelTab=excelTab)
-          #combine everything
-          rbind(out.root,do.call(rbind,out.grades))
-            })#End dLdata lapply
+            #lapply for each grade
+            out.grades <- lapply(1:nrow(gradeDirDribble), function(i) {
+              gradeDirLink_i <-
+                gradeDirDribble[i, "drive_resource"][[1]][[1]]$webViewLink
+              #output each grade's sub-dataframe
+              data.frame(
+                envir = envir,
+                grades = grades[i],
+                part = "all",
+                path = paste0("/", fs::path(envir, gradeDirDribble$name[i]), "/"),
+                filetype = "folder",
+                gDriveLink = gradeDirLink_i,
+                gID = gradeDirDribble$id[i],
+                excelTab = excelTab
+              )
+            })
+            #make a root data frame for the link to all parts, all grades
+            out.root <-
+              data.frame(
+                envir = envir,
+                grades = "all",
+                part = "all",
+                path = paste0("/", envir, "/"),
+                filetype = "folder",
+                gDriveLink = envirDirLink,
+                gID = assembledMatDribble$id[envirIndex],
+                excelTab = excelTab
+              )
+            #combine everything
+            dplyr::bind_rows(out.root, do.call(dplyr::bind_rows, out.grades))
+          })#End dLdata lapply
           #output Download Link matrix
-          do.call(rbind,dLdata)
+          do.call(dplyr::bind_rows,dLdata)
 
           }else{
+
+        ########
+        #---> From here, applies to all data cats, except downloads
+
         #google drive ID for the current data cat folder
         dirID<-assembledMatDribble$id[which(substr(assembledMatDribble$name,1,3)==substr(dataCat_k,1,3))]
+        #if the directory is missing for this dataCat, return ()
+        if(length(dirID)==0){return(NA)}
         dirDribble<-googledrive::drive_find(q=paste0("'",dirID,"' in parents"))
 
         #handle quickprep "data category"
@@ -119,11 +165,16 @@ updateTeachingMatLinks<-function(shortTitle,dataCat=c("download","quickPrep_feed
 
             #output Quickprep & Feedback Table
             data.frame(dataCat=dataCat_k,grades=NA,part=qp_part,filename=dirDribble$name,filetype=qp_filetypes,
-                       gDriveLink=qp_links,gPresentLink=qp_gPresentLink,gID=dirDribble$id,excelTab=excelTab)
+                       gDriveLink=qp_links,gPresentLink=qp_gPresentLink,gID=dirDribble$id,excelTab=excelTab) %>% dplyr::filter(.data$filename!=".gitkeep")
 
         #handle all remote and classroom environments differently
         }else{
           gradeDirs<-dirDribble[sapply(dirDribble$drive_resource,function(x) x$mimeType=="application/vnd.google-apps.folder"),]
+
+          #Test if there are no grade directories for this data category
+          if(nrow(gradeDirs)==0){return(NA)}
+
+
           grades0<-gsub("^.*_(.*)","\\1",gradeDirs$name)
           grades<-grades0[which(grades0!="")]
 
@@ -170,8 +221,11 @@ updateTeachingMatLinks<-function(shortTitle,dataCat=c("download","quickPrep_feed
                   }
                 }# end handout vs. presentation handling
             })#end out.category lapply
-            names(out.category)<-existingCategories
-            out.category
+
+            #remove any .gitkeep files
+            out.category2<-lapply(1:length(out.category), function(i) dplyr::filter(out.category[[i]],.data$filename!=".gitkeep"))
+            names(out.category2)<-existingCategories
+            out.category2
           })
           names(out.grades)<-paste0("g",grades)
           out.grades
@@ -187,14 +241,23 @@ updateTeachingMatLinks<-function(shortTitle,dataCat=c("download","quickPrep_feed
 
 
 # now, reorganize gData by XLtab ------------------------------------------
+# Melt and reforge as a big ol' tibble
 gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
 
 
+
      #Read in tabs from the teaching-materials.xlsx for selected data types
+
+
+    # redefine tmKey.selected to remove empty dataCat(egorie)s----------------------
+    badCats<-sapply(gData0,function(x) identical(x,NA))
+    badCatNames<-names(badCats)[which(badCats==TRUE)]
+    tmKey.selected2<-tmKey.selected %>% dplyr::filter(!.data$dataCat%in%badCatNames)
+
     #Remove rows that are totally NA
-    tmImported<-lapply(1:length(tmKey.selected$tab),function(i) {
-      d<-openxlsx::read.xlsx(linksFile,sheet=tmKey.selected$tab[i],startRow=2)
+    tmImported<-lapply(1:length(tmKey.selected2$tab),function(i) {
+      d<-openxlsx::read.xlsx(linksFile,sheet=tmKey.selected2$tab[i],startRow=2)
       rmNArows(d)
     })
 
@@ -204,7 +267,7 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
       tmImported[[i]]$gID <- gsub("^.*\\/(?:d|folders)\\/([^\\/\n]*)\\/?.*$","\\1",tmImported[[i]]$gDriveLink)
       tmImported[[i]]
       })
-    names(tmImported2)<-tmKey.selected$tab
+    names(tmImported2)<-tmKey.selected2$tab
 
 ###########################################
 # merge data and write to appropriate tab ---------------------------------
@@ -226,8 +289,11 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
       gData_i<-gData %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble() %>% dplyr::mutate(updateNotes=NA)
 
-      #add missing data to Spreadsheet dataframe from gDrive meta info
-      excel_Data_i.aug <- dplyr::left_join(excelData_i,gData_i,by="gID") #%>% print(Inf)
+
+
+
+      #add missing data to Spreadsheet dataframe from gDrive meta info; mutate_all avoids class mismatches when merging:
+      excel_Data_i.aug <- dplyr::left_join(excelData_i %>% dplyr::mutate_all(as.character),gData_i%>% dplyr::mutate_all(as.character),by="gID")
 
       #which columns overlap (besides gID)? which will need to be coalesced
       insct<-intersect(names(excelData_i),names(gData_i))[-which(intersect(names(excelData_i),names(gData_i))=="gID")]
@@ -265,7 +331,7 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
         missing.df$updateNotes<-date()
           #if the excel data isn't empty, bind the old excel data with the new missing data from gdrive info
           if(nrow(excel_Data_i.aug)>0){
-            final<-rbind(excel_Data_i.aug[names(excelData_i)],missing.df)
+            final<-dplyr::bind_rows(excel_Data_i.aug[names(excelData_i)],missing.df)
           #if excel data is empty, the only data to output is the missing data
           }else{
              final<-missing.df
@@ -290,7 +356,7 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
       #remove NA rows
       out<-rmNArows(out)[,-which(names(out)=="gID")]
 
-      #overwrite old data with final
+      #overwrite old data with final (this is not writing to the hard drive until the saveWorkbook stage)
       XLConnect::writeWorksheet(tmXLSX,sheet=excelTab_i,data=out,startCol=1,startRow=3,header=F)
 
       #output final tab dataset

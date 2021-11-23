@@ -7,13 +7,21 @@
 #' that has order=1
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/processedProcedure.json
 #' @importFrom rlang .data
 #' @export
 #'
-compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta/teaching-materials.xlsx",destFolder="meta/JSON/" ,outputFileName="procedure.json"){
+compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta/teaching-materials.xlsx",destFolder="meta/JSON/" ,outputFileName="procedure.json",WD=getwd()){
 
    .=NULL #to avoid errors with dplyr syntax
+
+     #if WD supplied, append it to destFolder
+   if (!identical(WD, getwd())) {
+     destFolder <- paste0(WD, destFolder)
+     procedureFile <- paste0(WD, procedureFile)
+     linksFile <- paste0(WD, linksFile)
+   }
 
    #Function to change shorthand word=def into bulleted list with bold word ("- **word:** definition")
    formatVocab<-function(vocabTextVector){

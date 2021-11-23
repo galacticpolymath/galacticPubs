@@ -11,6 +11,7 @@
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" (file extension will be ignored)
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param dpi what resolution would you like the output in dots per inch? 300 by default
 #' @param ... other arguments passed to \code{\link[grDevices]{png}}
 #' @return the learning chart plot object (grid format); the file is saved to assets/GP_Learning_Chart.png by default
@@ -19,7 +20,10 @@
 
 
 learningChart=function(compiledAlignment,targetSubj=NULL,caption,captionN=T,centralText,
-                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Chart",dpi=300,...){
+                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Chart",WD=getwd(),dpi=300,...){
+
+#if WD supplied, append it to destFolder
+if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
 
 #deal with missing caption and add sample size if requested
 if(missing(caption)){caption="GP Learning Chart: Knowledge & skills taught in this lesson"}

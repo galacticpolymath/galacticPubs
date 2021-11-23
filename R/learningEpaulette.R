@@ -7,6 +7,7 @@
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" for ggsave output image file
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param thickness is how thick to make the epaulette bar `(`range from 0 to 0.5`)`, 0.2 or 20\% of vertical plot space by default
 #' @param width plot width in inches
 #' @param height plot height in inches
@@ -19,7 +20,10 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",thickness=0.2,width=11,height=1.6,dpi=200,...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),thickness=0.2,width=11,height=1.6,dpi=200,...){
+
+  #if WD supplied, append it to destFolder
+  if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
 
 #bring in empty matrix to merge in, in case some subjects are missing
 a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="galacticPubs"))
@@ -123,12 +127,12 @@ dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
 givenExt=if(grepl(".",fileName,fixed=TRUE)){gsub(".*\\.(.{3,4}$)","\\1",fileName)}else{NULL} #extract file extension if provided
 fileOut<-gsub("(^.*)\\..*$","\\1",basename(fileName)) #strip extension and full path from provided fileName
 fileOutExt<-ifelse(is.null(givenExt),"png",givenExt) #provide png extension if not provided
-output.0<-fs::path(destFolder,"/",paste0(fileOut,"_",compiledAlignment$grades,collapse=""),ext=fileOutExt)
-output<-gsub("^[\\//](.*)","\\1",output.0)
+output<-fs::path(destFolder,"/",paste0(fileOut,"_",compiledAlignment$grades,collapse=""),ext=fileOutExt)
 
 #save the file
-ggplot2::ggsave(filename=output,plot=epaulette,width=width, height=height,dpi=dpi,bg="transparent"
-                ,...)
+ggplot2::ggsave(filename=basename(output),plot=epaulette,path=fs::path_dir(output),width=width, height=height,dpi=dpi,bg="transparent",...)
+
+
 #output object if they want to modify further
 
 message("GP Learning Epaulette saved\n@ ",output)

@@ -83,7 +83,7 @@ ui <- navbarPage(
         ),
         textInput(
             inputId = "ShortTitle",
-            label = "ShortTitle",
+            label = "shortTitle (a unique prefix for key lesson materials)",
             value = y$ShortTitle
         ),
         textInput("LessonBanner",label="Lesson Banner (should be in assets/banners_etc)",
@@ -259,9 +259,9 @@ server <- function(input, output,session) {
           h4("What to include:"),
           checkboxGroupInput("ReadyToCompile",
                              "(Which items are done and should be compiled?)",
-                             choices = c("Front Matter","Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"),
+                             choices = c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"),
                              selected=y$ReadyToCompile),
-          actionButton("compile","Compile Materials",class="compile-button")
+          actionButton("compile","Save & Compile Materials",class="compile-button")
           )),
     column(width=7      # verbatimTextOutput("console_text"))
     )
@@ -287,7 +287,7 @@ server <- function(input, output,session) {
     #Save data before compiling
     current_data<-prep_input(input,yaml_path,y)$current_data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
-    batchCompile(input,choices=input$ReadyToCompile)
+    batchCompile(input,choices=input$ReadyToCompile,WD=WD)
     } ) %>% bindEvent(input$compile)
 
 
