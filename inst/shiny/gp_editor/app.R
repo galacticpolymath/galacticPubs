@@ -160,18 +160,31 @@ ui <- navbarPage(
 # TAB 4: PUBLISH ----------------------------------------------------------
 
     tabPanel("Publish",
-             radioButtons("publication_status","Lesson Status for Staging",choices=c("Live","Draft"),selected="Draft"),
-             actionButton('stageForPublication',
+             radioButtons("PublicationStatus","Lesson Status for Staging",choices=c("Live","Draft"),selected=y$PublicationStatus),
+             actionButton('StageForPublication',
                           label=div(
                                       img(src = 'rsrc/gpicon.ico'),
                                       p(strong("Stage for Publication"))),
-                          class = "publish-button")
+                          class = "publish-button"),
+             div(
+             textOutput("publishReport")
+             )
     )
 
 
 )
 
 
+
+
+##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ##%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -179,6 +192,7 @@ ui <- navbarPage(
 server <- function(input, output,session) {
   vals<-reactiveValues()
   vals$yaml_update_txt<-renderText("")
+  output$publishReport<-renderText("")
 
   #check whether there are unsaved changes
   observe({
@@ -372,6 +386,48 @@ server <- function(input, output,session) {
         div(class="spacer")
   ))
   })
+
+   #####################################
+  # 4. PUBLISH
+
+  #Clicked publish button
+  observe({
+    # browser()
+    #Save data before compiling
+    current_data<-prep_input(input,yaml_path,y)$current_data
+    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
+    #files from www folder used to generate preview (or other files dumped there)
+    www_file_paths<-list.files(fs::path(getwd(),"/www"),pattern="^.*\\..*",full.names = TRUE)
+    lesson_file_path<-fs::path(WD,"meta/json/LESSON.json")
+    if(!file.exists(lesson_file_path)){
+      warning("Lesson File Not Found!\n - ",lesson_file_path)
+      lesson_file_path<-{}
+      }
+
+    files2copy<-c(www_file_paths,lesson_file_path)
+    destFolder<-fs::path(WD,"published")
+    dir.create(destFolder,showWarnings = FALSE)
+    #delete existing published contents
+    unlink(list.files(destFolder,full.names = TRUE))
+    #replace w/ new files
+    ec<-tryCatch(fs::file_copy(files2copy,destFolder),error=function(e){e})
+    if(!"error"%in%class(ec)){
+      message("Files successfully staged:\n -",paste(files2copy,collapse="\n -"))
+      output$publishReport<-renderText({"\u2713 Success"})
+    }else{
+      warning(as.character(ec))
+      output$publishReport<-renderText({"\u2718 Failed"})}
+
+
+
+
+
+  }) %>% bindEvent(input$StageForPublication)
+
+  # output$publishReport<-renderPrint({
+  #   browser()
+  #   if(is.null(vals$publishSuccess)){""}
+  #   if(vals$publishSuccess){"Success"}else{"Failed"}})
 
 }
 

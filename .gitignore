@@ -14,3 +14,4 @@ meta/
 scripts/
 assembled-lesson-materials/
 inst/shiny/gp_editor/www/*.png
+published
