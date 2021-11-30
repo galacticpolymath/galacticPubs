@@ -3,7 +3,7 @@
 #Safe read yaml simplifies all null and missing data to ''
 safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
   y<-yaml::read_yaml(yaml_path,eval.expr=eval.expr)
-  y2<-sapply(1:length(y), function(i){
+  y2<-lapply(1:length(y), function(i){
     yi<-y[[i]]
     if(identical(yi,NULL)|identical(yi,"")|identical(yi,NA)|identical(yi,"\n")){yi<-''
     }else{yi}
@@ -46,14 +46,14 @@ make_null_json<-function(name,WD,destFolder="meta/JSON/"){
 }
 
 # Helper function for lumping separate markdown/YAML entries (which are separated for end user continuity)
-# into a single list item for the JSON output for the web
+# into a single list item for the JSON output for the web; output is the supplied list.obj, with items removed and lumped with new.name
 lumpItems<-function(items,item.labs,list.obj,new.name){
 
      applicable00<- match(items,names(list.obj))
      #remove empty items (not just NA)
      applicable0<-as.vector(na.omit(ifelse(list.obj[applicable00]=="",NA,applicable00)))
      applicable <- names(list.obj)[applicable0]
-     applicableLabs<-item.labs[as.vector(na.omit(match(items,applicable)))]
+     applicableLabs<-item.labs[as.vector(na.omit(match(applicable,items)))]
      lumped<-sapply(1:length(applicable),function(i){
               # add H4 to label (only if there is a label provided)
               paste0(ifelse(applicableLabs[i]=="","",

@@ -99,17 +99,6 @@ ui <- navbarPage(
                                        "assets/orig-client-media_NoEdit/",
                                        pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
                                        WD)),
-        textAreaInput("LearningEpaulette",label="Learning Epaulette (should be in assets/learning-plots)",
-                  value=matching_files(y,yaml_item="LearningEpaulette",
-                                       rel_path="assets/learning-plots/",
-                                       pattern="^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
-                                       WD)),
-
-        textAreaInput("LearningChart","Learning Chart (Shows much lower on Preview page, with Standards)",
-                  value=matching_files(y,"LearningChart",
-                                       "assets/learning-plots",
-                                       "^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
-                                       WD)),
 
         checkboxGroupInput("LessonEnvir","Lesson Environment",choices = c("Classroom","Remote"),selected=y$LessonEnvir,inline=TRUE),
         dateInput(
@@ -229,7 +218,7 @@ server <- function(input, output,session) {
     #accessed from another server function
     vals$yaml_update_txt <-output$yaml_update_txt <-
         txt<-renderText(paste0(
-            "front-matter.yml&json updated:<br>",
+            "front-matter.yml updated:<br>",
             format(Sys.time(), "%Y-%b-%d %r")
         ))
 
@@ -276,7 +265,18 @@ server <- function(input, output,session) {
                              choices = c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"),
                              selected=y$ReadyToCompile),
           actionButton("compile","Save & Compile Materials",class="compile-button")
-          )),
+          ),
+        textAreaInput("LearningEpaulette",label="Learning Epaulette (should be in assets/learning-plots)",
+                  value=matching_files(y,yaml_item="LearningEpaulette",
+                                       rel_path="assets/learning-plots/",
+                                       pattern="^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
+                                       WD)),
+        textAreaInput("LearningChart","Learning Chart (Shows much lower on Preview page, with Standards)",
+                  value=matching_files(y,"LearningChart",
+                                       "assets/learning-plots",
+                                       "^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
+                                       WD))
+        ), #end left pane
     column(width=7      # verbatimTextOutput("console_text"))
     )
     )
@@ -351,7 +351,7 @@ server <- function(input, output,session) {
             h4("Sponsored by:"),
             lapply(1:max(length(sponsoredByTxt),length(yaml::yaml.load(input$SponsorLogo))),function(i){
                 div(class="sponsor",
-                span(class="sponsor-text",md_txt("Sponsor Text",sponsoredByTxt[i])),
+                span(class="sponsor-text",md_txt("",sponsoredByTxt[i])),
                 div(class="sponsor-logo-container",
                 robust_img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]),"Sponsor Logo")
                 ))})

@@ -20,17 +20,18 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
    }
 
 
-
+# Standards alignment & learning plots -----------------------------------------------------
   if("Standards Alignment"%in% choices){
 
     alignment <- compileStandards(WD=WD)
     if(input$TargetSubject==""){stop("Enter a Target Subject on the Edit tab and try again.")}
+    message("\nGenerating Learning Chart\n")
     learningChart(alignment,
                   targetSubj=input$TargetSubject,
                   caption=input$Title,
                   dpi=200,
                   WD=WD)
-
+    message("\nGenerating Learning Epaulette\n")
     learningEpaulette(alignment,
                       targetSubj=input$TargetSubject,
                       WD=WD)
@@ -41,18 +42,56 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
     if(input$ShortTitle==""){stop("You need to enter a unique ShortTitle in Edit Tab")}
     updateTeachingMatLinks(shortTitle=input$ShortTitle,WD=WD)
     compileTeachingMat(WD=WD)
-  }else{make_null_json("teaching-materials",WD)}
+  }else{
+    make_null_json("teaching-materials",WD)
+    alignment<-NA
+    }
 
 
+# Separate parts of Front Matter ------------------------------------------
+  if("Front Matter" %in% choices){
+    d<-reactiveValuesToList(input)
+
+    frontMatter<-list(
+      ShortTitle=d$ShortTitle,
+      PublicationStatus= d$PublicationStatus,
+      TemplateVer= d$TemplateVer,
+      LastUpdated=Sys.time(),
+      Title=d$Title,
+      Subtitle=d$Subtitle,
+      SponsoredBy=d$SponsoredBy,
+      Section=list(
+        `__component`= "lesson-plan.overview",
+        EstLessonTime=d$EstLessonTime,
+        ForGrades= d$ForGrades,
+        TargetSubject= d$TargetSubject,
+        # browser(),
+        #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
+        Text=lumpItems(c("DrivingQ","EssentialQ","LearningObj","MiscMD"),item.labs = c("Driving Question(s):","Essential Question(s):","Learning Objective(s):",""),
+                        d,new.name = "Text")$Text,
+        Tags=d$Tags#unlist(lapply(d$Tags,function(x) c(Value=x)))
+        )
+      )
+
+    jsonlite::write_json(frontMatter,path = fs::path(destFolder,"front-matter",ext = "json"),pretty=TRUE,auto_unbox=TRUE)
+    }
+
+
+
+# Procedures --------------------------------------------------------------
   if("Procedures" %in% choices){
     compileProcedure(WD=WD)
   }else{make_null_json("procedure",WD=WD)}
 
+
+
+# Acknowledgments ---------------------------------------------------------
   if("Acknowledgments" %in% choices){
     compileAcknowledgments(WD=WD)
   }else{make_null_json("acknowledgments",WD)}
 
 
+# Version Documentation ---------------------------------------------------
   if("Versions" %in% choices){
     compileVersions(WD=WD)
   }else{make_null_json("versions",WD)}
@@ -91,7 +130,7 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
           filenamez.df<-filenamez.df[match(jsonNames,filenamez.df$match),]
           filenamez<-filenamez.df$file %>% unlist()
 
-
+          #read in all the json pieces
           lesson<-lapply(filenamez,function(x){
                   jsonlite::read_json(fs::path(destFolder,x))
                   })

@@ -259,9 +259,15 @@ multimedia<-lapply(1:nrow(linksMedia),function(i){
 
 
 
-out<-list(classroom=list(resourceSummary=rsrcSumm_C,gradeVariantNotes=gradeVariantNotes,resources=resourcesC),
+d<-list(classroom=list(resourceSummary=rsrcSumm_C,gradeVariantNotes=gradeVariantNotes,resources=resourcesC),
           remote=list(resourceSummary=rsrcSumm_R,gradeVariantNotes=gradeVariantNotes,resources=resourcesR),
           multimedia=multimedia)
+
+out<-list(
+  `__component` = "teaching - resources.teaching - resources",
+  SectionTitle= "Teaching Materials",
+  list(Data=d)
+)
 
 
 

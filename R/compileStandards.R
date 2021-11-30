@@ -51,25 +51,25 @@ a0<-openxlsx::read.xlsx(standardsFile,sheet=4,colNames=TRUE,startRow=2)
 a0<-a0[which(a0$Code!=""),]
 
 #rename so easier to deal with
-names(a0)[1:10] <- c("code","statement","subject","grade","lg","lg_stmnt","set","target","grp", "how")
+names(a0)[1:11] <- c("code","statement","subject","grade","lo","lo_stmnt","set","dim","target","grp", "how")
 
 
 # manage TBDs and flagged, undocumented alignments ------------------------
 tbds<-grepl("tbd",a0$how,ignore.case=TRUE)
-#a1 does not have records with lg_statements containing "TBD" or no entry for "how"
+#a1 does not have records with lo_statements containing "TBD" or no entry for "how"
 if(sum(tbds)>0) {
   message(
-    "\nThe following were removed because Learning Goal documentation contained 'TBD':\n\t\u2022",
+    "\nThe following were removed because Learning Objective documentation contained 'TBD':\n\t\u2022",
     paste0(a0$code[tbds], collapse = "\n\t\u2022"),
            "\n"
   )
 }
 
 #undocumented alignments
-undoc<-is.na(a0$how)
+undoc<-is.na(a0$how)&is.na(a0$grp)
 if(sum(undoc)>0) {
   message(
-    "\nThe following were removed because learning goal documentation was blank:\n\t\u2022",
+    "\nThe following were removed because learning objective documentation was blank:\n\t\u2022",
     paste0(a0$code[undoc], collapse = "\n\t\u2022"),
     "\n"
   )
@@ -80,7 +80,10 @@ a1<-a0[!undoc&!tbds,]
 # Add markdown bullet to front of lines that don't start with it
 # Figure out grade band(s)
 a2<-a1
-a2$how<-ifelse(!grepl("^- ",a1$how),paste0("- ",a1$how),a1$how)
+
+#swap out bullets for - to maintain consistency in markdown syntax
+a2$how<-gsub("\u2022","-",a2$how)
+a2$how<-ifelse(!grepl("^- ",a2$how),paste0("- ",a2$how),a2$how)
 
 
 # #///////////////////////////
@@ -104,7 +107,7 @@ a3$grouping <-
   sapply(1:nrow(a3), function(i) {
     ifelse(is.na(a3$grp[i]),
            paste0("singlet", "_", i),
-           paste0("group", "_", a3$grp[i]))
+           paste0("group", "_", gsub("(-.*)","",a3$grp[i])))
   })
 
 
@@ -112,7 +115,7 @@ a3$grouping <-
 a3$code_set<-paste(a3$code,a3$set,sep="_")
 a_master$code_set<-paste(a_master$code,a_master$set,sep="_")
 #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standardsRef)
-A<-dplyr::left_join(a3[,c("code_set","lg","lg_stmnt","target","grp","grouping","how")],a_master,by="code_set")
+A<-dplyr::left_join(a3[,c("code_set","lo","lo_stmnt","target","grp","grouping","how")],a_master,by="code_set")
 #factor subjects for desired order
 A$subject<-factor(A$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 A <- A %>% dplyr::arrange(.data$subject)
@@ -124,12 +127,12 @@ gradeBandTxt<-sapply(gradeBandBreaks,function(x) paste0(x[1],"-",x[length(x)]))
 gradeL<-sapply(A$grade, function(x) {
   #Ignore K-12 wide standards for assigning grade bands
   if (grepl("K", x, ignore.case = TRUE)) {
-    NA
+    "K-12"
   } else{
     grades <- unlist(strsplit(x, ",", fixed = T))
     bands<-sapply(grades, function(g_i) {
       hits = unlist(sapply(gradeBandBreaks, FUN=function(brk) {
-        g_i %in% brk
+        as.numeric(g_i) %in% brk
       }))
       gradeBandTxt[which(hits)]
     })
@@ -165,6 +168,7 @@ for(ta_i in 1:length(unique(A$target))) {
           # use 1st 'how' alignment note if they're all the same, otherwise collapse alignment
           # notes that map to diff. learning targets into a bulleted list
           if (length(unique(d_gr$how)) == 1) {
+            browser()
             aNotes = d_gr$how[1]
           } else{
             aNotes = paste0(unique(d_gr$how), collapse = "\n")
