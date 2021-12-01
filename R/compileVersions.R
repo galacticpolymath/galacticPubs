@@ -15,6 +15,7 @@ compileVersions <- function(WD=getwd(),inputFileName="meta/version-info.xlsx",de
    #if WD supplied, append it to destFolder
    if (!identical(WD, getwd())) {
      destFolder <- paste0(WD, destFolder)
+     inputFileName=paste0(WD,"meta/version-info.xlsx")
    }
 
 

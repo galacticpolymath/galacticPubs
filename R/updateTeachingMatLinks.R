@@ -5,7 +5,7 @@
 #' Just a note that I'm using 2 libraries to handle XLSX files. Not ideal, but the imported data from openxlsx::read.xlsx is nicer than XLConnect::readWorksheetFromFile, but the editing of data from a complex spreadsheet is MUCH better in XLConnect.
 #'
 #' @param shortTitle The unique short title of this lesson which is prefixed on the lesson folder name in the shared
-#' @param dataCat which info do you want to merge with your teaching-materials spreadsheet? Options= "quickPrep_feedback", "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.
+#' @param dataCat which info do you want to merge with your teaching-materials spreadsheet? Options= "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.
 #' @param linksFile file location of the lesson teaching-resource-links XLSX worksheet. gdrive; *CaseSensitive!
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param sortOutput logical; if T, outputs are sorted by grade, part, filetype, then filename
@@ -13,7 +13,7 @@
 #' @export
 #'
 updateTeachingMatLinks<-function(shortTitle,
-                                 dataCat = c("download", "quickPrep_feedback", "remote", "classroom"),
+                                 dataCat = c("download",  "remote", "classroom"),
                                  linksFile = "meta/teaching-materials.xlsx",
                                  WD = getwd(),
                                  sortOutput = T,
@@ -42,15 +42,14 @@ updateTeachingMatLinks<-function(shortTitle,
   #useful later for figuring out filetypes of dribble listings
   mimeKey<-googledrive::drive_mime_type(googledrive::expose())
   #Create key for connecting the dataCat file categories to the tabs on the .xlsx file.
-    tmKey<-data.frame(dataCat=c("quickPrep_feedback","download","classroom","classroom","remote","remote"),subCat=c("","","presentations","handouts","presentations","handouts"),tab=c("quickPrep_Fb","dL","c_pres","c_handouts","r_pres","r_handouts"))
+    tmKey<-data.frame(dataCat=c("download","classroom","classroom","remote","remote"),subCat=c("","presentations","handouts","presentations","handouts"),tab=c("dL","c_pres","c_handouts","r_pres","r_handouts"))
     #if shorthand was used in dataCat (e.g. 1st letter), make correction
     dataCat.orig<-dataCat
     dataCat<-unique(tmKey$dataCat)[pmatch(dataCat,unique(tmKey$dataCat))]
     #filter key to only the selected dataCats
     tmKey.selected<-tmKey[tmKey$dataCat %in% dataCat,]
   #If sorting output, what's the order of column sorting?
-    sortStringL<-list(quickPrep_Fb=c("filetype","part"),
-                      dL=c("envir","grades","part"),
+    sortStringL<-list(dL=c("envir","grades","part"),
                       c_pres=c("stage","grades","part","type"),
                       c_handouts=c("stage","grades","part","type","SvT"),
                       r_pres=c("stage","grades","part","type"),
@@ -148,27 +147,27 @@ updateTeachingMatLinks<-function(shortTitle,
         if(length(dirID)==0){return(NA)}
         dirDribble<-googledrive::drive_find(q=paste0("'",dirID,"' in parents"))
 
-        #handle quickprep "data category"
-        if(dataCat_k=="quickPrep_feedback"){
-            excelTab<-tmKey$tab[match(paste(dataCat_k,""),paste(tmKey$dataCat,tmKey$subCat))]
-            #If the filename has "-part 1-" in it, extract part, otherwise put an NA (i.e. for forms)
-            qp_part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",dirDribble$name,perl=T),
-                        gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",dirDribble$name,perl=T),NA)
-            qp_links<-sapply(dirDribble$drive_resource,function(x) {x$webViewLink})
-            qp_mimeTypes<-sapply(dirDribble$drive_resource,function(x){x$mimeType})
-            qp_filetypes<-mimeKey$human_type[match(qp_mimeTypes,mimeKey$mime_type)]
-            qp_baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",qp_links,perl=T)
-
-            qp_gPresentLink=paste0(qp_baseLink,"present")
-            # Make PresentLink NA for non-presentation files
-            qp_gPresentLink[which(googledrive::drive_reveal(dirDribble,"mime_type")$mime_type!="application/vnd.google-apps.presentation")]<-NA
-
-            #output Quickprep & Feedback Table
-            data.frame(dataCat=dataCat_k,grades=NA,part=qp_part,filename=dirDribble$name,filetype=qp_filetypes,
-                       gDriveLink=qp_links,gPresentLink=qp_gPresentLink,gID=dirDribble$id,excelTab=excelTab) %>% dplyr::filter(.data$filename!=".gitkeep")
-
-        #handle all remote and classroom environments differently
-        }else{
+        # #handle quickprep "data category"
+        # if(dataCat_k=="quickPrep_feedback"){
+        #     excelTab<-tmKey$tab[match(paste(dataCat_k,""),paste(tmKey$dataCat,tmKey$subCat))]
+        #     #If the filename has "-part 1-" in it, extract part, otherwise put an NA (i.e. for forms)
+        #     qp_part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",dirDribble$name,perl=T),
+        #                 gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",dirDribble$name,perl=T),NA)
+        #     qp_links<-sapply(dirDribble$drive_resource,function(x) {x$webViewLink})
+        #     qp_mimeTypes<-sapply(dirDribble$drive_resource,function(x){x$mimeType})
+        #     qp_filetypes<-mimeKey$human_type[match(qp_mimeTypes,mimeKey$mime_type)]
+        #     qp_baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",qp_links,perl=T)
+        #
+        #     qp_gPresentLink=paste0(qp_baseLink,"present")
+        #     # Make PresentLink NA for non-presentation files
+        #     qp_gPresentLink[which(googledrive::drive_reveal(dirDribble,"mime_type")$mime_type!="application/vnd.google-apps.presentation")]<-NA
+        #
+        #     #output Quickprep & Feedback Table
+        #     data.frame(dataCat=dataCat_k,grades=NA,part=qp_part,filename=dirDribble$name,filetype=qp_filetypes,
+        #                gDriveLink=qp_links,gPresentLink=qp_gPresentLink,gID=dirDribble$id,excelTab=excelTab) %>% dplyr::filter(.data$filename!=".gitkeep")
+        #
+        # #handle all remote and classroom environments differently
+        # }else{
           gradeDirs<-dirDribble[sapply(dirDribble$drive_resource,function(x) x$mimeType=="application/vnd.google-apps.folder"),]
 
           #Test if there are no grade directories for this data category
@@ -230,7 +229,7 @@ updateTeachingMatLinks<-function(shortTitle,
           names(out.grades)<-paste0("g",grades)
           out.grades
           }#end "remote/classroom" else{}
-        }#end "not download" else{}
+        # }#end "not download" else{}
 
     })#end gData def
     names(gData0)<-dataCat

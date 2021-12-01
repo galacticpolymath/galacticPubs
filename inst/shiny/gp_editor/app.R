@@ -43,13 +43,14 @@ ui <- navbarPage(
     theme = shinytheme("yeti"),
     title = "GP Lesson Editor",
     position="fixed-top",
+
 # Save Button--------------------------------------------------
     header = div(class="header_save",
     # Define custom CSS styles
     tags$link(rel = "stylesheet", type = "text/css", href = "rsrc/custom.css"),
     div(class="header_button_container",
         #save time stamp to left of button
-        span(class="yaml_update", htmlOutput("yaml_update_txt")),
+        uiOutput("yaml_update_msg"),
         #save button
         actionButton('save', div(class="header_button_container",
             img(src = "rsrc/gpicon.ico"),
@@ -128,9 +129,33 @@ ui <- navbarPage(
         h3("Lesson Preview"),
         textAreaInput("QuickPrep",label="Teach It in 15 Quick Prep:",value=y$QuickPrep,height="150px"),
         hr(class="blhr"),
-        h3("Bonus + Extensions"),
-        textAreaInput("Bonus",label="Bonus Material:",placeholder="Optional.",value=y$Bonus,height="150px"),
-        textAreaInput("Extensions",label="Extensions:",placeholder="Optional.",value=y$Extensions,height="150px"),
+        h3("But wait, there's more!"),
+        textAreaInput("Bonus",label="Bonus Material (Easter eggs and tidbits that aren't a whole extension lesson)",placeholder="Optional.",value=y$Bonus,height="150px"),
+        textAreaInput("Extensions",label="Extensions (Full spin-off lessons, activities, and assessments)",placeholder="Optional.",value=y$Extensions,height="150px"),
+        hr(class="blhr"),
+        h3("Background and Research Connections"),
+        #Research background
+        textAreaInput("Background",
+                      label="Research Background:",
+                      placeholder="![Journal article image](ScreenShotOfStudy.png)\n[Link to Original Study](StudyURL)\n#### Scientific Background\nVery accessible explanation of this line of research and why it matters.\n#### Further Reading\n- [Link to relevant thing 1](url1)\n- [Link to relevant thing 2](url2)",
+                      value=y$Background,
+                      height="150px"),
+        #Connection to Research
+        textAreaInput("ConnectionToResearch",
+                      label="Connection to Research",
+                      placeholder="#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
+                      value=y$Background,height="150px"),
+        hr(class="blhr"),
+        h3("Feedback & Credits"),
+        #Feedback
+        textAreaInput("Feedback",
+                      label="Feedback",
+                      placeholder="### Got suggestions or feedback?\n#### We want to know what you think!\n[Please share your thoughts using this form](Add form link) and we will use it to improve this and other future lessons.",
+                      value=y$Background,height="150px"),
+        textAreaInput("Credits",
+                      label="Credits",
+                      placeholder="#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
+                      value=y$Background,height="150px"),
         hr(class="blhr"),
         div(class="spacer")
     ),
@@ -180,7 +205,8 @@ ui <- navbarPage(
 # SERVER LOGIC ------------------------------------------------------------
 server <- function(input, output,session) {
   vals<-reactiveValues()
-  vals$yaml_update_txt<-renderText("")
+  vals$yaml_update_txt<-("")
+  vals$saved<-TRUE
   output$publishReport<-renderText("")
 
   #check whether there are unsaved changes
@@ -191,8 +217,20 @@ server <- function(input, output,session) {
       !(identical(data_check[[1]][i],data_check[[2]][i]) | sum(length(data_check[[1]][[i]]),length(data_check[[2]][[i]]))==0)
       })
     count_outOfDate<-do.call(sum,outOfDate)
-    if(count_outOfDate>0){output$yaml_update_txt <-vals$yaml_update_txt <- renderText("Not saved, yo ->")
-    }else if(substr(vals$yaml_update_txt(),1,1)=="N"){vals$yaml_update_txt <-output$yaml_update_txt <- renderText("")}
+    if(count_outOfDate>0){vals$yaml_update_txt <- ("Not saved, yo ->")
+    vals$saved<-FALSE
+    }else if(substr(vals$yaml_update_txt,1,1)=="N"){vals$yaml_update_txt <- ("")
+    vals$saved<-TRUE}
+
+
+  })
+
+  output$yaml_update_msg<-renderUI({
+    tagList(
+      # browser(),
+       span(class=ifelse(vals$saved,"yaml_saved","yaml_unsaved"), HTML(vals$yaml_update_txt))
+    )
+
   })
 
 
@@ -216,8 +254,9 @@ server <- function(input, output,session) {
     jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"),pretty=TRUE,auto_unbox = TRUE)
     #Storing yaml update text in reactive values and output, so it gets printed & can be
     #accessed from another server function
-    vals$yaml_update_txt <-output$yaml_update_txt <-
-        txt<-renderText(paste0(
+    vals$saved<-TRUE
+    vals$yaml_update_txt <-
+        txt<-(paste0(
             "front-matter.yml updated:<br>",
             format(Sys.time(), "%Y-%b-%d %r")
         ))

@@ -264,9 +264,9 @@ d<-list(classroom=list(resourceSummary=rsrcSumm_C,gradeVariantNotes=gradeVariant
           multimedia=multimedia)
 
 out<-list(
-  `__component` = "teaching - resources.teaching - resources",
+  `__component` = "teaching-resources.teaching-resources",
   SectionTitle= "Teaching Materials",
-  list(Data=d)
+  Data=d
 )
 
 

@@ -39,9 +39,12 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
   }else{make_null_json("standards",WD)}
 
   if("Teaching Materials" %in% choices){
-    if(input$ShortTitle==""){stop("You need to enter a unique ShortTitle in Edit Tab")}
-    updateTeachingMatLinks(shortTitle=input$ShortTitle,WD=WD)
-    compileTeachingMat(WD=WD)
+    if(input$ShortTitle==""){warning("You need to enter a unique ShortTitle in Edit Tab")
+    }else{
+      updateTeachingMatLinks(shortTitle = input$ShortTitle, WD = WD)
+      compileTeachingMat(WD = WD)
+    }
+
   }else{
     make_null_json("teaching-materials",WD)
     alignment<-NA
@@ -50,17 +53,23 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
 
 # Separate parts of Front Matter ------------------------------------------
   if("Front Matter" %in% choices){
-    d<-reactiveValuesToList(input)
+      #consolidate current and saved front matter info
+    prepped<-prep_input(input,yaml_path=paste0(WD,"meta/front-matter.yml"))
+    # input
+    d<-prepped$current_data
+    # saved data read from yaml (esp. for things we don't read in, but want to keep like template version)
+    z<-prepped$saved_data
 
-    frontMatter<-list(
+    header<-list(
       ShortTitle=d$ShortTitle,
       PublicationStatus= d$PublicationStatus,
-      TemplateVer= d$TemplateVer,
+      TemplateVer= z$TemplateVer,
       LastUpdated=Sys.time(),
       Title=d$Title,
       Subtitle=d$Subtitle,
-      SponsoredBy=d$SponsoredBy,
-      Section=list(
+      SponsoredBy=d$SponsoredBy)
+
+    overview<-list(
         `__component`= "lesson-plan.overview",
         EstLessonTime=d$EstLessonTime,
         ForGrades= d$ForGrades,
@@ -69,11 +78,45 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
         #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
         Text=lumpItems(c("DrivingQ","EssentialQ","LearningObj","MiscMD"),item.labs = c("Driving Question(s):","Essential Question(s):","Learning Objective(s):",""),
                         d,new.name = "Text")$Text,
-        Tags=d$Tags#unlist(lapply(d$Tags,function(x) c(Value=x)))
+        Tags=d$Tags,#unlist(lapply(d$Tags,function(x) c(Value=x)))
+        Description=d$Description
         )
-      )
 
-    jsonlite::write_json(frontMatter,path = fs::path(destFolder,"front-matter",ext = "json"),pretty=TRUE,auto_unbox=TRUE)
+    preview<-list(
+      `__component`="lesson-plan.collapsible-text-section",
+      SectionTitle= "Lesson Preview",
+      Content= d$QuickPrep,
+      InitiallyExpanded=TRUE
+    )
+
+    bonus<-list(
+      `__component`="lesson-plan.collapsible-text-section",
+      SectionTitle= "Bonus Content",
+      Content= d$Bonus,
+      InitiallyExpanded=TRUE
+    )
+
+    extensions<-list(
+      `__component`="lesson-plan.collapsible-text-section",
+      SectionTitle= "Extensions",
+      Content= d$Extensions,
+      InitiallyExpanded=TRUE
+    )
+
+    background<-list(
+      `__component`="lesson-plan.collapsible-text-section",
+      SectionTitle= "Background",
+      Content= d$Background,
+      InitiallyExpanded=TRUE
+    )
+
+
+
+    jsonlite::write_json(header,path = fs::path(destFolder,"header",ext = "json"),pretty=TRUE,auto_unbox=TRUE)
+    jsonlite::write_json(overview,path = fs::path(destFolder,"overview",ext = "json"),pretty=TRUE,auto_unbox=TRUE)
+    jsonlite::write_json(preview,path = fs::path(destFolder,"preview",ext = "json"),pretty=TRUE,auto_unbox=TRUE)
+    jsonlite::write_json(preview,path = fs::path(destFolder,"bonus",ext = "json"),pretty=TRUE,auto_unbox=TRUE)
+    jsonlite::write_json(preview,path = fs::path(destFolder,"extensions",ext = "json"),pretty=TRUE,auto_unbox=TRUE)
     }
 
 
@@ -103,11 +146,11 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
 # -meta/teachingMaterials.json
 # -meta/versions.json
 
-  jsonNames<-c("front-matter","teaching-materials","procedure","standards","acknowledgments","versions")
+  jsonNames<-c("header","overview","preview","teaching-materials","procedure","standards","acknowledgments","versions")
   jsonFilenames<-paste0(jsonNames,".json")
   #test for missings or duplicates
   json_ls<-list.files(paste0(WD,"meta/json"))
-  matches<-data.frame(file=json_ls,match=sapply(substr(json_ls,1,7),function(x){jsonNames[pmatch(x,jsonNames)]}),row.names=NULL)
+  matches<-data.frame(file=json_ls,match=jsonNames[pmatch(gsub("(^.*)\\..*","\\1",json_ls),jsonNames)],row.names=NULL)
   message("\n *",length(json_ls)," JSON files found: \n   -",paste(json_ls,collapse="\n   -"),"\n")
   #count up how many JSONs found for each expected filename
   jsonNameMatchCounts<-sapply(jsonNames,function(x) sum(x==matches$match,na.rm=T))
@@ -117,24 +160,43 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
     dupedJSON_abbrev<-substr(names(jsonNameMatchCounts)[which(jsonNameMatchCounts>1)],1,7)
     dupedFilenames<-json_ls[which(substr(json_ls,1,7)%in%dupedJSON_abbrev)] %>% stats::na.omit() %>% as.character()
 
-    stop("   You can only have 1 JSON per category. \n\t  Delete one of each category:\n\t  -",
+    warning("   You can only have 1 JSON per category. \n\t  Delete duplicate files:\n\t  -",
          paste(dupedFilenames,collapse="\n\t  -"))
   }else{
            if(sum(jsonNameMatchCounts)<length(jsonNames)){
              missingJSON<-paste0(names(jsonNameMatchCounts)[which(jsonNameMatchCounts<1)],".json")
-             stop("\n\tYou're missing:\n\t -",paste(missingJSON,collapse="\n\t -"),"\n")
+             warning("\n\tYou're missing:\n\t -",paste(missingJSON,collapse="\n\t -"),"\n")
            }else{
-          lesson<-list()
+
           filenamez.df<-matches %>% dplyr::filter(stats::complete.cases(.data$match))
           #sort to have desired order (specified in jsonNames)
           filenamez.df<-filenamez.df[match(jsonNames,filenamez.df$match),]
           filenamez<-filenamez.df$file %>% unlist()
-
+          browser()
           #read in all the json pieces
-          lesson<-lapply(filenamez,function(x){
+          lesson_data<-lapply(filenamez,function(x){
                   jsonlite::read_json(fs::path(destFolder,x))
                   })
-          names(lesson)<-filenamez.df$match
+          names(lesson_data)<-filenamez.df$match
+
+          #reorganize slightly to match legacy structure
+          lesson<-list(lesson_data[["header"]],
+                       section = list(lesson_data[["overview"]]),
+                                      lesson_data[["preview"]],
+                                      lesson_data[["teaching-materials"]],
+                                      lesson_data[["procedure"]],
+                                      lesson_data[["bonus"]],
+                                      lesson_data[["extensions"]],
+                                      lesson_data[["background"]],
+                                      lesson_data[["standards"]],
+                                      lesson_data[["jobviz"]],
+                                      lesson_data[["credits"]],
+                                      lesson_data[["acknowledgments"]],
+                                      lesson_data[["versions"]],
+                       CoverImage = lesson_data[["images"]]$CoverImage,
+                       SponsorImage = lesson_data[["images"]]$SponsorImage
+
+          )
           message("\n *JSON files imported:\n  -",paste(filenamez,collapse="\n  -"),"\n")
           }
 

@@ -168,7 +168,6 @@ for(ta_i in 1:length(unique(A$target))) {
           # use 1st 'how' alignment note if they're all the same, otherwise collapse alignment
           # notes that map to diff. learning targets into a bulleted list
           if (length(unique(d_gr$how)) == 1) {
-            browser()
             aNotes = d_gr$how[1]
           } else{
             aNotes = paste0(unique(d_gr$how), collapse = "\n")
@@ -204,7 +203,8 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 
 # Write JSON for GP Simple Lesson Plan -----------------------------------
-compiled_json<-jsonlite::toJSON(out,pretty=TRUE,auto_unbox = TRUE)
+compiled_json<-jsonlite::toJSON( list(  `__component` = "lesson-plan.standards",
+                                        Data=out) ,pretty=TRUE,auto_unbox = TRUE)
 con<-file(outFile)
 writeLines(compiled_json,con)
 close(con)
