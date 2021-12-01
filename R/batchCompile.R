@@ -60,6 +60,7 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
     # saved data read from yaml (esp. for things we don't read in, but want to keep like template version)
     z<-prepped$saved_data
 
+
     header<-list(
       ShortTitle=d$ShortTitle,
       PublicationStatus= d$PublicationStatus,
@@ -82,12 +83,21 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
         Description=d$Description
         )
 
+    #read in teaching-materials multimedia if that file exists
+    tmExists<-file.exists(paste0(WD,"meta/JSON/teaching-materials.json"))
+    if(tmExists){
+      tm<-jsonlite::read_json(paste0(WD,"meta/JSON/teaching-materials.json"))
+    }
+
+    # Make lesson preview section
     preview<-list(
-      `__component`="lesson-plan.collapsible-text-section",
+      `__component`="lesson-plan.lesson-preview",
       SectionTitle= "Lesson Preview",
-      Content= d$QuickPrep,
+      Multimedia= if(tmExists){tm$Data$multimedia}else{},
+      QuickPrep= d$QuickPrep,
       InitiallyExpanded=TRUE
     )
+    browser()
 
     bonus<-list(
       `__component`="lesson-plan.collapsible-text-section",
@@ -172,7 +182,7 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
           #sort to have desired order (specified in jsonNames)
           filenamez.df<-filenamez.df[match(jsonNames,filenamez.df$match),]
           filenamez<-filenamez.df$file %>% unlist()
-          browser()
+
           #read in all the json pieces
           lesson_data<-lapply(filenamez,function(x){
                   jsonlite::read_json(fs::path(destFolder,x))
