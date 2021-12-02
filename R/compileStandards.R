@@ -127,7 +127,7 @@ gradeBandTxt<-sapply(gradeBandBreaks,function(x) paste0(x[1],"-",x[length(x)]))
 gradeL<-sapply(A$grade, function(x) {
   #Ignore K-12 wide standards for assigning grade bands
   if (grepl("K", x, ignore.case = TRUE)) {
-    "K-12"
+    NA
   } else{
     grades <- unlist(strsplit(x, ",", fixed = T))
     bands<-sapply(grades, function(g_i) {
@@ -174,8 +174,8 @@ for(ta_i in 1:length(unique(A$target))) {
           }
           list(
             codes = unique(d_gr$code),
-            #in case I ever change grade to grades or vice versa
-            grades = d_gr %>% dplyr::select(dplyr::starts_with("grade")) %>% unique() %>% as.character(),
+            #make sure grade is never changed to grades...
+            grades = d_gr$grade %>% unique() %>% as.character(),
             statements = unique(d_gr$statement),
             alignmentNotes = aNotes,
             subcat = d_gr$subcat[1]
@@ -216,7 +216,16 @@ message("\nStandards submitted:\t",nrow(a0),"\nRemoved due to issues:\t",sum(tbd
 message("JSON file saved\n@ ",outFile)
 message(rep("=",30))
 
+uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",") %>% unlist() %>% unique()
+
 #add grades information to output
-return(list(input=dplyr::as_tibble(a0),compiled=dplyr::as_tibble(A),problem_entries=dplyr::as_tibble(a0[(tbds+undoc)>0,])))
+return(
+  list(
+    input = dplyr::as_tibble(a0),
+    compiled = dplyr::as_tibble(A),
+    problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
+    gradeBands= uniqueGradeBands
+  )
+)
 
 }#end compileAlignment function def

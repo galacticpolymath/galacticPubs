@@ -47,7 +47,7 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
             ", but it helps teach national learning standards in 4 subjects: \n- [Common Core Math](http://www.corestandards.org/Math/); [Common Core ELA](http://www.corestandards.org/ELA-Literacy/); [Next Generation Science (NGSS)](https://www.nextgenscience.org/); and [College, Career, and Civic Life (C3) Social Studies Standards](https://www.socialstudies.org/standards/c3).\nIn total, there are ",
             nrow(alignment$compiled),
             " standards across US grade band(s): ",
-            paste0(alignment$gradeBands, sep = ', '),
+            paste0(alignment$gradeBands, collapse = ', '),
             "."
           ),
         Footnote = "**Notes on Standards**\n\n*Standards are broken down into “Target” and “Connected” categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
