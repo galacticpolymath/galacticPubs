@@ -104,7 +104,14 @@ prep_input<-function(input,yaml_path){
 
     #read in existing front-matter.yml if it exists (just to be sure we're up to date)
     #If this is the user's first time editing, they will have read in y at the top, but not written yet
-    if(file.exists(yaml_path)){y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)}
+  if (file.exists(yaml_path)) {
+    y <- yaml::read_yaml(yaml_path, eval.expr = TRUE)
+  } else{
+    #use the front matter template supplied with galacticPubs as a starting point
+    y <-
+      safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
+                                   "galacticPubs"))
+  }
 
     # operational input variables we don't want to output
     op_var<-c("save")
