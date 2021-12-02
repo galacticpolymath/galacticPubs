@@ -202,12 +202,12 @@ dir.create(destFolder,showWarnings=FALSE,recursive=T)
 outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),collapse=""),ext="json")
 
 
+
 # Write JSON for GP Simple Lesson Plan -----------------------------------
-compiled_json<-jsonlite::toJSON( list(  `__component` = "lesson-plan.standards",
-                                        Data=out) ,pretty=TRUE,auto_unbox = TRUE)
-con<-file(outFile)
-writeLines(compiled_json,con)
-close(con)
+jsonlite::write_json( list(  `__component` = "lesson-plan.standards",
+                             Data=out),
+                      outFile,pretty=TRUE,auto_unbox = TRUE)
+
 
 
 # return compiled tibble --------------------------------------------------

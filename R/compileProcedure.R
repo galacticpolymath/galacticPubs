@@ -43,7 +43,7 @@ compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta
 
   #####
   #Parse all the text columns to expand {vidN} notation into full video links
-  proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")]<-apply(proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")],2,function(x) galacticPubs::parseGPmarkdown(x))
+  proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")]<-apply(proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")],2,function(x) galacticPubs::parseGPmarkdown(x,linksFile=linksFile))
 
   ####
   #Parse vocab shorthand into reasonably formatted markdown with bullets
@@ -108,10 +108,16 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 
 # Write JSON for GP Simple Lesson Plan -----------------------------------
-compiled_json<-jsonlite::toJSON(out,pretty=TRUE,auto_unbox = TRUE)
-con<-file(outFile)
-writeLines(compiled_json,con)
-close(con)
+jsonlite::write_json(
+  list(
+    `__component` = "lesson-plan.procedure",
+    SectionTitle = "Procedure",
+    Data = out
+  ),
+  outFile,
+  pretty = TRUE,
+  auto_unbox = TRUE
+)
 
 # printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
 

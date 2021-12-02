@@ -13,7 +13,7 @@
 parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx"){
   #read in multimedia links
   mediaLinks<-openxlsx::read.xlsx(linksFile,sheet="multimedia",startRow=2)%>% dplyr::tibble()
-  vidLinks<-mediaLinks %>% dplyr::filter(tolower(.data$Type)=="video")
+  vidLinks<-mediaLinks %>% dplyr::filter(tolower(.data$type)=="video")
 
   #extract all video GP mardown syntax captures (e.g. "{vid1}")
   vidCaptures<-stringr::str_extract_all(x,"\\{vid[^\\{]*\\}")
@@ -26,7 +26,7 @@ parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx"){
                     index<-match(vidN,vidLinks$order,nomatch=999)
                     if(index!=999&!is.na(index)){
                     URL<-vidLinks$mainLink[index]
-                    title<-vidLinks$Title[index]
+                    title<-vidLinks$title[index]
                     replace<-ifelse(is.na(title),NA,paste0('[\u25B6"',title,'"](',URL,')'))
                     }else{
                     replace<-paste0("[ERROR: CHECK *",refs,"* REFERENCE. NO LINK FOUND]()")

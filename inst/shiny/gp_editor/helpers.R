@@ -99,8 +99,9 @@ robust_txt<-function(input_txt,label="Some Text"){
 # with additional insertions (like template version and other custom fields) that we
 # want to keep in the YAML file, but are not used interactively in the shiny app.
 # This result can then be compared to y, which has been read in to see if they are identical.
-prep_input<-function(input,yaml_path,y){
-    if(missing(y)){y<-NULL; warning("Might want to pass y to this function.")}
+prep_input<-function(input,yaml_path){
+    # if(missing(y)){y<-NULL; warning("Might want to pass y to this function.")}
+
     #read in existing front-matter.yml if it exists (just to be sure we're up to date)
     #If this is the user's first time editing, they will have read in y at the top, but not written yet
     if(file.exists(yaml_path)){y<-yaml::read_yaml(yaml_path, eval.expr =TRUE)}
@@ -140,10 +141,11 @@ prep_input<-function(input,yaml_path,y){
     list(saved_data=y,current_data=lapply(Y3,function(x)as.character(x)))
 }
 
-#makes list items for a section in JSON output for lesson plan
-makeSection<-function(title){
-  list(
-    `__component`="lesson-plan.section-heading",
-    SectionTitle=title
-  )
-}
+# #makes list items for a section in JSON output for lesson plan
+# makeSection<-function(title){
+#   list(
+#     `__component`="lesson-plan.section-heading",
+#     SectionTitle=title
+#   )
+# }
+

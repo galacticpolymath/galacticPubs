@@ -144,18 +144,18 @@ ui <- navbarPage(
         textAreaInput("ConnectionToResearch",
                       label="Connection to Research",
                       placeholder="#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
-                      value=y$Background,height="150px"),
+                      value=y$ConnectionToResearch,height="150px"),
         hr(class="blhr"),
         h3("Feedback & Credits"),
         #Feedback
         textAreaInput("Feedback",
                       label="Feedback",
                       placeholder="### Got suggestions or feedback?\n#### We want to know what you think!\n[Please share your thoughts using this form](Add form link) and we will use it to improve this and other future lessons.",
-                      value=y$Background,height="150px"),
+                      value=y$Feedback,height="150px"),
         textAreaInput("Credits",
                       label="Credits",
                       placeholder="#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
-                      value=y$Background,height="150px"),
+                      value=y$Credits,height="150px"),
         hr(class="blhr"),
         div(class="spacer")
     ),
@@ -211,7 +211,7 @@ server <- function(input, output,session) {
 
   #check whether there are unsaved changes
   observe({
-    data_check<-prep_input(isolate(input),yaml_path,y)
+    data_check<-prep_input(isolate(input),yaml_path)
     outOfDate<-lapply(1:length(data_check[[1]]),function(i){
       #each element of the list should be identical or of length 0 (accounting for character(0)& NULL )
       !(identical(data_check[[1]][i],data_check[[2]][i]) | sum(length(data_check[[1]][[i]]),length(data_check[[2]][[i]]))==0)
@@ -239,7 +239,7 @@ server <- function(input, output,session) {
   # Save YAML & JSON when button clicked -------------------------------------------
     doIT<-observe({
 
-    current_data<-prep_input(input,yaml_path,y)$current_data
+    current_data<-prep_input(input,yaml_path)$current_data
     #write current data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
 
@@ -301,7 +301,7 @@ server <- function(input, output,session) {
           h4("What to include:"),
           checkboxGroupInput("ReadyToCompile",
                              "(Which items are done and should be compiled?)",
-                             choices = c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"),
+                             choices = c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgments","Versions"),
                              selected=y$ReadyToCompile),
           actionButton("compile","Save & Compile Materials",class="compile-button")
           ),
@@ -327,7 +327,7 @@ server <- function(input, output,session) {
   # Scripts
   observe({
     #Save selections
-    current_data<-prep_input(input,yaml_path,y)$current_data
+    current_data<-prep_input(input,yaml_path)$current_data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
 
     scripts<-list.files(paste0(WD,"scripts"),pattern=".R")
@@ -338,7 +338,7 @@ server <- function(input, output,session) {
   # Compile Materials
   observe({
     #Save data before compiling
-    current_data<-prep_input(input,yaml_path,y)$current_data
+    current_data<-prep_input(input,yaml_path)$current_data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
     batchCompile(input,choices=input$ReadyToCompile,WD=WD)
     } ) %>% bindEvent(input$compile)
@@ -433,7 +433,7 @@ server <- function(input, output,session) {
   observe({
     # browser()
     #Save data before compiling
-    current_data<-prep_input(input,yaml_path,y)$current_data
+    current_data<-prep_input(input,yaml_path)$current_data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
     #files from www folder used to generate preview (or other files dumped there)
     www_file_paths<-list.files(fs::path(getwd(),"/www"),pattern="^.*\\..*",full.names = TRUE)

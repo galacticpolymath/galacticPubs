@@ -16,8 +16,14 @@ compileTeachingMat <- function(linksFile = "meta/teaching-materials.xlsx",
                                outputFileName = "teaching-materials.json",
                                WD = getwd()) {
 
+#make YouTube embed links from other links
+YTembed<-function(link){
+  gsub("^.*(?:v=|youtu.be\\/)([^&]*).*","https://www.youtube.com/embed/\\1",link)
+}
 
-   .=NULL #to avoid errors with dplyr syntax
+
+
+  .=NULL #to avoid errors with dplyr syntax
 
    #if WD supplied, append it to destFolder
    if(!identical(WD, getwd())) {
@@ -250,7 +256,7 @@ multimedia<-lapply(1:nrow(linksMedia),function(i){
     #if byLink left blank, but
     byLink=d$byLink,
     keywords=d$keywords,
-    mainLink=d$mainLink,
+    mainLink=YTembed(d$mainLink),
     vimeoLink=d$vimeoLink,
     filename=d$filename,
     otherLink=d$otherLink)
@@ -259,14 +265,13 @@ multimedia<-lapply(1:nrow(linksMedia),function(i){
 
 
 
-d<-list(classroom=list(resourceSummary=rsrcSumm_C,gradeVariantNotes=gradeVariantNotes,resources=resourcesC),
-          remote=list(resourceSummary=rsrcSumm_R,gradeVariantNotes=gradeVariantNotes,resources=resourcesR),
-          multimedia=multimedia)
+teachingMat<-list(classroom=list(resourceSummary=rsrcSumm_C,gradeVariantNotes=gradeVariantNotes,resources=resourcesC),
+          remote=list(resourceSummary=rsrcSumm_R,gradeVariantNotes=gradeVariantNotes,resources=resourcesR))
 
 out<-list(
   `__component` = "teaching-resources.teaching-resources",
   SectionTitle= "Teaching Materials",
-  Data=d
+  Data=teachingMat
 )
 
 
@@ -278,11 +283,13 @@ dir.create(destFolder,showWarnings=FALSE,recursive=T)
 outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(outputFileName))),ext="json")
 
 
-# Write JSON for GP Simple Lesson Plan -----------------------------------
-compiled_json<-jsonlite::toJSON(out,pretty=TRUE,auto_unbox = TRUE)
-con<-file(outFile)
-writeLines(compiled_json,con)
-close(con)
+# Write JSON for teaching materials -----------------------------------
+jsonlite::write_json(out,outFile,pretty=TRUE,auto_unbox = TRUE)
+
+#write json for multimedia
+jsonlite::write_json(multimedia,fs::path(destFolder,"multimedia.json"),pretty=TRUE,auto_unbox = TRUE)
+
+
 
 # printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
 

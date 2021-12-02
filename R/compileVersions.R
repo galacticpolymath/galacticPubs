@@ -47,11 +47,18 @@ dir.create(destFolder,showWarnings=FALSE,recursive=T)
 outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(outputFileName))),ext="json")
 
 
-# Write JSON for GP Simple Lesson Plan -----------------------------------
-compiled_json<-jsonlite::toJSON(out,pretty=TRUE,auto_unbox = TRUE)
-con<-file(outFile)
-writeLines(compiled_json,con)
-close(con)
+# Write JSON  -----------------------------------
+jsonlite::write_json(
+  list(
+    `__component` = "lesson-plan.versions",
+    SectionTitle = "Version Notes",
+    Data = out
+  ),
+  outFile,
+  pretty = TRUE,
+  auto_unbox = TRUE
+)
+
 
 printToScreenTable<-cbind(ver[,c("ver_num","date","ver_summary")],OtherInfo="BlahBlah")
 
