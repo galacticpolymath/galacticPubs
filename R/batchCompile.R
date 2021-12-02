@@ -19,6 +19,9 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
      destFolder <- paste0(WD, destFolder)
    }
 
+#quell Rcheck warnings
+prep_input<-lumpItems <-
+
 
 # Standards alignment & learning plots -----------------------------------------------------
   if("Standards Alignment"%in% choices){
@@ -50,7 +53,7 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
             paste0(alignment$gradeBands, collapse = ', '),
             "."
           ),
-        Footnote = "**Notes on Standards**\n\n*Standards are broken down into “Target” and “Connected” categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
+        Footnote = "**Notes on Standards**\n\n*Standards are broken down into ***Target*** and ***Connected*** categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
         Badge = list(url = basename(yaml::yaml.load(
           input$LearningChart[1]
         )))
@@ -219,13 +222,13 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
   format(matches,justify="none")
   #point out missing sections
   if (sum(matches$found) < length(jsonNames)) {
-    missingJSON <- subset(matches, !found)$file
+    missingJSON <- subset(matches, !matches$found)$file
     warning("\n\tFYI, you're missing:\n\t -",
             paste(missingJSON, collapse = "\n\t -"),
             "\n")
   }
 
-  filenamez.df<-subset(matches,found)
+  filenamez.df<-subset(matches,matches$found)
 
   #read in all the json pieces
   lesson_data<-lapply(filenamez.df$file,function(x){

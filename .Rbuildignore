@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^data-raw$
 ^meta\.*$
+^published\.*$
 ^assets\.*
 ^scripts\.*
 ^assembled-lesson-materials\.*

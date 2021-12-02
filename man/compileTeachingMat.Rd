@@ -8,7 +8,8 @@ compileTeachingMat(
   linksFile = "meta/teaching-materials.xlsx",
   procedureFile = "meta/procedure.xlsx",
   destFolder = "meta/JSON/",
-  outputFileName = "teachingMaterials.json"
+  outputFileName = "teaching-materials.json",
+  WD = getwd()
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ compileTeachingMat(
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
 
 \item{outputFileName}{output file name; default= "processedTeachingMaterials.json"}
+
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/processedResources.json

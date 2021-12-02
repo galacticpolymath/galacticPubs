@@ -14,6 +14,7 @@ learningChart(
   saveFile = TRUE,
   destFolder = "assets/learning-plots/",
   fileName = "GP-Learning-Chart",
+  WD = getwd(),
   dpi = 300,
   ...
 )
@@ -36,6 +37,8 @@ learningChart(
 \item{destFolder}{where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory}
 
 \item{fileName}{expects "somefilename" (file extension will be ignored)}
+
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 
 \item{dpi}{what resolution would you like the output in dots per inch? 300 by default}
 

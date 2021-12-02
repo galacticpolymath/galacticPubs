@@ -15,7 +15,7 @@ batchCompile(
 \arguments{
 \item{input}{the input from the shiny app environment}
 
-\item{choices}{one or more of the following: c("Front Matter","Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
+\item{choices}{one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
 
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
 

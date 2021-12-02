@@ -11,6 +11,7 @@ learningEpaulette(
   saveFile = TRUE,
   destFolder = "assets/learning-plots/",
   fileName = "GP-Learning-Epaulette",
+  WD = getwd(),
   thickness = 0.2,
   width = 11,
   height = 1.6,
@@ -30,6 +31,8 @@ learningEpaulette(
 \item{destFolder}{where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory}
 
 \item{fileName}{expects "somefilename" for ggsave output image file}
+
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 
 \item{thickness}{is how thick to make the epaulette bar `(`range from 0 to 0.5`)`, 0.2 or 20\% of vertical plot space by default}
 

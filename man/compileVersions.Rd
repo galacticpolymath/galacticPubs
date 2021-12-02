@@ -5,12 +5,15 @@
 \title{compileVersions}
 \usage{
 compileVersions(
+  WD = getwd(),
   inputFileName = "meta/version-info.xlsx",
   destFolder = "meta/JSON/",
   outputFileName = "versions.json"
 )
 }
 \arguments{
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
 \item{inputFileName}{file location of the lesson alignment matrix XLSX worksheet; include full path if not in working directory}
 
 \item{destFolder}{where you want to save the folder; by default in the "JSON/" folder}

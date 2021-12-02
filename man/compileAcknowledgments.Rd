@@ -5,12 +5,15 @@
 \title{compileAcknowledgments}
 \usage{
 compileAcknowledgments(
+  WD = getwd(),
   inputFileName = "meta/acknowledgments.xlsx",
   destFolder = "meta/JSON/",
   outputFileName = "acknowledgments.json"
 )
 }
 \arguments{
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
 \item{inputFileName}{file location of the lesson alignment matrix XLSX worksheet; include full path if not in working directory}
 
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
