@@ -8,8 +8,11 @@
 #
 # Load helper functions
 source("helpers.R")
+pacman_test<-tryCatch(require(pacman),error=function(e){message("Recommended to install the 'pacman' package")})
+if(!"error"%in%class(pacman_test)){p_load(shiny,shinythemes,shinyFiles)}else{
+  library(shiny);library(shinythemes);library(shinyFiles)
+}
 
-library(shiny);library(shinythemes)
 
 #import when editor is run from galacticPubs package
 default_y_args<-c("Title","author","date","updated","SponsoredBy","Subtitle","EstLessonTime","ForGrades","TargetSubject","Text","Tags")
@@ -128,6 +131,10 @@ ui <- navbarPage(
         hr(class="blhr"),
         h3("Lesson Preview"),
         textAreaInput("QuickPrep",label="Teach It in 15 Quick Prep:",value=y$QuickPrep,height="150px"),
+        hr(class="blhr"),
+        h3("Supporting Media"),
+        fileInput("supportingMedia","Files referenced in markdown sections that need to be uploaded",multiple = TRUE),
+        tableOutput("supportingMediaFiles"),
         hr(class="blhr"),
         h3("But wait, there's more!"),
         textAreaInput("Bonus",label="Bonus Material (Easter eggs and tidbits that aren't a whole extension lesson)",placeholder="Optional.",value=y$Bonus,height="150px"),
@@ -274,6 +281,12 @@ server <- function(input, output,session) {
           textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD)
         )
   })
+
+  #####################################
+  # 1. Edit/Prepare stuff
+
+  output$supportingMediaFiles<-renderTable(input$supportingMedia)
+
 
   #####################################
   # 2. Compile stuff

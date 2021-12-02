@@ -12,7 +12,7 @@
 #' @importFrom rlang .data
 #' @export
 #'
-compileProcedure <- function(procedureFile="meta/procedure.xlsx",linksFile="meta/teaching-materials.xlsx",destFolder="meta/JSON/" ,outputFileName="procedure.json",WD=getwd()){
+compileProcedure <- function(procedureFile="meta/procedure_GSheetsOnly.xlsx",linksFile="meta/teaching-materials.xlsx",destFolder="meta/JSON/" ,outputFileName="procedure.json",WD=getwd()){
 
    .=NULL #to avoid errors with dplyr syntax
 

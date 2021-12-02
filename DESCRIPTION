@@ -38,7 +38,7 @@ Imports:
     yaml
 Remotes:
     galacticpolymath/galacticEdTools
-Suggests: colorspace, rmdformats
+Suggests: colorspace, rmdformats,pacman
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
 RoxygenNote: 7.1.2
 Depends: 
