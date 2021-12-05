@@ -135,7 +135,7 @@ ui <- navbarPage(
       #Supporting Media
         hr(class="blhr"),
         h3("Supporting Media"),
-        p("These files will be copied to ./published/ and can be referenced in markdown text."),
+        p("Files found in ./assets/supporting-media/. They'll be copied to ./published/ upon Preview and can be referenced in markdown text."),
         p("  Ex: insert image with ![alt text](filename.png) in any text input section."),
         tableOutput("supportingMediaFiles"),
 
@@ -292,7 +292,7 @@ server <- function(input, output,session) {
 
   output$supportingMediaFiles<-renderTable({
     f<-list.files(fs::path(WD,"assets/supporting-media"),pattern = "[^help.txt]",full.names = TRUE)
-    if(length(f)==0){f<-NULL
+    if(length(f)==0){return(data.frame(file="No files found at assets/supporting-media"))
     }else{
     info<-file.info(f)
     fn<-basename(rownames(info))

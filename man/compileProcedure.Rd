@@ -5,7 +5,7 @@
 \title{compileProcedure}
 \usage{
 compileProcedure(
-  procedureFile = "meta/procedure.xlsx",
+  procedureFile = "meta/procedure_GSheetsOnly.xlsx",
   linksFile = "meta/teaching-materials.xlsx",
   destFolder = "meta/JSON/",
   outputFileName = "procedure.json",

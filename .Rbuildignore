@@ -3,6 +3,7 @@
 ^data-raw$
 ^meta\.*$
 ^published\.*$
-^assets\.*
-^scripts\.*
-^assembled-lesson-materials\.*
+^assets\.*$
+^scripts\.*$
+^assembled-lesson-materials\.*$
+^.*\www\.*$
