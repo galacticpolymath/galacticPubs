@@ -9,8 +9,8 @@
 # Load helper functions
 source("helpers.R")
 pacman_test<-tryCatch(require(pacman),error=function(e){message("Recommended to install the 'pacman' package")})
-if(!"error"%in%class(pacman_test)){p_load(shiny,shinythemes,shinyFiles)}else{
-  library(shiny);library(shinythemes);library(shinyFiles)
+if(!"error"%in%class(pacman_test)){p_load(shiny,shinythemes)}else{
+  library(shiny);library(shinythemes)
 }
 
 
@@ -131,10 +131,15 @@ ui <- navbarPage(
         hr(class="blhr"),
         h3("Lesson Preview"),
         textAreaInput("QuickPrep",label="Teach It in 15 Quick Prep:",value=y$QuickPrep,height="150px"),
+
+      #Supporting Media
         hr(class="blhr"),
         h3("Supporting Media"),
-        fileInput("supportingMedia","Files referenced in markdown sections that need to be uploaded",multiple = TRUE),
+        p("These files will be copied to ./published/ and can be referenced in markdown text."),
+        p("  Ex: insert image with ![alt text](filename.png) in any text input section."),
         tableOutput("supportingMediaFiles"),
+
+
         hr(class="blhr"),
         h3("But wait, there's more!"),
         textAreaInput("Bonus",label="Bonus Material (Easter eggs and tidbits that aren't a whole extension lesson)",placeholder="Optional.",value=y$Bonus,height="150px"),
@@ -234,7 +239,7 @@ server <- function(input, output,session) {
 
   output$yaml_update_msg<-renderUI({
     tagList(
-      # browser(),
+
        span(class=ifelse(vals$saved,"yaml_saved","yaml_unsaved"), HTML(vals$yaml_update_txt))
     )
 
@@ -285,7 +290,16 @@ server <- function(input, output,session) {
   #####################################
   # 1. Edit/Prepare stuff
 
-  output$supportingMediaFiles<-renderTable(input$supportingMedia)
+  output$supportingMediaFiles<-renderTable({
+    f<-list.files(fs::path(WD,"assets/supporting-media"),pattern = "[^help.txt]",full.names = TRUE)
+    if(length(f)==0){f<-NULL
+    }else{
+    info<-file.info(f)
+    fn<-basename(rownames(info))
+    info_table<-dplyr::tibble(file=fn,type=RCurl::guessMIMEType(fn),size_MB=sprintf("%.1f", info$size/1e6)) %>% dplyr::arrange(.data$type,.data$file)
+    info_table
+    }
+    })
 
 
   #####################################
@@ -387,6 +401,14 @@ server <- function(input, output,session) {
       }else{
         fs::file_copy(filez,img_loc,overwrite=TRUE)
       }
+
+    #Copy supporting files (if any)
+    f<-list.files(fs::path(WD,"assets/supporting-media"),pattern = "[^help.txt]",full.names = TRUE)
+    if(length(f)==0){
+    }else{
+      fs::file_copy(f,img_loc,overwrite=TRUE)
+    }
+
     })
 
     sponsoredByTxt<-yaml::yaml.load(input$SponsoredBy)
@@ -444,7 +466,7 @@ server <- function(input, output,session) {
 
   #Clicked publish button
   observe({
-    # browser()
+
     #Save data before compiling
     current_data<-prep_input(input,yaml_path)$current_data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
@@ -477,7 +499,7 @@ server <- function(input, output,session) {
   }) %>% bindEvent(input$StageForPublication)
 
   # output$publishReport<-renderPrint({
-  #   browser()
+
   #   if(is.null(vals$publishSuccess)){""}
   #   if(vals$publishSuccess){"Success"}else{"Failed"}})
 

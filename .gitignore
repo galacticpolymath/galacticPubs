@@ -13,5 +13,6 @@ tmp.RData
 meta/
 scripts/
 assembled-lesson-materials/
-inst/shiny/gp_editor/www/*.png
+inst/shiny/gp_editor/www/
 published
+!*/rsrc/
