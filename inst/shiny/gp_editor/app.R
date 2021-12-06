@@ -410,9 +410,10 @@ server <- function(input, output,session) {
     }
 
     })
-
-    sponsoredByTxt<-yaml::yaml.load(input$SponsoredBy)
-      # print(h2(shiny::markdown(paste0(c('Driving Question(s):',input$DrivingQ)))))
+    browser()
+    #Custom extraction of bullets with regex!!
+    sponsoredByTxt<-stringr::str_extract_all(input$SponsoredBy,
+                                             pattern = "((?<=^|\\n)- .*?(\\n|$))") %>% unlist()
 
 
     # Output the lesson preview page to UI ---------------------------------------------------
@@ -420,7 +421,8 @@ server <- function(input, output,session) {
         div(class="lesson-preview-container",
         h2(robust_txt(input$Title,"Title")),
         h4(robust_txt(input$Subtitle,"Subtitle")),
-        robust_img(class="lesson-banner",src=basename(input$LessonBanner), label="Lesson Banner"),
+        browser(),
+        robust_img(class="lesson-banner",src=basename(yaml::yaml.load(input$LessonBanner)[[1]]), label="Lesson Banner"),
         div(class="sponsor-section",
             h4("Sponsored by:"),
             lapply(1:max(length(sponsoredByTxt),length(yaml::yaml.load(input$SponsorLogo))),function(i){
