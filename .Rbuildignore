@@ -7,3 +7,4 @@
 ^scripts\.*$
 ^assembled-lesson-materials\.*$
 ^.*\www\.*$
+!^.*\rsrc.*$
