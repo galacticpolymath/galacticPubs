@@ -1,10 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
-^meta\.*$
-^published\.*$
-^assets\.*$
-^scripts\.*$
-^assembled-lesson-materials\.*$
-^.*www[^.*rsrc].*$
+^meta.*$
+^published.*$
+^assets.*$
+^scripts.*$
+^assembled-lesson-materials.*$
+^inst/shiny/gp_editor/www/[^rsrc].*$
 
