@@ -6,5 +6,5 @@
 ^assets\.*$
 ^scripts\.*$
 ^assembled-lesson-materials\.*$
-^.*\www\.*$
-!^.*\rsrc.*$
+^.*www[^.*rsrc].*$
+
