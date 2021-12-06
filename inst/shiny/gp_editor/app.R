@@ -410,10 +410,17 @@ server <- function(input, output,session) {
     }
 
     })
-    browser()
+
     #Custom extraction of bullets with regex!!
-    sponsoredByTxt<-stringr::str_extract_all(input$SponsoredBy,
-                                             pattern = "((?<=^|\\n)- .*?(\\n|$))") %>% unlist()
+    sponsoredByTxt<-if(grepl("^-",input$SponsoredBy)){
+
+                    parsed<-tryCatch(stringr::str_extract_all(input$SponsoredBy,
+                                                       pattern = "(?<=^- |\\n- )(.*?(\\n|$))") %>% unlist(),
+                              error=function(e){e})
+                    if(length(parsed)==0){warning("No sponsor text extracted. Make sure you have a space after the '-' for each bullet.")
+                    }else{parsed}
+                #If no bullets found, just return the unparsed input text
+                }else{input$SponsoredBy}
 
 
     # Output the lesson preview page to UI ---------------------------------------------------
@@ -421,7 +428,6 @@ server <- function(input, output,session) {
         div(class="lesson-preview-container",
         h2(robust_txt(input$Title,"Title")),
         h4(robust_txt(input$Subtitle,"Subtitle")),
-        browser(),
         robust_img(class="lesson-banner",src=basename(yaml::yaml.load(input$LessonBanner)[[1]]), label="Lesson Banner"),
         div(class="sponsor-section",
             h4("Sponsored by:"),
