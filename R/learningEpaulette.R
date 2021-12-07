@@ -20,7 +20,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(.7,.7,.7,.7),saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=14,thickness=0.2,width=11,height=1.6,dpi=200,...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(.7,.7,.7,.7),saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=12,thickness=0.2,width=11,height=1.6,dpi=200,...){
 
   #if WD supplied, append it to destFolder
   if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
