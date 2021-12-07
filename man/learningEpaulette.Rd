@@ -7,11 +7,12 @@
 learningEpaulette(
   compiledAlignment,
   targetSubj = NULL,
-  vertSpacing = c(1, 1, 1, 1),
+  vertSpacing = c(0.7, 0.7, 0.7, 0.7),
   saveFile = TRUE,
   destFolder = "assets/learning-plots/",
   fileName = "GP-Learning-Epaulette",
   WD = getwd(),
+  font_size = 14,
   thickness = 0.2,
   width = 11,
   height = 1.6,

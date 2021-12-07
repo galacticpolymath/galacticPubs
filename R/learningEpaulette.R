@@ -20,7 +20,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(1,1,1,1),saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),thickness=0.2,width=11,height=1.6,dpi=200,...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(.7,.7,.7,.7),saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=14,thickness=0.2,width=11,height=1.6,dpi=200,...){
 
   #if WD supplied, append it to destFolder
   if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
@@ -116,7 +116,7 @@ epaulette<-ggplot2::ggplot(rectangles)+galacticEdTools::theme_galactic()+
   ggplot2::geom_point(data=xlabels,ggplot2::aes_string(x="x",y="yend",fill="subject"),stroke=xlabels$stroke,col=xlabels$strokeCol,
              size=xlabels$size,pch=21,show.legend = F)+
   # ggplot2::geom_label(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust"),colour="transparent",fill="transparent",size=7,show.legend = F,nudge_y=-.35)+
-  ggplot2::geom_text(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust",fontface="fontface"),size=7,show.legend = F,nudge_y=-.35,col=gpColors("galactic black"))+
+  ggplot2::geom_text(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust",fontface="fontface"),size=font_size,show.legend = F,nudge_y=-.35,col=gpColors("galactic black"))+
   galacticEdTools::theme_galactic()+ ggplot2::theme_void()+ggplot2::theme(aspect.ratio=1.6/11,plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
 
 plot(epaulette)
