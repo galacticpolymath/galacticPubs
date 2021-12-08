@@ -9,7 +9,8 @@ compileTeachingMat(
   procedureFile = "meta/procedure_GSheetsOnly.xlsx",
   destFolder = "meta/JSON/",
   outputFileName = "teaching-materials.json",
-  WD = getwd()
+  WD = getwd(),
+  structureForWeb = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ compileTeachingMat(
 \item{outputFileName}{output file name; default= "processedTeachingMaterials.json"}
 
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
+\item{structureForWeb}{default=TRUE; Do you want to preface JSON output with component & nest output in Data element?}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/processedResources.json

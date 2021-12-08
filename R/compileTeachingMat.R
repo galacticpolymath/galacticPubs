@@ -6,6 +6,7 @@
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedTeachingMaterials.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
+#' @param structureForWeb default=TRUE; Do you want to preface JSON output with component & nest output in Data element?
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/processedResources.json
 #' @importFrom rlang .data
 #' @export
@@ -14,7 +15,8 @@ compileTeachingMat <- function(linksFile = "meta/teaching-materials.xlsx",
                                procedureFile = "meta/procedure_GSheetsOnly.xlsx",
                                destFolder = "meta/JSON/" ,
                                outputFileName = "teaching-materials.json",
-                               WD = getwd()) {
+                               WD = getwd(),
+                               structureForWeb= TRUE) {
 
 #make YouTube embed links from other links
 YTembed<-function(link){
@@ -268,11 +270,12 @@ multimedia<-lapply(1:nrow(linksMedia),function(i){
 teachingMat<-list(classroom=list(resourceSummary=rsrcSumm_C,gradeVariantNotes=gradeVariantNotes,resources=resourcesC),
           remote=list(resourceSummary=rsrcSumm_R,gradeVariantNotes=gradeVariantNotes,resources=resourcesR))
 
-out<-list(
+# Prefix with component and title, and nest output in Data if structuring for web deployment
+out<-if(structureForWeb){list(
   `__component` = "teaching-resources.teaching-resources",
   SectionTitle= "Teaching Materials",
   Data=teachingMat
-)
+)}else{teachingMat}
 
 
 

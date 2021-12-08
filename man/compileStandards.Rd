@@ -9,7 +9,8 @@ compileStandards(
   destFolder = "meta/JSON/",
   fileName = "standards.json",
   standardsRef = "standardX",
-  WD = getwd()
+  WD = getwd(),
+  structureForWeb = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ compileStandards(
 \item{standardsRef}{where do you want to pull down statements and other info for the supplied standards codes? Default="standardX" (i.e. the \href{https://github.com/galacticpolymath/standardX}{standardX repository}); Options= "standardX" or "myFile" (which will use Tab 2 on the supplied XLSX workbook)}
 
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
+\item{structureForWeb}{default=TRUE; Do you want to preface JSON output with component & nest output in Data element?}
 }
 \value{
 list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." colum). A JSON is saved to the destFolder location.

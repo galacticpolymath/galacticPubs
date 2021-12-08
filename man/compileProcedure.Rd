@@ -9,7 +9,8 @@ compileProcedure(
   linksFile = "meta/teaching-materials.xlsx",
   destFolder = "meta/JSON/",
   outputFileName = "procedure.json",
-  WD = getwd()
+  WD = getwd(),
+  structureForWeb = TRUE
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ that has order=1}
 \item{outputFileName}{output file name; default= "processedProcedure.json"}
 
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
+\item{structureForWeb}{default=TRUE; Do you want to preface JSON output with component & nest output in Data element?}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/processedProcedure.json

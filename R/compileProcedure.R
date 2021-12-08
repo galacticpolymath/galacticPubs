@@ -8,11 +8,17 @@
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
+#' @param structureForWeb default=TRUE; Do you want to preface JSON output with component & nest output in Data element?
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/processedProcedure.json
 #' @importFrom rlang .data
 #' @export
 #'
-compileProcedure <- function(procedureFile="meta/procedure_GSheetsOnly.xlsx",linksFile="meta/teaching-materials.xlsx",destFolder="meta/JSON/" ,outputFileName="procedure.json",WD=getwd()){
+compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
+                             linksFile = "meta/teaching-materials.xlsx",
+                             destFolder = "meta/JSON/" ,
+                             outputFileName = "procedure.json",
+                             WD = getwd(),
+                             structureForWeb = TRUE){
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -77,10 +83,10 @@ compileProcedure <- function(procedureFile="meta/procedure_GSheetsOnly.xlsx",lin
   lessonDur
 
   #Let's make a list that we'll convert to JSON
-  out<-list()
-  out$lessonPreface=procTitles$LessonPreface[1]
-  out$lessonDur=lessonDur
-  out$parts<-lapply(1:length(unique(procTitles$Part)),function(i){
+  out0<-list()
+  out0$lessonPreface=procTitles$LessonPreface[1]
+  out0$lessonDur=lessonDur
+  out0$parts<-lapply(1:length(unique(procTitles$Part)),function(i){
     partNum <- i
     partTitle <- procTitles$PartTitle[i]
     partDur <- proc$PartDur[i]
@@ -98,9 +104,14 @@ compileProcedure <- function(procedureFile="meta/procedure_GSheetsOnly.xlsx",lin
 
   })
 
-  # OUT<-c()
+# Prefix with component and title, and nest output in Data if structuring for web deployment
+out<-if(structureForWeb){
+  list(
+    `__component` = "lesson-plan.procedure",
+    SectionTitle = "Procedure",
+    Data = out0
+  )}else{out0}
 
-# Make json structured output ----------------------------------------------
 
 # create directory if necessary & prep output filename --------------------
 dir.create(destFolder,showWarnings=FALSE,recursive=T)
@@ -109,11 +120,7 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 # Write JSON for GP Simple Lesson Plan -----------------------------------
 jsonlite::write_json(
-  list(
-    `__component` = "lesson-plan.procedure",
-    SectionTitle = "Procedure",
-    Data = out
-  ),
+  out,
   outFile,
   pretty = TRUE,
   auto_unbox = TRUE

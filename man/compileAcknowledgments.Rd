@@ -8,7 +8,8 @@ compileAcknowledgments(
   WD = getwd(),
   inputFileName = "meta/acknowledgments.xlsx",
   destFolder = "meta/JSON/",
-  outputFileName = "acknowledgments.json"
+  outputFileName = "acknowledgments.json",
+  structureForWeb = TRUE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ compileAcknowledgments(
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
 
 \item{outputFileName}{output file name; default= "acknowledgments.json"}
+
+\item{structureForWeb}{default=TRUE; Do you want to preface JSON output with component & nest output in Data element?}
 }
 \value{
 acknowledgment list object; a JSON is saved to destFolder

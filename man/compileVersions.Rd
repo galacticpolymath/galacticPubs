@@ -8,7 +8,8 @@ compileVersions(
   WD = getwd(),
   inputFileName = "meta/version-info.xlsx",
   destFolder = "meta/JSON/",
-  outputFileName = "versions.json"
+  outputFileName = "versions.json",
+  structureForWeb = TRUE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ compileVersions(
 \item{destFolder}{where you want to save the folder; by default in the "JSON/" folder}
 
 \item{outputFileName}{output file name; default= "acknowledgments.json"}
+
+\item{structureForWeb}{default=TRUE; Do you want to preface JSON output with component & nest output in Data element?}
 }
 \value{
 acknowledgment list object; a JSON is saved to standards/acknowledgments.json

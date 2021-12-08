@@ -5,10 +5,16 @@
 #' @param inputFileName file location of the lesson alignment matrix XLSX worksheet; include full path if not in working directory
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "acknowledgments.json"
+#' @param structureForWeb default=TRUE; Do you want to preface JSON output with component & nest output in Data element?
 #' @return acknowledgment list object; a JSON is saved to destFolder
 #' @export
 #'
-compileAcknowledgments <- function(WD=getwd(),inputFileName="meta/acknowledgments.xlsx",destFolder="meta/JSON/",outputFileName="acknowledgments.json"){
+compileAcknowledgments <- function(WD = getwd(),
+                                   inputFileName = "meta/acknowledgments.xlsx",
+                                   destFolder = "meta/JSON/",
+                                   outputFileName = "acknowledgments.json",
+                                   structureForWeb = TRUE) {
+
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -25,7 +31,7 @@ ack<-openxlsx::read.xlsx(normalizePath(inputFileName),sheet=1)
 if(is.null(ack)){stop("Something went wrong. Check your filenames and that the acknowledgments spreadsheet is not empty.")}
 
 roles<-unique(ack$Role)
-out<-list()
+out0<-list()
 for(i in 1:length(roles)){
   role_i<-roles[i]
   ack_i<-subset(ack,ack$Role==role_i)
@@ -41,10 +47,16 @@ for(i in 1:length(roles)){
                             })
 
 
-  out[[i]]<-c(role=role_i,def=def_i,records=list(persons_i))
+  out0[[i]]<-c(role=role_i,def=def_i,records=list(persons_i))
 }
-out
-# Make json structured output ----------------------------------------------
+
+# Prefix with component and title, and nest output in Data if structuring for web deployment
+out<-if(structureForWeb){
+  list(
+    `__component` = "lesson-plan.acknowledgments",
+    SectionTitle = "Acknowledgments",
+    Data = out0
+  )}else{out0}
 
 # create directory if necessary & prep output filename --------------------
 dir.create(destFolder,showWarnings=FALSE,recursive=T)
@@ -52,10 +64,8 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 
 # Write JSON  -----------------------------------
-jsonlite::write_json(list(
-    `__component` = "lesson-plan.acknowledgments",
-    SectionTitle = "Acknowledgments",
-    Data = out),
+jsonlite::write_json(
+    out,
     outFile,pretty=TRUE,auto_unbox = TRUE)
 
 printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")

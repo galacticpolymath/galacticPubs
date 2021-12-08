@@ -6,6 +6,7 @@
 #' @param fileName output file name; default= "standards.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param standardsRef where do you want to pull down statements and other info for the supplied standards codes? Default="standardX" (i.e. the \href{https://github.com/galacticpolymath/standardX}{standardX repository}); Options= "standardX" or "myFile" (which will use Tab 2 on the supplied XLSX workbook)
+#' @param structureForWeb default=TRUE; Do you want to preface JSON output with component & nest output in Data element?
 #' @return list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." colum). A JSON is saved to the destFolder location.
 #' @export
 #'
@@ -13,7 +14,8 @@ compileStandards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
                              destFolder = "meta/JSON/" ,
                              fileName = "standards.json",
                              standardsRef = "standardX",
-                             WD= getwd()) {
+                             WD= getwd(),
+                             structureForWeb= TRUE) {
 
 
    .=NULL #to avoid errors with dplyr syntax
@@ -195,7 +197,14 @@ for(ta_i in 1:length(unique(A$target))) {
 
 
 
-out<-do.call(c,l_ta)
+out0<-do.call(c,l_ta)
+
+
+# Prefix with component and title, and nest output in Data if structuring for web deployment
+out<-if(structureForWeb){
+  list(  `__component` = "lesson-plan.standards",
+                             Data=out0)
+}else{out0}
 
 # create directory if necessary & prep output filename --------------------
 dir.create(destFolder,showWarnings=FALSE,recursive=T)
@@ -204,8 +213,7 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 
 # Write JSON for GP Simple Lesson Plan -----------------------------------
-jsonlite::write_json( list(  `__component` = "lesson-plan.standards",
-                             Data=out),
+jsonlite::write_json( out,
                       outFile,pretty=TRUE,auto_unbox = TRUE)
 
 

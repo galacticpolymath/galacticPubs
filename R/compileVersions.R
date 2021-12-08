@@ -5,10 +5,16 @@
 #' @param inputFileName file location of the lesson alignment matrix XLSX worksheet; include full path if not in working directory
 #' @param destFolder where you want to save the folder; by default in the "JSON/" folder
 #' @param outputFileName output file name; default= "acknowledgments.json"
+#' @param structureForWeb default=TRUE; Do you want to preface JSON output with component & nest output in Data element?
 #' @return acknowledgment list object; a JSON is saved to standards/acknowledgments.json
 #' @export
 #'
-compileVersions <- function(WD=getwd(),inputFileName="meta/version-info.xlsx",destFolder="meta/JSON/",outputFileName="versions.json"){
+compileVersions <- function(WD = getwd(),
+                            inputFileName = "meta/version-info.xlsx",
+                            destFolder = "meta/JSON/",
+                            outputFileName = "versions.json",
+                            structureForWeb = TRUE) {
+
 
    .=NULL #to avoid errors with dplyr syntax
 
@@ -29,7 +35,7 @@ ver$date<-sapply(ver$date,function(x) {as.character(as.Date(as.numeric(x), origi
 ver$major<-gsub("(^[^\\.]*)\\..*","\\1",ver$ver_num)
 #Change 0 release to beta for hierarchy
 ver$major<-sapply(ver$major,function(x) if(x==0){x<-"Beta"}else{x<-x})
-out<-list()
+out0<-list()
 for(mjr in 1:length(unique(ver$major))){
   ver_mjr<-subset(ver,ver$major==unique(ver$major)[mjr])
   out_mjr<-list()
@@ -37,10 +43,18 @@ for(mjr in 1:length(unique(ver$major))){
     ver_i<-ver_mjr[i,]
     out_mjr[[i]]<-list(version=ver_i$ver_num,date=ver_i$date,summary=ver_i$ver_summary,notes=ver_i$ver_notes,acknowledgments=ver_i$ver_acknowledgements)
   }
-  out[[mjr]]<-list(major_release=unique(ver$major)[mjr],sub_releases=(out_mjr))
+  out0[[mjr]]<-list(major_release=unique(ver$major)[mjr],sub_releases=(out_mjr))
 }
-out
-# Make json structured output ----------------------------------------------
+
+
+
+# Prefix with component and title, and nest output in Data if structuring for web deployment
+out<-if(structureForWeb){
+  list(
+    `__component` = "lesson-plan.versions",
+    SectionTitle = "Version Notes",
+    Data = out0
+  )}else{out0}
 
 # create directory if necessary & prep output filename --------------------
 dir.create(destFolder,showWarnings=FALSE,recursive=T)
@@ -49,11 +63,7 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 # Write JSON  -----------------------------------
 jsonlite::write_json(
-  list(
-    `__component` = "lesson-plan.versions",
-    SectionTitle = "Version Notes",
-    Data = out
-  ),
+  out,
   outFile,
   pretty = TRUE,
   auto_unbox = TRUE
