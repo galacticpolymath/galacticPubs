@@ -75,8 +75,8 @@ prep_input<-lumpItems <-
   if("Teaching Materials" %in% choices){
     if(input$ShortTitle==""){warning("You need to enter a unique ShortTitle in Edit Tab")
     }else{
-      updateTeachingMatLinks(shortTitle = input$ShortTitle, WD = WD)
-      compileTeachingMat(WD = WD)
+      updateTeachingMatLinks(shortTitle = input$ShortTitle, WD = WD,dataCat=c("download",tolower(input$LessonEnvir)))
+      compileTeachingMat(LessonEnvir=input$LessonEnvir,WD = WD)
     }
 
   }

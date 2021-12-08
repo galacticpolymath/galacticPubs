@@ -5,6 +5,7 @@
 \title{compileTeachingMat}
 \usage{
 compileTeachingMat(
+  LessonEnvir = c("Classroom"),
   linksFile = "meta/teaching-materials.xlsx",
   procedureFile = "meta/procedure_GSheetsOnly.xlsx",
   destFolder = "meta/JSON/",
@@ -14,6 +15,8 @@ compileTeachingMat(
 )
 }
 \arguments{
+\item{LessonEnvir}{what versions of this lesson are available? options: "Classroom" and "Remote"}
+
 \item{linksFile}{file location of the lesson teaching-materials XLSX worksheet.}
 
 \item{procedureFile}{file location of the lesson procedure XLSX worksheet}
