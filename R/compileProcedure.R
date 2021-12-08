@@ -39,7 +39,17 @@ compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
 
 
   #read in main procedure
-  proc<-openxlsx::read.xlsx(procedureFile,sheet="Procedure") %>% dplyr::tibble() %>% rmNArows()
+  #import and make sure numbered columns are integers
+  proc<-openxlsx::read.xlsx(procedureFile,sheet="Procedure") %>%
+          dplyr::tibble() %>%
+          rmNArows() %>%
+          dplyr::mutate(Part=as.integer(.data$Part),
+                        Chunk=as.integer(.data$Chunk),
+                        ChunkDur=as.integer(.data$ChunkDur),
+                        Step=as.integer(.data$Step),
+                        PartN=as.integer(.data$PartN),
+                        PartDur=as.integer(.data$PartDur))
+
   #read in Part titles and lesson + Part prefaces
   procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble() %>% rmNArows()
 
