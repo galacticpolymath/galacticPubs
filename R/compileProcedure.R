@@ -94,7 +94,8 @@ compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
 
   #Let's make a list that we'll convert to JSON
   out0<-list()
-  out0$lessonPreface=procTitles$LessonPreface[1]
+  pref<-procTitles$LessonPreface[1]
+  out0$lessonPreface=if(is.na(pref)){}else{pref}
   out0$lessonDur=lessonDur
   out0$parts<-lapply(1:length(unique(procTitles$Part)),function(i){
     partNum <- i
