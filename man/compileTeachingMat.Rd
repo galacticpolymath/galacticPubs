@@ -6,7 +6,7 @@
 \usage{
 compileTeachingMat(
   linksFile = "meta/teaching-materials.xlsx",
-  procedureFile = "meta/procedure.xlsx",
+  procedureFile = "meta/procedure_GSheetsOnly.xlsx",
   destFolder = "meta/JSON/",
   outputFileName = "teaching-materials.json",
   WD = getwd()

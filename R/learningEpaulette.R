@@ -8,6 +8,7 @@
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" for ggsave output image file
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
+#' @param font_size size of font in pts
 #' @param thickness is how thick to make the epaulette bar `(`range from 0 to 0.5`)`, 0.2 or 20\% of vertical plot space by default
 #' @param width plot width in inches
 #' @param height plot height in inches
