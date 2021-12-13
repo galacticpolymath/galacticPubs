@@ -134,7 +134,8 @@ jsonlite::write_json(
   out,
   outFile,
   pretty = TRUE,
-  auto_unbox = TRUE
+  auto_unbox = TRUE,
+  na="null"
 )
 
 # printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")

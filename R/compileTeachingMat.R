@@ -82,6 +82,7 @@ YTembed<-function(link){
     resourcesC <- {
     }
   } else{
+
     s_C <- subset(rsrcSummary, rsrcSummary$envir == "classroom")
     rsrcSumm_C <- lapply(unique(s_C$itemCat), function(x) {
       d <- subset(s_C, s_C$itemCat == x)
@@ -367,7 +368,6 @@ teachingMat0<-list(classroom = if (is.null(resourcesC)) {
                     )
                   })
 
-
 #discard null sections
 teachingMat<-teachingMat0[which(lengths(teachingMat0)>0)]
 
@@ -388,10 +388,10 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 
 # Write JSON for teaching materials -----------------------------------
-jsonlite::write_json(out,outFile,pretty=TRUE,auto_unbox = TRUE)
+jsonlite::write_json(out,outFile,pretty=TRUE,auto_unbox = TRUE,na="null")
 
 #write json for multimedia
-jsonlite::write_json(multimedia,fs::path(destFolder,"multimedia.json"),pretty=TRUE,auto_unbox = TRUE)
+jsonlite::write_json(multimedia,fs::path(destFolder,"multimedia.json"),pretty=TRUE,auto_unbox = TRUE,na="null")
 
 
 

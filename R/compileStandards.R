@@ -214,7 +214,7 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 # Write JSON for GP Simple Lesson Plan -----------------------------------
 jsonlite::write_json( out,
-                      outFile,pretty=TRUE,auto_unbox = TRUE)
+                      outFile,pretty=TRUE,auto_unbox = TRUE,na="null")
 
 
 

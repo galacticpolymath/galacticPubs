@@ -66,7 +66,8 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 # Write JSON  -----------------------------------
 jsonlite::write_json(
     out,
-    outFile,pretty=TRUE,auto_unbox = TRUE)
+    outFile,pretty=TRUE,auto_unbox = TRUE,
+    na="null")
 
 printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
 

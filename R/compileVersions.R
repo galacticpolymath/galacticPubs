@@ -31,6 +31,7 @@ compileVersions <- function(WD = getwd(),
 ver<-openxlsx::read.xlsx(normalizePath(inputFileName),sheet=1)[,1:5]
 ver<-subset(ver,ver$ver_num!="")
 if(is.null(ver)){stop("Something went wrong. Check your filenames and that the version_info.xlsx spreadsheet is not empty.")}
+
 ver$date<-sapply(ver$date,function(x) {as.character(as.Date(as.numeric(x), origin = "1899-12-30"),format="%b %d, %Y")},USE.NAMES = FALSE)
 ver$major<-gsub("(^[^\\.]*)\\..*","\\1",ver$ver_num)
 #Change 0 release to beta for hierarchy
@@ -66,7 +67,8 @@ jsonlite::write_json(
   out,
   outFile,
   pretty = TRUE,
-  auto_unbox = TRUE
+  auto_unbox = TRUE,
+  na="null"
 )
 
 
