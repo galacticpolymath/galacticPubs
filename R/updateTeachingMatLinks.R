@@ -254,7 +254,7 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
     badCatNames<-names(badCats)[which(badCats==TRUE)]
     tmKey.selected2<-tmKey.selected %>% dplyr::filter(!.data$dataCat%in%badCatNames)
 
-    #Remove rows that are totally NA
+    #Read in tabs and remove rows that are totally NA
     tmImported<-lapply(1:length(tmKey.selected2$tab),function(i) {
       d<-openxlsx::read.xlsx(linksFile,sheet=tmKey.selected2$tab[i],startRow=2)
       rmNArows(d)
@@ -323,6 +323,9 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
       #if there are missing data, prep a compatible dataframe
         if(nrow(missing)>=1){
+
+        warning("The following files are missing and record(s) should probably be manually deleted from updateTeachingMatLinks.xlsx:\n",missing)
+
         #make missing a compatible df to bind to final df
         missing.df<-matrix(nrow=nrow(missing),ncol=ncol(excelData_i)) %>% as.data.frame()
         names(missing.df)<-names(excelData_i)
@@ -342,18 +345,12 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
       #Sort output if requested, otherwise output whatcha got
       if(sortOutput){
-        indx<-match(unlist(sortStringL[which(names(sortStringL)==excelTab_i)]),names(final))
-
-        # if index names for sorting don't match, throw an error
-        if((length(stats::complete.cases(indx))<length(indx))|(length(indx)==0)){
-          stop("Sorting column names: '",sortStringL[which(names(sortStringL)==excelTab_i)],
-                "' don't match '",excelTab_i,"' Tab's column names: ",paste0(names(excelData_i),collapse=", "))
-          }
-        #annoying how arrange() syntax keeps changing. Doing this the hard way
-        out<-final[eval(parse(text=   paste0("order(",paste0("final[,",indx,"]",collapse=", "),")")   )), ]
-      }else{out<-final}
+        sortnames<-as.vector(sortStringL[which(names(sortStringL)==excelTab_i)])
+        indx<-match(unlist(sortnames),names(final))
+        out0 <- final %>% dplyr::arrange(dplyr::across(indx))
+      }else{out0<-final}
       #remove NA rows
-      out<-rmNArows(out)[,-which(names(out)=="gID")]
+      out<-rmNArows(out0)[,-which(names(out0)=="gID")]
 
       #overwrite old data with final (this is not writing to the hard drive until the saveWorkbook stage)
       XLConnect::writeWorksheet(tmXLSX,sheet=excelTab_i,data=out,startCol=1,startRow=3,header=F)
