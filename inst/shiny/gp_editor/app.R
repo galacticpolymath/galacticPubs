@@ -137,6 +137,23 @@ ui <- navbarPage(
         h3("Supporting Media"),
         p("Files found in ./assets/supporting-media/. They'll be copied to ./published/ upon Preview and can be referenced in markdown text."),
         p("  Ex: insert image with ![alt text](filename.png) in any text input section."),
+      checkboxGroupInput(
+        "SupportingMedia",
+        "Supporting Media Files to be Published",
+        choiceValues = list.files(
+          fs::path(WD, "assets/supporting-media"),
+          pattern = "[^help.txt]",
+          full.names = TRUE
+        ),
+        choiceNames = basename(
+          list.files(
+            fs::path(WD, "assets/supporting-media"),
+            pattern = "[^help.txt]",
+            full.names = TRUE
+          )
+        ),
+        selected = y$SupportingMedia
+      ),
         tableOutput("supportingMediaFiles"),
 
 
@@ -221,8 +238,23 @@ server <- function(input, output,session) {
   vals$saved<-TRUE
   output$publishReport<-renderText("")
 
+  #Finish generating all frontend items
+  output$overview_text_block<-renderUI({
+    div(class="text-block",p(class="text-block-title",strong("These sections combined in JSON output as 'Text'")),
+          textAreaInput("DrivingQ","Driving question(s):",y$DrivingQ),
+          textAreaInput("EssentialQ",
+                        a("Essential question(s):",
+                          href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
+                        y$EssentialQ),
+          textAreaInput("LearningObj","Learning Objective(s):",y$LearningObj,height="300px"),
+          textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD)
+        )
+  })
+
   #check whether there are unsaved changes
   observe({
+    #don't run until full page rendered
+    if(!is.null(input$DrivingQ)){
     data_check<-prep_input(isolate(input),yaml_path)
     outOfDate<-lapply(1:length(data_check[[1]]),function(i){
       #each element of the list should be identical or of length 0 (accounting for character(0)& NULL )
@@ -233,7 +265,7 @@ server <- function(input, output,session) {
     vals$saved<-FALSE
     }else if(substr(vals$yaml_update_txt,1,1)=="N"){vals$yaml_update_txt <- ("")
     vals$saved<-TRUE}
-
+    }
 
   })
 
@@ -249,7 +281,7 @@ server <- function(input, output,session) {
 
   #######################################
   # Save YAML & JSON when button clicked -------------------------------------------
-    doIT<-observe({
+    observe({
 
     current_data<-prep_input(input,yaml_path)$current_data
     #write current data
@@ -275,17 +307,7 @@ server <- function(input, output,session) {
 
     }) %>% bindEvent(input$save)
 
-  output$overview_text_block<-renderUI({
-    div(class="text-block",p(class="text-block-title",strong("These sections combined in JSON output as 'Text'")),
-          textAreaInput("DrivingQ","Driving question(s):",y$DrivingQ),
-          textAreaInput("EssentialQ",
-                        a("Essential question(s):",
-                          href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
-                        y$EssentialQ),
-          textAreaInput("LearningObj","Learning Objective(s):",y$LearningObj,height="300px"),
-          textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD)
-        )
-  })
+
 
   #####################################
   # 1. Edit/Prepare stuff
@@ -477,6 +499,13 @@ server <- function(input, output,session) {
 
     #Save data before compiling
     current_data<-prep_input(input,yaml_path)$current_data
+
+    #update publication dates, etc
+    #FirstPublicationDate is set upon first publishing; only changed manually after that
+    if(current_data$FirstPublicationDate==""){current_data$FirstPublicationDate<-as.character(Sys.time())}
+    current_data$LastUpdated<-as.character(Sys.time())
+
+
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
     #files from www folder used to generate preview (or other files dumped there)
     www_file_paths<-list.files(fs::path(getwd(),"/www"),pattern="^.*\\..*",full.names = TRUE)

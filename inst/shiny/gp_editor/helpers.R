@@ -93,6 +93,27 @@ robust_txt<-function(input_txt,label="Some Text"){
   }else{input_txt}
 }
 
+# Add missing fields (maintaining order in a template)
+
+addMissingFields<-function(list_obj, template) {
+  missing <- match(names(template), names(list_obj)) %>% is.na() %>% which()
+  new <- list_obj
+  if (sum(missing) > 0) {
+    for (i in missing) {
+      if (i == 1) {
+        new <- c(template[i], new)
+      } else{
+        new <- c(new[1:(i - 1)], template[i],
+                 if ((i - 1) == length(new)) {
+                 } else{
+                   new[i:length(new)]
+                 })
+      }
+    }
+  }
+  new
+}
+
 
 # Prep 'input' for comparing to YAML read in from hard drive (y)
 # The result is a list that contains the 'input' fields, ordered based on a Template,
@@ -112,38 +133,63 @@ prep_input<-function(input,yaml_path){
       safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
                                    "galacticPubs"))
   }
+    ####
+    #update yaml just read in, according to template (add missing fields)
+    template_yaml<-safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
+                                   "galacticPubs"))
+    # This will add fields if galacticPubs supplies a new template
+    y<-addMissingFields(y,template=template_yaml)
+
+    #Revise yaml template version number if out of date
+    old_template_ver<-y$TemplateVer
+    new_template_ver<-template_yaml$TemplateVer
+    #update template ver if out of date
+    if(!identical(old_template_ver,new_template_ver)){
+      y$TemplateVer<-new_template_ver
+    }
+
+
 
     # operational input variables we don't want to output
-    op_var<-c("save")
-    #make nonreactive list of everything except our "Operational" input items
-    Y <- reactiveValuesToList(input)[!names(input) %in% op_var]
-    #import YAML template to get a canonical order for output
-    #template file is in 'extdata/'  ('inst/extdata' if you're developing package)
-    template_fields<-names(yaml::read_yaml(system.file("extdata","front-matter_TEMPLATE.yml",package="galacticPubs")))
-      # #debugging example
-      # template_fields<-template_fields[-c(2,9)]
+    input_op_var<-c("save","StageForPublication")
+    # operational variables in yaml we don't expect to be in input
+    yaml_op_var<-c("TemplateVer","FirstPublicationDate","LastUpdated")
 
-    ## Test template versions for matching fields (ignoring NAs for fields in template, but not in 'input')
-    Y_order_indx0<-as.vector(na.omit(match(template_fields,names(Y))))
-    #if the template doesn't have values for a given input, give a warning
-    if(sum(is.na(Y_order_indx0))>0){warning("Your template ver: ",y$TemplateVer,
-                                           " is missing the field(s):\n\t- ",paste0(names(Y)[which(is.na(Y_order_indx0))],collapse="\n\t- "),
-                                           "\nUpdate galacticPubs to upgrade your template to ensure fields are in the right order.")}
+    #make nonreactive list of everything except our "Operational" input items
+    Y <- reactiveValuesToList(input)[!names(input) %in% input_op_var]
+
+    template_fields0<-names(template_yaml)
+    template_fields<-template_fields0[!template_fields0%in%yaml_op_var]
+
+    ## Test template versions for nonmatching fields
+    ## (galacticPubs may be out of date and have an old template)
+    Y_order_indx0<-match(template_fields,names(Y))
 
     #Put any missing fields that are in 'input', but not the template yml, at the end
-    Y_order_indx<-Y_order_indx0
-    for(i in 1:length(Y_order_indx)){if(is.na(Y_order_indx[i])){Y_order_indx[i]<-max(Y_order_indx,na.rm=T)+1}}
-    #Now we have a robust index vector to reorder Y before outputting to YAML
-    Y2<-Y[Y_order_indx]
-    #Finally, preserve any manually added fields on YML before overwriting
-    y_not_in_Y2<-which(is.na(match(names(y),names(Y2))))
-    Y3<-Y2 #initialize w/ old vector (for loop is destructive)
-    for(i in y_not_in_Y2){
-      #Add y value at beginning or insert it among Y3 fields, 1 by 1
-      if(i==1){Y3<-c(y[i],Y3)
-      }else{Y3<-c(Y3[1:(i-1)],y[i],
-                  if((i-1)==length(Y3)){}else{Y3[i:length(Y3)]})}
-    }
+    input_not_in_template<-Y[which(is.na(match(names(Y),template_fields)))]
+    toAdd<-if(length(input_not_in_template)>0){
+      #if the template doesn't have values for a given input, give a warning
+      warning(
+        "Your template ver: ",
+        y$TemplateVer,
+        " is missing the field(s):\n\t- ",
+        paste0(names(Y)[which(is.na(Y_order_indx0))], collapse = "\n\t- "),
+        "\nUpdate galacticPubs to upgrade your template to ensure fields are in the right order."
+      )
+      input_not_in_template
+      }else{}
+
+
+
+    Y2<-c(Y[as.vector(na.omit(Y_order_indx0))],toAdd)
+
+
+    #Finally, preserve any fields on YML before overwriting
+    #(e.g. TemplateVer)
+
+    # Add values from yaml that are not in input data
+    Y3<-addMissingFields(Y2,template=y)
+
     #gotta make sure all Y3 elements are characters, cuz the publication date will invoke pesky POSIX issues :/
     list(saved_data=y,current_data=lapply(Y3,function(x)as.character(x)))
 }

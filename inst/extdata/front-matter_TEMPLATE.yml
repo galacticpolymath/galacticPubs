@@ -1,25 +1,28 @@
 #Default values for new lesson front matter
-TemplateVer: 0.1.4
-PublicationStatus: Draft
+TemplateVer: 0.1.5
 ShortTitle: ''
+PublicationStatus: Draft
+PublicationDate: ''
+FirstPublicationDate: ''
+LastUpdated: ''
 Title: ''
 Subtitle: ''
 SponsoredBy: ''
 TargetSubject: ''
-DrivingQ: ''
 LessonEnvir: ''
 ForGrades: ''
 SponsorLogo: ''
-LearningEpaulette: ''
-LearningChart: ''
 EstLessonTime: ''
 LessonBanner: ''
+LearningEpaulette: ''
+LearningChart: ''
+SupportingMedia: ''
 #---> These are combined into "text" overview section in JSON output
 MiscMD: ''
+DrivingQ: ''
 EssentialQ: ''
 LearningObj: ''
 # <---
-PublicationDate: ''
 Tags: ''
 Description: ''
 QuickPrep: |
