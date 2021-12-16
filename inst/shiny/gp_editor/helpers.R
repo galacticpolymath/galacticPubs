@@ -195,6 +195,28 @@ prep_input<-function(input,yaml_path){
     list(saved_data=y,current_data=lapply(Y3,function(x)as.character(x)))
 }
 
+#Get the name of the repo this is set up on. No error catching at the moment.
+whichRepo<-function(){
+  origin<-system(paste0("cd '",rstudioapi::getActiveProject(),"' && git remote -v"),intern=TRUE)[1]
+  repo<-gsub("^.*/(.*)\\.git.*$","\\1", origin)
+  if(is.na(repo)) {
+    warning(
+      "\n No github remote found. Make sure you've set up github right.\n *URLs won't work on live lesson plan (b/c we don't know the subdirectory they live in).*"
+    )
+  }
+  repo
+}
+
+#add full url prefix to lesson subdirectory where it will be published at catalog.galacticpolymath.com
+catalogURL<-function(relative_ref,repo){
+  if(is.na(repo)) {
+    relative_ref
+  } else{
+   paste0("https://catalog.galacticpolymath.com/lessons/",repo,"/",relative_ref)
+  }
+}
+
+
 # #makes list items for a section in JSON output for lesson plan
 # makeSection<-function(title){
 #   list(
