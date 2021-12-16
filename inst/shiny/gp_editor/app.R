@@ -75,6 +75,11 @@ ui <- navbarPage(
             "Most text fields accept",
             a("markdown formatting", href = "https://www.markdownguide.org/basic-syntax/")
         ),
+        dateInput(width="200px",
+            inputId = "PublicationDate",
+            label = "Publication Date",
+            value = y$PublicationDate
+        ),
         textInput(
             inputId = "Title",
             label = "Title",
@@ -90,11 +95,12 @@ ui <- navbarPage(
             label = "shortTitle (a unique prefix for key lesson materials)",
             value = y$ShortTitle
         ),
-        textInput("LessonBanner",label="Lesson Banner (should be in assets/banners_etc)",
-                  value=matching_files(y,yaml_item="LessonBanner",
+        checkboxGroupInput("LessonBanner",label="Lesson Banner (found in assets/banners_etc)",
+                  choices=matching_files(y,yaml_item="LessonBanner",
                                        rel_path="assets/banners_etc/",
                                        pattern="^.*anner.*\\.[png|PNG|jpeg|jpg]",
-                                       WD)),
+                                       WD),
+                  selected=y$LessonBanner),
 
         textAreaInput("SponsoredBy","Sponsored By: (Add multiple entries with `- `, i.e. hyphen+space)",y$SponsoredBy),
 
@@ -105,11 +111,7 @@ ui <- navbarPage(
                                        WD)),
 
         checkboxGroupInput("LessonEnvir","Lesson Environment",choices = c("Classroom","Remote"),selected=y$LessonEnvir,inline=TRUE),
-        dateInput(
-            inputId = "PublicationDate",
-            label = "Publication Date",
-            value = y$PublicationDate
-        ),
+
         textInput(inputId = "ForGrades",
                   label = "For Grades",
                   value = y$ForGrades),
@@ -140,14 +142,14 @@ ui <- navbarPage(
       checkboxGroupInput(
         "SupportingMedia",
         "Supporting Media Files to be Published",
-        choiceValues = list.files(
-          fs::path(WD, "assets/supporting-media"),
-          pattern = "[^help.txt]",
-          full.names = TRUE
+        choiceValues = paste0(
+          "assets/supporting-media/",
+          list.files(fs::path(WD, "assets/supporting-media/"),
+                     pattern = "[^help.txt]")
         ),
         choiceNames = basename(
           list.files(
-            fs::path(WD, "assets/supporting-media"),
+            fs::path(WD, "assets/supporting-media/"),
             pattern = "[^help.txt]",
             full.names = TRUE
           )
@@ -397,20 +399,23 @@ server <- function(input, output,session) {
   #####################################
   # 3. Output the preview of the lesson plan
    output$preview<-renderUI({
+
+    current_data<-prep_input(input,yaml_path)$current_data
+
     #delete preexisting images
     #pattern excludes directories
     oldFiles<-list.files(img_loc,pattern="\\.",full.names = TRUE)
     if(length(oldFiles)>0){unlink(oldFiles)}
     #copy images over to www folder for previewing
-    items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart")
+    items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart","SupportingMedia")
     #read in filenames; if empty, return empty; else add WD to create full path
     items2copy_filenames<-lapply(items2copy,function(x) {
-      item<-yaml::yaml.load(input[[x]])
+      item<-yaml::yaml.load(current_data[[x]])
       if(identical(item,NULL)|identical(item,"")){NA}else{ paste0(WD,item)}
      })
     names(items2copy_filenames)<-items2copy
 
-    #Test if all the files to copy exist; otherwise through a useful error
+    #Test if all the files to copy exist; otherwise throw a useful error
     lapply(1:length(items2copy_filenames),function(i){
       filez<-items2copy_filenames[[i]]
       errs<-ifelse(is.na(filez),TRUE,!file.exists(filez))
@@ -424,69 +429,69 @@ server <- function(input, output,session) {
         fs::file_copy(filez,img_loc,overwrite=TRUE)
       }
 
-    #Copy supporting files (if any)
-    f<-list.files(fs::path(WD,"assets/supporting-media"),pattern = "[^help.txt]",full.names = TRUE)
-    if(length(f)==0){
-    }else{
-      fs::file_copy(f,img_loc,overwrite=TRUE)
-    }
+    # #Copy supporting files (if any)
+    # f<-input$SupportingMedia
+    # if(length(f)==0){
+    # }else{
+    #   fs::file_copy(f,img_loc,overwrite=TRUE)
+    # }
 
     })
 
     #Custom extraction of bullets with regex!!
-    sponsoredByTxt<-if(grepl("^-",input$SponsoredBy)){
+    sponsoredByTxt<-if(grepl("^-",current_data$SponsoredBy)){
 
-                    parsed<-tryCatch(stringr::str_extract_all(input$SponsoredBy,
+                    parsed<-tryCatch(stringr::str_extract_all(current_data$SponsoredBy,
                                                        pattern = "(?<=^- |\\n- )(.*?(\\n|$))") %>% unlist(),
                               error=function(e){e})
                     if(length(parsed)==0){warning("No sponsor text extracted. Make sure you have a space after the '-' for each bullet.")
                     }else{parsed}
                 #If no bullets found, just return the unparsed input text
-                }else{input$SponsoredBy}
+                }else{current_data$SponsoredBy}
 
 
     # Output the lesson preview page to UI ---------------------------------------------------
      list(
         div(class="lesson-preview-container",
-        h2(robust_txt(input$Title,"Title")),
-        h4(robust_txt(input$Subtitle,"Subtitle")),
-        robust_img(class="lesson-banner",src=basename(yaml::yaml.load(input$LessonBanner)[[1]]), label="Lesson Banner"),
+        h2(robust_txt(current_data$Title,"Title")),
+        h4(robust_txt(current_data$Subtitle,"Subtitle")),
+        robust_img(class="lesson-banner",src=basename(yaml::yaml.load(current_data$LessonBanner)[[1]]), label="Lesson Banner"),
         div(class="sponsor-section",
             h4("Sponsored by:"),
-            lapply(1:max(length(sponsoredByTxt),length(yaml::yaml.load(input$SponsorLogo))),function(i){
+            lapply(1:max(length(sponsoredByTxt),length(yaml::yaml.load(current_data$SponsorLogo))),function(i){
                 div(class="sponsor",
                 span(class="sponsor-text",md_txt("",sponsoredByTxt[i])),
                 div(class="sponsor-logo-container",
-                robust_img(class="sponsor-logo",src=basename(yaml::yaml.load(input$SponsorLogo)[i]),"Sponsor Logo")
+                robust_img(class="sponsor-logo",src=basename(yaml::yaml.load(current_data$SponsorLogo)[i]),"Sponsor Logo")
                 ))})
         ),
         ## 1. OVERVIEW
         div(class="section",h1("1. Overview")),
         div(class="stats",
-          robust_img(class="learning-epaulette",src=basename(input$LearningEpaulette),"Learning Epaulette"),
+          robust_img(class="learning-epaulette",src=basename(current_data$LearningEpaulette),"Learning Epaulette"),
           div(class="triad-container",
             div(class="triad border-right",
-              md_txt('Target subject',input$TargetSubject)
+              md_txt('Target subject',current_data$TargetSubject)
             ),
             div(class="triad border-right",
-              md_txt('For grades',input$ForGrades)
+              md_txt('For grades',current_data$ForGrades)
               ),
             div(class="triad",
-              md_txt("Est. Lesson Time", input$EstLessonTime))
+              md_txt("Est. Lesson Time", current_data$EstLessonTime))
               )
           ),
 
-        md_txt('Driving Question(s)',input$DrivingQ),
-        md_txt('Essential Question(s)',input$EssentialQ),
-        md_txt('Learning Objective(s)',input$LearningObj),
-        md_txt('',input$MiscMD,required=FALSE),# no label and required=F makes this invisible if no text in input
+        md_txt('Driving Question(s)',current_data$DrivingQ),
+        md_txt('Essential Question(s)',current_data$EssentialQ),
+        md_txt('Learning Objective(s)',current_data$LearningObj),
+        md_txt('',current_data$MiscMD,required=FALSE),# no label and required=F makes this invisible if no text in current_data
         # Keyword tags (w/ logic for adding placeholder if no values provided)
-        if(is.null(input$Tags)){div(class="placeholder",h3("Keywords missing"))
-          }else{div(class="keyword-cloud",h4("Keywords:"),lapply(input$Tags,function(x){span(class="keyword",x)}))},
-        md_txt('Description',input$Description),
+        if(is.null(current_data$Tags)){div(class="placeholder",h3("Keywords missing"))
+          }else{div(class="keyword-cloud",h4("Keywords:"),lapply(current_data$Tags,function(x){span(class="keyword",x)}))},
+        md_txt('Description',current_data$Description),
         ## 2. LESSON PREVIEW
         div(class="section",h1("2. Lesson Preview")),
-        md_txt('"Teach It in 15" Quick Prep',input$QuickPrep),
+        md_txt('"Teach It in 15" Quick Prep',current_data$QuickPrep),
         div(class="spacer")
   ))
   })
@@ -507,7 +512,8 @@ server <- function(input, output,session) {
 
 
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
-    #files from www folder used to generate preview (or other files dumped there)
+    #files from www folder used to generate preview (or other files dumped there like Supporting Media (at Preview stage))
+    #Should really make a function that checks time stamps and existence of files on a manifest
     www_file_paths<-list.files(fs::path(getwd(),"/www"),pattern="^.*\\..*",full.names = TRUE)
     lesson_file_path<-fs::path(WD,"meta/json/LESSON.json")
     if(!file.exists(lesson_file_path)){

@@ -18,8 +18,8 @@ matching_files<-function(y,yaml_item,rel_path,pattern,WD){
     search_results<-fs::path_rel(list.files(paste0(WD,rel_path,collapse="/"),
                                              pattern=pattern,full.names=T),WD)
     if(length(search_results)<1){out<-""}else{out <- search_results}
-    yaml::as.yaml(out)
-  }else{y[yaml_item]}
+    out
+  }else{yaml::yaml.load(y[yaml_item])}
 }
 
 
@@ -148,15 +148,22 @@ prep_input<-function(input,yaml_path){
       y$TemplateVer<-new_template_ver
     }
 
+    Y0 <- reactiveValuesToList(input)
 
-
-    # operational input variables we don't want to output
-    input_op_var<-c("save","StageForPublication")
-    # operational variables in yaml we don't expect to be in input
-    yaml_op_var<-c("TemplateVer","FirstPublicationDate","LastUpdated")
+    # figure out which are shiny operational variables in input & ignore em
+    input_op_var <- lapply(1:length(Y0), function(l) {
+      #check if "shiny" somewhere in a class name for each list item
+      if (sum(grepl("shiny", class(Y0[[l]]))) > 0) {
+        names(Y0)[l]
+      } else{
+      }
+    }) %>% unlist()
 
     #make nonreactive list of everything except our "Operational" input items
-    Y <- reactiveValuesToList(input)[!names(input) %in% input_op_var]
+    Y <- Y0[!names(input) %in% input_op_var]
+
+    # operational variables in yaml we don't expect to be in input
+    yaml_op_var<-c("TemplateVer","FirstPublicationDate","LastUpdated")
 
     template_fields0<-names(template_yaml)
     template_fields<-template_fields0[!template_fields0%in%yaml_op_var]
