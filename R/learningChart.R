@@ -213,8 +213,7 @@ invisible(sapply(targetSubj,function(x){
 })
 # output PNG of learning chart --------------------------------------------
 dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
-outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),"_",
-                                    paste0(compiledAlignment$grades),collapse=""),ext="png")
+outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),collapse=""),ext="png")
 
 grDevices::png(outFile,width=7,height=4.5,units="in",res=dpi,...)
 grid::grid.draw(learningChart)

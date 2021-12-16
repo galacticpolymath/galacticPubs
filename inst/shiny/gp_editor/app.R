@@ -9,8 +9,8 @@
 # Load helper functions
 source("helpers.R")
 pacman_test<-tryCatch(require(pacman),error=function(e){message("Recommended to install the 'pacman' package")})
-if(!"error"%in%class(pacman_test)){p_load(shiny,shinythemes)}else{
-  library(shiny);library(shinythemes)
+if(!"error"%in%class(pacman_test)){p_load(shiny,shinythemes,sortable)}else{
+  library(shiny);library(shinythemes);library(sortable)
 }
 
 
@@ -96,7 +96,7 @@ ui <- navbarPage(
             value = y$ShortTitle
         ),
         checkboxGroupInput("LessonBanner",label="Lesson Banner (found in assets/banners_etc)",
-                  choices=matching_files(y,yaml_item="LessonBanner",
+                  choices=matching_files(
                                        rel_path="assets/banners_etc/",
                                        pattern="^.*anner.*\\.[png|PNG|jpeg|jpg]",
                                        WD),
@@ -104,11 +104,15 @@ ui <- navbarPage(
 
         textAreaInput("SponsoredBy","Sponsored By: (Add multiple entries with `- `, i.e. hyphen+space)",y$SponsoredBy),
 
-        textAreaInput("SponsorLogo",label="Sponsor Logo(s)— (add images to assets/orig-client-media_NoEdit; reorder as needed for multiple logos)",
-                  value=matching_files(y,"SponsorLogo",
-                                       "assets/orig-client-media_NoEdit/",
-                                       pattern="^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
-                                       WD)),
+        rank_list(
+          input_id = "SponsorLogo",
+          text = "Sponsor Logo(s)— (add images to assets/orig-client-media_NoEdit; reorder as needed for multiple logos)",
+          labels = matching_files(
+            "assets/orig-client-media_NoEdit/",
+            pattern = "^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
+            WD
+          )
+        ),
 
         checkboxGroupInput("LessonEnvir","Lesson Environment",choices = c("Classroom","Remote"),selected=y$LessonEnvir,inline=TRUE),
 
@@ -356,17 +360,24 @@ server <- function(input, output,session) {
                              selected=y$ReadyToCompile),
           actionButton("compile","Save & Compile Materials",class="compile-button")
           ),
-        textAreaInput("LearningEpaulette",label="Learning Epaulette (should be in assets/learning-plots)",
-                  value=matching_files(y,yaml_item="LearningEpaulette",
-                                       rel_path="assets/learning-plots/",
-                                       pattern="^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
-                                       WD)),
-        textAreaInput("LearningChart","Learning Chart (Shows much lower on Preview page, with Standards)",
-                  value=matching_files(y,"LearningChart",
-                                       "assets/learning-plots",
-                                       "^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
-                                       WD))
-        ), #end left pane
+        checkboxGroupInput(
+          "LearningEpaulette",
+          label = "Learning Epaulette (should be in assets/learning-plots)",
+          choices = matching_files(rel_path = "assets/learning-plots/",
+                                   pattern = "^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
+                                   WD),
+          selected = if(y$LearningEpaulette == ""){NULL}else{y$LearningEpaulette}
+        ),
+        checkboxGroupInput(
+          "LearningChart",
+          "Learning Chart (Shows much lower on Preview page, with Standards)",
+          choices = matching_files(
+            "assets/learning-plots",
+            "^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
+            WD
+          ),
+          selected = if(y$LearningChart == ""){NULL}else{y$LearningChart}
+        )), #end left pane
     column(width=7      # verbatimTextOutput("console_text"))
     )
     )
@@ -410,7 +421,7 @@ server <- function(input, output,session) {
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart","SupportingMedia")
     #read in filenames; if empty, return empty; else add WD to create full path
     items2copy_filenames<-lapply(items2copy,function(x) {
-      item<-yaml::yaml.load(current_data[[x]])
+      item<-current_data[[x]]
       if(identical(item,NULL)|identical(item,"")){NA}else{ paste0(WD,item)}
      })
     names(items2copy_filenames)<-items2copy
@@ -455,14 +466,14 @@ server <- function(input, output,session) {
         div(class="lesson-preview-container",
         h2(robust_txt(current_data$Title,"Title")),
         h4(robust_txt(current_data$Subtitle,"Subtitle")),
-        robust_img(class="lesson-banner",src=basename(yaml::yaml.load(current_data$LessonBanner)[[1]]), label="Lesson Banner"),
+        robust_img(class="lesson-banner",src=basename(current_data$LessonBanner), label="Lesson Banner"),
         div(class="sponsor-section",
             h4("Sponsored by:"),
-            lapply(1:max(length(sponsoredByTxt),length(yaml::yaml.load(current_data$SponsorLogo))),function(i){
+            lapply(1:max(length(sponsoredByTxt),length(current_data$SponsorLogo)),function(i){
                 div(class="sponsor",
                 span(class="sponsor-text",md_txt("",sponsoredByTxt[i])),
                 div(class="sponsor-logo-container",
-                robust_img(class="sponsor-logo",src=basename(yaml::yaml.load(current_data$SponsorLogo)[i]),"Sponsor Logo")
+                robust_img(class="sponsor-logo",src=basename(current_data$SponsorLogo[i]),"Sponsor Logo")
                 ))})
         ),
         ## 1. OVERVIEW

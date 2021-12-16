@@ -128,7 +128,7 @@ dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
 givenExt=if(grepl(".",fileName,fixed=TRUE)){gsub(".*\\.(.{3,4}$)","\\1",fileName)}else{NULL} #extract file extension if provided
 fileOut<-gsub("(^.*)\\..*$","\\1",basename(fileName)) #strip extension and full path from provided fileName
 fileOutExt<-ifelse(is.null(givenExt),"png",givenExt) #provide png extension if not provided
-output<-fs::path(destFolder,"/",paste0(fileOut,"_",compiledAlignment$grades,collapse=""),ext=fileOutExt)
+output<-fs::path(destFolder,"/",fileOut,ext=fileOutExt)
 
 #save the file
 ggplot2::ggsave(filename=basename(output),plot=epaulette,path=fs::path_dir(output),width=width, height=height,dpi=dpi,bg="transparent",...)

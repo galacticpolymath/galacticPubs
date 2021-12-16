@@ -19,23 +19,30 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
      destFolder <- paste0(WD, destFolder)
    }
 
-#quell Rcheck warnings
-prep_input<-lumpItems <-
+    #prep data before compiling; use current_data (which merges input and saved yaml) instead of input
+    prepped_data<-prep_input(input,yaml_path)
+    current_data<-prepped_data$current_data
+
 
 
 # Standards alignment & learning plots -----------------------------------------------------
   if("Standards Alignment"%in% choices){
 
     alignment <- compileStandards(WD=WD)
-    if(input$TargetSubject==""){stop("Enter a Target Subject on the Edit tab and try again.")}
+    if(current_data$TargetSubject==""){stop("Enter a Target Subject on the Edit tab and try again.")}
     message("\nGenerating Learning Chart\n")
 
     #LEARNING CHART
     learningChart(alignment,
-                  targetSubj=input$TargetSubject,
-                  caption=input$Title,
+                  targetSubj=current_data$TargetSubject,
+                  caption=current_data$Title,
                   dpi=200,
                   WD=WD)
+
+    #set learning chart filename from default file output on learningChart function
+    #(since this file doesn't exist in yaml yet)
+    current_data$LearningChart<-paste0("assets/learning-plots/",formals(learningChart)$fileName,".png")
+
     #export learning chart section
     lc<-list(
       list(`__component` = "lesson-plan.section-heading", #not clear why this is needed...it's a unique component
@@ -46,7 +53,7 @@ prep_input<-lumpItems <-
         Description =
           paste0(
             "This Galactic Polymath Learning Chart illustrates the areas of knowledge covered. This lesson targets ",
-            input$TargetSubject,
+            current_data$TargetSubject,
             ", but it helps teach national learning standards in 4 subjects: \n- [Common Core Math](http://www.corestandards.org/Math/); [Common Core ELA](http://www.corestandards.org/ELA-Literacy/); [Next Generation Science (NGSS)](https://www.nextgenscience.org/); and [College, Career, and Civic Life (C3) Social Studies Standards](https://www.socialstudies.org/standards/c3).\nIn total, there are ",
             nrow(alignment$compiled),
             " standards across US grade band(s): ",
@@ -54,9 +61,9 @@ prep_input<-lumpItems <-
             "."
           ),
         Footnote = "**Notes on Standards**\n\n*Standards are broken down into ***Target*** and ***Connected*** categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
-        Badge = list(url = basename(yaml::yaml.load(
-          input$LearningChart[1]
-        )))
+        Badge = list(url = basename(
+          current_data$LearningChart[1]
+        ))
       )
     )
 
@@ -67,16 +74,20 @@ prep_input<-lumpItems <-
     #LEARNING EPAULETTE
     message("\nGenerating Learning Epaulette\n")
     learningEpaulette(alignment,
-                      targetSubj=input$TargetSubject,
+                      targetSubj=current_data$TargetSubject,
                       WD=WD)
+
+    #set learning chart filename from default file output on learningChart function
+    #(since this file doesn't exist in yaml yet)
+    current_data$LearningEpaulette<-paste0("assets/learning-plots/",formals(learningEpaulette)$fileName,".png")
 
   }
 
   if("Teaching Materials" %in% choices){
-    if(input$ShortTitle==""){warning("You need to enter a unique ShortTitle in Edit Tab")
+    if(current_data$ShortTitle==""){warning("You need to enter a unique ShortTitle in Edit Tab")
     }else{
-      updateTeachingMatLinks(shortTitle = input$ShortTitle, WD = WD,dataCat=c("download",tolower(input$LessonEnvir)))
-      compileTeachingMat(LessonEnvir=input$LessonEnvir,WD = WD)
+      updateTeachingMatLinks(shortTitle = current_data$ShortTitle, WD = WD,dataCat=c("download",tolower(current_data$LessonEnvir)))
+      compileTeachingMat(LessonEnvir=current_data$LessonEnvir,WD = WD)
     }
 
   }
@@ -84,40 +95,45 @@ prep_input<-lumpItems <-
 
 # Separate parts of Front Matter ------------------------------------------
   if("Front Matter" %in% choices){
-      #consolidate current and saved front matter info
-    prepped<-prep_input(input,yaml_path=paste0(WD,"meta/front-matter.yml"))
-    # input
-    d<-prepped$current_data
-    # saved data read from yaml (esp. for things we don't read in, but want to export to JSON like template version)
-    z<-prepped$saved_data
 
     header<-list(
-      ShortTitle=d$ShortTitle,
-      PublicationStatus= d$PublicationStatus,
-      TemplateVer= z$TemplateVer,
+      TemplateVer= current_data$TemplateVer,
+      ShortTitle=current_data$ShortTitle,
+      PublicationStatus= current_data$PublicationStatus,
+      PublicationDate=current_data$PublicationDate
       LastUpdated=Sys.time(),
-      Title=d$Title,
-      Subtitle=d$Subtitle,
-      SponsoredBy=d$SponsoredBy,
-      SponsorImage = list(url = basename(yaml::yaml.load(d$SponsorLogo))),
-      CoverImage = list(url = basename(yaml::yaml.load(d$LessonBanner)))
+      Title=current_data$Title,
+      Subtitle=current_data$Subtitle,
+      SponsoredBy=current_data$SponsoredBy,
+      SponsorImage = list(url = basename(current_data$SponsorLogo)),
+      CoverImage = list(url = basename(current_data$LessonBanner))
     )
 
 
     overview<-list(
         `__component`= "lesson-plan.overview",
-        EstLessonTime=d$EstLessonTime,
-        ForGrades= d$ForGrades,
-        TargetSubject= d$TargetSubject,
+        EstLessonTime=current_data$EstLessonTime,
+        ForGrades= current_data$ForGrades,
+        TargetSubject= current_data$TargetSubject,
         # browser(),
         #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
-        Text=lumpItems(c("DrivingQ","EssentialQ","LearningObj","MiscMD"),item.labs = c("Driving Question(s):","Essential Question(s):","Learning Objective(s):",""),
-                        d,new.name = "Text")$Text,
-        Tags=d$Tags,#unlist(lapply(d$Tags,function(x) c(Value=x)))
+        Text=lumpItems(
+            c("DrivingQ", "EssentialQ", "LearningObj", "MiscMD"),
+            item.labs = c(
+              "Driving Question(s):",
+              "Essential Question(s):",
+              "Learning Objective(s):",
+              ""
+            ),
+            current_data,
+            new.name = "Text"
+          )$Text,
+        Tags=current_data$Tags,#unlist(lapply(current_data$Tags,function(x) c(Value=x)))
         SteamEpaulette=list(
-                          url=basename(yaml::yaml.load(d$LearningEpaulette[1]))), #might want to add more complex image handling later
-        Description=d$Description
-        )
+          url = basename(current_data$LearningEpaulette[1]),
+          #might want to add more complex image handling later
+          Description = current_data$Description
+        ))
 
     #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
     mmExists<-file.exists(paste0(WD,"meta/JSON/multimedia.json"))
@@ -130,7 +146,7 @@ prep_input<-lumpItems <-
       `__component`="lesson-plan.lesson-preview",
       SectionTitle= "Lesson Preview",
       Multimedia= if(mmExists){mm}else{},
-      QuickPrep= d$QuickPrep,
+      QuickPrep= current_data$QuickPrep,
       InitiallyExpanded=TRUE
     )
 
@@ -138,14 +154,14 @@ prep_input<-lumpItems <-
     bonus<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Bonus Content",
-      Content= d$Bonus,
+      Content= current_data$Bonus,
       InitiallyExpanded=TRUE
     )
 
     extensions<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Extensions",
-      Content= d$Extensions,
+      Content= current_data$Extensions,
       InitiallyExpanded=TRUE
     )
 
@@ -154,11 +170,11 @@ prep_input<-lumpItems <-
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Background",
       Content= ifelse(
-        d$ConnectionToResearch == "",
-        d$Background,
-        paste(d$Background,
+        current_data$ConnectionToResearch == "",
+        current_data$Background,
+        paste(current_data$Background,
           "\n### Lesson Connections to this Research",
-          d$ConnectionToResearch
+          current_data$ConnectionToResearch
         )),
       InitiallyExpanded=TRUE
     )
@@ -166,14 +182,14 @@ prep_input<-lumpItems <-
      feedback<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Feedback",
-      Content= d$Feedback,
+      Content= current_data$Feedback,
       InitiallyExpanded=TRUE
     )
 
      credits<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Credits",
-      Content= d$Credits,
+      Content= current_data$Credits,
       InitiallyExpanded=TRUE
     )
 
@@ -266,5 +282,6 @@ prep_input<-lumpItems <-
   # print(printToScreenTable)
   message("\n Combined JSON file saved\n @ ",outFile,"\n")
   message(" ",rep("-",30))
-
+  #Save data (mainly for epaulette & learning chart filenames)
+  yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
 }
