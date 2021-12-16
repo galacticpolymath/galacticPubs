@@ -124,12 +124,14 @@ prep_input<-function(input,yaml_path){
                                    "galacticPubs"))
   }
     ####
-    #update yaml just read in, according to template (add missing fields)
+    #update lesson yaml, according to template (add missing fields)
     template_yaml<-safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
                                    "galacticPubs"))
 
-    # This will add fields if galacticPubs supplies a new template
+    ##### UPDATE our YAML from latest template
+    # This will add fields to our front-matter if galacticPubs supplies a new template
     y<-addMissingFields(y,template=template_yaml)
+
 
     #Revise yaml template version number if out of date
     old_template_ver<-y$TemplateVer
@@ -191,6 +193,14 @@ prep_input<-function(input,yaml_path){
 
     # Add values from yaml that are not in input data
     Y3<-addMissingFields(Y2,template=y)
+
+    #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)
+    if(Y3$GPCatalogPath==""){
+      repo<-whichRepo()
+      Y3$GPCatalogPath<-catalogURL("LESSON.json",repo)
+    }
+
+
     #gotta make sure all Y3 elements are characters, cuz the publication date will invoke pesky POSIX issues :/
     list(saved_data=y,current_data=lapply(Y3,function(x)as.character(x)))
 }
