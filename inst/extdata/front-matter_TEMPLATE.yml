@@ -1,7 +1,8 @@
 #DEFAULT VALUES FOR front-matter.ReadyToCompile
 #
 #---> These are operational variables that will be ignored by editor(), but kept in output
-TemplateVer: 0.2.0
+id: ''
+TemplateVer: 0.2.1
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''

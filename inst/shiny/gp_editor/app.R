@@ -528,7 +528,19 @@ server <- function(input, output,session) {
     }
     #update publication dates, etc
     #FirstPublicationDate is set upon first publishing; only changed manually after that
-    if(current_data$FirstPublicationDate==""){current_data$FirstPublicationDate<-as.character(Sys.time())}
+    #Same for id (based on how many lessons currently in catalog)
+    if(current_data$FirstPublicationDate==""){
+      current_data$FirstPublicationDate<-as.character(Sys.time())
+    }
+
+    if(current_data$id==""){
+      #count how many lessons there are currently on gp-catalog
+      current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
+      browser()
+      current_data$id<-(sapply(current_catalog, function(x) x$id) %>% max(na.rm=T) )+1
+      message("Lesson ID assigned: ",current_data$id)
+
+    }
     #always update LastUpdated timestamp
     current_data$LastUpdated<-as.character(Sys.time())
     current_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))

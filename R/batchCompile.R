@@ -19,11 +19,13 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
      destFolder <- paste0(WD, destFolder)
    }
 
+
+    #quell Rcheck
+    lumpItems<-whichRepo <- catalogURL <- expandMDLinks <- NULL
+
     #figure out which repo we're connected to (to create full paths to catalog.galacticpolymath.com)
     repo<-whichRepo()
 
-    #quell Rcheck
-    lumpItems<-NULL
 
 # Standards alignment & learning plots -----------------------------------------------------
   if("Standards Alignment"%in% choices){
