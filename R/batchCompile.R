@@ -124,7 +124,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
               "Learning Objective(s):",
               ""
             ),
-            current_data,
+            list.obj=current_data,
             new.name = "Text"
           )$Text,
         Tags=current_data$Tags,#unlist(lapply(current_data$Tags,function(x) c(Value=x)))

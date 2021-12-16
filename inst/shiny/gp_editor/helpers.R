@@ -5,11 +5,12 @@ safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
   y<-yaml::read_yaml(yaml_path,eval.expr=eval.expr)
   y2<-lapply(1:length(y), function(i){
     yi<-y[[i]]
-    if(identical(yi,NULL)|identical(yi,"")|identical(yi,NA)|identical(yi,"\n")){yi<-''
+    if(identical(yi,NULL)|identical(yi,"")|identical(yi,NA)|identical(yi,"\n")|identical(yi,list())){yi<-''
     }else{yi}
   })
   names(y2)<-names(y)
   y2
+  browser()
 }
 
 #Function to find files that match a pattern and read them in if YAML entry is blank

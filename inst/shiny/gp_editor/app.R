@@ -534,7 +534,7 @@ server <- function(input, output,session) {
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
 
     #Read lesson back in to edit timestamps
-    lesson<-jsonlite::read_json(path = lesson_file_path)
+    lesson<-jsonlite::read_json(path = lesson_file_path,null="null")
     lesson$FirstPublicationDate<-current_data$FirstPublicationDate
     lesson$LastUpdated<-current_data$LastUpdated
     #rewrite it before staging it in `published/`
