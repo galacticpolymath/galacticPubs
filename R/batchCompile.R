@@ -100,7 +100,7 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
       TemplateVer= current_data$TemplateVer,
       ShortTitle=current_data$ShortTitle,
       PublicationStatus= current_data$PublicationStatus,
-      PublicationDate=current_data$PublicationDate
+      PublicationDate=current_data$PublicationDate,
       LastUpdated=Sys.time(),
       Title=current_data$Title,
       Subtitle=current_data$Subtitle,
@@ -192,8 +192,6 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
       Content= current_data$Credits,
       InitiallyExpanded=TRUE
     )
-
-
 
     jsonlite::write_json(header,path = fs::path(destFolder,"header",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")
     jsonlite::write_json(overview,path = fs::path(destFolder,"overview",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")

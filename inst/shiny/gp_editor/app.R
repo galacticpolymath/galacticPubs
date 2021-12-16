@@ -513,24 +513,32 @@ server <- function(input, output,session) {
   #Clicked publish button
   observe({
 
-    #Save data before compiling
+    #Reconcile input and yaml saved data before finalizing
     current_data<-prep_input(input,yaml_path)$current_data
 
-    #update publication dates, etc
-    #FirstPublicationDate is set upon first publishing; only changed manually after that
-    if(current_data$FirstPublicationDate==""){current_data$FirstPublicationDate<-as.character(Sys.time())}
-    current_data$LastUpdated<-as.character(Sys.time())
-
-
-    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
     #files from www folder used to generate preview (or other files dumped there like Supporting Media (at Preview stage))
     #Should really make a function that checks time stamps and existence of files on a manifest
     www_file_paths<-list.files(fs::path(getwd(),"/www"),pattern="^.*\\..*",full.names = TRUE)
     lesson_file_path<-fs::path(WD,"meta/json/LESSON.json")
     if(!file.exists(lesson_file_path)){
-      warning("Lesson File Not Found!\n - ",lesson_file_path)
+      warning("Lesson File Not Found! (Compile first)!\n - ",lesson_file_path)
       lesson_file_path<-{}
-      }
+    }
+    #update publication dates, etc
+    #FirstPublicationDate is set upon first publishing; only changed manually after that
+    if(current_data$FirstPublicationDate==""){current_data$FirstPublicationDate<-as.character(Sys.time())}
+    #always update LastUpdated timestamp
+    current_data$LastUpdated<-as.character(Sys.time())
+
+    #Save time stamp changes
+    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
+
+    #Read lesson back in to edit timestamps
+    lesson<-jsonlite::read_json(path = lesson_file_path)
+    lesson$FirstPublicationDate<-current_data$FirstPublicationDate
+    lesson$LastUpdated<-current_data$LastUpdated
+    #rewrite it before staging it in `published/`
+    jsonlite::write_json(lesson,lesson_file_path,pretty=TRUE,auto_unbox = TRUE,na="null")
 
     files2copy<-c(www_file_paths,lesson_file_path)
     destFolder<-fs::path(WD,"published")
