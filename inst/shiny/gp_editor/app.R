@@ -76,9 +76,9 @@ ui <- navbarPage(
             a("markdown formatting", href = "https://www.markdownguide.org/basic-syntax/")
         ),
         dateInput(width="200px",
-            inputId = "PublicationDate",
-            label = "Publication Date",
-            value = y$PublicationDate
+            inputId = "ReleaseDate",
+            label = "Official Release Date",
+            value = y$ReleaseDate
         ),
         textInput(
             inputId = "Title",
@@ -402,7 +402,7 @@ server <- function(input, output,session) {
     #Save data before compiling
     current_data<-prep_input(input,yaml_path)$current_data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
-    batchCompile(input,choices=input$ReadyToCompile,WD=WD)
+    batchCompile(current_data,choices=input$ReadyToCompile,WD=WD)
     } ) %>% bindEvent(input$compile)
 
 

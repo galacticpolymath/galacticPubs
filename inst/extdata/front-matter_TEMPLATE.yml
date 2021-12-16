@@ -1,8 +1,8 @@
 #Default values for new lesson front matter
-TemplateVer: 0.1.5
+TemplateVer: 0.1.6
 ShortTitle: ''
 PublicationStatus: Draft
-PublicationDate: ''
+ReleaseDate: ''
 FirstPublicationDate: ''
 LastUpdated: ''
 Title: ''

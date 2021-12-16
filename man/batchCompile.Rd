@@ -5,7 +5,7 @@
 \title{batchCompile}
 \usage{
 batchCompile(
-  input,
+  current_data,
   choices = c("Front Matter"),
   destFolder = "meta/JSON/",
   outputFileName = "LESSON.json",
@@ -13,7 +13,7 @@ batchCompile(
 )
 }
 \arguments{
-\item{input}{the input from the shiny app environment}
+\item{current_data}{the reconciled data including yaml and input from the shiny app environment}
 
 \item{choices}{one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
 

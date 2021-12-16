@@ -3,7 +3,7 @@
 #' Processes a subset of data chosen by user using the GP Shiny Editor
 #'
 #' Combines functionality of compileProcedure, compileStandards, compileAcknowledgements, compileJSON, etc.
-#' @param input the input from the shiny app environment
+#' @param current_data the reconciled data including yaml and input from the shiny app environment
 #' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
@@ -12,18 +12,16 @@
 #' @importFrom rlang .data
 #' @export
 #'
-batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd()){
+batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd()){
 
    #if WD supplied, append it to destFolder
    if(!identical(WD, getwd())) {
      destFolder <- paste0(WD, destFolder)
    }
 
-    #prep data before compiling; use current_data (which merges input and saved yaml) instead of input
-    prepped_data<-prep_input(input,yaml_path)
-    current_data<-prepped_data$current_data
 
-
+    #quell Rcheck
+    lumpItems<-NULL
 
 # Standards alignment & learning plots -----------------------------------------------------
   if("Standards Alignment"%in% choices){
@@ -100,7 +98,8 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
       TemplateVer= current_data$TemplateVer,
       ShortTitle=current_data$ShortTitle,
       PublicationStatus= current_data$PublicationStatus,
-      PublicationDate=current_data$PublicationDate,
+      FirstPublicationDate=current_data$FirstPublicationDate,
+      ReleaseDate=current_data$ReleaseDate,
       LastUpdated=Sys.time(),
       Title=current_data$Title,
       Subtitle=current_data$Subtitle,
@@ -281,5 +280,5 @@ batchCompile <- function(input, choices=c("Front Matter"),destFolder="meta/JSON/
   message("\n Combined JSON file saved\n @ ",outFile,"\n")
   message(" ",rep("-",30))
   #Save data (mainly for epaulette & learning chart filenames)
-  yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
+  yaml::write_yaml(current_data, fs::path(WD,"meta/front-matter.yml"))
 }
