@@ -216,6 +216,15 @@ catalogURL<-function(relative_ref,repo){
   }
 }
 
+#make markdown links into full paths to GP catalog
+expandMDLinks<-function(md,repo){
+  #ignore websites, replace partial links to anything else
+  pat="(?<=\\]\\()(?!http|www|\\.com).*?(?<!\\.com)(?=\\))"
+  old_str<-stringr::str_extract_all(string=md,pattern=pat) %>% unlist()
+  new_str<-catalogURL(old_str,repo)
+  #replace old with new
+  stringr::str_replace_all(string=md,pattern=pat,new_str)
+}
 
 # #makes list items for a section in JSON output for lesson plan
 # makeSection<-function(title){

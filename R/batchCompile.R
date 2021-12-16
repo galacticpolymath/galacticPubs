@@ -19,6 +19,8 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
      destFolder <- paste0(WD, destFolder)
    }
 
+    #figure out which repo we're connected to (to create full paths to catalog.galacticpolymath.com)
+    repo<-whichRepo()
 
     #quell Rcheck
     lumpItems<-NULL
@@ -59,9 +61,10 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
             "."
           ),
         Footnote = "**Notes on Standards**\n\n*Standards are broken down into ***Target*** and ***Connected*** categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
-        Badge = list(url = basename(
-          current_data$LearningChart[1]
-        ))
+        Badge = list(url =
+                       catalogURL(basename(current_data$LearningChart[1]),repo)
+                     )
+
       )
     )
 
@@ -96,8 +99,9 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #Take everything from TemplateVer to SponsoredBy
     header<-current_data[1:which(names(current_data)=="SponsoredBy")]
-    header$SponsorImage=list(url = basename(current_data$SponsorLogo))
-    header$CoverImage=list(url = basename(current_data$LessonBanner))
+    #make full catalog paths
+    header$SponsorImage=list(url = catalogURL(basename(current_data$SponsorLogo),repo))
+    header$CoverImage=list(url = catalogURL(basename(current_data$LessonBanner),repo))
 
 
     overview<-list(
@@ -119,7 +123,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
           )$Text,
         Tags=current_data$Tags,#unlist(lapply(current_data$Tags,function(x) c(Value=x)))
         SteamEpaulette=list(
-          url = basename(current_data$LearningEpaulette[1]),
+          url = catalogURL(basename(current_data$LearningEpaulette[1]),repo),
           #might want to add more complex image handling later
           Description = current_data$Description
         ))
@@ -139,46 +143,49 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
       InitiallyExpanded=TRUE
     )
 
-
+    # markdown links to supporting materials allowed
     bonus<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Bonus Content",
-      Content= current_data$Bonus,
+      Content= expandMDLinks(current_data$Bonus,repo),
       InitiallyExpanded=TRUE
     )
-
+    # markdown links to supporting materials allowed
     extensions<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Extensions",
-      Content= current_data$Extensions,
+      Content= expandMDLinks(current_data$Extensions,repo),
       InitiallyExpanded=TRUE
     )
 
     #Combine Sci Background and Lesson Connections to Research
+    # markdown links to supporting materials allowed
+    # expandMDLinks takes relative links in [](x.jpg) format and makes a full path to GP catalog
     background<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Background",
       Content= ifelse(
         current_data$ConnectionToResearch == "",
-        current_data$Background,
-        paste(current_data$Background,
+        expandMDLinks(current_data$Background,repo),
+        paste(expandMDLinks(current_data$Background,repo),
           "\n### Lesson Connections to this Research",
-          current_data$ConnectionToResearch
+          expandMDLinks(current_data$ConnectionToResearch,repo)
         )),
       InitiallyExpanded=TRUE
     )
 
+    # markdown links to supporting materials allowed
      feedback<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Feedback",
-      Content= current_data$Feedback,
+      Content= expandMDLinks(current_data$Feedback,repo),
       InitiallyExpanded=TRUE
     )
-
+      # markdown links to supporting materials allowed
      credits<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Credits",
-      Content= current_data$Credits,
+      Content= expandMDLinks(current_data$Credits,repo),
       InitiallyExpanded=TRUE
     )
 
@@ -235,7 +242,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
   #read in all the json pieces
   lesson_data<-lapply(filenamez.df$file,function(x){
-    jsonlite::read_json(fs::path(destFolder,x))
+    jsonlite::read_json(fs::path(destFolder,x),na="null",null="null")
   })
   names(lesson_data)<-gsub("^(.*)\\..*","\\1", filenamez.df$file) #removes file extension
 
