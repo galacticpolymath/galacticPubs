@@ -5,12 +5,11 @@ safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
   y<-yaml::read_yaml(yaml_path,eval.expr=eval.expr)
   y2<-lapply(1:length(y), function(i){
     yi<-y[[i]]
-    if(identical(yi,NULL)|identical(yi,"")|identical(yi,NA)|identical(yi,"\n")|identical(yi,list())){yi<-''
+    if(identical(yi,NULL)|identical(yi,"")|identical(yi,NA)|identical(yi,"\n")|identical(yi,list())|length(yi)==0){yi<-''
     }else{yi}
   })
   names(y2)<-names(y)
   y2
-  browser()
 }
 
 #Function to find files that match a pattern and read them in if YAML entry is blank
@@ -34,14 +33,6 @@ md_txt <- function(label,txt,required=TRUE){
     }
 }
 
-make_null_json<-function(name,WD,destFolder="meta/JSON/"){
-  if(missing(WD)){stop("Must supply 'WD' (working directory)")}
-
-  l<-list(NULL)
-  outFile<-fs::path(WD,destFolder,name,ext="json")
-  jsonlite::write_json(l,path=outFile,auto_unbox=TRUE)
-  message(" Empty json saved for unfinished section\n  - ",outFile,"")
-}
 
 # Helper function for lumping separate markdown/YAML entries (which are separated for end user continuity)
 # into a single list item for the JSON output for the web; output is the supplied list.obj, with items removed and lumped with new.name
@@ -110,6 +101,7 @@ addMissingFields<-function(list_obj, template) {
     }
   }
   new
+
 }
 
 
@@ -124,7 +116,7 @@ prep_input<-function(input,yaml_path){
     #read in existing front-matter.yml if it exists (just to be sure we're up to date)
     #If this is the user's first time editing, they will have read in y at the top, but not written yet
   if (file.exists(yaml_path)) {
-    y <- yaml::read_yaml(yaml_path, eval.expr = TRUE)
+    y <- safe_read_yaml(yaml_path)
   } else{
     #use the front matter template supplied with galacticPubs as a starting point
     y <-
@@ -135,6 +127,7 @@ prep_input<-function(input,yaml_path){
     #update yaml just read in, according to template (add missing fields)
     template_yaml<-safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
                                    "galacticPubs"))
+
     # This will add fields if galacticPubs supplies a new template
     y<-addMissingFields(y,template=template_yaml)
 
@@ -158,10 +151,13 @@ prep_input<-function(input,yaml_path){
     }) %>% unlist()
 
     #make nonreactive list of everything except our "Operational" input items
-    Y <- Y0[!names(input) %in% input_op_var]
+    Y0B <- Y0[!names(input) %in% input_op_var]
+    #Remove Nulls! They cause many problems when we output to character & get character(0)
+    Y<- sapply(Y0B,function(x){if(is.null(x)){""}else{x}} ,simplify = F)
 
-    # operational variables in yaml we don't expect to be in input
-    yaml_op_var<-c("TemplateVer","FirstPublicationDate","LastUpdated")
+    # operational variables in yaml we don't expect to be in input (anything before ShortTitle)
+    yaml_op_var<-names(template_yaml)[1:(which(names(template_yaml)=="ShortTitle")-1)]
+
 
     template_fields0<-names(template_yaml)
     template_fields<-template_fields0[!template_fields0%in%yaml_op_var]
@@ -181,6 +177,7 @@ prep_input<-function(input,yaml_path){
         paste0(names(Y)[which(is.na(Y_order_indx0))], collapse = "\n\t- "),
         "\nUpdate galacticPubs to upgrade your template to ensure fields are in the right order."
       )
+
       input_not_in_template
       }else{}
 
@@ -194,7 +191,6 @@ prep_input<-function(input,yaml_path){
 
     # Add values from yaml that are not in input data
     Y3<-addMissingFields(Y2,template=y)
-
     #gotta make sure all Y3 elements are characters, cuz the publication date will invoke pesky POSIX issues :/
     list(saved_data=y,current_data=lapply(Y3,function(x)as.character(x)))
 }

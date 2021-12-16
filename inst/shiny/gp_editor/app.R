@@ -301,7 +301,7 @@ server <- function(input, output,session) {
                   list.obj=current_data,
                   new.name="Text")
 
-    jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"),pretty=TRUE,auto_unbox = TRUE)
+    jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
     #Storing yaml update text in reactive values and output, so it gets printed & can be
     #accessed from another server function
     vals$saved<-TRUE
@@ -420,9 +420,9 @@ server <- function(input, output,session) {
     #copy images over to www folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart","SupportingMedia")
     #read in filenames; if empty, return empty; else add WD to create full path
-    items2copy_filenames<-lapply(items2copy,function(x) {
-      item<-current_data[[x]]
-      if(identical(item,NULL)|identical(item,"")){NA}else{ paste0(WD,item)}
+    items2copy_filenames<-lapply(1:length(items2copy),function(i) {
+      item<-current_data[[items2copy[i]]]
+      if(identical(item,NULL)|identical(item,"")|length(item)==0){NA}else{ paste0(WD,item)}
      })
     names(items2copy_filenames)<-items2copy
 
@@ -450,6 +450,7 @@ server <- function(input, output,session) {
     })
 
     #Custom extraction of bullets with regex!!
+
     sponsoredByTxt<-if(grepl("^-",current_data$SponsoredBy)){
 
                     parsed<-tryCatch(stringr::str_extract_all(current_data$SponsoredBy,
@@ -519,6 +520,7 @@ server <- function(input, output,session) {
     #files from www folder used to generate preview (or other files dumped there like Supporting Media (at Preview stage))
     #Should really make a function that checks time stamps and existence of files on a manifest
     www_file_paths<-list.files(fs::path(getwd(),"/www"),pattern="^.*\\..*",full.names = TRUE)
+    if(length(www_file_paths)==0){www_file_paths<-{}}
     lesson_file_path<-fs::path(WD,"meta/json/LESSON.json")
     if(!file.exists(lesson_file_path)){
       warning("Lesson File Not Found! (Compile first)!\n - ",lesson_file_path)
@@ -529,6 +531,7 @@ server <- function(input, output,session) {
     if(current_data$FirstPublicationDate==""){current_data$FirstPublicationDate<-as.character(Sys.time())}
     #always update LastUpdated timestamp
     current_data$LastUpdated<-as.character(Sys.time())
+    current_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
 
     #Save time stamp changes
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
@@ -537,9 +540,9 @@ server <- function(input, output,session) {
     lesson<-jsonlite::read_json(path = lesson_file_path,null="null")
     lesson$FirstPublicationDate<-current_data$FirstPublicationDate
     lesson$LastUpdated<-current_data$LastUpdated
+    lesson$galacticPubsVer<-current_data$galacticPubsVer
     #rewrite it before staging it in `published/`
-    jsonlite::write_json(lesson,lesson_file_path,pretty=TRUE,auto_unbox = TRUE,na="null")
-
+    jsonlite::write_json(lesson,lesson_file_path,pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
     files2copy<-c(www_file_paths,lesson_file_path)
     destFolder<-fs::path(WD,"published")
     dir.create(destFolder,showWarnings = FALSE)

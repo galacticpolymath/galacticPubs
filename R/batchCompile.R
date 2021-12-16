@@ -67,7 +67,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
 
     #write learning chart section before standards section
-    jsonlite::write_json(lc,fs::path(destFolder,"learning-chart.json"),pretty=TRUE,auto_unbox=TRUE)
+    jsonlite::write_json(lc,fs::path(destFolder,"learning-chart.json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
 
     #LEARNING EPAULETTE
     message("\nGenerating Learning Epaulette\n")
@@ -94,19 +94,10 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 # Separate parts of Front Matter ------------------------------------------
   if("Front Matter" %in% choices){
 
-    header<-list(
-      TemplateVer= current_data$TemplateVer,
-      ShortTitle=current_data$ShortTitle,
-      PublicationStatus= current_data$PublicationStatus,
-      FirstPublicationDate=current_data$FirstPublicationDate,
-      ReleaseDate=current_data$ReleaseDate,
-      LastUpdated=Sys.time(),
-      Title=current_data$Title,
-      Subtitle=current_data$Subtitle,
-      SponsoredBy=current_data$SponsoredBy,
-      SponsorImage = list(url = basename(current_data$SponsorLogo)),
-      CoverImage = list(url = basename(current_data$LessonBanner))
-    )
+    #Take everything from TemplateVer to SponsoredBy
+    header<-current_data[1:which(names(current_data)=="SponsoredBy")]
+    header$SponsorImage=list(url = basename(current_data$SponsorLogo))
+    header$CoverImage=list(url = basename(current_data$LessonBanner))
 
 
     overview<-list(
@@ -114,7 +105,6 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
         EstLessonTime=current_data$EstLessonTime,
         ForGrades= current_data$ForGrades,
         TargetSubject= current_data$TargetSubject,
-        # browser(),
         #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
         Text=lumpItems(
             c("DrivingQ", "EssentialQ", "LearningObj", "MiscMD"),
@@ -137,7 +127,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
     mmExists<-file.exists(paste0(WD,"meta/JSON/multimedia.json"))
     if(mmExists){
-      mm<-jsonlite::read_json(paste0(WD,"meta/JSON/multimedia.json"))
+      mm<-jsonlite::read_json(paste0(WD,"meta/JSON/multimedia.json"),null="null")
     }
 
     # Make lesson preview section
@@ -192,14 +182,14 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
       InitiallyExpanded=TRUE
     )
 
-    jsonlite::write_json(header,path = fs::path(destFolder,"header",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")
-    jsonlite::write_json(overview,path = fs::path(destFolder,"overview",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")
-    jsonlite::write_json(preview,path = fs::path(destFolder,"preview",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")
-    jsonlite::write_json(bonus,path = fs::path(destFolder,"bonus",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")
-    jsonlite::write_json(extensions,path = fs::path(destFolder,"extensions",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")
-    jsonlite::write_json(background,path = fs::path(destFolder,"background",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")
-    jsonlite::write_json(feedback,path = fs::path(destFolder,"feedback",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")
-    jsonlite::write_json(credits,path = fs::path(destFolder,"credits",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null")
+    jsonlite::write_json(header,path = fs::path(destFolder,"header",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    jsonlite::write_json(overview,path = fs::path(destFolder,"overview",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    jsonlite::write_json(preview,path = fs::path(destFolder,"preview",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    jsonlite::write_json(bonus,path = fs::path(destFolder,"bonus",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    jsonlite::write_json(extensions,path = fs::path(destFolder,"extensions",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    jsonlite::write_json(background,path = fs::path(destFolder,"background",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    jsonlite::write_json(feedback,path = fs::path(destFolder,"feedback",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    jsonlite::write_json(credits,path = fs::path(destFolder,"credits",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
     }
 
 
@@ -270,7 +260,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
 
   # Write JSON for GP Simple Lesson Plan -----------------------------------
-  jsonlite::write_json(lesson,outFile,pretty=TRUE,auto_unbox = TRUE,na="null")
+  jsonlite::write_json(lesson,outFile,pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
 
   # printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
 
