@@ -537,7 +537,7 @@ server <- function(input, output,session) {
       #count how many lessons there are currently on gp-catalog
       current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
       browser()
-      current_data$id<-(sapply(current_catalog, function(x) x$id) %>% max(na.rm=T) )+1
+      current_data$id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
       message("Lesson ID assigned: ",current_data$id)
 
     }
