@@ -3,7 +3,6 @@
 #' Create a Galactic Polymath Learning Epaulette which is a special kind of mosaic plot showing proportion of lesson by subject
 #' @param compiledAlignment the output of \code{\link{compileStandards}}
 #' @param targetSubj which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"
-#' @param vertSpacing 4 value vector ranging from 0 to 1 for manipulating label spacing
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" for ggsave output image file
@@ -21,7 +20,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,vertSpacing=c(.7,.7,.7,.7),saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=12,thickness=0.2,width=11,height=1.6,dpi=200,...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=12,thickness=0.2,width=11,height=1.6,dpi=200,...){
 
   #if WD supplied, append it to destFolder
   if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
@@ -59,6 +58,11 @@ clrs<-gpColors(c("math","ela","science","socstudies")) %>% as.character()
 
 #Calculate corrected proportions
 proportions=a_combined  %>% dplyr::group_by(.data$subject)%>% dplyr::summarise(proportion=round(sum(.data$n_prop_adj),2),.groups="drop")
+
+# dummy proportions
+browser()
+proportions$proportion<-c(.3,.2,.2,0.3)
+
 xlabels<-sapply(proportions$proportion,scales::percent) %>% dplyr::as_tibble()
 xlabels$x.prop=(proportions$proportion)
 xlabels$x=cumsum(proportions$proportion)-(proportions$proportion/2)
@@ -66,38 +70,34 @@ xlabels$x=cumsum(proportions$proportion)-(proportions$proportion/2)
 xlabels$x.lab <-xlabels$x + c(.01,.01,-.01,-.01)
 
 
-#set manual vertical spacing, otherwise distribute as steps (from 0 to 1 (0 being lowest, 1, being highest))
-#convert relative label 0, 1 scale to plot 0,1 scale units
-if(!is.null(vertSpacing)){
-  vertSpacingFormatted =vertSpacing*.5
-  }else{vertSpacingFormatted =seq(.5,0,length.out=4)}
 
-
-xlabels$yend=vertSpacingFormatted
 xlabels$subj<-c("math","ela","science","socstudies")
-xlabels$subject<-c("Math","ELA","Science","Soc. Studies")
+xlabels$subject<-c("Math","ELA","Sci","SocStd")
 xlabels$lab<-paste(t(xlabels$value),t(xlabels$subject))
 xlabels$hjust<-.5#c(0,0,1,1)
 xlabels$fontface<-"plain"
 xlabels$stroke<-1
 xlabels$strokeCol<-clrs
+xlabels$lightCol<-c("#fdebe8","#fef6ed","#f8f5fe","#efebf6")
 xlabels$size<-9
 
 
+xlabels$y<-0.6
 
 
 
-rectangles<-dplyr::tibble(xmin=c(0,cumsum(proportions$proportion)[-4]),xmax=cumsum(proportions$proportion),ymin=1-thickness,ymax=1,subject=c("Math","ELA","Science","Soc. Studies"))
+
+
+rectangles<-dplyr::tibble(proportion=proportions$proportion,xmin=c(0,cumsum(proportions$proportion)[-4]),xmax=cumsum(proportions$proportion),ymin=1-thickness,ymax=1,subject=c("Math","ELA","Science","Soc. Studies")) %>% dplyr::filter(.data$proportion>0)
 rectangles$subject<-factor(rectangles$subject,ordered=T,levels=c("Math","ELA","Science","Soc. Studies"))
 rectangles$border<-"transparent"
 
-segs<-dplyr::tibble(x=xlabels$x,xend=xlabels$x,y=1-thickness-0.04,yend=xlabels$yend,subject=xlabels$subject,segCol=clrs)
+# segs<-dplyr::tibble(x=xlabels$x,xend=xlabels$x,y=1-thickness-0.04,yend=xlabels$yend,subject=xlabels$subject,segCol=clrs,targetSegCol=NA)
 
 #boldenize & embiggenate if targetSubj indicated
 if(!is.null(targetSubj)){
   (targetRows<-which(!is.na(charmatch(tolower(xlabels$subj),tolower(targetSubj))) ))
-  segs$segCol[targetRows]<-gpColors("galactic black")
-  xlabels$stroke[targetRows]<-4
+  xlabels$stroke[targetRows]<-2
   xlabels$strokeCol[targetRows] <- gpColors("galactic black")
   xlabels$fontface[targetRows]<-"bold"
   xlabels$size[targetRows]<-11
@@ -106,21 +106,30 @@ if(!is.null(targetSubj)){
 
 
 ## PLOT Epaulette
-epaulette<-ggplot2::ggplot(rectangles)+galacticEdTools::theme_galactic()+
+epaulette<-
+  ggplot2::ggplot(rectangles)+
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax",fill="subject"),size=1.2,show.legend = F)+
+  ggplot2::scale_colour_manual(values=clrs,aesthetics=c("color","fill"))+
   #Add Target border(s) if necessary
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax"),fill="transparent",colour=rectangles$border,size=2.3,show.legend = F)+
-  ggplot2::scale_x_continuous(limits = c(-.01,1.01))+ggplot2::scale_y_continuous(limits=c(-.1,1.01))+
-  ggplot2::geom_segment(data=segs,ggplot2::aes_string(x="x",xend="xend",y="y",yend="yend"),col=segs$segCol,size=3,
-                        inherit.aes=F,show.legend = F)+
-  ggplot2::scale_colour_manual(values=clrs,aesthetics=c("color","fill"))+
-  ggplot2::geom_point(data=xlabels,ggplot2::aes_string(x="x",y="yend",fill="subject"),stroke=xlabels$stroke,col=xlabels$strokeCol,
-             size=xlabels$size,pch=21,show.legend = F)+
-  # ggplot2::geom_label(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust"),colour="transparent",fill="transparent",size=7,show.legend = F,nudge_y=-.35)+
-  ggplot2::geom_text(data=xlabels,ggplot2::aes_string(x="x.lab",y="yend",label="lab",hjust="hjust",fontface="fontface"),size=font_size,show.legend = F,nudge_y=-.35,col=gpColors("galactic black"))+
-  galacticEdTools::theme_galactic()+ ggplot2::theme_void()+ggplot2::theme(aspect.ratio=1.6/11,plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
+  ggplot2::scale_x_continuous(limits = c(-.01,1.01))+
+  ggplot2::theme_void()+
+    ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
 
-plot(epaulette)
+
+subject_labels<-subset(xlabels,xlabels$x.prop>0) %>% ggplot2::ggplot()+
+  ggrepel::geom_text_repel(ggplot2::aes_string(x="x.lab",y=.2,label="lab",fontface="fontface",segment.size="stroke"),size=font_size,show.legend = FALSE,direction="y",col=gpColors("galactic black"),force=3)+
+  ggplot2::scale_y_continuous(limits=c(0,0.2),expand=ggplot2::expansion(c(0,0)))+
+  ggplot2::scale_x_continuous(limits = c(-.01,1.01))+
+   ggplot2::theme_void()+
+    ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
+
+
+G <- epaulette+subject_labels+patchwork::plot_layout(ncol=1,heights=c(0.3,0.7))
+G
+# #save
+# ggplot2::ggsave("delete/test.jpeg",width=6,height=1)
+
 #create folder if necessary
 dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
 
@@ -131,12 +140,13 @@ fileOutExt<-ifelse(is.null(givenExt),"png",givenExt) #provide png extension if n
 output<-fs::path(destFolder,"/",fileOut,ext=fileOutExt)
 
 #save the file
-ggplot2::ggsave(filename=basename(output),plot=epaulette,path=fs::path_dir(output),width=width, height=height,dpi=dpi,bg="transparent",...)
+ggplot2::ggsave(filename=basename(output),plot=G,path=fs::path_dir(output),width=width, height=height,dpi=dpi,bg="transparent")
+                ...)
 
 
 #output object if they want to modify further
 
 message("GP Learning Epaulette saved\n@ ",output)
-return(epaulette)
+return(list(plot=G,proportions=proportions))
 
 }

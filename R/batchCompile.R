@@ -127,8 +127,8 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
         SteamEpaulette=list(
           url = catalogURL(basename(current_data$LearningEpaulette[1]),repo),
           #might want to add more complex image handling later
-          Description = current_data$Description
-        ))
+          ),
+         Description = current_data$Description)
 
     #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
     mmExists<-file.exists(paste0(WD,"meta/JSON/multimedia.json"))
