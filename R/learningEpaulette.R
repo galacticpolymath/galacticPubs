@@ -129,7 +129,8 @@ subject_labels<-subset(xlabels,xlabels$x.prop>0) %>% ggplot2::ggplot()+
     ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
 
 
-(G <- epaulette+subject_labels+patchwork::plot_layout(ncol=1,heights=c(0.3,0.7)))
+(G <- epaulette+subject_labels+patchwork::plot_layout(ncol=1,heights=c(0.3,0.7)) &
+    ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank()))
 
 epaulette_vert<-  ggplot2::ggplot(rectangles)+
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax",fill="subject"),size=1.2,show.legend = F)+
@@ -163,10 +164,10 @@ subject_labels_vert <- subset(xlabels,xlabels$x.prop>0) %>% ggplot2::ggplot()+
   ggplot2::geom_segment(ggplot2::aes_string(x=.001,xend=2,y="vertLabStart",yend="vertLabStart"))+
   ggplot2::scale_x_continuous(expand=ggplot2::expansion(c(0,0)))+
   ggplot2::scale_y_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0.001,0.001)))+
-   ggplot2::theme_void()+
-    ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
+   ggplot2::theme_void()
 
-(G_vert <- epaulette_vert+subject_labels_vert+patchwork::plot_layout(ncol=2,widths=c(0.2,0.8)))
+(G_vert <- epaulette_vert+subject_labels_vert+patchwork::plot_layout(ncol=2,widths=c(0.2,0.8)) &
+    ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank()))
 #make a vertical version of this
 
 
