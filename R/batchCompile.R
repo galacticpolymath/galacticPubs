@@ -125,7 +125,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
           )$Text,
         Tags=current_data$Tags,#unlist(lapply(current_data$Tags,function(x) c(Value=x)))
         SteamEpaulette=list(
-          url = catalogURL(basename(current_data$LearningEpaulette[1]),repo),
+          url = catalogURL(basename(current_data$LearningEpaulette[1]),repo)
           #might want to add more complex image handling later
           ),
          Description = current_data$Description)

@@ -7,12 +7,11 @@
 learningEpaulette(
   compiledAlignment,
   targetSubj = NULL,
-  vertSpacing = c(0.7, 0.7, 0.7, 0.7),
   saveFile = TRUE,
   destFolder = "assets/learning-plots/",
   fileName = "GP-Learning-Epaulette",
   WD = getwd(),
-  font_size = 12,
+  font_size = 19,
   thickness = 0.2,
   width = 11,
   height = 1.6,
@@ -24,8 +23,6 @@ learningEpaulette(
 \item{compiledAlignment}{the output of \code{\link{compileStandards}}}
 
 \item{targetSubj}{which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"}
-
-\item{vertSpacing}{4 value vector ranging from 0 to 1 for manipulating label spacing}
 
 \item{saveFile}{T/F, save file or just print to screen?}
 
