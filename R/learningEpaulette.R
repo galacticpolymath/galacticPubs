@@ -20,7 +20,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=12,thickness=0.2,width=11,height=1.6,dpi=200,...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=19,thickness=0.2,width=11,height=1.6,dpi=200,...){
 
   #if WD supplied, append it to destFolder
   if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
@@ -60,14 +60,13 @@ clrs<-gpColors(c("math","ela","science","socstudies")) %>% as.character()
 proportions=a_combined  %>% dplyr::group_by(.data$subject)%>% dplyr::summarise(proportion=round(sum(.data$n_prop_adj),2),.groups="drop")
 
 # dummy proportions
-browser()
-proportions$proportion<-c(.3,.2,.2,0.3)
+
+# proportions$proportion<-c(.3,.2,.1,0.4)
 
 xlabels<-sapply(proportions$proportion,scales::percent) %>% dplyr::as_tibble()
 xlabels$x.prop=(proportions$proportion)
 xlabels$x=cumsum(proportions$proportion)-(proportions$proportion/2)
-#make slight correction for labeling purposes
-xlabels$x.lab <-xlabels$x + c(.01,.01,-.01,-.01)
+
 
 
 
@@ -105,6 +104,9 @@ if(!is.null(targetSubj)){
 }
 
 
+# #install compact font
+# sysfonts::font_add_google(name="Kanit",regular.wt=400,bold.wt=600)
+# showtext::showtext_auto()
 ## PLOT Epaulette
 epaulette<-
   ggplot2::ggplot(rectangles)+
@@ -112,23 +114,61 @@ epaulette<-
   ggplot2::scale_colour_manual(values=clrs,aesthetics=c("color","fill"))+
   #Add Target border(s) if necessary
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax"),fill="transparent",colour=rectangles$border,size=2.3,show.legend = F)+
-  ggplot2::scale_x_continuous(limits = c(-.01,1.01))+
+  ggplot2::scale_x_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0,0)))+
   ggplot2::theme_void()+
     ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
 
-
 subject_labels<-subset(xlabels,xlabels$x.prop>0) %>% ggplot2::ggplot()+
-  ggrepel::geom_text_repel(ggplot2::aes_string(x="x.lab",y=.2,label="lab",fontface="fontface",segment.size="stroke"),size=font_size,show.legend = FALSE,direction="y",col=gpColors("galactic black"),force=3)+
+  galacticEdTools::theme_galactic(font="Kanit")+
+  ggrepel::geom_text_repel(ggplot2::aes_string(x="x",y=.2,label="lab",fontface="fontface",
+                                               segment.size="stroke"),
+                           family="Kanit",size=font_size,show.legend = FALSE,direction="y",col=gpColors("galactic black"),force=5)+
   ggplot2::scale_y_continuous(limits=c(0,0.2),expand=ggplot2::expansion(c(0,0)))+
-  ggplot2::scale_x_continuous(limits = c(-.01,1.01))+
+  ggplot2::scale_x_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0,0)))+
    ggplot2::theme_void()+
     ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
 
 
-G <- epaulette+subject_labels+patchwork::plot_layout(ncol=1,heights=c(0.3,0.7))
-G
-# #save
-# ggplot2::ggsave("delete/test.jpeg",width=6,height=1)
+(G <- epaulette+subject_labels+patchwork::plot_layout(ncol=1,heights=c(0.3,0.7)))
+
+epaulette_vert<-  ggplot2::ggplot(rectangles)+
+  ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax",fill="subject"),size=1.2,show.legend = F)+
+  ggplot2::scale_colour_manual(values=clrs,aesthetics=c("color","fill"))+
+  #Add Target border(s) if necessary
+  ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax"),fill="transparent",colour=rectangles$border,size=2.3,show.legend = F)+
+  ggplot2::scale_x_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0.001,0.001)))+
+  ggplot2::scale_y_continuous(expand=ggplot2::expansion(c(0.1,0.1)))+
+  ggplot2::theme_void()+
+    ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())+
+ggplot2::coord_flip()#+ggplot2::theme_bw()
+
+xlabels$vertLabStart <- cumsum(xlabels$x.prop)
+
+subject_labels_vert <- subset(xlabels,xlabels$x.prop>0) %>% ggplot2::ggplot()+
+  galacticEdTools::theme_galactic(font="Kanit")+
+  ggplot2::geom_text(
+    ggplot2::aes_string(
+      x = .1,
+      y = "vertLabStart-.01",
+      label = "subject",
+      fontface = "fontface"
+    ),
+    hjust = 0,
+    vjust = 1.2,
+    size = font_size,
+    family="Kanit",
+    show.legend = FALSE,
+    col = gpColors("galactic black")
+  )+
+  ggplot2::geom_segment(ggplot2::aes_string(x=.001,xend=2,y="vertLabStart",yend="vertLabStart"))+
+  ggplot2::scale_x_continuous(expand=ggplot2::expansion(c(0,0)))+
+  ggplot2::scale_y_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0.001,0.001)))+
+   ggplot2::theme_void()+
+    ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
+
+(G_vert <- epaulette_vert+subject_labels_vert+patchwork::plot_layout(ncol=2,widths=c(0.2,0.8)))
+#make a vertical version of this
+
 
 #create folder if necessary
 dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
@@ -136,11 +176,18 @@ dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
 
 givenExt=if(grepl(".",fileName,fixed=TRUE)){gsub(".*\\.(.{3,4}$)","\\1",fileName)}else{NULL} #extract file extension if provided
 fileOut<-gsub("(^.*)\\..*$","\\1",basename(fileName)) #strip extension and full path from provided fileName
+
+fileOut_vert<-paste0(fileOut,"_vert")
+
 fileOutExt<-ifelse(is.null(givenExt),"png",givenExt) #provide png extension if not provided
 output<-fs::path(destFolder,"/",fileOut,ext=fileOutExt)
+output_vert <- fs::path(destFolder,"/",fileOut_vert,ext=fileOutExt)
 
 #save the file
-ggplot2::ggsave(filename=basename(output),plot=G,path=fs::path_dir(output),width=width, height=height,dpi=dpi,bg="transparent")
+ggplot2::ggsave(filename=basename(output),plot=G,path=fs::path_dir(output),width=width, height=height,dpi=dpi,bg="transparent",
+                ...)
+#save vertical version
+ggplot2::ggsave(filename=basename(output_vert),plot=G_vert,path=fs::path_dir(output_vert),width=height*1, height=width*.8,dpi=dpi,bg="transparent",
                 ...)
 
 

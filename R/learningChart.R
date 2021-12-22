@@ -170,7 +170,7 @@ gridLab<-function(x,y,label,fill,longestString,textCol="white",outlineCol="grey"
   #grid.polygon(x=c(.5,1,1,.99,.99,.5),y=c(1,1,.5,.5,.99,.99),gp=gpar(fill="transparent",alpha=1,col=gpColors("galactic black")))
   grid::grid.rect(x=x,y=y,width=grid::unit(1,"strwidth",data=paste0("  ",longestString,"  ")),height=grid::unit(6.5,"strheight",data=longestString),just="center",gp=grid::gpar(fill=fill,alpha=1,col=gpColors("galactic black"),lwd=lwd))
 
-shadowtext::grid.shadowtext(label,x=x,y=y,bg.r=outlineThickness,bg.colour=outlineCol,just="center",gp=shadowtext::gpar(font=2,col=textCol,fontfamily="Montserrat",fontsize=14))
+shadowtext::grid.shadowtext(label,x=x,y=y,bg.r=outlineThickness,bg.colour=outlineCol,just="center",gp=shadowtext::gpar(font=2,col=textCol,fontsize=14))
 }
 
 gridFooter<-function(bg,textCol,caption,x,y,fontsize=8,fillCol=gpColors("galactic black")){
@@ -207,7 +207,7 @@ gridFooter(caption=caption,x=0.01,y=.0275,fontsize=9)
 invisible(sapply(targetSubj,function(x){
   d=targetDF %>% dplyr::filter(.data$subject==tolower(!!x))
   grid::grid.text(label="Target",x=grid::unit(d$xText,"npc"),y=grid::unit(d$yText,"npc"),just=c(d$hjust,d$vjust),
-                  gp=grid::gpar(col=gpColors("galactic black"),fontface="bold",family="montserrat",fontsize=14))
+                  gp=grid::gpar(col=gpColors("galactic black"),fontface="bold",fontsize=14))
   grid::grid.rect(x=d$xBox,y=d$yBox,width=grid::unit(1,"strwidth",data=paste0("  C3 Soc Studies  ")),height=grid::unit(6.5,"strheight",data="C3 Soc Studies"),just="center",gp=grid::gpar(fill="transparent",alpha=1,col=gpColors("galactic black"),lwd=3))}
   ))
 })
