@@ -3,7 +3,7 @@
 #' Create a Galactic Polymath Learning Epaulette which is a special kind of mosaic plot showing proportion of lesson by subject
 #' @param compiledAlignment the output of \code{\link{compileStandards}}
 #' @param targetSubj which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"
-#' @param labelPadding for horizontal epaulette, the amount of padding between label text and bottom as an arbitrary ratio; default=1
+#' @param heightScalar for horizontal epaulette, multiplier for height which affects amount of padding between label text and epaulette; default=1
 #' @param randomSeed random number for getting slightly different (but repeatable) repelled text labels
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
@@ -22,7 +22,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(compiledAlignment,targetSubj=NULL,labelPadding=1,randomSeed=101,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=19,thickness=0.2,width=11,height=1.6,dpi=200,...){
+learningEpaulette<-function(compiledAlignment,targetSubj=NULL,heightScalar=1,randomSeed=101,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=19,thickness=0.2,width=11,height=1.6,dpi=200,...){
 
   #if WD supplied, append it to destFolder
   if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
@@ -205,7 +205,7 @@ output_vert <- fs::path(destFolder,"/",fileOut_vert,ext=fileOutExt)
 
 
 #save the file
-ggplot2::ggsave(filename=basename(output),plot=G,path=fs::path_dir(output),width=width,height=height*labelPadding,dpi=dpi,bg="transparent")
+ggplot2::ggsave(filename=basename(output),plot=G,path=fs::path_dir(output),width=width,height=height*heightScalar,dpi=dpi,bg="transparent")
  # ,
 #                 ...)
 #save vertical version
