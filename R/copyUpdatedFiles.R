@@ -65,5 +65,5 @@ copyUpdatedFiles<-function(paths,destFolder,clear=FALSE,verbose=TRUE){
     }
 
 
-  return(OUT)
+  invisible(OUT)
 }

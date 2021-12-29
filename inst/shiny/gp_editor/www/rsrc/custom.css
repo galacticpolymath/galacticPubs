@@ -70,6 +70,20 @@ box{   width:350px;padding:10px 10px 0px 10px;
   margin: 1.5rem 0 0.5rem;
 }
 
+.preview-ep, .preview-chart{
+  margin: 3rem 0.5rem;
+  border-radius: 16px;
+  background-color: #f7f7f7;
+  padding: 1.5rem;
+}
+
+.preview-ep img,.preview-chart img{
+  width:100%;
+}
+
+.preview-ep img{
+  border: 1px dashed rgba(13,86,233,1);
+}
 
 
 /* Lesson Preview styling */

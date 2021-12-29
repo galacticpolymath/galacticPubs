@@ -386,20 +386,24 @@ server <- function(input, output,session) {
         )), #end left pane
 
       #preview pane for compiled figures etc
-    column(width=7,      # verbatimTextOutput("console_text"))
-        div(class="compile-section",
+      column(
+        width = 7,
+        # verbatimTextOutput("console_text"))
+        div(class = "preview-ep",
             h3("Learning Epaulette Preview"),
-            fluidRow(
-            img(src=vals$current_data$LearningEpaulette[1]),
-            img(src=vals$current_data$LearningEpaulette[2]))
+            fluidRow(img(
+              src =basename(vals$current_data$LearningEpaulette[1])
+            ),
+            img(
+              src = basename(vals$current_data$LearningEpaulette[2])
+            ))),
+        div(
+          class = "preview-chart",
+          h3("Learning Chart Preview"),
+          img(src = basename(vals$current_data$LearningChart))
 
-           ),
-        div(class="compile-section",
-            h3("Learning Chart Preview"),
-            img(src=vals$current_data$LearningChart)
-
-           )
-    )
+        )
+      )
     )
     )
 
@@ -422,7 +426,7 @@ server <- function(input, output,session) {
     #Save data before compiling
     current_data<-prep_input(input,yaml_path)$current_data
     yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
-    batchCompile(current_data,choices=input$ReadyToCompile,WD=WD)
+    batchCompile(current_data,choices=input$ReadyToCompile,WD=WD,img_loc=img_loc)
     } ) %>% bindEvent(input$compile)
 
 

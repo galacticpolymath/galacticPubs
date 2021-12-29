@@ -8,11 +8,12 @@
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
+#' @param img_loc where files are being stored (www folder)
 #' @return a JSON is saved to meta/JSON/LESSON.json
 #' @importFrom rlang .data
 #' @export
 #'
-batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd()){
+batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd(),img_loc){
 
    #if WD supplied, append it to destFolder
    if(!identical(WD, getwd())) {
@@ -26,9 +27,10 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     #figure out which repo we're connected to (to create full paths to catalog.galacticpolymath.com)
     repo<-whichRepo()
 
-
-# Standards alignment & learning plots -----------------------------------------------------
-  if("Standards Alignment"%in% choices & !inSync("meta/json/standards.json","meta/standards_GSheetsOnly.xlsx")){
+  # Standards alignment & learning plots -----------------------------------------------------
+    browser()
+    stnds_out_of_date<-!inSync(paste0(WD,"meta/json/standards.json"),paste0(WD,"meta/standards_GSheetsOnly.xlsx"))
+  if("Standards Alignment"%in% choices & stnds_out_of_date){
 
     alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)
     if(current_data$TargetSubject==""){warning("Enter a Target Subject on the Edit tab and try again.")}
@@ -43,6 +45,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     #set learning chart filename from default file output on learningChart function
     #(since this file doesn't exist in yaml yet)
     current_data$LearningChart<-paste0("assets/learning-plots/",formals(learningChart)$fileName,".png")
+    copyUpdatedFiles(paste0(WD,current_data$LearningChart),img_loc)
 
     #export learning chart section
     lc<-list(
@@ -80,7 +83,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     #set learning chart filename from default file output on learningChart function
     #(since this file doesn't exist in yaml yet)
     current_data$LearningEpaulette<-paste0("assets/learning-plots/",formals(learningEpaulette)$fileName,".png")
-
+    copyUpdatedFiles(paste0(WD,current_data$LearningEpaulette),img_loc)
   }
 
   if("Teaching Materials" %in% choices){
