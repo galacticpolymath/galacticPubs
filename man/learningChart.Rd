@@ -5,30 +5,25 @@
 \title{learningChart}
 \usage{
 learningChart(
-  compiledAlignment,
-  targetSubj = NULL,
   caption,
   captionN = T,
   centralText,
+  shortTitle,
   centralTextSize = 3.7,
   saveFile = TRUE,
   destFolder = "assets/learning-plots/",
   fileName = "GP-Learning-Chart",
   WD = getwd(),
-  dpi = 300,
+  dpi = 200,
   ...
 )
 }
 \arguments{
-\item{compiledAlignment}{the output of \code{\link{compileStandards}}}
-
-\item{targetSubj}{which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"}
-
 \item{caption}{quoted text you want to go at the bottom of the chart}
 
 \item{captionN}{T/F, add the range of the number of standards per grade used to make the plot to caption?}
 
-\item{centralText}{specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment}
+\item{centralText}{specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades`\n`5-6")}
 
 \item{centralTextSize}{multiplier for font size of centralText}
 

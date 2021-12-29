@@ -5,28 +5,31 @@
 \title{learningEpaulette}
 \usage{
 learningEpaulette(
-  compiledAlignment,
-  targetSubj = NULL,
+  heightScalar = 1,
+  epauletteHeight = 0.2,
+  randomSeed = 101,
   saveFile = TRUE,
   destFolder = "assets/learning-plots/",
   fileName = "GP-Learning-Epaulette",
   WD = getwd(),
   font_size = 19,
-  thickness = 0.2,
   width = 11,
   height = 1.6,
   dpi = 200,
+  showPlot = TRUE,
   ...
 )
 }
 \arguments{
-\item{compiledAlignment}{the output of \code{\link{compileStandards}}}
+\item{heightScalar}{for horizontal epaulette, multiplier for image height which affects amount of padding between label text and epaulette; default=1}
 
-\item{targetSubj}{which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"}
+\item{epauletteHeight}{relative size of the epaulette; default=0.2}
+
+\item{randomSeed}{random number for getting slightly different (but repeatable) repelled text labels}
 
 \item{saveFile}{T/F, save file or just print to screen?}
 
-\item{destFolder}{where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory}
+\item{destFolder}{where do you want to save the folder; by default in the "assets/learning-plots" folder, 1 level up from the working directory}
 
 \item{fileName}{expects "somefilename" for ggsave output image file}
 
@@ -34,13 +37,13 @@ learningEpaulette(
 
 \item{font_size}{size of font in pts}
 
-\item{thickness}{is how thick to make the epaulette bar `(`range from 0 to 0.5`)`, 0.2 or 20\% of vertical plot space by default}
-
 \item{width}{plot width in inches}
 
 \item{height}{plot height in inches}
 
 \item{dpi}{resolution in dots per inch; by default 150}
+
+\item{showPlot}{plot to screen or just save to file? default=T}
 
 \item{...}{additional parameters for \code{\link[ggplot2]{ggsave}}}
 }
@@ -48,5 +51,5 @@ learningEpaulette(
 returned plot as a ggplot object; plot saved to assets/GP_Learning_Epaulette.png by default
 }
 \description{
-Create a Galactic Polymath Learning Epaulette which is a special kind of mosaic plot showing proportion of lesson by subject
+Create a Galactic Polymath Learning Epaulette which is a special kind of mosaic plot showing proportion of lesson by subject. Outputs a horizontal and a vertical version for mobile
 }
