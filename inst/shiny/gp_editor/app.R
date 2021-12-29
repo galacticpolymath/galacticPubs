@@ -433,41 +433,26 @@ server <- function(input, output,session) {
 
     current_data<-prep_input(input,yaml_path)$current_data
 
-    #delete preexisting images
-    #pattern excludes directories
-    oldFiles<-list.files(img_loc,pattern="\\.",full.names = TRUE)
-    if(length(oldFiles)>0){unlink(oldFiles)}
     #copy images over to www folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart","SupportingMedia")
     #read in filenames; if empty, return empty; else add WD to create full path
-    items2copy_filenames<-lapply(1:length(items2copy),function(i) {
-      item<-current_data[[items2copy[i]]]
-      if(identical(item,NULL)|identical(item,"")|length(item)==0){NA}else{ paste0(WD,item)}
-     })
-    names(items2copy_filenames)<-items2copy
-
-    #Test if all the files to copy exist; otherwise throw a useful error
-    lapply(1:length(items2copy_filenames),function(i){
-      filez<-items2copy_filenames[[i]]
-      errs<-ifelse(is.na(filez),TRUE,!file.exists(filez))
-      if(sum(errs)>0){
-        errFiles<-items2copy_filenames[[i]][which(errs)]
-        warning("The following files for field '",names(items2copy_filenames)[i],
-             "' do not exist:\n\t- ",
-             ifelse(is.na(errFiles),"NO FILE CHOSEN", paste(errFiles,collapse="\n\t- "))
-        )
-      }else{
-        fs::file_copy(filez,img_loc,overwrite=TRUE)
+    items2copy_filenames<-lapply(1:length(items2copy), function(i) {
+      item <- current_data[[items2copy[i]]]
+      if (identical(item, NULL) | identical(item, "") |
+          length(item) == 0) {
+        dplyr::tibble(path = NA, category = items2copy[i])
+      } else{
+        dplyr::tibble(path = paste0(WD, item), category = items2copy[i])
       }
+    }) %>% do.call(dplyr::bind_rows,.)
 
-    # #Copy supporting files (if any)
-    # f<-input$SupportingMedia
-    # if(length(f)==0){
-    # }else{
-    #   fs::file_copy(f,img_loc,overwrite=TRUE)
-    # }
+    flz<-items2copy_filenames$path
+    names(flz)<-items2copy_filenames$category
 
-    })
+    # clear target directory and copy updated files
+    copyUpdatedFiles(flz,img_loc,clear=TRUE)
+
+
 
     #Custom extraction of bullets with regex!!
 

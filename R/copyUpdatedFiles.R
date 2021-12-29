@@ -6,6 +6,7 @@
 #' @param destFolder directory where you want files to be transferred
 #' @param clear do you want to delete all files in the destination folder before copying? default=FALSE
 #' @param verbose print summary table? default=T
+#' @returns tibble of path1 files and statuses
 #' @export
 
 copyUpdatedFiles<-function(paths,destFolder,clear=FALSE,verbose=TRUE){
@@ -50,6 +51,19 @@ copyUpdatedFiles<-function(paths,destFolder,clear=FALSE,verbose=TRUE){
     dplyr::tibble(file=f,log=status)
 
   })
-  if(verbose){print(do.call(dplyr::bind_rows,out))}
+  OUT<-do.call(dplyr::bind_rows,out)
+  OUT$category<-names(paths)
+  if(verbose){
+    message("@ Copying summary:")
+    print(OUT)}
 
+  errs<-subset(OUT,log=="Not Found")
+  if(nrow(errs>0)){
+    warning("The following files were not found:\n\t- ",
+             ifelse(is.na(errs$file),paste0("NO FILE (Category: ",errs$slug,")"), paste(errs$file,collapse="\n\t- "))
+    )
+    }
+
+
+  return(OUT)
 }

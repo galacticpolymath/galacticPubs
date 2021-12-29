@@ -28,12 +28,12 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
 
 # Standards alignment & learning plots -----------------------------------------------------
-  if("Standards Alignment"%in% choices){
+  if("Standards Alignment"%in% choices & !inSync("meta/json/standards.json","meta/standards_GSheetsOnly.xlsx")){
 
     alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)
     if(current_data$TargetSubject==""){warning("Enter a Target Subject on the Edit tab and try again.")}
     message("\nGenerating Learning Chart\n")
-    browser()
+
     #LEARNING CHART
     learningChart(shortTitle=current_data$ShortTitle,
                   dpi=200,
