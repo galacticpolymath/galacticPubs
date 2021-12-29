@@ -30,7 +30,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 # Standards alignment & learning plots -----------------------------------------------------
   if("Standards Alignment"%in% choices){
 
-    alignment <- compileStandards(WD=WD)
+    alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)
     if(current_data$TargetSubject==""){stop("Enter a Target Subject on the Edit tab and try again.")}
     message("\nGenerating Learning Chart\n")
 

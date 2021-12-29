@@ -2,11 +2,9 @@
 #'
 #' Make a GP Learning Chart
 #'
-#' @param compiledAlignment the output of \code{\link{compileStandards}}
-#' @param targetSubj which subject(s) is (are) the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param caption quoted text you want to go at the bottom of the chart
 #' @param captionN T/F, add the range of the number of standards per grade used to make the plot to caption?
-#' @param centralText specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment
+#' @param centralText specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades`\n`5-6")
 #' @param centralTextSize multiplier for font size of centralText
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
@@ -19,63 +17,50 @@
 #' @importFrom rlang .data
 
 
-learningChart=function(compiledAlignment,targetSubj=NULL,caption,captionN=T,centralText,
+learningChart=function(caption,captionN=T,centralText,shortTitle,
                        centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Chart",WD=getwd(),dpi=300,...){
 
 #if WD supplied, append it to destFolder
 if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
 
+if(missing(shortTitle)){shortTitle<-"this lesson"}else{shortTitle<-paste0("'",shortTitle,"'")}
 #deal with missing caption and add sample size if requested
-if(missing(caption)){caption="GP Learning Chart: Knowledge & skills taught in this lesson"}
+if(missing(caption)){caption=paste0("GP Learning Chart: Knowledge & skills taught in ",shortTitle)}
+
+# Standards exist?
+standardsFile<-fs::path(WD,"meta/standards.RDS")
+standardsFound <- file.exists(standardsFile)
+
+###########
+# Do all this only if compiled standards found ----------------------------
+
+if(!standardsFound){warning("Compiled Standards not found at: ",standardsFile)
+  }else{
+
+# Define important variables ----------------------------------------------
+    # Load compiled standards
+    importedData<-readRDS(standardsFile)
+    compiledAlignment<-importedData$data
+    a_combined<-importedData$a_combined
+    targetSubj<-importedData$targetSubj
+
 
 if(captionN){
-  avgN<-table(compiledAlignment$compiled$gradeBand) %>% mean() %>% floor()
-  caption <- paste0(caption," (~",avgN," standards per grade)")}
+  avgN<-table(compiledAlignment$compiled$gradeBand) %>% mean(na.rm=T) %>% floor()
+  caption <- paste0(caption," (~",avgN," standards per grade band)")
+  }
 
 if(missing(centralText)){
   t_gradeBands<-compiledAlignment$compiled$gradeBand %>% table
   centralText<-paste0("grades\n",names(t_gradeBands)[which.max(t_gradeBands)])
 }
 
-#Import empty template to fill in for missing alignment dimensions (e.g. if there are no alignments to reading, or CCC, etc)
-a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="galacticPubs"))
-#super important to refactor subject on the imported data to ensure order
-a_template$subject=factor(a_template$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 
-a_summ<-compiledAlignment$compiled %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
-
-#gotta combine missing rows, sort, & repeat the entries N times
-a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>%
-            dplyr::arrange(.data$subject,.data$dimension)%>% dplyr::mutate(binary=ifelse(.data$n>0,1,0))
-a_combined$id=1:nrow(a_combined)
-a_combined$dimAbbrev<-c(" Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math"," Measurement, Data,\n Probability, Statistics"," Number Systems, Operations,\n Symbolic Representation"," Language, Speaking,\n Listening"," Reading"," Writing"," Cross-Cutting \n Concepts "," Disciplinary\n Core Ideas"," Science & Engineering\n Practices"," Civics, Economics,\n Geography, History"," Develop Questions,\n Plan Inquiries"," Evaluate, \n Communicate, \n Take Action ")
-
-#Figure out how many times to repeat each dimension of standards (min 1, even if 0 alignments)
-expandScoreCounts<-rep(a_combined$id,(function(x)ifelse(a_combined$n[x]<=1,1,a_combined$n[x]))(a_combined$id))
-
-a_final <- a_combined[expandScoreCounts,]#don't actually use this anymore
 
 subjPal<-gpColors(c("math","ela","science","socstudies"))
 
 
 # Make a proportional Learning Chart --------------------------------------
-#Account for bias in the number of standards
-bias<-readRDS(system.file("standardCountsByDimension.rds",package="galacticPubs"))
-bias_by_subj<-bias %>% dplyr::summarise(tot_n_subj=sum(.data$n),.groups="drop")
-a_combined<-dplyr::left_join(a_combined, (bias %>% dplyr::rename("tot_n_dim"="n")),by=c("subject","dimension"))
-a_combined<-dplyr::left_join(a_combined,bias_by_subj,by="subject")
-
-#correct the lesson's n standards by Tot possible for the subject
-#*Because there aren't an equal number of standards per dimension, (and they're not all equal),
-#*It's more intuitive to treat them as if they are all equal.
-#*So to make the correction, we'll weight the proportions by total N for subject
-a_combined$n_adj<-a_combined$n/a_combined$tot_n_subj
-a_combined$n_prop<-a_combined$n/sum(a_combined$n)
-a_combined$n_prop_adj<-a_combined$n_adj/sum(a_combined$n_adj)
-
-#Remind r that a_combined factors are ORDERED
-a_combined$subject <- factor(a_combined$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=TRUE)
-
 
 #val for scale of the biggest ray
 barScale<- max(a_combined$n_prop_adj)
@@ -85,7 +70,7 @@ smidge<-function(amt=1){
   barScale+(amt*barScale/10)
 }
 
-label_data2=a_combined
+label_data2 <- a_combined
 label_data2$hjust<-ifelse( 360 * (label_data2$id-0.5) /nrow(label_data2)<180 , 0, 1)
 label_data2$y<-smidge(2)
 label_data2$y[c(1,12)]<-smidge(3)
@@ -126,7 +111,7 @@ outerFill$ymax<-10
           # legend.margin=margin(0,0,0,0),
           # legend.title=element_text(face="bold")
           )  +
-    ggplot2::geom_bar(stat="identity",col=gpColors("galactic black"),alpha=.9,position="stack")+#labs(x="",y="")+
+    ggplot2::geom_bar(stat="identity",col=gpColors("galactic black"),alpha=.9,position="stack")+
     ggplot2::scale_fill_manual(values=as.vector(subjPal))+
     ggplot2::scale_y_continuous(expand=c(0,0),breaks=seq(0, barScale,.1),limits=c(-.1, smidge(4)))+
     #cover outside circle crap with white box
@@ -193,7 +178,7 @@ gridFooter<-function(bg,textCol,caption,x,y,fontsize=8,fillCol=gpColors("galacti
 # build learningChart -----------------------------------------------------
 
 
-learningChart<-grid::grid.grabExpr({
+G<-grid::grid.grabExpr({
 grid::grid.draw(badge_prop)
 gridLab(.9,.91,"CC\nMath",subjPal[1],"C3 Soc Studies",outlineCol =gpColors("galactic black") ,outlineThickness=.1) #old outline color "#090816"
 gridLab(.9,.15,"CC\nELA",subjPal[2],"C3 Soc Studies",outlineCol = gpColors("galactic black"),outlineThickness=.1)
@@ -216,16 +201,17 @@ dir.create(destFolder,showWarnings=FALSE, recursive=TRUE)
 outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),collapse=""),ext="png")
 
 grDevices::png(outFile,width=7,height=4.5,units="in",res=dpi,...)
-grid::grid.draw(learningChart)
+grid::grid.draw(G)
 grDevices::dev.off()
 
 #output to user
-grid::grid.draw(learningChart)
+grid::grid.draw(G)
 
 #tell user where file is saved
 message("GP Learning Chart saved\n@ ",outFile)
 
 #return object to user (wrapped in invisible to prevent meaningless gTree obj being printed)
-return(invisible(learningChart))
+return(invisible(G))
 
+}
 }

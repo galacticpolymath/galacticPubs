@@ -6,6 +6,7 @@
 #' @param fileName output file name; default= "standards.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param standardsRef where do you want to pull down statements and other info for the supplied standards codes? Default="standardX" (i.e. the \href{https://github.com/galacticpolymath/standardX}{standardX repository}); Options= "standardX" or "myFile" (which will use Tab 2 on the supplied XLSX workbook)
+#' @param targetSubj which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param structureForWeb default=TRUE; Do you want to preface JSON output with component & nest output in Data element?
 #' @return list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." colum). A JSON is saved to the destFolder location.
 #' @export
@@ -14,6 +15,7 @@ compileStandards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
                              destFolder = "meta/JSON/" ,
                              fileName = "standards.json",
                              standardsRef = "standardX",
+                             targetSubj= NULL,
                              WD= getwd(),
                              structureForWeb= TRUE) {
 
@@ -225,6 +227,110 @@ message("JSON file saved\n@ ",outFile)
 message(rep("=",30))
 
 uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",") %>% unlist() %>% unique()
+
+
+# Prep learningEpaulette data ---------------------------------------------
+    #bring in empty matrix to merge in, in case some subjects are missing
+    a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="galacticPubs"))
+    #super important to refactor subject on the imported data to ensure order
+    a_template$subject=factor(a_template$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
+
+    a_summ<-A %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
+
+    #gotta combine missing rows, sort, & repeat the entries N times
+    a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>% dplyr::arrange(.data$subject,.data$dimension)%>% dplyr::mutate(binary=ifelse(.data$n>0,1,0))
+
+    #Account for bias in the number of standards
+    bias<-readRDS(system.file("standardCountsByDimension.rds",package="galacticPubs"))
+    bias_by_subj<-bias %>% dplyr::summarise(tot_n_subj=sum(.data$n),.groups="drop")
+    a_combined<-dplyr::left_join(a_combined, (bias %>% dplyr::rename("tot_n_dim"="n")),by = c("subject", "dimension") )
+    a_combined<-dplyr::left_join(a_combined,bias_by_subj,by = c("subject"))
+
+    #correct the lesson's n standards by Tot possible for the subject
+    #*Because there aren't an equal number of standards per dimension, (and they're not all equal),
+    #*It's more intuitive to treat them as if they are all equal.
+    #*So to make the correction, we'll weight the proportions by total N for subject
+    a_combined$id=1:nrow(a_combined)
+    a_combined$n_adj<-a_combined$n/a_combined$tot_n_subj
+    a_combined$n_prop<-a_combined$n/sum(a_combined$n)
+    a_combined$n_prop_adj<-a_combined$n_adj/sum(a_combined$n_adj)
+
+    #Remind r that a_combined factors are ORDERED
+    a_combined$subject <- factor(a_combined$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
+
+
+    #Calculate corrected proportions
+    proportions=a_combined  %>% dplyr::group_by(.data$subject)%>% dplyr::summarise(proportion=round(sum(.data$n_prop_adj),2),.groups="drop")
+
+
+
+    xlabels<-sapply(proportions$proportion,scales::percent) %>% dplyr::as_tibble()
+    xlabels$x.prop=(proportions$proportion)
+    xlabels$x=cumsum(proportions$proportion)-(proportions$proportion/2)
+
+
+
+
+    xlabels$subj<-c("math","ela","science","socstudies")
+    xlabels$subject<-c("Math","ELA","Sci","SocStd")
+    xlabels$lab<-paste(t(xlabels$value),t(xlabels$subject))
+    xlabels$hjust<-.5#c(0,0,1,1)
+    xlabels$fontface<-"plain"
+    xlabels$stroke<-1
+    xlabels$strokeCol<-gpColors(xlabels$subj)
+    xlabels$lightCol<-c("#fdebe8","#fef6ed","#f8f5fe","#efebf6")
+    xlabels$size<-9
+
+
+    xlabels$y<-0.6
+
+
+    #thickness of epaulette bar
+    thickness= 0.2
+
+    rectangles<-dplyr::tibble(proportion=proportions$proportion,xmin=c(0,cumsum(proportions$proportion)[-4]),xmax=cumsum(proportions$proportion),ymin=1-thickness,ymax=1,subject=c("Math","ELA","Science","Soc. Studies")) %>% dplyr::filter(.data$proportion>0)
+    rectangles$subject<-factor(rectangles$subject,ordered=T,levels=c("Math","ELA","Science","Soc. Studies"))
+    rectangles$border<-"transparent"
+
+    # segs<-dplyr::tibble(x=xlabels$x,xend=xlabels$x,y=1-thickness-0.04,yend=xlabels$yend,subject=xlabels$subject,segCol=clrs,targetSegCol=NA)
+
+    #boldenize & embiggenate if targetSubj indicated
+    if(!is.null(targetSubj)){
+      (targetRows<-which(!is.na(charmatch(tolower(xlabels$subj),tolower(targetSubj))) ))
+      xlabels$stroke[targetRows]<-2
+      xlabels$strokeCol[targetRows] <- gpColors("galactic black")
+      xlabels$fontface[targetRows]<-"bold"
+      xlabels$size[targetRows]<-11
+      rectangles$border[targetRows]<- gpColors("galactic black")
+    }
+
+
+
+# prep for LearningChart  -------------------------------------------------
+
+    a_combined$dimAbbrev<-c(" Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math"," Measurement, Data,\n Probability, Statistics"," Number Systems, Operations,\n Symbolic Representation"," Language, Speaking,\n Listening"," Reading"," Writing"," Cross-Cutting \n Concepts "," Disciplinary\n Core Ideas"," Science & Engineering\n Practices"," Civics, Economics,\n Geography, History"," Develop Questions,\n Plan Inquiries"," Evaluate, \n Communicate, \n Take Action ")
+
+
+
+
+
+
+# Save Standards Data -----------------------------------------------------
+toSave<- list(
+            data=list(
+              input = dplyr::as_tibble(a0),
+              compiled = dplyr::as_tibble(A),
+              problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
+              gradeBands= uniqueGradeBands
+              ),
+            a_combined=a_combined,
+            xlabels=xlabels,
+            rectangles=rectangles,
+            targetSubj=targetSubj
+            )
+saveRDS(toSave,file=fs::path(WD,"meta/standards.RDS"))
+
+
 
 #add grades information to output
 return(
