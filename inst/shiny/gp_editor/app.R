@@ -262,6 +262,7 @@ server <- function(input, output,session) {
     #don't run until full page rendered
     if(!is.null(input$DrivingQ)){
     data_check<-prep_input(isolate(input),yaml_path)
+    vals$current_data<-data_check$current_data
     outOfDate<-lapply(1:length(data_check[[1]]),function(i){
       #each element of the list should be identical or of length 0 (accounting for character(0)& NULL )
       !(identical(data_check[[1]][i],data_check[[2]][i]) | sum(length(data_check[[1]][[i]]),length(data_check[[2]][[i]]))==0)
@@ -289,16 +290,16 @@ server <- function(input, output,session) {
   # Save YAML & JSON when button clicked -------------------------------------------
     observe({
 
-    current_data<-prep_input(input,yaml_path)$current_data
+    vals$current_data<-prep_input(input,yaml_path)$current_data
     #write current data
-    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
+    yaml::write_yaml(vals$current_data, paste0(meta_path,"front-matter.yml"))
 
     ##Create list for JSON output (a little different, bc we want to combine some YAML sections to simplify web output of similar text types)
     # first combine some parts to have desired flexible JSON output
 
     current_data_lumped<-lumpItems(items=c("DrivingQ","EssentialQ","LearningObj","MiscMD"),
                   item.labs=c("Driving Question","Essential Question(s)","Learning Objective(s)",""),
-                  list.obj=current_data,
+                  list.obj=vals$current_data,
                   new.name="Text")
 
     jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
@@ -337,7 +338,11 @@ server <- function(input, output,session) {
   #
 
   output$compile<-renderUI({
+    #prep stuff
     scriptFiles<-list.files(path = paste0(WD, "scripts"),pattern=".R")
+
+
+    #generate UI output
     tagList(
     h3("Step 2: Compile working documents and lesson assets"),
     fluidPage(
@@ -348,7 +353,7 @@ server <- function(input, output,session) {
           checkboxGroupInput("ScriptsToRun",
                              "Uncheck to skip:",
                              choices = scriptFiles,
-                             selected=scriptFiles[which(scriptFiles %in% y$ScriptsToRun)] ),
+                             selected=scriptFiles[which(scriptFiles %in% vals$current_data$ScriptsToRun)] ),
             actionButton("run_lesson_scripts","Run Lesson Scripts",class="compile-button")
           ),
         #choose which elements are completed
@@ -357,16 +362,17 @@ server <- function(input, output,session) {
           checkboxGroupInput("ReadyToCompile",
                              "(Which items are done and should be compiled?)",
                              choices = c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgments","Versions"),
-                             selected=y$ReadyToCompile),
+                             selected=vals$current_data$ReadyToCompile),
           actionButton("compile","Save & Compile Materials",class="compile-button")
           ),
+
         checkboxGroupInput(
           "LearningEpaulette",
           label = "Learning Epaulette (should be in assets/learning-plots)",
           choices = matching_files(rel_path = "assets/learning-plots/",
                                    pattern = "^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
                                    WD),
-          selected = if(y$LearningEpaulette == ""){NULL}else{y$LearningEpaulette}
+          selected = if(vals$current_data$LearningEpaulette[1] == ""){NULL}else{vals$current_data$LearningEpaulette}
         ),
         checkboxGroupInput(
           "LearningChart",
@@ -376,9 +382,23 @@ server <- function(input, output,session) {
             "^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
             WD
           ),
-          selected = if(y$LearningChart == ""){NULL}else{y$LearningChart}
+          selected = if(vals$current_data$LearningChart == ""){NULL}else{vals$current_data$LearningChart}
         )), #end left pane
-    column(width=7      # verbatimTextOutput("console_text"))
+
+      #preview pane for compiled figures etc
+    column(width=7,      # verbatimTextOutput("console_text"))
+        div(class="compile-section",
+            h3("Learning Epaulette Preview"),
+            fluidRow(
+            img(src=vals$current_data$LearningEpaulette[1]),
+            img(src=vals$current_data$LearningEpaulette[2]))
+
+           ),
+        div(class="compile-section",
+            h3("Learning Chart Preview"),
+            img(src=vals$current_data$LearningChart)
+
+           )
     )
     )
     )

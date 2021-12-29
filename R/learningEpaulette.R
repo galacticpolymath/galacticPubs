@@ -1,7 +1,8 @@
 #' learningEpaulette
 #'
 #' Create a Galactic Polymath Learning Epaulette which is a special kind of mosaic plot showing proportion of lesson by subject. Outputs a horizontal and a vertical version for mobile
-#' @param heightScalar for horizontal epaulette, multiplier for height which affects amount of padding between label text and epaulette; default=1
+#' @param heightScalar for horizontal epaulette, multiplier for image height which affects amount of padding between label text and epaulette; default=1
+#' @param epauletteHeight relative size of the epaulette; default=0.2
 #' @param randomSeed random number for getting slightly different (but repeatable) repelled text labels
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learning-plots" folder, 1 level up from the working directory
@@ -20,7 +21,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(heightScalar=1,randomSeed=101,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=19,width=11,height=1.6,dpi=200,showPlot=TRUE,...){
+learningEpaulette<-function(heightScalar=1,epauletteHeight=0.2,randomSeed=101,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=19,width=11,height=1.6,dpi=200,showPlot=TRUE,...){
 
   #if WD supplied, append it to destFolder
   if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
@@ -75,7 +76,7 @@ subject_labels<-subset(xlabels,xlabels$x.prop>0) %>% ggplot2::ggplot()+
 ###
 # HORIZONTAL EPAULETTE + LABELS
 # calculate relative label height; we need to scale the relative proportion of label with the overall image height
-ep_abs_height<-0.3*height #Target epaulette height in inches (must stay constant)
+ep_abs_height<-epauletteHeight*height #Target epaulette height in inches (must stay constant)
 scaled_height<-(height*heightScalar) #New height in inches
 relEpauletteHeight<-(ep_abs_height)/scaled_height
 relLabHeight <- 1-relEpauletteHeight
@@ -84,7 +85,7 @@ G <- epaulette / subject_labels  + patchwork::plot_layout(ncol = 1, heights = c(
     ggplot2::theme(
     plot.background = ggplot2::element_blank(),
     panel.background = ggplot2::element_blank(),
-    plot.margin=ggplot2::unit(c(0,0,0,0),"npc")
+    plot.margin=ggplot2::unit(c(0,0,5,0),"points")
     )
 
 

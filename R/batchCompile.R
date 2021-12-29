@@ -31,14 +31,13 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
   if("Standards Alignment"%in% choices){
 
     alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)
-    if(current_data$TargetSubject==""){stop("Enter a Target Subject on the Edit tab and try again.")}
+    if(current_data$TargetSubject==""){warning("Enter a Target Subject on the Edit tab and try again.")}
     message("\nGenerating Learning Chart\n")
-
+    browser()
     #LEARNING CHART
-    learningChart(alignment,
-                  targetSubj=current_data$TargetSubject,
-                  caption=current_data$Title,
+    learningChart(shortTitle=current_data$ShortTitle,
                   dpi=200,
+                  captionN=FALSE,
                   WD=WD)
 
     #set learning chart filename from default file output on learningChart function
@@ -76,9 +75,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #LEARNING EPAULETTE
     message("\nGenerating Learning Epaulette\n")
-    learningEpaulette(alignment,
-                      targetSubj=current_data$TargetSubject,
-                      WD=WD)
+    learningEpaulette(WD=WD,showPlot = FALSE)
 
     #set learning chart filename from default file output on learningChart function
     #(since this file doesn't exist in yaml yet)

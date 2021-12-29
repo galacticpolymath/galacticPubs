@@ -17,8 +17,17 @@
 #' @importFrom rlang .data
 
 
-learningChart=function(caption,captionN=T,centralText,shortTitle,
-                       centralTextSize=3.7,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Chart",WD=getwd(),dpi=300,...){
+learningChart=function(caption,
+                       captionN = T,
+                       centralText,
+                       shortTitle,
+                       centralTextSize = 3.7,
+                       saveFile = TRUE,
+                       destFolder = "assets/learning-plots/",
+                       fileName = "GP-Learning-Chart",
+                       WD = getwd(),
+                       dpi = 200,
+                       ...){
 
 #if WD supplied, append it to destFolder
 if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
