@@ -1,8 +1,8 @@
-#DEFAULT VALUES FOR front-matter.ReadyToCompile
+#DEFAULT VALUES FOR front-matter.
 #
 #---> These are operational variables that will be ignored by editor(), but kept in output
 id: ''
-TemplateVer: 0.2.1
+TemplateVer: 0.2.2
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
@@ -13,6 +13,7 @@ PublicationStatus: Draft
 ReleaseDate: ''
 Title: ''
 Subtitle: ''
+SponsorName: ''
 SponsoredBy: ''
 SponsorLogo: ''
 LessonBanner: ''
@@ -21,6 +22,7 @@ LessonEnvir: ''
 ForGrades: ''
 EstLessonTime: ''
 LearningEpaulette: ''
+LearningEpaulette_vert: ''
 LearningChart: ''
 SupportingMedia: ''
 #---> These are combined into "text" overview section in JSON output

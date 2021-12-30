@@ -9,7 +9,8 @@ batchCompile(
   choices = c("Front Matter"),
   destFolder = "meta/JSON/",
   outputFileName = "LESSON.json",
-  WD = getwd()
+  WD = getwd(),
+  img_loc
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ batchCompile(
 \item{outputFileName}{output file name; default= "processedProcedure.json"}
 
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
+\item{img_loc}{where files are being stored (www folder)}
 }
 \value{
 a JSON is saved to meta/JSON/LESSON.json

@@ -7,7 +7,7 @@
 inSync(path1, path2, verbose = FALSE)
 }
 \arguments{
-\item{path1}{path to file of interest}
+\item{path1}{path to file of interest (the one that may or may not need updating)}
 
 \item{path2}{path to reference file (expected to be at least slightly older)}
 

@@ -35,7 +35,26 @@ box{   width:350px;padding:10px 10px 0px 10px;
 .shiny-bound-input:{
   height:100%;
 }
-.shiny-input-container {margin-right: 1rem;width:100% !important;}
+
+
+.selectize-input .item {
+  color: #008cba !important;
+  background-color: #ECECE2 !important;
+  margin: 2px 4px 2px 0 !important;
+
+}
+
+/* This is to account for some stupid vertical misalignment in Target Subject */
+.selectize-control {
+  margin-bottom: -4px!important;
+}
+
+.inline-fields > div{
+  display: inline-block;
+  margin-top: auto;
+  vertical-align: bottom !important;
+}
+
 .header_button_container {
   display:flex;
     position: fixed;

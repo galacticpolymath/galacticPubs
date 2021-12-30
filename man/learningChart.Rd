@@ -23,7 +23,7 @@ learningChart(
 
 \item{captionN}{T/F, add the range of the number of standards per grade used to make the plot to caption?}
 
-\item{centralText}{specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades`\n`5-6")}
+\item{centralText}{specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades`\\n`5-6")}
 
 \item{centralTextSize}{multiplier for font size of centralText}
 

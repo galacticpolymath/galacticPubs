@@ -75,25 +75,31 @@ ui <- navbarPage(
             "Most text fields accept",
             a("markdown formatting", href = "https://www.markdownguide.org/basic-syntax/")
         ),
-        dateInput(width="200px",
+        div(class="inline-fields",
+          textInput(
+            inputId = "ShortTitle",
+            label = "shortTitle (a unique prefix for key lesson materials)",
+            value = y$ShortTitle,
+            width = 200
+          ),
+          dateInput(
+            width = "200px",
             inputId = "ReleaseDate",
             label = "Official Release Date",
             value = y$ReleaseDate
+          )
         ),
         textInput(
             inputId = "Title",
             label = "Title",
-            value = y$Title
+            value = y$Title,
+            width=600
         ),
         textInput(
             inputId = "Subtitle",
             label = "Subtitle",
-            value = y$Subtitle
-        ),
-        textInput(
-            inputId = "ShortTitle",
-            label = "shortTitle (a unique prefix for key lesson materials)",
-            value = y$ShortTitle
+            value = y$Subtitle,
+            width=600
         ),
         checkboxGroupInput("LessonBanner",label="Lesson Banner (found in assets/banners_etc)",
                   choices=matching_files(
@@ -101,12 +107,12 @@ ui <- navbarPage(
                                        pattern="^.*anner.*\\.[png|PNG|jpeg|jpg]",
                                        WD),
                   selected=y$LessonBanner),
-
-        textAreaInput("SponsoredBy","Sponsored By: (Add multiple entries with `- `, i.e. hyphen+space)",y$SponsoredBy),
+        selectizeInput("SponsorName",label="Sponsor Name(s) for Search Index:",choices=y$SponsorName,selected=y$SponsorName,options=list(create=TRUE),multiple=TRUE),
+        textAreaInput("SponsoredBy","Sponsored By: (Add multiple entries with `- `, i.e. hyphen+space)",y$SponsoredBy,width="100%",height=150),
 
         rank_list(
           input_id = "SponsorLogo",
-          text = "Sponsor Logo(s)— (add images to assets/orig-client-media_NoEdit; reorder as needed for multiple logos)",
+          text = "Sponsor Logo(s)— (add images w/ 'logo' in name to 'assets/orig-client-media_NoEdit')",
           labels = matching_files(
             "assets/orig-client-media_NoEdit/",
             pattern = "^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
@@ -115,28 +121,39 @@ ui <- navbarPage(
         ),
 
         checkboxGroupInput("LessonEnvir","Lesson Environment",choices = c("Classroom","Remote"),selected=y$LessonEnvir,inline=TRUE),
-
-        textInput(inputId = "ForGrades",
-                  label = "For Grades",
-                  value = y$ForGrades),
-        textInput(inputId = "TargetSubject",
-                  label = "Target Subject",
-                  value = y$TargetSubject),
-        textInput(
+        div(
+          class = "inline-fields",
+          textInput(
+            inputId = "ForGrades",
+            label = "For Grades",
+            value = y$ForGrades,
+            width = 300
+          ),
+          selectizeInput(
+            inputId = "TargetSubject",
+            label = "Target Subject",
+            choices = c("Math", "Science", "Social Studies", "ELA"),
+            selected = y$TargetSubject,
+            options = list(create = TRUE),
+            width ="300px"
+          ),
+          textInput(
             "EstLessonTime",
             "Estimated Lesson Time",
             value = y$EstLessonTime,
-            placeholder = "format= '3 x 45 min'"
-            ),
+            placeholder = "format= '3 x 45 min'",
+            width = 300
+          )
+        ),
         #text block
         htmlOutput("overview_text_block"),
 
-        selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE),
+        selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE, width="100%"),
 
-        textAreaInput("Description",label="Lesson Description:",placeholder="Try to keep it as short as possible",value=y$Description,height="300px"),
+        textAreaInput("Description",label="Lesson Description:",placeholder="Try to keep it as short as possible",value=y$Description,height="300px", width="100%"),
         hr(class="blhr"),
         h3("Lesson Preview"),
-        textAreaInput("QuickPrep",label="Teach It in 15 Quick Prep:",value=y$QuickPrep,height="150px"),
+        textAreaInput("QuickPrep",label="Teach It in 15 Quick Prep:",value=y$QuickPrep,height="150px", width="100%"),
 
       #Supporting Media
         hr(class="blhr"),
@@ -165,8 +182,8 @@ ui <- navbarPage(
 
         hr(class="blhr"),
         h3("But wait, there's more!"),
-        textAreaInput("Bonus",label="Bonus Material (Easter eggs and tidbits that aren't a whole extension lesson)",placeholder="Optional.",value=y$Bonus,height="150px"),
-        textAreaInput("Extensions",label="Extensions (Full spin-off lessons, activities, and assessments)",placeholder="Optional.",value=y$Extensions,height="150px"),
+        textAreaInput("Bonus",label="Bonus Material (Easter eggs and tidbits that aren't a whole extension lesson)",placeholder="Optional.",value=y$Bonus,height="150px", width="100%"),
+        textAreaInput("Extensions",label="Extensions (Full spin-off lessons, activities, and assessments)",placeholder="Optional.",value=y$Extensions,height="150px", width="100%"),
         hr(class="blhr"),
         h3("Background and Research Connections"),
         #Research background
@@ -174,23 +191,23 @@ ui <- navbarPage(
                       label="Research Background:",
                       placeholder="![Journal article image](ScreenShotOfStudy.png)\n[Link to Original Study](StudyURL)\n#### Scientific Background\nVery accessible explanation of this line of research and why it matters.\n#### Further Reading\n- [Link to relevant thing 1](url1)\n- [Link to relevant thing 2](url2)",
                       value=y$Background,
-                      height="150px"),
+                      height="150px", width="100%"),
         #Connection to Research
         textAreaInput("ConnectionToResearch",
                       label="Connection to Research",
                       placeholder="#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
-                      value=y$ConnectionToResearch,height="150px"),
+                      value=y$ConnectionToResearch,height="150px", width="100%"),
         hr(class="blhr"),
         h3("Feedback & Credits"),
         #Feedback
         textAreaInput("Feedback",
                       label="Feedback",
                       placeholder="### Got suggestions or feedback?\n#### We want to know what you think!\n[Please share your thoughts using this form](Add form link) and we will use it to improve this and other future lessons.",
-                      value=y$Feedback,height="150px"),
+                      value=y$Feedback,height="150px", width="100%"),
         textAreaInput("Credits",
                       label="Credits",
                       placeholder="#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
-                      value=y$Credits,height="150px"),
+                      value=y$Credits,height="150px", width="100%"),
         hr(class="blhr"),
         div(class="spacer")
     ),
@@ -247,13 +264,13 @@ server <- function(input, output,session) {
   #Finish generating all frontend items
   output$overview_text_block<-renderUI({
     div(class="text-block",p(class="text-block-title",strong("These sections combined in JSON output as 'Text'")),
-          textAreaInput("DrivingQ","Driving question(s):",y$DrivingQ),
+          textAreaInput("DrivingQ","Driving question(s):",y$DrivingQ, width="100%"),
           textAreaInput("EssentialQ",
                         a("Essential question(s):",
                           href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
-                        y$EssentialQ),
-          textAreaInput("LearningObj","Learning Objective(s):",y$LearningObj,height="300px"),
-          textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD)
+                        y$EssentialQ, width="100%"),
+          textAreaInput("LearningObj","Learning Objective(s):",y$LearningObj,height="300px", width="100%"),
+          textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD, width="100%")
         )
   })
 
