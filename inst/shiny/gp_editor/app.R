@@ -280,11 +280,15 @@ server <- function(input, output,session) {
     if(!is.null(input$DrivingQ)){
     data_check<-prep_input(isolate(input),yaml_path)
     vals$current_data<-data_check$current_data
+    browser()
     outOfDate<-lapply(1:length(data_check[[1]]),function(i){
-      #each element of the list should be identical or of length 0 (accounting for character(0)& NULL )
+        #each element of the list should be identical or of length 0 (accounting for character(0)& NULL )
       !(identical(data_check[[1]][i],data_check[[2]][i]) | sum(length(data_check[[1]][[i]]),length(data_check[[2]][[i]]))==0)
       })
+
     count_outOfDate<-do.call(sum,outOfDate)
+    #check for rearrangement
+    new_order<-if(match(names(data_check[[1]]),names(data_check[[2]])))
     if(count_outOfDate>0){vals$yaml_update_txt <- ("Not saved, yo ->")
     vals$saved<-FALSE
     }else if(substr(vals$yaml_update_txt,1,1)=="N"){vals$yaml_update_txt <- ("")
@@ -385,11 +389,19 @@ server <- function(input, output,session) {
 
         checkboxGroupInput(
           "LearningEpaulette",
-          label = "Learning Epaulette (should be in assets/learning-plots)",
+          label = "Horizontal LearningEpaulette (for large displays)",
           choices = matching_files(rel_path = "assets/learning-plots/",
-                                   pattern = "^.*[Ee]paulet.*\\.[png|PNG|jpeg|jpg]",
+                                   pattern = "^(?!_vert).*?[Ee]paulet[^_]*$",
                                    WD),
           selected = if(vals$current_data$LearningEpaulette[1] == ""){NULL}else{vals$current_data$LearningEpaulette}
+        ),
+        checkboxGroupInput(
+          "LearningEpaulette_vert",
+          label = "Vertical LearningEpaulette (for large displays)",
+          choices = matching_files(rel_path = "assets/learning-plots/",
+                                   pattern = "^.*_vert",
+                                   WD),
+          selected = if(vals$current_data$LearningEpaulette_vert == ""){NULL}else{vals$current_data$LearningEpaulette_vert}
         ),
         checkboxGroupInput(
           "LearningChart",
@@ -562,7 +574,7 @@ server <- function(input, output,session) {
     if(current_data$id==""){
       #count how many lessons there are currently on gp-catalog
       current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
-      browser()
+
       current_data$id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
       message("Lesson ID assigned: ",current_data$id)
 

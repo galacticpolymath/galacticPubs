@@ -14,8 +14,15 @@ safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
 
 #Function to find files that match a pattern and read them in if YAML entry is blank
 matching_files<-function(rel_path,pattern,WD){
-  fs::path_rel(list.files(paste0(WD,rel_path,collapse="/"),
-                                             pattern=pattern,full.names=T),WD)
+  #have to include perl=TRUE and grep b/c list.files grep pattern recognition doesn't allow for lookarounds
+  fs::path_rel(grep(
+    pattern,
+    list.files(paste0(WD, rel_path, collapse = "/"),
+               full.names = T),
+    perl = TRUE,
+    value = TRUE
+  ), WD)
+
 
 }
 
@@ -83,8 +90,8 @@ robust_txt<-function(input_txt,label="Some Text"){
 }
 
 # Add missing fields (maintaining order in a template)
-
-addMissingFields<-function(list_obj, template) {
+# reorder=do you also want to reorder all matching items based on template order?
+addMissingFields<-function(list_obj, template,reorder=FALSE) {
   missing <- match(names(template), names(list_obj)) %>% is.na() %>% which()
   new <- list_obj
   if (sum(missing) > 0) {
@@ -100,26 +107,61 @@ addMissingFields<-function(list_obj, template) {
       }
     }
   }
-  new
+  #Reorder new with preference for template order, but preserving new additions
+  #(suprisingly hard)
+  if(reorder) {
+    A<-names(template)
+    B<-names(new)
+    A_matching <- A[which(A %in% B)]
+
+    C <- rep(NA, length(B)) #ordered vector to be constructed
+    for (i in 1:length(B)) {
+      BmatchA <- match(B[i], A)
+      # special case...always put last template item after the penultimate template item (to preserve favored order)
+      if (length(A_matching) == 1) {
+        C[i] <- A_matching[1]
+        #insert dummy placeholder
+        B <- c(B[1:(i - 1)], "REPLACED DUMMY VALUE", B[i:length(C)])
+        #remove the last remaining B val found in A, since we're moving it
+        B <- B[-max(which(B %in% A))]
+        A_matching <- A_matching[-1]
+        #if no match in template, go with B[i] & move on
+      } else if (is.na(BmatchA)) {
+        C[i] <- B[i]
+        #if it's the last matching item, put it next and remove the old match
+
+      } else{
+        # if
+        C[i] <- A_matching[1]
+        A_matching <- A_matching[-1]
+      }
+    }
+    out<-new[C]
+
+  } else{
+    out <- new
+  }
+
+  out
 
 }
 
 
-# Prep 'input' for comparing to YAML read in from hard drive (y)
+
+# Prep 'input' for comparing to YAML read in from hard drive (saved)
 # The result is a list that contains the 'input' fields, ordered based on a Template,
 # with additional insertions (like template version and other custom fields) that we
 # want to keep in the YAML file, but are not used interactively in the shiny app.
-# This result can then be compared to y, which has been read in to see if they are identical.
+# This result can then be compared to saved, which has been read in to see if they are identical.
 prep_input<-function(input,yaml_path){
-    # if(missing(y)){y<-NULL; warning("Might want to pass y to this function.")}
 
     #read in existing front-matter.yml if it exists (just to be sure we're up to date)
     #If this is the user's first time editing, they will have read in y at the top, but not written yet
   if (file.exists(yaml_path)) {
-    y <- safe_read_yaml(yaml_path)
+    saved_00 <- safe_read_yaml(yaml_path)
   } else{
     #use the front matter template supplied with galacticPubs as a starting point
-    y <-
+    saved_00 <-
       safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
                                    "galacticPubs"))
   }
@@ -128,17 +170,19 @@ prep_input<-function(input,yaml_path){
     template_yaml<-safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
                                    "galacticPubs"))
 
-    ##### UPDATE our YAML from latest template
+    ##### UPGRADE our YAML to the latest template version
     # This will add fields to our front-matter if galacticPubs supplies a new template
-    y<-addMissingFields(y,template=template_yaml)
+    saved_0<-addMissingFields(saved_00,template=template_yaml)
+    # not super DRY, but I need y0 to have new template fields and saved to be reordered to trigger an unsaved flag
+    saved<-addMissingFields(saved_00,template=template_yaml,reorder = TRUE)
 
 
     #Revise yaml template version number if out of date
-    old_template_ver<-y$TemplateVer
+    old_template_ver<-saved$TemplateVer
     new_template_ver<-template_yaml$TemplateVer
     #update template ver if out of date
     if(!identical(old_template_ver,new_template_ver)){
-      y$TemplateVer<-new_template_ver
+      saved$TemplateVer<-new_template_ver
     }
 
     Y0 <- reactiveValuesToList(input)
@@ -168,13 +212,15 @@ prep_input<-function(input,yaml_path){
     ## (galacticPubs may be out of date and have an old template)
     Y_order_indx0<-match(template_fields,names(Y))
 
+    ######
     #Put any missing fields that are in 'input', but not the template yml, at the end
     input_not_in_template<-Y[which(is.na(match(names(Y),template_fields)))]
     toAdd<-if(length(input_not_in_template)>0){
       #if the template doesn't have values for a given input, give a warning
+
       warning(
         "Your template ver: ",
-        y$TemplateVer,
+        saved$TemplateVer,
         " is missing the field(s):\n\t- ",
         paste0(names(Y)[which(is.na(Y_order_indx0))], collapse = "\n\t- "),
         "\nUpdate galacticPubs to upgrade your template to ensure fields are in the right order."
@@ -183,16 +229,14 @@ prep_input<-function(input,yaml_path){
       input_not_in_template
       }else{}
 
-
-
     Y2<-c(Y[as.vector(na.omit(Y_order_indx0))],toAdd)
 
-
+    ######
     #Finally, preserve any fields on YML before overwriting
     #(e.g. TemplateVer)
 
     # Add values from yaml that are not in input data
-    Y3<-addMissingFields(Y2,template=y)
+    Y3<-addMissingFields(Y2,template=saved,reorder=TRUE)
 
     #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)
     if(Y3$GPCatalogPath==""){
@@ -200,9 +244,8 @@ prep_input<-function(input,yaml_path){
       Y3$GPCatalogPath<-catalogURL("LESSON.json",repo)
     }
 
-
     #gotta make sure all Y3 elements are characters, cuz the publication date will invoke pesky POSIX issues :/
-    list(saved_data=y,current_data=lapply(Y3,function(x)as.character(x)))
+    list(saved_data=saved_0,current_data=lapply(Y3,function(x)as.character(x)))
 }
 
 #Get the name of the repo this is set up on. No error catching at the moment.
