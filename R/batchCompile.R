@@ -28,7 +28,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     repo<-whichRepo()
 
   # Standards alignment & learning plots -----------------------------------------------------
-    browser()
+    # test if standards json is out of sync with the standards_GSheetsOnly.xlsx file
     stnds_out_of_date<-!inSync(paste0(WD,"meta/json/standards.json"),paste0(WD,"meta/standards_GSheetsOnly.xlsx"))
   if("Standards Alignment"%in% choices & stnds_out_of_date){
 
@@ -78,7 +78,8 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #LEARNING EPAULETTE
     message("\nGenerating Learning Epaulette\n")
-    learningEpaulette(WD=WD,showPlot = FALSE)
+    browser()
+    learningEpaulette(WD=WD,showPlot = FALSE,robustPar(heightScalar,current_data ))
 
     #set learning chart filename from default file output on learningChart function
     #(since this file doesn't exist in yaml yet)
@@ -126,6 +127,10 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
         Tags=current_data$Tags,#unlist(lapply(current_data$Tags,function(x) c(Value=x)))
         SteamEpaulette=list(
           url = catalogURL(basename(current_data$LearningEpaulette[1]),repo)
+          #might want to add more complex image handling later
+          ),
+        SteamEpaulette_vert=list(
+          url = catalogURL(basename(current_data$LearningEpaulette_vert[1]),repo)
           #might want to add more complex image handling later
           ),
          Description = current_data$Description)

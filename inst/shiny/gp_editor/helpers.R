@@ -287,3 +287,10 @@ expandMDLinks<-function(md,repo){
 #   )
 # }
 
+robustPar<-function(par,current_data){
+  if(exists(current_data[par])){
+    current_data[par]
+  }else{}
+}
+
+

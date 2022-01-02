@@ -280,7 +280,7 @@ server <- function(input, output,session) {
     if(!is.null(input$DrivingQ)){
     data_check<-prep_input(isolate(input),yaml_path)
     vals$current_data<-data_check$current_data
-    browser()
+
     outOfDate<-lapply(1:length(data_check[[1]]),function(i){
         #each element of the list should be identical or of length 0 (accounting for character(0)& NULL )
       !(identical(data_check[[1]][i],data_check[[2]][i]) | sum(length(data_check[[1]][[i]]),length(data_check[[2]][[i]]))==0)
@@ -288,7 +288,8 @@ server <- function(input, output,session) {
 
     count_outOfDate<-do.call(sum,outOfDate)
     #check for rearrangement
-    new_order<-if(match(names(data_check[[1]]),names(data_check[[2]])))
+    new_order<-match(names(data_check[[1]]),names(data_check[[2]]))
+
     if(count_outOfDate>0){vals$yaml_update_txt <- ("Not saved, yo ->")
     vals$saved<-FALSE
     }else if(substr(vals$yaml_update_txt,1,1)=="N"){vals$yaml_update_txt <- ("")
