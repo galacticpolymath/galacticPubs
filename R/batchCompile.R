@@ -81,7 +81,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     message("\nGenerating Learning Epaulette\n")
 
     #test if
-    browser()
+
     learningEpaulette(
       WD = WD,
       showPlot = FALSE,

@@ -122,27 +122,25 @@ addMissingFields<-function(list_obj, template,reorder=FALSE) {
   #workhorse function
   addMissing <- function(l, t) {
     #If template sublevels added, give l a NA name, so NA items can be matched (preventing duplication of NAs)
-    if(length(names(t))>1 & length(names(l))==0){
-      names(l)<-NA
+    if (length(names(t)) > 1 & length(names(l)) == 0) {
+      names(l) <- NA
     }
+    #which template names are missing from list
     missing <-
       match(names(t), names(l)) %>% is.na() %>% which()
+    names(t)[missing]
     new <- l
     if (sum(missing) > 0) {
       for (i in missing) {
         if (i == 1) {
           new <- c(t[i], new)
         } else{
-          new <- c(new[1:(i - 1)], t[i],
-                   if ((i - 1) == length(new)) {
-
-                   } else{
-                     new[i:length(new)]
-                   })
+          new <- c(new[1:(min(i - 1,length(new)-1))], t[i], new[min(length(new),i):length(new)])
         }
       }
     }
-    names(new) <- names(t)
+
+    # names(new) <- names(t)
     return(new)
   }
 
@@ -256,31 +254,29 @@ prep_input<-function(input,yaml_path){
     #template_fields sans operational variables
     template_fields<-template_fields0[!template_fields0%in%yaml_op_var]
 
-    ## Test template versions for nonmatching fields
-    ## (galacticPubs may be out of date and have an old template)
-    Y_order_indx0<-match(template_fields,names(Y))
+
 
     ######
     #Put any missing fields that are in 'input', but not the template yml, at the end
     input_not_in_template<-Y[which(is.na(match(names(Y),template_fields)))]
-    toAdd<-if(length(input_not_in_template)>0){
+    if(length(input_not_in_template)>0){
       #if the template doesn't have values for a given input, give a warning
 
       warning(
         "Your template ver: ",
         saved$TemplateVer,
-        " is missing the field(s):\n\t- ",
-        paste0(names(Y)[which(is.na(Y_order_indx0))], collapse = "\n\t- "),
-        "\nUpdate galacticPubs to upgrade your template to ensure fields are in the right order."
+        " is missing the field(s):\n\n\t- ",
+        paste0(names(input_not_in_template), collapse = "\n\t- "),
+        "\n\n *Update galacticPubs to upgrade your template to ensure fields are in the right order.\n"
       )
 
       input_not_in_template
       }else{}
-
-    Y2<-c(Y[as.vector(na.omit(Y_order_indx0))],toAdd)
+    Y2<-Y
+    # Y2<-c(Y[as.vector(na.omit(Y_order_indx0))],toAdd)
 
     ######
-    #Finally, preserve any fields on YML before overwriting
+    # preserve any fields on YML before overwriting
     #(e.g. TemplateVer)
 
     # Add values from yaml that are not in input data
@@ -291,7 +287,7 @@ prep_input<-function(input,yaml_path){
       repo<-whichRepo()
       Y3$GPCatalogPath<-catalogURL("LESSON.json",repo)
     }
-
+    browser()
     #gotta make sure all POSIX Y3 elements are characters, cuz otherwise the publication date will get screwed up :/
     list(saved_data = saved_00,
          current_data = purrr::map(Y3, function(x) {

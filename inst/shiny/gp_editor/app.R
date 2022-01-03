@@ -156,7 +156,7 @@ ui <- navbarPage(
         h3("Supporting Media"),
         p("Files found in ./assets/supporting-media/. They'll be copied to ./published/ upon Preview and can be referenced in markdown text."),
         p("  Ex: insert image with ![alt text](filename.png) in any text input section."),
-      browser(),
+
       checkboxGroupInput(
         "SupportingMedia",
         "Supporting Media Files to be Published",
@@ -417,7 +417,6 @@ server <- function(input, output,session) {
           ),
           selected = if(vals$current_data$LearningChart == ""){NULL}else{vals$current_data$LearningChart}
         )), #end left pane
-
       #preview pane for compiled figures etc
       column(
         width = 7,
@@ -426,10 +425,13 @@ server <- function(input, output,session) {
             h3("Learning Epaulette Preview"),
             fluidRow(robust_img(
               src =basename(vals$current_data$LearningEpaulette[1])
-            ,"Horizontal Epaulette"),
-            img(class="ep-vert",
-              src = basename(vals$current_data$LearningEpaulette_vert[1])
-            ))),
+            ,class="preview-ep",label = "Widescreen Epaulette"),
+            robust_img(class="ep-vert",
+              src = basename(vals$current_data$LearningEpaulette_vert[1]),
+              label="Mobile Epaulette"
+            )),
+            sliderInput("LearningEpaulette_params_heightScalar",label = "Crop bottom of image to fit ggrepel labels",value = vals$current_data$LearningEpaulette_params$heightScalar,min=0,max=2,step = 0.1)),
+
         div(
           class = "preview-chart",
           h3("Learning Chart Preview"),
