@@ -156,21 +156,17 @@ ui <- navbarPage(
         h3("Supporting Media"),
         p("Files found in ./assets/supporting-media/. They'll be copied to ./published/ upon Preview and can be referenced in markdown text."),
         p("  Ex: insert image with ![alt text](filename.png) in any text input section."),
+      browser(),
       checkboxGroupInput(
         "SupportingMedia",
         "Supporting Media Files to be Published",
-        choiceValues = paste0(
-          "assets/supporting-media/",
-          list.files(fs::path(WD, "assets/supporting-media/"),
-                     pattern = "[^help.txt]",full.names=TRUE)
-        ),
-        choiceNames = basename(
-          list.files(
-            fs::path(WD, "assets/supporting-media/"),
-            pattern = "[^help.txt]",
-            full.names = TRUE
-          )
-        ),
+        choiceValues =
+          fs::path_rel(list.files(fs::path(WD, "assets/supporting-media/"),
+                     pattern = "[^help.txt]",full.names=TRUE),WD),
+        choiceNames = basename(list.files(
+          fs::path(WD, "assets/supporting-media/"),
+          pattern = "[^help.txt]"
+        )),
         selected = y$SupportingMedia
       ),
         tableOutput("supportingMediaFiles"),
@@ -428,9 +424,9 @@ server <- function(input, output,session) {
         # verbatimTextOutput("console_text"))
         div(class = "preview-ep",
             h3("Learning Epaulette Preview"),
-            fluidRow(img(
+            fluidRow(robust_img(
               src =basename(vals$current_data$LearningEpaulette[1])
-            ),
+            ,"Horizontal Epaulette"),
             img(class="ep-vert",
               src = basename(vals$current_data$LearningEpaulette_vert[1])
             ))),
@@ -475,7 +471,7 @@ server <- function(input, output,session) {
     current_data<-prep_input(input,yaml_path)$current_data
 
     #copy images over to www folder for previewing
-    items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningChart","SupportingMedia")
+    items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningEpaulette_vert","LearningChart","SupportingMedia")
     #read in filenames; if empty, return empty; else add WD to create full path
     items2copy_filenames<-lapply(1:length(items2copy), function(i) {
       item <- current_data[[items2copy[i]]]
