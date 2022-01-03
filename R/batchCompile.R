@@ -72,21 +72,32 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
       )
     )
 
-
     #write learning chart section before standards section
     jsonlite::write_json(lc,fs::path(destFolder,"learning-chart.json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
 
+
+    #####################
     #LEARNING EPAULETTE
     message("\nGenerating Learning Epaulette\n")
-    browser()
-    #test if
-    if("heightScalar"%in% names(current_data)){}
-    learningEpaulette(WD=WD,showPlot = FALSE,eval(robust_par("heightScalar",current_data )))
 
-    #set learning chart filename from default file output on learningChart function
+    #test if
+    browser()
+    learningEpaulette(
+      WD = WD,
+      showPlot = FALSE,
+      heightScalar = current_data$LearningEpaulette_params$heightScalar,
+      randomSeed = current_data$LearningEpaulette_params$randomSeed
+    )
+
+    #set learning epaulette filename from default file output on learningEpaulette function
     #(since this file doesn't exist in yaml yet)
     current_data$LearningEpaulette<-paste0("assets/learning-plots/",formals(learningEpaulette)$fileName,".png")
-    copyUpdatedFiles(paste0(WD,current_data$LearningEpaulette),img_loc)
+    current_data$LearningEpaulette_vert<-paste0("assets/learning-plots/",formals(learningEpaulette)$fileName,"_vert.png")
+    copyUpdatedFiles(paste0(WD,
+      c(current_data$LearningEpaulette,
+        current_data$LearningEpaulette_vert
+      )
+    ), img_loc)
   }
 
   if("Teaching Materials" %in% choices){

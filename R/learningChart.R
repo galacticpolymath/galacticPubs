@@ -6,6 +6,7 @@
 #' @param captionN T/F, add the range of the number of standards per grade used to make the plot to caption?
 #' @param centralText specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades`\\n`5-6")
 #' @param centralTextSize multiplier for font size of centralText
+#' @param shortTitle the unique short title for this lesson
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" (file extension will be ignored)

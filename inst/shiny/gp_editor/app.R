@@ -14,14 +14,10 @@ if(!"error"%in%class(pacman_test)){p_load(shiny,shinythemes,sortable)}else{
 }
 
 
-#import when editor is run from galacticPubs package
-default_y_args<-c("Title","author","date","updated","SponsoredBy","Subtitle","EstLessonTime","ForGrades","TargetSubject","Text","Tags")
-
 # WD is the Rstudio project folder, which is different from the Shiny app's working directory
 WD<-paste0(rstudioapi::getActiveProject(),"/")
-
-meta_path <- paste0(WD,"meta/")
-yaml_path<-paste0(meta_path,"front-matter.yml")
+meta_path <- fs::path(WD,"meta/")
+yaml_path<-fs::path(meta_path,"front-matter.yml")
 yaml_test<-file.exists(yaml_path)
 
 if(yaml_test==FALSE){
@@ -32,8 +28,8 @@ if(yaml_test==FALSE){
 
     y<-safe_read_yaml(yaml_path, eval.expr =TRUE)
 }
-#Image storage is temporary, in the app working directory
-img_loc<-paste0(getwd(),"/www/",collapse="/")
+#Image storage is temporary, in the app working directory (force, so it gets set now in current wd)
+img_loc<-paste0(force(getwd()),"/www/",collapse="/")
 #create image preview directory
 dir.create(img_loc,showWarnings =FALSE)
 
@@ -104,7 +100,7 @@ ui <- navbarPage(
         checkboxGroupInput("LessonBanner",label="Lesson Banner (found in assets/banners_etc)",
                   choices=matching_files(
                                        rel_path="assets/banners_etc/",
-                                       pattern="^.*anner.*\\.[png|PNG|jpeg|jpg]",
+                                       pattern="^.*/banners_etc/.*[Bb]anner.*\\.[png|PNG|jpeg|jpg]",
                                        WD),
                   selected=y$LessonBanner),
         selectizeInput("SponsorName",label="Sponsor Name(s) for Search Index:",choices=y$SponsorName,selected=y$SponsorName,options=list(create=TRUE),multiple=TRUE),
@@ -166,7 +162,7 @@ ui <- navbarPage(
         choiceValues = paste0(
           "assets/supporting-media/",
           list.files(fs::path(WD, "assets/supporting-media/"),
-                     pattern = "[^help.txt]")
+                     pattern = "[^help.txt]",full.names=TRUE)
         ),
         choiceNames = basename(
           list.files(
@@ -295,7 +291,7 @@ server <- function(input, output,session) {
                is_empty(data_check[[2]][[i]])))
       }) %>% unlist()
     }
-    browser()
+
 
     count_outOfDate<-sum(outOfDate)
     #which are out of date
@@ -325,7 +321,7 @@ server <- function(input, output,session) {
 
     vals$current_data<-prep_input(input,yaml_path)$current_data
     #write current data
-    yaml::write_yaml(vals$current_data, paste0(meta_path,"front-matter.yml"))
+    yaml::write_yaml(vals$current_data, fs::path(meta_path,"front-matter.yml"))
 
     ##Create list for JSON output (a little different, bc we want to combine some YAML sections to simplify web output of similar text types)
     # first combine some parts to have desired flexible JSON output
@@ -335,7 +331,7 @@ server <- function(input, output,session) {
                   list.obj=vals$current_data,
                   new.name="Text")
 
-    jsonlite::write_json(current_data_lumped,paste0(meta_path,"JSON/front-matter.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+    # jsonlite::write_json(current_data_lumped,fs::path(meta_path,"JSON/front-matter.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
     #Storing yaml update text in reactive values and output, so it gets printed & can be
     #accessed from another server function
     vals$saved<-TRUE
@@ -372,7 +368,7 @@ server <- function(input, output,session) {
 
   output$compile<-renderUI({
     #prep stuff
-    scriptFiles<-list.files(path = paste0(WD, "scripts"),pattern=".R")
+    scriptFiles<-list.files(path = fs::path(WD, "scripts"),pattern=".R")
 
 
     #generate UI output
@@ -435,8 +431,8 @@ server <- function(input, output,session) {
             fluidRow(img(
               src =basename(vals$current_data$LearningEpaulette[1])
             ),
-            img(
-              src = basename(vals$current_data$LearningEpaulette[2])
+            img(class="ep-vert",
+              src = basename(vals$current_data$LearningEpaulette_vert[1])
             ))),
         div(
           class = "preview-chart",
@@ -455,9 +451,9 @@ server <- function(input, output,session) {
   observe({
     #Save selections
     current_data<-prep_input(input,yaml_path)$current_data
-    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
+    yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
 
-    scripts<-list.files(paste0(WD,"scripts"),pattern=".R")
+    scripts<-list.files(fs::path(WD,"scripts"),pattern=".R")
     script_subset <- scripts[scripts %in% input$ScriptsToRun]
     runLessonScripts(script_subset,WD = WD)
     } ) %>% bindEvent(input$run_lesson_scripts)
@@ -466,7 +462,7 @@ server <- function(input, output,session) {
   observe({
     #Save data before compiling
     current_data<-prep_input(input,yaml_path)$current_data
-    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
+    yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
     batchCompile(current_data,choices=input$ReadyToCompile,WD=WD,img_loc=img_loc)
     } ) %>% bindEvent(input$compile)
 
@@ -487,7 +483,7 @@ server <- function(input, output,session) {
           length(item) == 0) {
         dplyr::tibble(path = NA, category = items2copy[i])
       } else{
-        dplyr::tibble(path = paste0(WD, item), category = items2copy[i])
+        dplyr::tibble(path = fs::path(WD, item), category = items2copy[i])
       }
     }) %>% do.call(dplyr::bind_rows,.)
 
@@ -596,7 +592,7 @@ server <- function(input, output,session) {
     current_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
 
     #Save time stamp changes
-    yaml::write_yaml(current_data, paste0(meta_path,"front-matter.yml"))
+    yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
 
     #Read lesson back in to edit timestamps
     lesson<-jsonlite::read_json(path = lesson_file_path,null="null")

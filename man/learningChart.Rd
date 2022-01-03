@@ -25,6 +25,8 @@ learningChart(
 
 \item{centralText}{specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades`\\n`5-6")}
 
+\item{shortTitle}{the unique short title for this lesson}
+
 \item{centralTextSize}{multiplier for font size of centralText}
 
 \item{saveFile}{T/F, save file or just print to screen?}

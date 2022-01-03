@@ -23,10 +23,10 @@
 
 learningEpaulette<-function(heightScalar=1,epauletteHeight=0.2,randomSeed=101,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=19,width=11,height=1.6,dpi=200,showPlot=TRUE,...){
 
-  #test for NULL values being supplied; replace with defaults
-  a<-match.call(expand.dots=TRUE)[-1] %>% as.list()
-
-  browser()
+  # #test for NULL values being supplied; replace with defaults
+  # a<-match.call(expand.dots=TRUE)[-1] %>% as.list()
+  #
+  # browser()
 
   #if WD supplied, append it to destFolder
   if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}

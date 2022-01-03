@@ -32,7 +32,7 @@ matching_files<-function(rel_path,pattern,WD){
   #have to include perl=TRUE and grep b/c list.files grep pattern recognition doesn't allow for lookarounds
   fs::path_rel(grep(
     pattern,
-    list.files(paste0(WD, rel_path, collapse = "/"),
+    list.files(fs::path(WD, rel_path, collapse = "/"),
                full.names = T),
     perl = TRUE,
     value = TRUE
