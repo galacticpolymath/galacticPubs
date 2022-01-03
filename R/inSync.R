@@ -6,19 +6,19 @@
 #' @param path2 path to reference file (expected to be at least slightly older)
 #' @param verbose print out table with information? default=FALSE
 #'
-#' @returns T if timestamps match, F if they don't, and NA if one of them doesn't exist
+#' @returns T if timestamps match, F if they don't or if path 1 is missing
 #' @export
 
 inSync <- function(path1, path2, verbose = FALSE) {
   path12 <- c(path1, path2)
-  existance <- sapply(path12, file.exists)
+  existence <- sapply(path12, file.exists)
 
-  if (sum(existance) < 2) {
-    if (!existance[2]) {
+  if (sum(existence) < 2) {
+    if (!existence[2]) {
       warning("Path 2 (reference file) not found! \n >", path2)
-      out <- NA
+      out <- FALSE
 
-    } else if (!existance[2]) {
+    } else if (!existence[1]) {
       if (verbose) {
         warning("Path 1 file not found in destination Folder \n >", path2)
       }

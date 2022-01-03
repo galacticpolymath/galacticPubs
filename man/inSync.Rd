@@ -14,7 +14,7 @@ inSync(path1, path2, verbose = FALSE)
 \item{verbose}{print out table with information? default=FALSE}
 }
 \value{
-T if timestamps match, F if they don't, and NA if one of them doesn't exist
+T if timestamps match, F if they don't or if path 1 is missing
 }
 \description{
 Checks if 2 files exist, and whether path1 is the same age or newer than path2

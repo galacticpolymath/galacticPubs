@@ -2,7 +2,7 @@
 #
 #---> These are operational variables that will be ignored by editor(), but kept in output
 id: ''
-TemplateVer: 0.2.2
+TemplateVer: 0.2.3
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
@@ -19,10 +19,15 @@ SponsorLogo: ''
 LessonBanner: ''
 TargetSubject: ''
 LessonEnvir: ''
+
 ForGrades: ''
 EstLessonTime: ''
 LearningEpaulette: ''
 LearningEpaulette_vert: ''
+LearningEpaulette_params:
+  defaults: TRUE
+  heightScalar: !expr formals(learningEpaulette)$heightScalar
+  randomSeed: !expr formals(learningEpaulette)$randomSeed
 LearningChart: ''
 SupportingMedia: ''
 #---> These are combined into "text" overview section in JSON output

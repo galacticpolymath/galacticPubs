@@ -278,17 +278,28 @@ server <- function(input, output,session) {
   observe({
     #don't run until full page rendered
     if(!is.null(input$DrivingQ)){
+
     data_check<-prep_input(isolate(input),yaml_path)
     vals$current_data<-data_check$current_data
 
-    outOfDate<-lapply(1:length(data_check[[1]]),function(i){
-        #each element of the list should be identical or of length 0 (accounting for character(0)& NULL )
-      !(identical(data_check[[1]][i],data_check[[2]][i]) | sum(length(data_check[[1]][[i]]),length(data_check[[2]][[i]]))==0)
-      })
+    outOfDate<-if(!identical(length(data_check[[1]]), length(data_check[[2]]))) {
+      1000
+    } else{
 
-    count_outOfDate<-do.call(sum,outOfDate)
-    #check for rearrangement
-    new_order<-match(names(data_check[[1]]),names(data_check[[2]]))
+      lapply(1:length(data_check[[1]]), function(i) {
+        # if out-of-date,
+        #each element of the list should not be identical (unlist necessary to avoid narrow issue w/ <NA> vs `NA` names)
+        !(identical(unlist(data_check[[1]][i],use.names=FALSE), unlist(data_check[[2]][i],use.names=FALSE)) |
+            #or any variety of mismatched "", NULL, NA,etc (empties)
+            (is_empty(data_check[[1]][[i]]) &
+               is_empty(data_check[[2]][[i]])))
+      }) %>% unlist()
+    }
+    browser()
+
+    count_outOfDate<-sum(outOfDate)
+    #which are out of date
+    #rbind(saved=data_check[[1]][outOfDate],current=data_check[[1]][outOfDate])
 
     if(count_outOfDate>0){vals$yaml_update_txt <- ("Not saved, yo ->")
     vals$saved<-FALSE
@@ -398,7 +409,7 @@ server <- function(input, output,session) {
         ),
         checkboxGroupInput(
           "LearningEpaulette_vert",
-          label = "Vertical LearningEpaulette (for large displays)",
+          label = "Vertical LearningEpaulette (for mobile)",
           choices = matching_files(rel_path = "assets/learning-plots/",
                                    pattern = "^.*_vert",
                                    WD),

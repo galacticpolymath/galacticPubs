@@ -1,11 +1,26 @@
 # Editor app helper functions
 
+#tests for all variations on NULL, "", NA, etc
+is_empty <- function(x) {
+  if (identical(x, NULL) |
+      identical(x, "") |
+      identical(x, NA) |
+      identical(x, "\n") |
+      identical(x, list()) |
+      length(x) == 0) {
+    TRUE
+  } else{
+    FALSE
+  }
+}
+
 #Safe read yaml simplifies all null and missing data to ''
 safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
   y<-yaml::read_yaml(yaml_path,eval.expr=eval.expr)
+
   y2<-lapply(1:length(y), function(i){
     yi<-y[[i]]
-    if(identical(yi,NULL)|identical(yi,"")|identical(yi,NA)|identical(yi,"\n")|identical(yi,list())|length(yi)==0){yi<-''
+    if(is_empty(yi)){yi<-''
     }else{yi}
   })
   names(y2)<-names(y)
@@ -89,29 +104,61 @@ robust_txt<-function(input_txt,label="Some Text"){
   }else{input_txt}
 }
 
+# #specifically for batchCompile.R, test if a parameter exists in the current data,
+# #if so, use it; if not, return {}
+# robust_par<-function(param,current_data){
+#   if(param %in% names(current_data)){
+#     current_data[param]
+#   }else{}
+# }
+#
+
+
 # Add missing fields (maintaining order in a template)
 # reorder=do you also want to reorder all matching items based on template order?
 addMissingFields<-function(list_obj, template,reorder=FALSE) {
-  missing <- match(names(template), names(list_obj)) %>% is.na() %>% which()
-  new <- list_obj
-  if (sum(missing) > 0) {
-    for (i in missing) {
-      if (i == 1) {
-        new <- c(template[i], new)
-      } else{
-        new <- c(new[1:(i - 1)], template[i],
-                 if ((i - 1) == length(new)) {
-                 } else{
-                   new[i:length(new)]
-                 })
+
+  #Add missing level 1 params
+  #workhorse function
+  addMissing <- function(l, t) {
+    #If template sublevels added, give l a NA name, so NA items can be matched (preventing duplication of NAs)
+    if(length(names(t))>1 & length(names(l))==0){
+      names(l)<-NA
+    }
+    missing <-
+      match(names(t), names(l)) %>% is.na() %>% which()
+    new <- l
+    if (sum(missing) > 0) {
+      for (i in missing) {
+        if (i == 1) {
+          new <- c(t[i], new)
+        } else{
+          new <- c(new[1:(i - 1)], t[i],
+                   if ((i - 1) == length(new)) {
+
+                   } else{
+                     new[i:length(new)]
+                   })
+        }
       }
     }
+    names(new) <- names(t)
+    return(new)
   }
+
+  #Add missing level 1 params
+  L1<-addMissing(list_obj,template)
+  #Add missing level 2 params
+  L2<-lapply(names(L1),function(i){
+    addMissing(L1[[i]],template[[i]])
+  })
+  names(L2)<-names(L1)
+
   #Reorder new with preference for template order, but preserving new additions
   #(suprisingly hard)
   if(reorder) {
     A<-names(template)
-    B<-names(new)
+    B<-names(L2)
     A_matching <- A[which(A %in% B)]
 
     C <- rep(NA, length(B)) #ordered vector to be constructed
@@ -136,10 +183,10 @@ addMissingFields<-function(list_obj, template,reorder=FALSE) {
         A_matching <- A_matching[-1]
       }
     }
-    out<-new[C]
+    out<-L2[C]
 
   } else{
-    out <- new
+    out <- L2
   }
 
   out
@@ -206,6 +253,7 @@ prep_input<-function(input,yaml_path){
 
 
     template_fields0<-names(template_yaml)
+    #template_fields sans operational variables
     template_fields<-template_fields0[!template_fields0%in%yaml_op_var]
 
     ## Test template versions for nonmatching fields
@@ -244,8 +292,16 @@ prep_input<-function(input,yaml_path){
       Y3$GPCatalogPath<-catalogURL("LESSON.json",repo)
     }
 
-    #gotta make sure all Y3 elements are characters, cuz the publication date will invoke pesky POSIX issues :/
-    list(saved_data=saved_0,current_data=lapply(Y3,function(x)as.character(x)))
+    #gotta make sure all POSIX Y3 elements are characters, cuz otherwise the publication date will get screwed up :/
+    list(saved_data = saved_00,
+         current_data = purrr::map(Y3, function(x) {
+           if ("POSIXct" %in% class(x)|"Date"%in% class(x)) {
+             as.character(x)
+           } else{
+             x
+           }
+         })
+         )
 }
 
 #Get the name of the repo this is set up on. No error catching at the moment.
@@ -287,10 +343,5 @@ expandMDLinks<-function(md,repo){
 #   )
 # }
 
-robustPar<-function(par,current_data){
-  if(exists(current_data[par])){
-    current_data[par]
-  }else{}
-}
 
 

@@ -79,7 +79,9 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     #LEARNING EPAULETTE
     message("\nGenerating Learning Epaulette\n")
     browser()
-    learningEpaulette(WD=WD,showPlot = FALSE,robustPar(heightScalar,current_data ))
+    #test if
+    if("heightScalar"%in% names(current_data)){}
+    learningEpaulette(WD=WD,showPlot = FALSE,eval(robust_par("heightScalar",current_data )))
 
     #set learning chart filename from default file output on learningChart function
     #(since this file doesn't exist in yaml yet)
