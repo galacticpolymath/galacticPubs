@@ -6,15 +6,16 @@
 \usage{
 learningChart(
   caption,
-  captionN = T,
-  centralText,
-  shortTitle,
+  captionN = TRUE,
+  centralText = "",
+  shortTitle = "",
   centralTextSize = 3.7,
   saveFile = TRUE,
   destFolder = "assets/learning-plots/",
   fileName = "GP-Learning-Chart",
   WD = getwd(),
   dpi = 200,
+  showPlot = TRUE,
   ...
 )
 }
@@ -38,6 +39,8 @@ learningChart(
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 
 \item{dpi}{what resolution would you like the output in dots per inch? 300 by default}
+
+\item{showPlot}{plot to screen or just save to file? default=T}
 
 \item{...}{other arguments passed to \code{\link[grDevices]{png}}}
 }

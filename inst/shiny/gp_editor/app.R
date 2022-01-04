@@ -29,7 +29,7 @@ if(yaml_test==FALSE){
     y<-safe_read_yaml(yaml_path, eval.expr =TRUE)
 }
 #Image storage is temporary, in the app working directory (force, so it gets set now in current wd)
-img_loc<-paste0(force(getwd()),"/www/",collapse="/")
+img_loc<-paste0(getwd(),"/www/",collapse="/")
 #create image preview directory
 dir.create(img_loc,showWarnings =FALSE)
 
@@ -266,7 +266,7 @@ server <- function(input, output,session) {
         )
   })
 
-  #check whether there are unsaved changes
+  # check whether there are unsaved changes
   observe({
     #don't run until full page rendered
     if(!is.null(input$DrivingQ)){
@@ -293,7 +293,18 @@ server <- function(input, output,session) {
     #which are out of date
     #rbind(saved=data_check[[1]][outOfDate],current=data_check[[1]][outOfDate])
 
-    if(count_outOfDate>0){vals$yaml_update_txt <- ("Not saved, yo ->")
+    template_upgraded<-data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
+    if(count_outOfDate>0){
+      if(template_upgraded){
+        vals$yaml_update_txt<-paste0(
+          "Save & Upgrade template:\n",
+          data_check$saved_data$TemplateVer,
+          " -> ",
+          data_check$current_data$TemplateVer
+        )
+      }else{
+      vals$yaml_update_txt <- ("Not saved, yo ->")
+      }
     vals$saved<-FALSE
     }else if(substr(vals$yaml_update_txt,1,1)=="N"){vals$yaml_update_txt <- ("")
     vals$saved<-TRUE}
@@ -312,24 +323,12 @@ server <- function(input, output,session) {
 
 
   #######################################
-  # Save YAML & JSON when button clicked -------------------------------------------
+  # Save YAML when button clicked -------------------------------------------
     observe({
 
     vals$current_data<-prep_input(input,yaml_path)$current_data
     #write current data
     yaml::write_yaml(vals$current_data, fs::path(meta_path,"front-matter.yml"))
-
-    ##Create list for JSON output (a little different, bc we want to combine some YAML sections to simplify web output of similar text types)
-    # first combine some parts to have desired flexible JSON output
-
-    current_data_lumped<-lumpItems(items=c("DrivingQ","EssentialQ","LearningObj","MiscMD"),
-                  item.labs=c("Driving Question","Essential Question(s)","Learning Objective(s)",""),
-                  list.obj=vals$current_data,
-                  new.name="Text")
-
-    # jsonlite::write_json(current_data_lumped,fs::path(meta_path,"JSON/front-matter.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
-    #Storing yaml update text in reactive values and output, so it gets printed & can be
-    #accessed from another server function
     vals$saved<-TRUE
     vals$yaml_update_txt <-
         txt<-(paste0(
@@ -371,7 +370,7 @@ server <- function(input, output,session) {
     tagList(
     h3("Step 2: Compile working documents and lesson assets"),
     fluidPage(
-      column(width=5,
+      column(width=4,
         #choose scripts to run
         div(class="compile-section",
           h4("Run R Scripts to Generate Lesson Assets"),
@@ -417,27 +416,78 @@ server <- function(input, output,session) {
           ),
           selected = if(vals$current_data$LearningChart == ""){NULL}else{vals$current_data$LearningChart}
         )), #end left pane
-      #preview pane for compiled figures etc
+
+
+      ### COMPILE PREVIEWS
+      #preview pane for tweaking learning plots
       column(
-        width = 7,
-        # verbatimTextOutput("console_text"))
+        width = 8,{
+          #test if standards alignment ready & has already been compiled b4 trying to render images
+          stndrds_saved<-file.exists(fs::path(meta_path,"standards.RDS"))
+        if("Standards Alignment" %in% vals$current_data$ReadyToCompile & stndrds_saved){
+        tagList(
         div(class = "preview-ep",
             h3("Learning Epaulette Preview"),
-            fluidRow(robust_img(
-              src =basename(vals$current_data$LearningEpaulette[1])
-            ,class="preview-ep",label = "Widescreen Epaulette"),
-            robust_img(class="ep-vert",
-              src = basename(vals$current_data$LearningEpaulette_vert[1]),
-              label="Mobile Epaulette"
+            fluidRow(class = "ep-container",
+                div(class = "ep-horiz space-top",
+                    imageOutput("epaulette_fig", inline = T)),
+                div(
+                  class = "ep-vert space-top",
+                  robust_img(
+                    class = "",
+                    src = basename(vals$current_data$LearningEpaulette_vert[1]),
+                    label = "Mobile Epaulette"
+                  )
+                )),
+            div(
+              class = "inline-fields space-top",
+              sliderInput(
+                "LearningEpaulette_params_heightScalar",
+                label = "Crop bottom of image to fit ggrepel labels",
+                value = isolate(vals$current_data$LearningEpaulette_params_heightScalar),
+                min = 0.3,
+                max = 1.8,
+                step = 0.05,
+                width=200
+              ),
+              numericInput(
+                "LearningEpaulette_params_randomSeed",
+                label = "Random Seed for ggrepel",
+                value = isolate(vals$current_data$LearningEpaulette_params_randomSeed),
+                min = 0,
+                max = 500,
+                step = 1,
+                width = 110
+              ),
             )),
-            sliderInput("LearningEpaulette_params_heightScalar",label = "Crop bottom of image to fit ggrepel labels",value = vals$current_data$LearningEpaulette_params$heightScalar,min=0,max=2,step = 0.1)),
+            # actionButton("remake_ep","Update Epaulette")),
 
         div(
           class = "preview-chart",
           h3("Learning Chart Preview"),
-          img(src = basename(vals$current_data$LearningChart))
+          imageOutput("chart_fig",inline=TRUE),
+            textInput(
+              "LearningChart_params_caption",
+              "Manual caption:",
+              value = isolate(vals$current_data$LearningChart_params_caption)
+            ),
+            checkboxInput(
+              "LearningChart_params_captionN",
+              "Add standards count?",
+              width = 150,
+              value = isolate(vals$current_data$LearningChart_params_captionN)
+            ),
+            actionButton("remake_chart","Regenerate Chart")
+          )
+
 
         )
+          #end conditional panel
+        }else{
+          tagList(
+          div(class="info",h3("Compile standards to generate learning plots."))
+          )
+        }}
       )
     )
     )
@@ -463,6 +513,57 @@ server <- function(input, output,session) {
     yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
     batchCompile(current_data,choices=input$ReadyToCompile,WD=WD,img_loc=img_loc)
     } ) %>% bindEvent(input$compile)
+
+
+  #Update Horizontal Epaulette Preview
+  # observe({
+  output$epaulette_fig<-renderImage({
+    #generate new epaulette image
+    learningEpaulette(WD = WD,
+      showPlot = FALSE,
+      heightScalar = (input$LearningEpaulette_params_heightScalar),
+      randomSeed = (input$LearningEpaulette_params_randomSeed))
+
+    #copy image to www folder
+    copyUpdatedFiles(paste0(WD,
+      c(isolate(vals$current_data$LearningEpaulette),
+        isolate(vals$current_data$LearningEpaulette_vert)
+      )),img_loc)
+
+    # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
+
+      #return file info to UI
+    list(src=fs::path("www",basename(isolate(vals$current_data$LearningEpaulette))),alt="Compile Standards to generate epaulette previews")
+  },deleteFile=TRUE
+  )
+  # }) %>% bindEvent(input$remake_ep)
+
+  #Render learning chart
+    output$chart_fig <- renderImage({
+      #copy image to www folder
+      copyUpdatedFiles(fs::path(WD, vals$current_data$LearningChart),
+                               img_loc)
+      #return file info to UI
+      list(src = fs::path("www", basename(
+        isolate(vals$current_data$LearningChart)
+      )), alt = "Compile Standards to generate learning chart previews")
+    }, deleteFile = TRUE)
+
+    observe({
+    #generate new chart image
+      learningChart(
+        WD = WD,
+        showPlot=FALSE,
+        caption=(input$LearningChart_params_caption),
+        captionN=(input$LearningChart_params_captionN),
+        shortTitle=(vals$current_data$ShortTitle)
+      )
+      #this is just to trigger
+      f<-formals(learningChart)
+      vals$current_data$LearningChart<-fs::path(WD,f$destFolder,f$fileName,ext="png")
+
+      # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
+  }) %>% bindEvent(input$remake_chart)
 
 
 

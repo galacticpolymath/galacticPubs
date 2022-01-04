@@ -12,6 +12,7 @@
 #' @param fileName expects "somefilename" (file extension will be ignored)
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param dpi what resolution would you like the output in dots per inch? 300 by default
+#' @param showPlot plot to screen or just save to file? default=T
 #' @param ... other arguments passed to \code{\link[grDevices]{png}}
 #' @return the learning chart plot object (grid format); the file is saved to assets/GP_Learning_Chart.png by default
 #' @export
@@ -19,23 +20,24 @@
 
 
 learningChart=function(caption,
-                       captionN = T,
-                       centralText,
-                       shortTitle,
+                       captionN = TRUE,
+                       centralText='',
+                       shortTitle='',
                        centralTextSize = 3.7,
                        saveFile = TRUE,
                        destFolder = "assets/learning-plots/",
                        fileName = "GP-Learning-Chart",
                        WD = getwd(),
                        dpi = 200,
+                       showPlot=TRUE,
                        ...){
 
 #if WD supplied, append it to destFolder
 if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
 
-if(missing(shortTitle)){shortTitle<-"this lesson"}else{shortTitle<-paste0("'",shortTitle,"'")}
+if(shortTitle==''){shortTitle<-"this lesson"}else{shortTitle<-paste0("'",shortTitle,"'")}
 #deal with missing caption and add sample size if requested
-if(missing(caption)){caption=paste0("GP Learning Chart: Knowledge & skills taught in ",shortTitle)}
+if(caption==''){caption=paste0("GP Learning Chart: Knowledge & skills taught in ",shortTitle)}
 
 # Standards exist?
 standardsFile<-fs::path(WD,"meta/standards.RDS")
@@ -215,7 +217,9 @@ grid::grid.draw(G)
 grDevices::dev.off()
 
 #output to user
+if(showPlot){
 grid::grid.draw(G)
+}
 
 #tell user where file is saved
 message("GP Learning Chart saved\n@ ",outFile)

@@ -287,7 +287,7 @@ prep_input<-function(input,yaml_path){
       repo<-whichRepo()
       Y3$GPCatalogPath<-catalogURL("LESSON.json",repo)
     }
-    browser()
+
     #gotta make sure all POSIX Y3 elements are characters, cuz otherwise the publication date will get screwed up :/
     list(saved_data = saved_00,
          current_data = purrr::map(Y3, function(x) {

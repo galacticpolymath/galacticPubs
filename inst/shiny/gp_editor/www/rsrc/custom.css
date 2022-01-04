@@ -28,7 +28,7 @@ box{   width:350px;padding:10px 10px 0px 10px;
 
 
 
-/* More custom styles */
+/* Custom Shiny styles */
 .bad{background-color: #960061}
 .good{background-color: #3DFF90}
 .info{border: 3px solid #3e0055;background-color:#f0f4ff;}
@@ -52,7 +52,12 @@ box{   width:350px;padding:10px 10px 0px 10px;
 .inline-fields > div{
   display: inline-block;
   margin-top: auto;
+  margin-right: 10px;
   vertical-align: bottom !important;
+}
+
+.space-top{
+  margin-top:1rem;
 }
 
 .header_button_container {
@@ -90,11 +95,13 @@ box{   width:350px;padding:10px 10px 0px 10px;
   margin: 1.5rem 0 0.5rem;
 }
 
+
 .preview-ep, .preview-chart{
   margin: 3rem 0.5rem;
   border-radius: 16px;
-  background-color: #f7f7f7;
-  padding: 1.5rem;
+  background-color: rgba(44,131,195,0.1);
+  padding: 1.5rem !important;
+  max-width: 100%;
 }
 
 .preview-chart img{
@@ -103,15 +110,32 @@ box{   width:350px;padding:10px 10px 0px 10px;
 
 .preview-ep img{
   border: 1px dashed rgba(13,86,233,1);
-  width: 80%;
-  margin-right: 20px;
 }
 
-.ep-vert {
-  height: auto !important;
-  width: 10% !important;
-  margin-right:0;
+.ep-container{
+  display: flex;
+  flex-wrap: wrap;
+
 }
+
+.ep-horiz img{
+  margin: 1.5rem;
+  max-width: 90%;
+  object-fit: cover;
+}
+
+.ep-vert img{
+  width: auto ;
+  height: 200px ;
+  margin: 1.5rem;
+}
+
+.chart_fig{
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
 
 
 /* Lesson Preview styling */
