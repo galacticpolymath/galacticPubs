@@ -106,7 +106,7 @@ ui <- navbarPage(
         selectizeInput("SponsorName",label="Sponsor Name(s) for Search Index:",choices=y$SponsorName,selected=y$SponsorName,options=list(create=TRUE),multiple=TRUE),
         textAreaInput("SponsoredBy","Sponsored By: (Add multiple entries with `- `, i.e. hyphen+space)",y$SponsoredBy,width="100%",height=150),
 
-        rank_list(
+        sortable::rank_list(
           input_id = "SponsorLogo",
           text = "Sponsor Logo(s)— (add images w/ 'logo' in name to 'assets/orig-client-media_NoEdit')",
           labels = matching_files(
@@ -377,18 +377,27 @@ server <- function(input, output,session) {
           checkboxGroupInput("ScriptsToRun",
                              "Uncheck to skip:",
                              choices = scriptFiles,
-                             selected=scriptFiles[which(scriptFiles %in% vals$current_data$ScriptsToRun)] ),
+                             selected=isolate(scriptFiles[which(scriptFiles %in% vals$current_data$ScriptsToRun)] )),
             actionButton("run_lesson_scripts","Run Lesson Scripts",class="compile-button")
           ),
         #choose which elements are completed
         div(class="compile-section",
           h4("What to include:"),
-          checkboxGroupInput("ReadyToCompile",
-                             "(Which items are done and should be compiled?)",
-                             choices = c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgments","Versions"),
-                             selected=vals$current_data$ReadyToCompile),
-          actionButton("compile","Save & Compile Materials",class="compile-button")
+          checkboxGroupInput(
+            "ReadyToCompile",
+            "(Which items are done and should be compiled?)",
+            choices = c(
+              "Front Matter",
+              "Standards Alignment",
+              "Teaching Materials",
+              "Procedure",
+              "Acknowledgments",
+              "Versions"
+            ),
+            selected = isolate(vals$current_data$ReadyToCompile)
           ),
+          actionButton("compile", "Save & Compile Materials", class = "compile-button")
+        ),
 
         checkboxGroupInput(
           "LearningEpaulette",
@@ -396,7 +405,13 @@ server <- function(input, output,session) {
           choices = matching_files(rel_path = "assets/learning-plots/",
                                    pattern = "^(?!_vert).*?[Ee]paulet[^_]*$",
                                    WD),
-          selected = if(vals$current_data$LearningEpaulette[1] == ""){NULL}else{vals$current_data$LearningEpaulette}
+          selected = isolate({
+            if (vals$current_data$LearningEpaulette[1] == "") {
+              NULL
+            } else{
+              vals$current_data$LearningEpaulette
+            }
+          })
         ),
         checkboxGroupInput(
           "LearningEpaulette_vert",
@@ -404,7 +419,13 @@ server <- function(input, output,session) {
           choices = matching_files(rel_path = "assets/learning-plots/",
                                    pattern = "^.*_vert",
                                    WD),
-          selected = if(vals$current_data$LearningEpaulette_vert == ""){NULL}else{vals$current_data$LearningEpaulette_vert}
+          selected = isolate({
+            if (vals$current_data$LearningEpaulette_vert == "") {
+              NULL
+            } else{
+              vals$current_data$LearningEpaulette_vert
+            }
+          })
         ),
         checkboxGroupInput(
           "LearningChart",
@@ -414,8 +435,14 @@ server <- function(input, output,session) {
             "^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
             WD
           ),
-          selected = if(vals$current_data$LearningChart == ""){NULL}else{vals$current_data$LearningChart}
-        )), #end left pane
+          selected = isolate({
+            if (vals$current_data$LearningChart == "") {
+              NULL
+            } else{
+              vals$current_data$LearningChart
+            }
+          }))
+        ),  #end left pane
 
 
       ### COMPILE PREVIEWS
@@ -424,7 +451,7 @@ server <- function(input, output,session) {
         width = 8,{
           #test if standards alignment ready & has already been compiled b4 trying to render images
           stndrds_saved<-file.exists(fs::path(meta_path,"standards.RDS"))
-        if("Standards Alignment" %in% vals$current_data$ReadyToCompile & stndrds_saved){
+        if("Standards Alignment" %in% isolate(vals$current_data$ReadyToCompile) & stndrds_saved){
         tagList(
         div(class = "preview-ep",
             h3("Learning Epaulette Preview"),
@@ -435,10 +462,11 @@ server <- function(input, output,session) {
                   class = "ep-vert space-top",
                   robust_img(
                     class = "",
-                    src = basename(vals$current_data$LearningEpaulette_vert[1]),
+                    src = basename(isolate(vals$current_data$LearningEpaulette_vert[1])),
                     label = "Mobile Epaulette"
                   )
                 )),
+            # LEARNING EPAULETTE COMPILE PREVIEW
             div(
               class = "inline-fields space-top",
               sliderInput(
@@ -459,9 +487,10 @@ server <- function(input, output,session) {
                 step = 1,
                 width = 110
               ),
-            )),
-            # actionButton("remake_ep","Update Epaulette")),
+            ),
+             actionButton("remake_ep","Update Epaulette")),
 
+        # LEARNING CHART COMPILE PREVIEW
         div(
           class = "preview-chart",
           h3("Learning Chart Preview"),
@@ -470,6 +499,11 @@ server <- function(input, output,session) {
               "LearningChart_params_caption",
               "Manual caption:",
               value = isolate(vals$current_data$LearningChart_params_caption)
+            ),
+            textInput(
+              "LearningChart_params_centralText",
+              "Central Text Manual caption:",
+              value = isolate(vals$current_data$LearningChart_params_centralText)
             ),
             checkboxInput(
               "LearningChart_params_captionN",
@@ -494,9 +528,13 @@ server <- function(input, output,session) {
 
   })
 
+  #####
+  ##### COMPILE TAB OBSERVERS
+  #####
   # Define action buttons for compiling stuff--------------------------------------------------
   # Scripts
   observe({
+    isolate({
     #Save selections
     current_data<-prep_input(input,yaml_path)$current_data
     yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
@@ -504,69 +542,88 @@ server <- function(input, output,session) {
     scripts<-list.files(fs::path(WD,"scripts"),pattern=".R")
     script_subset <- scripts[scripts %in% input$ScriptsToRun]
     runLessonScripts(script_subset,WD = WD)
+    })
     } ) %>% bindEvent(input$run_lesson_scripts)
 
   # Compile Materials
   observe({
+
     #Save data before compiling
     current_data<-prep_input(input,yaml_path)$current_data
     yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
     batchCompile(current_data,choices=input$ReadyToCompile,WD=WD,img_loc=img_loc)
+
     } ) %>% bindEvent(input$compile)
 
 
   #Update Horizontal Epaulette Preview
-  # observe({
+  observe({
   output$epaulette_fig<-renderImage({
+    isolate({
     #generate new epaulette image
     learningEpaulette(WD = WD,
       showPlot = FALSE,
       heightScalar = (input$LearningEpaulette_params_heightScalar),
       randomSeed = (input$LearningEpaulette_params_randomSeed))
+    })
 
     #copy image to www folder
+    isolate({
     copyUpdatedFiles(paste0(WD,
-      c(isolate(vals$current_data$LearningEpaulette),
-        isolate(vals$current_data$LearningEpaulette_vert)
+      c((vals$current_data$LearningEpaulette),
+        (vals$current_data$LearningEpaulette_vert)
       )),img_loc)
+    })
 
     # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
 
       #return file info to UI
     list(src=fs::path("www",basename(isolate(vals$current_data$LearningEpaulette))),alt="Compile Standards to generate epaulette previews")
+
   },deleteFile=TRUE
   )
-  # }) %>% bindEvent(input$remake_ep)
+   }) %>% bindEvent(input$remake_ep,ignoreInit=T,ignoreNULL = F)
 
-  #Render learning chart
-    output$chart_fig <- renderImage({
-      #copy image to www folder
-      copyUpdatedFiles(fs::path(WD, vals$current_data$LearningChart),
-                               img_loc)
-      #return file info to UI
-      list(src = fs::path("www", basename(
-        isolate(vals$current_data$LearningChart)
-      )), alt = "Compile Standards to generate learning chart previews")
-    }, deleteFile = TRUE)
-
+  #Render Learning Chart
     observe({
     #generate new chart image
-      learningChart(
-        WD = WD,
-        showPlot=FALSE,
-        caption=(input$LearningChart_params_caption),
-        captionN=(input$LearningChart_params_captionN),
-        shortTitle=(vals$current_data$ShortTitle)
-      )
-      #this is just to trigger
-      f<-formals(learningChart)
-      vals$current_data$LearningChart<-fs::path(WD,f$destFolder,f$fileName,ext="png")
+      isolate({
+        learningChart(
+          WD = WD,
+          showPlot = FALSE,
+          caption = (input$LearningChart_params_caption),
+          captionN = (input$LearningChart_params_captionN),
+          centralText = (input$LearningChart_params_centralText),
+          shortTitle = (vals$current_data$ShortTitle)
+        )
+      })#end isolate
 
+      # #this is just to trigger renderImage to update
+      # f<-formals(learningChart)
+      # vals$current_data$LearningChart<-fs::path(WD,f$destFolder,f$fileName,ext="png")
       # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
-  }) %>% bindEvent(input$remake_chart)
+
+      # Render the chart
+      output$chart_fig <- renderImage({
+      #copy image to www folder
+      #this call to vals is what connects it to learningChart()
+        isolate({
+        copyUpdatedFiles(fs::path(WD, vals$current_data$LearningChart),
+                               img_loc)
+        })
+      #return file info to UI
+        isolate({
+          list(src = fs::path("www", basename(vals$current_data$LearningChart)),
+               alt = "Compile Standards to generate learning chart previews")
+        })
+      }, deleteFile = TRUE)
 
 
+  }) %>% bindEvent(input$remake_chart,ignoreInit=T,ignoreNULL = F)
 
+
+  #####################################
+  #####################################
   #####################################
   # 3. Output the preview of the lesson plan
    output$preview<-renderUI({
@@ -609,7 +666,8 @@ server <- function(input, output,session) {
 
     # Output the lesson preview page to UI ---------------------------------------------------
      list(
-        div(class="lesson-preview-container",
+       div(class="lesson-preview-shadow",
+       div(class="lesson-preview-container",
         h2(robust_txt(current_data$Title,"Title")),
         h4(robust_txt(current_data$Subtitle,"Subtitle")),
         robust_img(class="lesson-banner",src=basename(current_data$LessonBanner), label="Lesson Banner"),
@@ -631,7 +689,7 @@ server <- function(input, output,session) {
               md_txt('Target subject',current_data$TargetSubject)
             ),
             div(class="triad border-right",
-              md_txt('For grades',current_data$ForGrades)
+              md_txt('Grades',current_data$ForGrades)
               ),
             div(class="triad",
               md_txt("Est. Lesson Time", current_data$EstLessonTime))
@@ -678,7 +736,7 @@ server <- function(input, output,session) {
         ## 11. Version Notes
         div(class="section",h3("11. Version Notes"))
 
-  ))#End lesson preview container list
+  )))#End lesson preview container list
   })
 
    #####################################

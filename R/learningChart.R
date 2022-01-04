@@ -62,7 +62,7 @@ if(captionN){
   caption <- paste0(caption," (~",avgN," standards per grade band)")
   }
 
-if(missing(centralText)){
+if(centralText==""){
   t_gradeBands<-compiledAlignment$compiled$gradeBand %>% table
   centralText<-paste0("grades\n",names(t_gradeBands)[which.max(t_gradeBands)])
 }
@@ -138,6 +138,8 @@ for(i in 1:nrow(outerFill)){
     badge_prop0 <- eval(parse(text=paste0("badge_prop0+",rect_i)))
 }}
 
+#Because \ gets escaped at some point, let's remove that and allow user to add newlines in centralText
+centralText<-gsub("\\n","\n",centralText,fixed=T)
 
 (badge_prop <- badge_prop0+
     #white background at center of circle
@@ -156,11 +158,11 @@ for(i in 1:nrow(outerFill)){
                        angle= 0, inherit.aes = FALSE )+
     # Central Text label
     ggplot2::annotate("text",x=Inf,y=-Inf,label=centralText,size=centralTextSize,fontface="bold",
-                      col=gpColors("galactic black"))+
+                      col=gpColors("galactic black"),lineheight=0.7)+
     ggplot2::coord_polar(clip="off")+ggplot2::guides(fill="none")
   )
     #geom_label_npc(data=data.frame(x=.5,y=1),aes(npcx=x,npcy=y),label="djskfjadlsjldf")
-
+browser()
 #MANUALLY (ARG) add labels to corners of badge
 gridLab<-function(x,y,label,fill,longestString,textCol="white",outlineCol="grey",outlineThickness=.05,lwd=1){
   #grid.polygon(x=c(.5,1,1,.99,.99,.5),y=c(1,1,.5,.5,.99,.99),gp=gpar(fill=fill,alpha=1,col="transparent"))
