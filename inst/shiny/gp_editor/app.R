@@ -623,7 +623,7 @@ server <- function(input, output,session) {
                 ))})
         ),
         ## 1. OVERVIEW
-        div(class="section",h1("1. Overview")),
+        div(class="section",h3("1. Overview")),
         div(class="stats",
           robust_img(class="learning-epaulette",src=basename(current_data$LearningEpaulette),"Learning Epaulette"),
           div(class="triad-container",
@@ -647,10 +647,38 @@ server <- function(input, output,session) {
           }else{div(class="keyword-cloud",h4("Keywords:"),lapply(current_data$Tags,function(x){span(class="keyword",x)}))},
         md_txt('Description',current_data$Description),
         ## 2. LESSON PREVIEW
-        div(class="section",h1("2. Lesson Preview")),
+        div(class="section",h3("2. Lesson Preview")),
         md_txt('"Teach It in 15" Quick Prep',current_data$QuickPrep),
-        div(class="spacer")
-  ))
+        div(class="spacer"),
+
+        ## 3. Teaching Materials
+        div(class="section",h3("3. Teaching Materials")),
+
+        ## 4. Procedure
+        div(class="section",h3("4. Procedure")),
+
+        ## 5. Bonus Content
+        div(class="section",h3("5. Bonus Content")),
+
+        ## 6. Background
+        div(class="section",h3("6. Background")),
+
+        ## 7. Standards
+        div(class="section",h3("7. Standards")),
+          robust_img(class="learning-chart",src=basename(current_data$LearningChart),"Learning Chart"),
+        ## 8. Feedback
+        div(class="section",h3("8. Feedback")),
+
+        ## 9. Credits
+        div(class="section",h3("9. Credits")),
+
+        ## 10. Acknowledgements
+        div(class="section",h3("10. Acknowledgments")),
+
+        ## 11. Version Notes
+        div(class="section",h3("11. Version Notes"))
+
+  ))#End lesson preview container list
   })
 
    #####################################

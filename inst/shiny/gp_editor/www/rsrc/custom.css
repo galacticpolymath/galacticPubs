@@ -148,10 +148,15 @@ box{   width:350px;padding:10px 10px 0px 10px;
 
 /* Lesson major section */
 .section{
-  margin: 1rem -9rem;
-  padding: 1.5rem 6rem;
+  margin: 1.5rem -9rem 1rem;
+  padding: 0.5rem 6rem;
   background-color: #f0f4ff;
 }
+
+.section h3{
+  margin: 0.5rem 0;
+}
+
 
 /* For missing images and whatnot...style placeholder text*/
 .placeholder{
@@ -206,7 +211,7 @@ box{   width:350px;padding:10px 10px 0px 10px;
   border-right: 1px solid #3c4858;
 }
 
-.learning-epaulette{
+.learning-epaulette, .learning-chart{
   display: block;
   width: 100%;
   height:100%;
