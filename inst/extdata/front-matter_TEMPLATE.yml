@@ -2,7 +2,7 @@
 #
 #---> These are operational variables that will be ignored by editor(), but kept in output
 id: ''
-TemplateVer: 0.2.5
+TemplateVer: 0.2.6
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
@@ -10,6 +10,7 @@ GPCatalogPath: ''
 #<---
 ShortTitle: ''
 PublicationStatus: Draft
+RebuildAllMaterials: no
 ReleaseDate: ''
 Title: ''
 Subtitle: ''
@@ -23,7 +24,6 @@ ForGrades: ''
 EstLessonTime: ''
 LearningEpaulette: ''
 LearningEpaulette_vert: ''
-LearningEpaulette_params_defaults: yes
 LearningEpaulette_params_heightScalar: !expr formals(learningEpaulette)$heightScalar
 LearningEpaulette_params_randomSeed: !expr formals(learningEpaulette)$randomSeed
 LearningChart: ''

@@ -324,19 +324,28 @@ server <- function(input, output,session) {
 
   #######################################
   # Save YAML when button clicked -------------------------------------------
-    observe({
+  observe({
+    isolate({
+      data_check <- prep_input(input, yaml_path)
+      vals$current_data <- data_check$current_data
+      template_upgraded <-
+        data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
 
-    vals$current_data<-prep_input(input,yaml_path)$current_data
-    #write current data
-    yaml::write_yaml(vals$current_data, fs::path(meta_path,"front-matter.yml"))
-    vals$saved<-TRUE
-    vals$yaml_update_txt <-
-        txt<-(paste0(
-            "front-matter.yml updated:<br>",
-            format(Sys.time(), "%Y-%b-%d %r")
+      # if template upgraded, trigger rebuild of all materials in batchCompile.R
+      if (template_upgraded) {
+        vals$current_data$RebuildAllMaterials <- TRUE
+      }
+
+      #write current data
+      yaml::write_yaml(vals$current_data, fs::path(meta_path, "front-matter.yml"))
+      vals$saved <- TRUE
+      vals$yaml_update_txt <-
+        txt <- (paste0(
+          "front-matter.yml updated:<br>",
+          format(Sys.time(), "%Y-%b-%d %r")
         ))
-
-    }) %>% bindEvent(input$save)
+    })
+  }) %>% bindEvent(input$save)
 
 
 
@@ -594,7 +603,7 @@ server <- function(input, output,session) {
           caption = (input$LearningChart_params_caption),
           captionN = (input$LearningChart_params_captionN),
           centralText = (input$LearningChart_params_centralText),
-          shortTitle = (vals$current_data$ShortTitle)
+          quotedTitle = (vals$current_data$Title)
         )
       })#end isolate
 

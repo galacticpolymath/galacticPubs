@@ -14,7 +14,7 @@
 #' @export
 #'
 batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd(),img_loc){
-
+    rebuild<-current_data$RebuildAllMaterials
    #if WD supplied, append it to destFolder
    if(!identical(WD, getwd())) {
      destFolder <- paste0(WD, destFolder)
@@ -30,16 +30,18 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
   # Standards alignment & learning plots -----------------------------------------------------
     # test if standards json is out of sync with the standards_GSheetsOnly.xlsx file
     stnds_out_of_date<-!inSync(paste0(WD,"meta/json/standards.json"),paste0(WD,"meta/standards_GSheetsOnly.xlsx"))
-  if("Standards Alignment"%in% choices & stnds_out_of_date){
+  if("Standards Alignment"%in% choices & (stnds_out_of_date | rebuild) ){
 
     alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)
     if(current_data$TargetSubject==""){warning("Enter a Target Subject on the Edit tab and try again.")}
     message("\nGenerating Learning Chart\n")
 
     #LEARNING CHART
-    learningChart(shortTitle=current_data$ShortTitle,
-                  dpi=200,
-                  captionN=FALSE,
+    learningChart(quotedTitle=current_data$Title,
+                  centralText = current_data$LearningChart_params_centralText,
+                  caption=current_data$LearningChart_params_caption,
+                  captionN=current_data$LearningChart_params_captionN,
+                  showPlot=FALSE,
                   WD=WD)
 
     #set learning chart filename from default file output on learningChart function
@@ -81,12 +83,11 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     message("\nGenerating Learning Epaulette\n")
 
     #test if
-
     learningEpaulette(
       WD = WD,
       showPlot = FALSE,
-      heightScalar = current_data$LearningEpaulette_params$heightScalar,
-      randomSeed = current_data$LearningEpaulette_params$randomSeed
+      heightScalar = current_data$LearningEpaulette_params_heightScalar,
+      randomSeed = current_data$LearningEpaulette_params_randomSeed
     )
 
     #set learning epaulette filename from default file output on learningEpaulette function
@@ -296,6 +297,12 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
   # print(printToScreenTable)
   message("\n Combined JSON file saved\n @ ",outFile,"\n")
   message(" ",rep("-",30))
-  #Save data (mainly for epaulette & learning chart filenames)
+
+  #after run, reset rebuild all trigger
+  if(rebuild){
+    current_data$RebuildAllMaterials<-FALSE
+  }
+
+  #Save update YAML
   yaml::write_yaml(current_data, fs::path(WD,"meta/front-matter.yml"))
 }

@@ -5,10 +5,10 @@
 \title{learningChart}
 \usage{
 learningChart(
-  caption,
+  caption = "",
   captionN = TRUE,
   centralText = "",
-  shortTitle = "",
+  quotedTitle = "",
   centralTextSize = 3.7,
   saveFile = TRUE,
   destFolder = "assets/learning-plots/",
@@ -26,7 +26,7 @@ learningChart(
 
 \item{centralText}{specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades`\\n`5-6")}
 
-\item{shortTitle}{the unique short title for this lesson}
+\item{quotedTitle}{the quoted title used to attribute the learning chart (e.g. Knowledge and skills taught by 'quotedTitle')}
 
 \item{centralTextSize}{multiplier for font size of centralText}
 
