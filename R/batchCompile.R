@@ -147,7 +147,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
           url = catalogURL(basename(current_data$LearningEpaulette_vert[1]),repo)
           #might want to add more complex image handling later
           ),
-         Description = current_data$Description)
+         Description = current_data$Description %>% fixAnchorLinks() ) #allow smooth-scrolling to in-page references
 
     #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
     mmExists<-file.exists(paste0(WD,"meta/JSON/multimedia.json"))
@@ -160,7 +160,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
       `__component`="lesson-plan.lesson-preview",
       SectionTitle= "Lesson Preview",
       Multimedia= if(mmExists){mm}else{},
-      QuickPrep= current_data$QuickPrep,
+      QuickPrep= current_data$QuickPrep %>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
       InitiallyExpanded=TRUE
     )
 
@@ -168,14 +168,14 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     bonus<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Bonus Content",
-      Content= expandMDLinks(current_data$Bonus,repo),
+      Content= expandMDLinks(current_data$Bonus,repo) %>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
       InitiallyExpanded=TRUE
     )
     # markdown links to supporting materials allowed
     extensions<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Extensions",
-      Content= expandMDLinks(current_data$Extensions,repo),
+      Content= expandMDLinks(current_data$Extensions,repo)%>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
       InitiallyExpanded=TRUE
     )
 
@@ -191,7 +191,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
         paste(expandMDLinks(current_data$Background,repo),
           "\n### Lesson Connections to this Research",
           expandMDLinks(current_data$ConnectionToResearch,repo)
-        )),
+        ))%>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
       InitiallyExpanded=TRUE
     )
 
@@ -199,14 +199,15 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
      feedback<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Feedback",
-      Content= expandMDLinks(current_data$Feedback,repo),
+      Content= expandMDLinks(current_data$Feedback,repo)%>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
       InitiallyExpanded=TRUE
     )
       # markdown links to supporting materials allowed
+
      credits<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Credits",
-      Content= expandMDLinks(current_data$Credits,repo),
+      Content= expandMDLinks(current_data$Credits,repo)%>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
       InitiallyExpanded=TRUE
     )
 

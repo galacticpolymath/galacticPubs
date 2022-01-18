@@ -60,7 +60,7 @@ copyUpdatedFiles<-function(paths,destFolder,clear=FALSE,verbose=TRUE){
   errs<-subset(OUT,log=="Not Found")
   if(nrow(errs>0)){
     warning("The following files were not found:\n\t- ",
-             ifelse(is.na(errs$file),paste0("NO FILE (Category: ",errs$slug,")"), paste(errs$file,collapse="\n\t- "))
+             ifelse(is.na(errs$file),paste0("NO FILE (Category: ",errs$category,")"), paste(errs$file,collapse="\n\t- "))
     )
     }
 

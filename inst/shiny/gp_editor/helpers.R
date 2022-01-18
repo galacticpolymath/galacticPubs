@@ -1,18 +1,5 @@
 # Editor app helper functions
 
-#tests for all variations on NULL, "", NA, etc
-is_empty <- function(x) {
-  if (identical(x, NULL) |
-      identical(x, "") |
-      identical(x, NA) |
-      identical(x, "\n") |
-      identical(x, list()) |
-      length(x) == 0) {
-    TRUE
-  } else{
-    FALSE
-  }
-}
 
 #Safe read yaml simplifies all null and missing data to ''
 safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
@@ -42,6 +29,7 @@ matching_files<-function(rel_path,pattern,WD){
 }
 
 
+#For rendering markdown text in preview
 # The required part is a flag to put a "Missing TXT" div (call robust_txt)
 md_txt <- function(label,txt,required=TRUE){
     if(is.null(txt)){txt=""}
@@ -94,7 +82,7 @@ robust_img<-function(class,src,label){
   }else{img(class=class,src=src)}
 }
 
-# More general form to test txt inputs
+# Function for swapping out missing text with "Missing" placeholder div
 robust_txt<-function(input_txt,label="Some Text"){
   if(is.null(input_txt)){input_txt=""}
   if(input_txt==""|is.na(input_txt)){
@@ -300,44 +288,6 @@ prep_input<-function(input,yaml_path){
          )
 }
 
-#Get the name of the repo this is set up on. No error catching at the moment.
-whichRepo<-function(){
-  origin<-system(paste0("cd '",rstudioapi::getActiveProject(),"' && git remote -v"),intern=TRUE)[1]
-  repo<-gsub("^.*/(.*)\\.git.*$","\\1", origin)
-  if(is.na(repo)) {
-    warning(
-      "\n No github remote found. Make sure you've set up github right.\n *URLs won't work on live lesson plan (b/c we don't know the subdirectory they live in).*"
-    )
-  }
-  repo
-}
-
-#add full url prefix to lesson subdirectory where it will be published at catalog.galacticpolymath.com
-catalogURL<-function(relative_ref,repo){
-  if(is.na(repo)) {
-    relative_ref
-  } else{
-   paste0("https://catalog.galacticpolymath.com/lessons/",repo,"/",relative_ref)
-  }
-}
-
-#make markdown links into full paths to GP catalog
-expandMDLinks<-function(md,repo){
-  #ignore websites, replace partial links to anything else
-  pat="(?<=\\]\\()(?!http|www|\\.com).*?(?<!\\.com)(?=\\))"
-  old_str<-stringr::str_extract_all(string=md,pattern=pat) %>% unlist()
-  new_str<-catalogURL(old_str,repo)
-  #replace old with new
-  stringr::str_replace_all(string=md,pattern=pat,new_str)
-}
-
-# #makes list items for a section in JSON output for lesson plan
-# makeSection<-function(title){
-#   list(
-#     `__component`="lesson-plan.section-heading",
-#     SectionTitle=title
-#   )
-# }
 
 
 

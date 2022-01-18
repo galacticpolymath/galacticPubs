@@ -793,6 +793,7 @@ server <- function(input, output,session) {
     lesson$FirstPublicationDate<-current_data$FirstPublicationDate
     lesson$LastUpdated<-current_data$LastUpdated
     lesson$galacticPubsVer<-current_data$galacticPubsVer
+
     #rewrite it before staging it in `published/`
     jsonlite::write_json(lesson,lesson_file_path,pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
     files2copy<-c(www_file_paths,lesson_file_path)

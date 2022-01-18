@@ -1,11 +1,12 @@
-#' parseGPmarkdown
+#' @title parseGPmarkdown
 #'
-#' Function to replace custom expressions with appropriate links or text
+#' @description Functions to replace custom expressions with appropriate links or text
 #'
 #' @param x a text string to parse
 #' @param linksFile file location of the lesson teaching-materials XLSX worksheet. This is used for our custom
 #' markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 #' that has order=1
+#' @family markdown
 #' @return formatted replacement text
 #' @export
 #' @importFrom rlang .data
@@ -38,3 +39,8 @@ parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx"){
 
   return(vidReplaced)
 }
+
+
+
+
+

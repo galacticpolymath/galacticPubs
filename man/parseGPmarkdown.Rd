@@ -17,5 +17,11 @@ that has order=1}
 formatted replacement text
 }
 \description{
-Function to replace custom expressions with appropriate links or text
+Functions to replace custom expressions with appropriate links or text
 }
+\seealso{
+Other markdown: 
+\code{\link{expandMDLinks}()},
+\code{\link{fixAnchorLinks}()}
+}
+\concept{markdown}
