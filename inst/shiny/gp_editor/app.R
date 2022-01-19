@@ -469,12 +469,9 @@ server <- function(input, output,session) {
                     imageOutput("epaulette_fig", inline = T)),
                 div(
                   class = "ep-vert space-top",
-                  robust_img(
-                    class = "",
-                    src = basename(isolate(vals$current_data$LearningEpaulette_vert[1])),
-                    label = "Mobile Epaulette"
+                  imageOutput("epaulette_fig_vert", inline = T)
                   )
-                )),
+                ),
             # LEARNING EPAULETTE COMPILE PREVIEW
             div(
               class = "inline-fields space-top",
@@ -565,33 +562,47 @@ server <- function(input, output,session) {
     } ) %>% bindEvent(input$compile)
 
 
-  #Update Horizontal Epaulette Preview
+  #Update Epaulette Previews
   observe({
-  output$epaulette_fig<-renderImage({
-    isolate({
-    #generate new epaulette image
-    learningEpaulette(WD = WD,
-      showPlot = FALSE,
-      heightScalar = (input$LearningEpaulette_params_heightScalar),
-      randomSeed = (input$LearningEpaulette_params_randomSeed))
-    })
+    output$epaulette_fig <- renderImage({
+      isolate({
+        #generate new epaulette image
+        learningEpaulette(
+          WD = WD,
+          showPlot = FALSE,
+          heightScalar = (input$LearningEpaulette_params_heightScalar),
+          randomSeed = (input$LearningEpaulette_params_randomSeed)
+        )
+      })
 
-    #copy image to www folder
-    isolate({
-    copyUpdatedFiles(paste0(WD,
-      c((vals$current_data$LearningEpaulette),
-        (vals$current_data$LearningEpaulette_vert)
-      )),img_loc)
-    })
+      #copy image to www folder
+      isolate({
+        copyUpdatedFiles(paste0(WD,
+                                c((vals$current_data$LearningEpaulette),
+                                  (vals$current_data$LearningEpaulette_vert)
+                                )), img_loc)
+      })
 
-    # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
+      # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
 
       #return file info to UI
-    list(src=fs::path("www",basename(isolate(vals$current_data$LearningEpaulette))),alt="Compile Standards to generate epaulette previews")
+      list(src = fs::path("www", basename(
+        isolate(vals$current_data$LearningEpaulette)
+      )), alt = "Compile Standards to generate epaulette previews")
 
-  },deleteFile=TRUE
-  )
-   }) %>% bindEvent(input$remake_ep,ignoreInit=T,ignoreNULL = F)
+    }, deleteFile = TRUE)
+
+    #Render vertical epaulette
+    output$epaulette_fig_vert <- renderImage({
+      list(src = fs::path("www", basename(
+        isolate(vals$current_data$LearningEpaulette_vert)
+      )), alt = "vert_epaulette")
+    })
+  }) %>% bindEvent(input$remake_ep,
+                   ignoreInit = T,
+                   ignoreNULL = F)
+
+
 
   #Render Learning Chart
     observe({
