@@ -19,8 +19,6 @@ Ex: "See ![image1](img.png) for details" becomes ->
 "See ![image1](https://catalog.galacticpolymath.com/ThisRepository/img.png) for details"
 }
 \seealso{
-[parseGPmarkdown()]
-
 Other markdown: 
 \code{\link{fixAnchorLinks}()},
 \code{\link{parseGPmarkdown}()}
