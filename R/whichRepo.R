@@ -3,6 +3,7 @@
 #' Get the name of the repo this is set up on. No error catching at the moment.
 #'
 #' @returns Either a warning or the name of the github repository connected to the current Rstudio project (extracted from `rstudioapi::getActiveProject()` and a call to `git remote -v`)
+#' @export
 
 
 whichRepo<-function(){
