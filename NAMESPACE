@@ -2,6 +2,7 @@
 
 export("%>%")
 export(batchCompile)
+export(catalogURL)
 export(clearTeachingMatExcelData)
 export(compileAcknowledgments)
 export(compileJSON)

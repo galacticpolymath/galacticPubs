@@ -2,6 +2,7 @@
 #' Add full url prefix to lesson subdirectory where it will be published at catalog.galacticpolymath.com
 #' @param relative_ref relative path in the current environment
 #' @param repo the name of the current repository e.g. from \code{\link{whichRepo}}
+#' @export
 
 catalogURL<-function(relative_ref,repo){
   if(is.na(repo)) {
