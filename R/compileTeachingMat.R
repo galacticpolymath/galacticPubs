@@ -388,10 +388,10 @@ outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",
 
 
 # Write JSON for teaching materials -----------------------------------
-jsonlite::write_json(out,outFile,pretty=TRUE,auto_unbox = TRUE,na="null")
+jsonlite::write_json(out,outFile,pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
 
 #write json for multimedia
-jsonlite::write_json(multimedia,fs::path(destFolder,"multimedia.json"),pretty=TRUE,auto_unbox = TRUE,na="null")
+jsonlite::write_json(multimedia,fs::path(destFolder,"multimedia.json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
 
 
 
