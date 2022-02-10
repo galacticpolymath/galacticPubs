@@ -51,10 +51,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #export learning chart section
     lc<-list(
-      list(`__component` = "lesson-plan.section-heading", #not clear why this is needed...it's a unique component
-           SectionTitle = "Standards"),
-      list(
-        `__component` = "lesson.steam-badge",
+        `__component` = "lesson.learning-chart",
         Title = "About the GP Learning Chart",
         Description =
           paste0(
@@ -71,8 +68,13 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
                        catalogURL(basename(current_data$LearningChart[1]),repo)
                      )
 
-      )
+
     )
+    #write standards-header section
+    sh<-list(`__component` = "lesson-plan.section-heading",
+           SectionTitle = "Learning Standards")
+    jsonlite::write_json(sh,fs::path(destFolder,"standards-header.json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+
 
     #write learning chart section before standards section
     jsonlite::write_json(lc,fs::path(destFolder,"learning-chart.json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
@@ -82,7 +84,6 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     #LEARNING EPAULETTE
     message("\nGenerating Learning Epaulette\n")
 
-    #test if
     learningEpaulette(
       WD = WD,
       showPlot = FALSE,
@@ -91,9 +92,10 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     )
 
     #set learning epaulette filename from default file output on learningEpaulette function
-    #(since this file doesn't exist in yaml yet)
+    #(since this file doesn't exist in yaml on first run)
     current_data$LearningEpaulette<-paste0("assets/learning-plots/",formals(learningEpaulette)$fileName,".png")
     current_data$LearningEpaulette_vert<-paste0("assets/learning-plots/",formals(learningEpaulette)$fileName,"_vert.png")
+    #copy files to working directory
     copyUpdatedFiles(paste0(WD,
       c(current_data$LearningEpaulette,
         current_data$LearningEpaulette_vert
@@ -138,7 +140,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
             list.obj=current_data,
             new.name = "Text"
           )$Text,
-        Tags=current_data$Tags,#unlist(lapply(current_data$Tags,function(x) c(Value=x)))
+        Tags=lapply(current_data$Tags,function(x) list(Value=x)),
         SteamEpaulette=list(
           url = catalogURL(basename(current_data$LearningEpaulette[1]),repo)
           #might want to add more complex image handling later
@@ -245,7 +247,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 ################################################################
 # Compile all JSONs ----------------------------------------------
 #   jsonNames should be ordered; this is telling which json files to look for and assemble them in this order
-  jsonNames<-c("header","overview","preview","teaching-materials","procedure","background","learning-chart","standards","feedback","job-viz","credits","acknowledgments","versions")
+  jsonNames<-c("header","overview","preview","teaching-materials","procedure","background","standards-header","learning-chart","standards","feedback","job-viz","credits","acknowledgments","versions")
   potentialFilenames<-paste0(jsonNames,".json")
   #test for missings or duplicates
   json_ls<-list.files(paste0(WD,"meta/json"))
