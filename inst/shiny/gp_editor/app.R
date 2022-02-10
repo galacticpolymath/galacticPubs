@@ -703,8 +703,7 @@ server <- function(input, output,session) {
         ## 1. OVERVIEW
         div(class="section",h3("1. Overview")),
         div(class="stats",
-          robust_img(class="learning-epaulette",src=basename(current_data$LearningEpaulette),"Learning Epaulette"),
-          div(class="triad-container",
+            div(class="triad-container",
             div(class="triad border-right",
               md_txt('Target subject',current_data$TargetSubject)
             ),
@@ -713,7 +712,8 @@ server <- function(input, output,session) {
               ),
             div(class="triad",
               md_txt("Est. Lesson Time", current_data$EstLessonTime))
-              )
+              ),
+            robust_img(class="learning-epaulette",src=basename(current_data$LearningEpaulette),"Learning Epaulette")
           ),
 
         md_txt('Driving Question(s)',current_data$DrivingQ),
