@@ -650,25 +650,7 @@ server <- function(input, output,session) {
 
     current_data<-prep_input(input,yaml_path)$current_data
 
-    #copy images over to www folder for previewing
-    items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningEpaulette_vert","LearningChart","SupportingMedia")
-    #read in filenames; if empty, return empty; else add WD to create full path
-    items2copy_filenames<-lapply(1:length(items2copy), function(i) {
-      item <- current_data[[items2copy[i]]]
-      if (identical(item, NULL) | identical(item, "") |
-          length(item) == 0) {
-        dplyr::tibble(path = NA, category = items2copy[i])
-      } else{
-        dplyr::tibble(path = fs::path(WD, item), category = items2copy[i])
-      }
-    }) %>% do.call(dplyr::bind_rows,.)
-
-    flz<-items2copy_filenames$path
-    names(flz)<-items2copy_filenames$category
-
-    # clear target directory and copy updated files
-    copyUpdatedFiles(flz,img_loc,clear=TRUE)
-
+    stageAssets(current_data,WD,img_loc,clear=TRUE)
 
 
     #Custom extraction of bullets with regex!!
@@ -767,6 +749,7 @@ server <- function(input, output,session) {
 
     #Reconcile input and yaml saved data before finalizing
     current_data<-prep_input(input,yaml_path)$current_data
+    stageAssets(current_data,WD,img_loc,clear=TRUE)
 
     #files from www folder used to generate preview (or other files dumped there like Supporting Media (at Preview stage))
     #Should really make a function that checks time stamps and existence of files on a manifest
