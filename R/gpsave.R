@@ -9,6 +9,7 @@
 #' @param height plot height in inches (default= 3.38, i.e. 16:9 aspect ratio)
 #' @param dpi dots per inch resolution (default= 300); note changing this will unfortunately also change the output relative text size
 #' @param ... other parameters from [ggplot2::ggsave()]
+#' @export
 
 gpsave<-function(filename,width=6, height=3.38,dpi=300,  ...){
   fn<-fs::path(getwd(),"assets","R_outputs",filename)
