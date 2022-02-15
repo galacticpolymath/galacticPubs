@@ -9,6 +9,7 @@
 #' @returns tibble of path1 files and statuses
 #' @export
 
+
 copyUpdatedFiles<-function(paths,destFolder,clear=FALSE,verbose=TRUE){
   if(clear) {
     unlink(list.files(destFolder, pattern = "\\.", full.names = TRUE))
@@ -16,7 +17,7 @@ copyUpdatedFiles<-function(paths,destFolder,clear=FALSE,verbose=TRUE){
   }
 
   out<-lapply(paths, function(f) {
-    viable <- file.exists(f)
+    viable <- file.exists(f) & grepl("^[^\\.]*\\.[^\\/]{3,4}\\/?$",f)
     newPath <- fs::path(destFolder, basename(f))
     # if file exists...
     if (viable) {

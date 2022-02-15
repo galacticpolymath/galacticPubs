@@ -597,7 +597,7 @@ server <- function(input, output,session) {
       list(src = fs::path("www", basename(
         isolate(vals$current_data$LearningEpaulette_vert)
       )), alt = "vert_epaulette")
-    })
+    }, deleteFile = TRUE)
   }) %>% bindEvent(input$remake_ep,
                    ignoreInit = T,
                    ignoreNULL = F)
