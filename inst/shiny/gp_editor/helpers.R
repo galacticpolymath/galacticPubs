@@ -234,8 +234,8 @@ prep_input<-function(input,yaml_path){
     #Remove Nulls! They cause many problems when we output to character & get character(0)
     Y<- sapply(Y0B,function(x){if(is.null(x)){""}else{x}} ,simplify = F)
 
-    # operational variables in yaml we don't expect to be in input (anything before ShortTitle)
-    yaml_op_var<-names(template_yaml)[1:(which(names(template_yaml)=="ShortTitle")-1)]
+    # operational variables in yaml we don't expect to be in input (everything before PublicationStatus, but skipping ShortTitle (2), which we is important)
+    yaml_op_var<-names(template_yaml)[c(1,3:(which(names(template_yaml)=="PublicationStatus")-1))]
 
 
     template_fields0<-names(template_yaml)

@@ -1,14 +1,15 @@
 #DEFAULT VALUES FOR front-matter.
 #
-#---> These are operational variables that will be ignored by editor(), but kept in output
+#---> Except for ShortTitle, these are operational variables that will be ignored by editor(), but kept in output
 id: ''
-TemplateVer: 0.2.6
+ShortTitle: ''
+TemplateVer: 0.2.7
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
 GPCatalogPath: ''
+GitHubPath: ''
 #<---
-ShortTitle: ''
 PublicationStatus: Draft
 RebuildAllMaterials: no
 ReleaseDate: ''
