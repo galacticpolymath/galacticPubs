@@ -4,7 +4,10 @@
 \alias{whichRepo}
 \title{whichRepo}
 \usage{
-whichRepo()
+whichRepo(fullPath = FALSE)
+}
+\arguments{
+\item{fullPath}{do you want to export the full path, or just the repo name? Default=F (just name)}
 }
 \value{
 Either a warning or the name of the github repository connected to the current Rstudio project (extracted from `rstudioapi::getActiveProject()` and a call to `git remote -v`)

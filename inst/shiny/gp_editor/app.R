@@ -14,6 +14,8 @@ if(!"error"%in%class(pacman_test)){p_load(shiny,shinythemes,sortable)}else{
 }
 
 
+# Initialization ----------------------------------------------------------
+
 # WD is the Rstudio project folder, which is different from the Shiny app's working directory
 WD<-paste0(rstudioapi::getActiveProject(),"/")
 meta_path <- fs::path(WD,"meta/")
@@ -33,7 +35,7 @@ img_loc<-paste0(getwd(),"/www/",collapse="/")
 #create image preview directory
 dir.create(img_loc,showWarnings =FALSE)
 
-print(y)
+
 
 # UI SECTION --------------------------------------------------------------
 
@@ -290,9 +292,8 @@ server <- function(input, output,session) {
 
 
     count_outOfDate<-sum(outOfDate)
-    #which are out of date
-    #rbind(saved=data_check[[1]][outOfDate],current=data_check[[1]][outOfDate])
 
+    #Check if template upgraded
     template_upgraded<-data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
     if(count_outOfDate>0){
       if(template_upgraded){
@@ -308,6 +309,22 @@ server <- function(input, output,session) {
     vals$saved<-FALSE
     }else if(substr(vals$yaml_update_txt,1,1)=="N"){vals$yaml_update_txt <- ("")
     vals$saved<-TRUE}
+
+    #Check if Github link is present
+    ## Add github URL if missing in yaml
+    if(is_empty(data_check$saved_data$GitHubPath)) {
+      data_check$current_data$GitHubPath <- whichRepo(fullPath=TRUE)
+      #write current data
+      yaml::write_yaml(data_check$current_data, fs::path(meta_path, "front-matter.yml"))
+      vals$saved <- TRUE
+      vals$yaml_update_txt <-
+        txt <- paste0(
+          "GitHubRepo attached:\n",basename(data_check$current_data$GitHubPath)
+
+        )
+    }
+
+
     }
 
   })
