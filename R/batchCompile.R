@@ -51,7 +51,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #export learning chart section
     lc<-list(
-        `__component` = "lesson.learning-chart",
+        `__component` = "lesson-plan.learning-chart",
         Title = "About the GP Learning Chart",
         Description =
           paste0(
