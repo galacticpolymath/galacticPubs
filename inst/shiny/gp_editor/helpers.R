@@ -44,31 +44,7 @@ md_txt <- function(label,txt,required=TRUE){
 }
 
 
-# Helper function for lumping separate markdown/YAML entries (which are separated for end user continuity)
-# into a single list item for the JSON output for the web; output is the supplied list.obj, with items removed and lumped with new.name
-lumpItems<-function(items,item.labs,list.obj,new.name){
 
-     applicable00<- match(items,names(list.obj))
-     #remove empty items (not just NA)
-     applicable0<-as.vector(na.omit(ifelse(list.obj[applicable00]=="",NA,applicable00)))
-     applicable <- names(list.obj)[applicable0]
-     applicableLabs<-item.labs[as.vector(na.omit(match(applicable,items)))]
-     lumped<-sapply(1:length(applicable),function(i){
-              # add H4 to label (only if there is a label provided)
-              paste0(ifelse(applicableLabs[i]=="","",
-                            paste0("#### ",applicableLabs[i],"\n")),
-                     list.obj[applicable[i]])
-              }) %>%  paste(list.obj[applicable],collapse="\n")
-     #remove lumped list items
-     first.applicable<-sort(applicable0)[1]
-     #rearrange to insert the lumped section
-     out<-list.obj
-     out[first.applicable]<-lumped #replace first applicable value with new item
-     names(out)[first.applicable]<-new.name #rename inserted item according to user defined var new.name
-     #remove remaining lumped columns (by name to avoid index issues)
-     OUT<-out[-(sort(applicable0)[-1])]
-     OUT
-    }#end lumpItems()
 
 #function for swapping out missing images with placeholder text
 robust_img<-function(class,src,label){

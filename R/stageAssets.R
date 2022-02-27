@@ -9,7 +9,7 @@
 #' @export
 
 stageAssets <- function(current_data, WD=getwd(), img_loc=fs::path(getwd(),"www"),clear=FALSE){
-
+ .=NULL
   #copy images over to www folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningEpaulette_vert","LearningChart","SupportingMedia")
     #read in filenames; if empty, return empty; else add WD to create full path

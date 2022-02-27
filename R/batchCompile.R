@@ -129,6 +129,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
         ForGrades= current_data$ForGrades,
         TargetSubject= current_data$TargetSubject,
         #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
+
         Text=lumpItems(
             c("DrivingQ", "EssentialQ", "LearningObj", "MiscMD"),
             item.labs = c(
