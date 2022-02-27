@@ -31,7 +31,7 @@ lumpItems<-function(items,item.labs,list.obj,new.name){
      remaining<-first.applicable:length(list.obj)
      out<-list.obj[c(1:first.applicable, remaining[!remaining%in%applicable0])]
     #replace first.applicable with lumped
-     out[first.applicable]<-paste0(lumped,collapse="")
+     out[first.applicable]<-paste0(lumped,collapse="\n")
      names(out)[first.applicable]<-new.name #rename inserted item according to user defined var new.name
      #remove remaining lumped columns (by name to avoid index issues)
 
