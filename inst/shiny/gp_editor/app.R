@@ -254,6 +254,7 @@ server <- function(input, output,session) {
   vals$yaml_update_txt<-("")
   vals$saved<-TRUE
   vals$staged<-FALSE
+  output$stageStatus <- renderText("")
   output$publishReport<-renderText("")
 
   #Finish generating all frontend items
@@ -835,19 +836,30 @@ server <- function(input, output,session) {
     if(vals$staged==FALSE){
 
     }else{
-      h3("Last Step")
-      actionButton('Publish',
-                          label=div(
-                                      img(src = 'rsrc/gpicon.ico'),
-                                      p(strong("Publish!"))),
-                          class = "publish-button")
+      tagList(
+        h3("Last Step"),
+        actionButton('Publish',
+                            label=div(
+                                        img(src = 'rsrc/gpicon.ico'),
+                                        p(strong("Publish!"))),
+                            class = "publish-button"),
+        htmlOutput('publishReport')
+      )
     }
   })
 
   # Publish button
   observe({
-    publish(WD=WD)
-    output$publishReport<-"x"
+    pub_status<-publish(WD=WD)
+    if(pub_status$success){
+      message("Lesson changes published!:\n -",paste(files2copy,collapse="\n -"))
+      output$publishReport<-renderText({"\u2713 Publication Success!"})
+    }else{
+      warning(pub_status)
+      output$publishReport<-tagList(h4("\u2718 Publication Failed"),
+                                  p("details:"),
+                              renderTable(pub_status))
+    }
   }) %>% bindEvent(input$Publish)
 
   # output$publishReport<-renderPrint({
