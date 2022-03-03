@@ -10,7 +10,7 @@
 publish<- function(WD=getwd(),commit_msg=NULL){
   #test that WD is in the root directory with the R Project
   if(list.files(WD,pattern="\\.Rproj") %>% length() ==1){
-    wdpath<-paste0(fs::as_fs_path((WD)))
+    wdpath<-paste0("'",fs::as_fs_path((WD)),"'")
     if(!is.null(commit_msg)){
       commit_msg<-paste("\n",commit_msg)
     }
