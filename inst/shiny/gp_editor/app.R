@@ -852,7 +852,6 @@ server <- function(input, output,session) {
   observe({
     pub_status<-publish(WD=WD)
     if(pub_status$success){
-      message("Lesson changes published!:\n -",paste(files2copy,collapse="\n -"))
       output$publishReport<-renderText({"\u2713 Publication Success!"})
     }else{
       warning(pub_status)
