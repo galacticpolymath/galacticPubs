@@ -222,13 +222,13 @@ ui <- navbarPage(
     tabPanel("Publish",
              radioButtons("PublicationStatus","Lesson Status for Staging",choices=c("Live","Draft"),selected=y$PublicationStatus),
              actionButton('StageForPublication',
-                          label=div(
-                                      img(src = 'rsrc/gpicon.ico'),
+                          label=div(icon("file-import"),
                                       p(strong("Stage for Publication"))),
                           class = "publish-button"),
              div(
-             textOutput("publishReport")
-             )
+             textOutput("stageStatus")
+             ),
+             htmlOutput("lastStep")
     )
 
 
@@ -253,6 +253,7 @@ server <- function(input, output,session) {
   vals<-reactiveValues()
   vals$yaml_update_txt<-("")
   vals$saved<-TRUE
+  vals$staged<-FALSE
   output$publishReport<-renderText("")
 
   #Finish generating all frontend items
@@ -761,7 +762,7 @@ server <- function(input, output,session) {
    #####################################
   # 4. PUBLISH
 
-  #Clicked publish button
+  #Clicked stage button
   observe({
 
     #Reconcile input and yaml saved data before finalizing
@@ -816,16 +817,38 @@ server <- function(input, output,session) {
     ec<-tryCatch(fs::file_copy(files2copy,destFolder),error=function(e){e})
     if(!"error"%in%class(ec)){
       message("Files successfully staged:\n -",paste(files2copy,collapse="\n -"))
-      output$publishReport<-renderText({"\u2713 Success"})
+      output$stageStatus<-renderText({"\u2713 Success"})
+      vals$staged <- TRUE
     }else{
       warning(as.character(ec))
-      output$publishReport<-renderText({"\u2718 Failed"})}
+      output$stageStatus<-renderText({"\u2718 Failed"})
+      vals$staged<-FALSE}
 
 
 
 
 
   }) %>% bindEvent(input$StageForPublication)
+
+  # After successful staging, make option to publish
+  output$lastStep <- renderUI({
+    if(vals$staged==FALSE){
+
+    }else{
+      h3("Last Step")
+      actionButton('Publish',
+                          label=div(
+                                      img(src = 'rsrc/gpicon.ico'),
+                                      p(strong("Publish!"))),
+                          class = "publish-button")
+    }
+  })
+
+  # Publish button
+  observe({
+    publish(WD=WD)
+    output$publishReport<-"x"
+  }) %>% bindEvent(input$Publish)
 
   # output$publishReport<-renderPrint({
 
