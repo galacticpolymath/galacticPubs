@@ -837,7 +837,9 @@ server <- function(input, output,session) {
 
     }else{
       tagList(
-        h3("Last Step"),
+        hr(),
+        h4("Last Step"),
+        textInput("commit_msg","Commit message (what're you updating?):",value = NULL),
         actionButton('Publish',
                             label=div(
                                         img(src = 'rsrc/gpicon.ico'),
@@ -850,7 +852,7 @@ server <- function(input, output,session) {
 
   # Publish button
   observe({
-    pub_status<-publish(WD=WD)
+    pub_status<-publish(WD=WD,commit_msg = input$commit_msg)
     if(pub_status$success){
       output$publishReport<-renderText({"\u2713 Publication Success!"})
     }else{

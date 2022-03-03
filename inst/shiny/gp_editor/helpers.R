@@ -188,7 +188,9 @@ prep_input<-function(current_data,yaml_path){
     input_op_var <- lapply(1:length(Y0), function(l) {
       #check if "shiny" somewhere in a class name for each list item
       if (sum(grepl("shiny", class(Y0[[l]]))) > 0) {
-        names(Y0)[l]
+        #add manual inputs to ignore
+        manual_inputs_to_ignore<-c("commit_msg")
+        c(names(Y0)[l],manual_inputs_to_ignore)
       } else{
       }
     }) %>% unlist()
