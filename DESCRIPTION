@@ -12,35 +12,35 @@ License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    dplyr,
-    fs,
-    galacticEdTools,
-    ggplot2,
-    ggrepel,
-    googledrive,
-    grid,
-    jsonlite,
-    magrittr,
-    openxlsx,
-    patchwork,
-    pbapply,
-    png,
-    RCurl,
-    reshape2,
-    rmarkdown,
-    scales,
-    shadowtext,
-    showtext,
-    sysfonts,
-    stringr,
-    rlang,
-    rstudioapi,
-    XLConnect,
-    shiny,
-    yaml
+    dplyr (>= 1.0.1),
+    fs (>= 1.5.0),
+    galacticEdTools (>= 0.1.9),
+    ggplot2 (>= 3.3.5),
+    ggrepel (>= 0.9.1),
+    googledrive (>= 2.0.0),
+    grid (>= 4.1.1),
+    jsonlite (>= 1.8.0),
+    magrittr (>= 2.0.1),
+    openxlsx (>= 4.2.5),
+    patchwork (>= 1.1.1),
+    pbapply (>= 1.5.0),
+    png (>= 0.1.0),
+    RCurl (>= 1.98.0),
+    reshape2 (>= 1.4.4),
+    rmarkdown (>= 2.11.0),
+    scales (>= 1.1.1),
+    shadowtext (>= 0.0.9),
+    showtext (>= 0.9.0),
+    sysfonts (>= 0.8.5),
+    stringr (>= 1.4.0),
+    rlang (>= 1.0.1),
+    rstudioapi (>= 0.13.0),
+    XLConnect (>= 1.0.5),
+    shiny (>= 1.7.1),
+    yaml (>= 2.3.5)
 Remotes:
     galacticpolymath/galacticEdTools
-Suggests: colorspace, rmdformats,pacman
+Suggests: colorspace (>= 2.0.0), rmdformats (>= 1.0.3),pacman (>= 0.5.0)
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
 RoxygenNote: 7.1.2
 Depends: 
