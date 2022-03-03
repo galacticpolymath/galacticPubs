@@ -12,11 +12,11 @@ publish<- function(WD=getwd(),commit_msg=NULL){
   if(list.files(WD,pattern="\\.Rproj") %>% length() ==1){
     wdpath<-paste0(fs::as_fs_path((WD)))
     if(!is.null(commit_msg)){
-      commit_msg<-paste('automated galacticPubs::publish():\n\n',commit_msg)
+      commit_msg<-paste("\n",commit_msg)
     }
 
     # add all changed files and commit
-    cmd_commit <- paste0("git add . && git commit -m '",commit_msg,"'")
+    cmd_commit <- paste0("git add . && git commit -m 'galacticPubs::publish() [",Sys.time(),"]",commit_msg,"'")
     cmd_push<- paste0("git push")
     cmd_status<- paste0("git status")
     #concatenate system commands; go to target dir; run git commit command
