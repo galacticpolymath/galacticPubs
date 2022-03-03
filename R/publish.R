@@ -12,7 +12,7 @@ publish<- function(WD=getwd(),commit_msg=NULL){
   if(list.files(WD,pattern="\\.Rproj") %>% length() ==1){
     wdpath<-paste0(fs::as_fs_path((WD)))
     if(!is.null(commit_msg)){
-      paste('automated galacticPubs::publish():\n\n',commit_msg)
+      commit_msg<-paste('automated galacticPubs::publish():\n\n',commit_msg)
     }
 
     # add all changed files and commit
