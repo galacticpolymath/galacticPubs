@@ -4,10 +4,12 @@
 \alias{publish}
 \title{publish}
 \usage{
-publish(WD = getwd())
+publish(WD = getwd(), commit_msg = NULL)
 }
 \arguments{
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
+\item{commit_msg}{What do you want to say about this update? Default= "automated galacticPubs::publish()"}
 }
 \description{
 Commit all files and push to Github, which will automatically publish to catalog.galacticpolymath.com and update the lesson on galacticpolymath.com (if it is current and set to PublicationStatus: "Live")

@@ -854,7 +854,7 @@ server <- function(input, output,session) {
   observe({
     pub_status<-publish(WD=WD,commit_msg = input$commit_msg)
     if(pub_status$success){
-      output$publishReport<-renderText({"\u2713 Publication Success!"})
+      output$publishReport<-renderText({paste0("\u2713 Publication Success! ",Sys.time()) })
     }else{
       warning(pub_status)
       output$publishReport<-tagList(h4("\u2718 Publication Failed"),
