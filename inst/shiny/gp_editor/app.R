@@ -255,7 +255,7 @@ server <- function(input, output,session) {
   vals$saved<-TRUE
   vals$staged<-FALSE
   output$stageStatus <- renderText("")
-  output$publishReport<-renderText("")
+
 
   #Finish generating all frontend items
   output$overview_text_block<-renderUI({
@@ -854,12 +854,12 @@ server <- function(input, output,session) {
   observe({
     pub_status<-publish(WD=WD,commit_msg = input$commit_msg)
     if(pub_status$success){
-      output$publishReport<-renderText({paste0("\u2713 Publication Success! ",Sys.time()) })
+      output$publishReport<-renderUI(h4(paste0("\u2713 Publication Success! ",Sys.time()) ))
     }else{
       warning(pub_status)
-      output$publishReport<-tagList(h4("\u2718 Publication Failed"),
+      output$publishReport<-renderUI({tagList(h4("\u2718 Publication Failed"),
                                   p("details:"),
-                              renderTable(pub_status))
+                              renderTable(pub_status))})
     }
   }) %>% bindEvent(input$Publish)
 
