@@ -4,7 +4,7 @@
 \alias{parseGPmarkdown}
 \title{parseGPmarkdown}
 \usage{
-parseGPmarkdown(x, linksFile = "meta/teaching-materials.xlsx")
+parseGPmarkdown(x, linksFile = "meta/teaching-materials.xlsx", WD = NULL)
 }
 \arguments{
 \item{x}{a text string to parse}
@@ -12,6 +12,8 @@ parseGPmarkdown(x, linksFile = "meta/teaching-materials.xlsx")
 \item{linksFile}{file location of the lesson teaching-materials XLSX worksheet. This is used for our custom
 markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 that has order=1}
+
+\item{WD}{working directory; default=NULL}
 }
 \value{
 formatted replacement text

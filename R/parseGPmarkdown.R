@@ -6,13 +6,18 @@
 #' @param linksFile file location of the lesson teaching-materials XLSX worksheet. This is used for our custom
 #' markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 #' that has order=1
+#' @param WD working directory; default=NULL
 #' @family markdown
 #' @return formatted replacement text
 #' @export
 #' @importFrom rlang .data
 #'
-parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx"){
+parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx",WD=NULL){
+  if(!is.null(WD)){
+  linksFile<-fs::path(WD,linksFile)
+  }
   #read in multimedia links
+  browser()
   mediaLinks<-openxlsx::read.xlsx(linksFile,sheet="multimedia",startRow=2)%>% dplyr::tibble()
   vidLinks<-mediaLinks %>% dplyr::filter(tolower(.data$type)=="video")
 

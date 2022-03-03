@@ -195,16 +195,17 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     #Combine Sci Background and Lesson Connections to Research
     # markdown links to supporting materials allowed
     # expandMDLinks takes relative links in [](x.jpg) format and makes a full path to GP catalog
+    # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
     background<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Background",
       Content= ifelse(
         current_data$ConnectionToResearch == "",
         expandMDLinks(current_data$Background,repo),
-        paste("### Connection to Research",expandMDLinks(current_data$ConnectionToResearch,repo),
-          "\n### Research Background",
+        paste("### Connection to Research\n",expandMDLinks(current_data$ConnectionToResearch,repo),
+          "\n### Research Background\n",
           expandMDLinks(current_data$Background,repo)
-        ))%>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
+        ))%>% fixAnchorLinks() %>% parseGPmarkdown(WD=WD),#allow smooth-scrolling to in-page references and expand {vidLinks}
       InitiallyExpanded=TRUE
     )
 
