@@ -181,16 +181,17 @@ ui <- navbarPage(
         hr(class="blhr"),
         h3("Background and Research Connections"),
         #Research background
+      #Connection to Research
+        textAreaInput("ConnectionToResearch",
+                      label="Connection to Research",
+                      placeholder="#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
+                      value=y$ConnectionToResearch,height="150px", width="100%"),
         textAreaInput("Background",
                       label="Research Background:",
                       placeholder="![Journal article image](ScreenShotOfStudy.png)\n[Link to Original Study](StudyURL)\n#### Scientific Background\nVery accessible explanation of this line of research and why it matters.\n#### Further Reading\n- [Link to relevant thing 1](url1)\n- [Link to relevant thing 2](url2)",
                       value=y$Background,
                       height="150px", width="100%"),
-        #Connection to Research
-        textAreaInput("ConnectionToResearch",
-                      label="Connection to Research",
-                      placeholder="#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
-                      value=y$ConnectionToResearch,height="150px", width="100%"),
+
         hr(class="blhr"),
         h3("Feedback & Credits"),
         #Feedback

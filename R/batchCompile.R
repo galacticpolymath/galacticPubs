@@ -201,9 +201,9 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
       Content= ifelse(
         current_data$ConnectionToResearch == "",
         expandMDLinks(current_data$Background,repo),
-        paste(expandMDLinks(current_data$Background,repo),
-          "\n### Lesson Connections to this Research",
-          expandMDLinks(current_data$ConnectionToResearch,repo)
+        paste("### Connection to Research",expandMDLinks(current_data$ConnectionToResearch,repo),
+          "\n### Research Background",
+          expandMDLinks(current_data$Background,repo)
         ))%>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
       InitiallyExpanded=TRUE
     )
