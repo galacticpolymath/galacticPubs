@@ -1,18 +1,6 @@
 # Editor app helper functions
 
 
-#Safe read yaml simplifies all null and missing data to ''
-safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
-  y<-yaml::read_yaml(yaml_path,eval.expr=eval.expr)
-
-  y2<-lapply(1:length(y), function(i){
-    yi<-y[[i]]
-    if(is_empty(yi)){yi<-''
-    }else{yi}
-  })
-  names(y2)<-names(y)
-  y2
-}
 
 #Function to find files that match a pattern and read them in if YAML entry is blank
 matching_files<-function(rel_path,pattern,WD){
@@ -157,12 +145,12 @@ addMissingFields<-function(list_obj, template,reorder=FALSE) {
 
 
 
-# Prep 'input' for comparing to YAML read in from hard drive (saved)
-# The result is a list that contains the 'input' fields, ordered based on a Template,
+# Prep 'current_data' for comparing to YAML read in from hard drive (saved)
+# The result is a list that contains the 'current_data' fields, ordered based on a Template,
 # with additional insertions (like template version and other custom fields) that we
 # want to keep in the YAML file, but are not used interactively in the shiny app.
 # This result can then be compared to saved, which has been read in to see if they are identical.
-prep_input<-function(input,yaml_path){
+prep_input<-function(current_data,yaml_path){
 
     #read in existing front-matter.yml if it exists (just to be sure we're up to date)
     #If this is the user's first time editing, they will have read in y at the top, but not written yet
@@ -194,9 +182,9 @@ prep_input<-function(input,yaml_path){
       saved$TemplateVer<-new_template_ver
     }
 
-    Y0 <- reactiveValuesToList(input)
+    Y0 <- reactiveValuesToList(current_data)
 
-    # figure out which are shiny operational variables in input & ignore em
+    # figure out which are shiny operational variables in current_data & ignore em
     input_op_var <- lapply(1:length(Y0), function(l) {
       #check if "shiny" somewhere in a class name for each list item
       if (sum(grepl("shiny", class(Y0[[l]]))) > 0) {
@@ -206,7 +194,7 @@ prep_input<-function(input,yaml_path){
     }) %>% unlist()
 
     #make nonreactive list of everything except our "Operational" input items
-    Y0B <- Y0[!names(input) %in% input_op_var]
+    Y0B <- Y0[!names(current_data) %in% input_op_var]
     #Remove Nulls! They cause many problems when we output to character & get character(0)
     Y<- sapply(Y0B,function(x){if(is.null(x)){""}else{x}} ,simplify = F)
 
@@ -221,7 +209,7 @@ prep_input<-function(input,yaml_path){
 
 
     ######
-    #Put any missing fields that are in 'input', but not the template yml, at the end
+    #Put any missing fields that are in 'current_data', but not the template yml, at the end
     input_not_in_template<-Y[which(is.na(match(names(Y),template_fields)))]
     if(length(input_not_in_template)>0){
       #if the template doesn't have values for a given input, give a warning

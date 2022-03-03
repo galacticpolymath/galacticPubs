@@ -10,13 +10,14 @@ batchCompile(
   destFolder = "meta/JSON/",
   outputFileName = "LESSON.json",
   WD = getwd(),
-  img_loc
+  img_loc,
+  clean = FALSE
 )
 }
 \arguments{
 \item{current_data}{the reconciled data including yaml and input from the shiny app environment}
 
-\item{choices}{one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
+\item{choices}{one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All"}
 
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
 
@@ -25,6 +26,8 @@ batchCompile(
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 
 \item{img_loc}{where files are being stored (www folder)}
+
+\item{clean}{delete all JSON files in meta/ and start over? default=FALSE}
 }
 \value{
 a JSON is saved to meta/JSON/LESSON.json

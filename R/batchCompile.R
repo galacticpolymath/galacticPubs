@@ -4,22 +4,25 @@
 #'
 #' Combines functionality of compileProcedure, compileStandards, compileAcknowledgements, compileJSON, etc.
 #' @param current_data the reconciled data including yaml and input from the shiny app environment
-#' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")
+#' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All"
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param img_loc where files are being stored (www folder)
+#' @param clean delete all JSON files in meta/ and start over? default=FALSE
 #' @return a JSON is saved to meta/JSON/LESSON.json
 #' @importFrom rlang .data
 #' @export
 #'
-batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd(),img_loc){
+batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd(),img_loc,clean=FALSE){
     rebuild<-current_data$RebuildAllMaterials
    #if WD supplied, append it to destFolder
    if(!identical(WD, getwd())) {
      destFolder <- paste0(WD, destFolder)
    }
 
+    #allow shorthand for compiling everything
+    if(tolower(choices)=="all"){choices <- c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
 
     #quell Rcheck
     lumpItems<-whichRepo <- catalogURL <- expandMDLinks <- NULL
@@ -167,20 +170,27 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
       InitiallyExpanded=TRUE
     )
 
+    #BONUS (optional section)
     # markdown links to supporting materials allowed
+    if(!is_empty(current_data$Bonus)){
     bonus<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Bonus Content",
       Content= expandMDLinks(current_data$Bonus,repo) %>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
-      InitiallyExpanded=TRUE
-    )
+      InitiallyExpanded=TRUE)
+      jsonlite::write_json(bonus,path = fs::path(destFolder,"bonus",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    }
+
+    #EXTENSIONS (optional section)
     # markdown links to supporting materials allowed
+    if(!is_empty(current_data$Extensions)){
     extensions<-list(
       `__component`="lesson-plan.collapsible-text-section",
       SectionTitle= "Extensions",
       Content= expandMDLinks(current_data$Extensions,repo)%>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
-      InitiallyExpanded=TRUE
-    )
+      InitiallyExpanded=TRUE)
+    jsonlite::write_json(extensions,path = fs::path(destFolder,"extensions",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    }
 
     #Combine Sci Background and Lesson Connections to Research
     # markdown links to supporting materials allowed
@@ -214,11 +224,11 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
       InitiallyExpanded=TRUE
     )
 
+
+    # Write all non-optional lesson pieces
     jsonlite::write_json(header,path = fs::path(destFolder,"header",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
     jsonlite::write_json(overview,path = fs::path(destFolder,"overview",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
     jsonlite::write_json(preview,path = fs::path(destFolder,"preview",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
-    jsonlite::write_json(bonus,path = fs::path(destFolder,"bonus",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
-    jsonlite::write_json(extensions,path = fs::path(destFolder,"extensions",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
     jsonlite::write_json(background,path = fs::path(destFolder,"background",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
     jsonlite::write_json(feedback,path = fs::path(destFolder,"feedback",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
     jsonlite::write_json(credits,path = fs::path(destFolder,"credits",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
@@ -248,7 +258,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 ################################################################
 # Compile all JSONs ----------------------------------------------
 #   jsonNames should be ordered; this is telling which json files to look for and assemble them in this order
-  jsonNames<-c("header","overview","preview","teaching-materials","procedure","background","standards-header","learning-chart","standards","feedback","job-viz","credits","acknowledgments","versions")
+  jsonNames<-c("header","overview","preview","teaching-materials","procedure","background","standards-header","learning-chart","standards","bonus","extensions","feedback","job-viz","credits","acknowledgments","versions")
   potentialFilenames<-paste0(jsonNames,".json")
   #test for missings or duplicates
   json_ls<-list.files(paste0(WD,"meta/json"))
