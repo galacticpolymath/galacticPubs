@@ -16,7 +16,7 @@ publish<- function(WD=getwd(),commit_msg=NULL){
     }
 
     # add all changed files and commit
-    cmd_commit <- paste0("git add . && git commit -m 'automated galacticPubs::publish()'")
+    cmd_commit <- paste0("git add . && git commit -m '",commit_msg,"'")
     cmd_push<- paste0("git push")
     cmd_status<- paste0("git status")
     #concatenate system commands; go to target dir; run git commit command
