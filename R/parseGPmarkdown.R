@@ -17,7 +17,6 @@ parseGPmarkdown<-function(x,linksFile="meta/teaching-materials.xlsx",WD=NULL){
   linksFile<-fs::path(WD,linksFile)
   }
   #read in multimedia links
-  browser()
   mediaLinks<-openxlsx::read.xlsx(linksFile,sheet="multimedia",startRow=2)%>% dplyr::tibble()
   vidLinks<-mediaLinks %>% dplyr::filter(tolower(.data$type)=="video")
 
