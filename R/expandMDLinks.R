@@ -9,9 +9,6 @@
 
 expandMDLinks<-function(md,repo){
   #ignore websites, replace partial links to anything else
-  pat="(?<=\\]\\()(?!#|http|www).*?(?<!\\.com|\\.org|\\.io|\\.co)(?=\\))"
-  old_str<-stringr::str_extract_all(string=md,pattern=pat) %>% unlist()
-  new_str<-catalogURL(old_str,repo)
-  #replace old with new
-  stringr::str_replace_all(string=md,pattern=pat,new_str)
+  pat="(?<=\\]\\()(?!#|http|www)(.*?)(?<!\\.com|\\.org|\\.io|\\.co)(?=\\))"
+  stringr::str_replace_all(string=md,pattern=pat,replacement=paste0(catalogURL("",repo),"\\1"))
 }

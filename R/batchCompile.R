@@ -201,13 +201,14 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
       SectionTitle= "Background",
       Content= ifelse(
         current_data$ConnectionToResearch == "",
-        expandMDLinks(current_data$Background,repo),
-        paste("### Connection to Research\n",expandMDLinks(current_data$ConnectionToResearch,repo),
-          "\n### Research Background\n",
-          expandMDLinks(current_data$Background,repo)
-        ))%>% fixAnchorLinks() %>% parseGPmarkdown(WD=WD),#allow smooth-scrolling to in-page references and expand {vidLinks}
+        current_data$Background,
+        paste("#### Connection to Research\n",current_data$ConnectionToResearch,
+          "\n#### Research Background\n",
+          current_data$Background
+        ))%>% expandMDLinks(repo=repo) %>% fixAnchorLinks() %>% parseGPmarkdown(WD=WD),#allow smooth-scrolling to in-page references and expand {vidLinks}
       InitiallyExpanded=TRUE
     )
+
 
     # markdown links to supporting materials allowed
      feedback<-list(
