@@ -15,4 +15,5 @@
 gpsave<-function(filename,width=6, height=3.38,dpi=300,bg="transparent",  ...){
   fn<-fs::path(getwd(),"assets","R_outputs",filename)
   ggplot2::ggsave(filename=fn,width=width,height=height,dpi=dpi,...)
+  message("@Saved: ",fn)
 }
