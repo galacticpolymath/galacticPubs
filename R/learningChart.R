@@ -33,14 +33,14 @@ learningChart=function(caption='',
                        ...){
 
 #if WD supplied, append it to destFolder
-if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
+if(!identical(WD,getwd())){destFolder<-fs::path(WD,destFolder)}
 
 if(quotedTitle==''){quotedTitle<-"this lesson"}else{quotedTitle<-paste0("\"",quotedTitle,"\"")}
 #deal with missing caption and add sample size if requested
 if(caption==''){caption=paste0("GP Learning Chart: Knowledge & skills taught in ",quotedTitle)}
 
 # Standards exist?
-standardsFile<-fs::path(WD,"meta/standards.RDS")
+standardsFile<-fs::path(WD,"meta","standards.RDS")
 standardsFound <- file.exists(standardsFile)
 
 ###########

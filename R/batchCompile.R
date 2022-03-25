@@ -52,7 +52,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #set learning chart filename from default file output on learningChart function
     #(since this file doesn't exist in yaml yet)
-    current_data$LearningChart<-fs::path("assets","learning-plots",formals(learningChart)$fileName,".png")
+    current_data$LearningChart<-fs::path("assets","learning-plots",paste0(formals(learningChart)$fileName,".png"))
     copyUpdatedFiles(fs::path(WD,current_data$LearningChart),img_loc)
 
     #export learning chart section
@@ -99,7 +99,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #set learning epaulette filename from default file output on learningEpaulette function
     #(since this file doesn't exist in yaml on first run)
-    current_data$LearningEpaulette<-fs::path("assets","learning-plots",formals(learningEpaulette)$fileName,ext="png")
+    current_data$LearningEpaulette<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,ext="png"))
     current_data$LearningEpaulette_vert<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
     #copy files to working directory
     copyUpdatedFiles(fs::path(WD,

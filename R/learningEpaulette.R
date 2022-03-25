@@ -29,7 +29,7 @@ learningEpaulette<-function(heightScalar=1,epauletteHeight=0.2,randomSeed=101,sa
   # browser()
 
   #if WD supplied, append it to destFolder
-  if(!identical(WD,getwd())){destFolder<-paste0(WD,destFolder)}
+  if(!identical(WD,getwd())){destFolder<-fs::path(WD,destFolder)}
 
 
 # Standards exist?
