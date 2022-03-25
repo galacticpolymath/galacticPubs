@@ -15,7 +15,7 @@ batchCompile(
 )
 }
 \arguments{
-\item{current_data}{the reconciled data including yaml and input from the shiny app environment}
+\item{current_data}{the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml}
 
 \item{choices}{one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All"}
 
