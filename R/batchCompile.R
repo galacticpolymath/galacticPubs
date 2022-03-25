@@ -3,7 +3,7 @@
 #' Processes a subset of data chosen by user using the GP Shiny Editor
 #'
 #' Combines functionality of compileProcedure, compileStandards, compileAcknowledgements, compileJSON, etc.
-#' @param current_data the reconciled data including yaml and input from the shiny app environment
+#' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
 #' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All"
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
@@ -15,10 +15,13 @@
 #' @export
 #'
 batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd(),img_loc,clean=FALSE){
-    rebuild<-current_data$RebuildAllMaterials
+
+  if(is.null(current_data)){current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))}
+
+  rebuild<-current_data$RebuildAllMaterials
    #if WD supplied, append it to destFolder
    if(!identical(WD, getwd())) {
-     destFolder <- paste0(WD, destFolder)
+     destFolder <- fs::path(WD, destFolder)
    }
 
     #allow shorthand for compiling everything
@@ -32,7 +35,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
   # Standards alignment & learning plots -----------------------------------------------------
     # test if standards json is out of sync with the standards_GSheetsOnly.xlsx file
-    stnds_out_of_date<-!inSync(paste0(WD,"meta/json/standards.json"),paste0(WD,"meta/standards_GSheetsOnly.xlsx"))
+    stnds_out_of_date<-!inSync(fs::path(WD,"meta","json","standards.json"),fs::path(WD,"meta","standards_GSheetsOnly.xlsx"))
   if("Standards Alignment"%in% choices & (stnds_out_of_date | rebuild) ){
 
     alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)
@@ -49,8 +52,8 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #set learning chart filename from default file output on learningChart function
     #(since this file doesn't exist in yaml yet)
-    current_data$LearningChart<-paste0("assets/learning-plots/",formals(learningChart)$fileName,".png")
-    copyUpdatedFiles(paste0(WD,current_data$LearningChart),img_loc)
+    current_data$LearningChart<-fs::path("assets","learning-plots",formals(learningChart)$fileName,".png")
+    copyUpdatedFiles(fs::path(WD,current_data$LearningChart),img_loc)
 
     #export learning chart section
     lc<-list(
@@ -96,10 +99,10 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #set learning epaulette filename from default file output on learningEpaulette function
     #(since this file doesn't exist in yaml on first run)
-    current_data$LearningEpaulette<-paste0("assets/learning-plots/",formals(learningEpaulette)$fileName,".png")
-    current_data$LearningEpaulette_vert<-paste0("assets/learning-plots/",formals(learningEpaulette)$fileName,"_vert.png")
+    current_data$LearningEpaulette<-fs::path("assets","learning-plots",formals(learningEpaulette)$fileName,ext="png")
+    current_data$LearningEpaulette_vert<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
     #copy files to working directory
-    copyUpdatedFiles(paste0(WD,
+    copyUpdatedFiles(fs::path(WD,
       c(current_data$LearningEpaulette,
         current_data$LearningEpaulette_vert
       )
@@ -156,9 +159,9 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
          Description = current_data$Description %>% fixAnchorLinks() ) #allow smooth-scrolling to in-page references
 
     #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
-    mmExists<-file.exists(paste0(WD,"meta/JSON/multimedia.json"))
+    mmExists<-file.exists(fs::path(WD,"meta","JSON","multimedia.json"))
     if(mmExists){
-      mm<-jsonlite::read_json(paste0(WD,"meta/JSON/multimedia.json"),null="null")
+      mm<-jsonlite::read_json(fs::path(WD,"meta","JSON","multimedia.json"),null="null")
     }
 
     # Make lesson preview section
@@ -263,7 +266,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
   jsonNames<-c("header","overview","preview","teaching-materials","procedure","background","standards-header","learning-chart","standards","bonus","extensions","feedback","job-viz","credits","acknowledgments","versions")
   potentialFilenames<-paste0(jsonNames,".json")
   #test for missings or duplicates
-  json_ls<-list.files(paste0(WD,"meta/json"))
+  json_ls<-list.files(fs::path(WD,"meta","json"))
 
   matches<-data.frame(file=potentialFilenames,found=potentialFilenames%in%json_ls)
   format(matches,justify="none")
