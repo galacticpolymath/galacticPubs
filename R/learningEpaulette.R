@@ -70,7 +70,7 @@ subject_labels<-subset(xlabels,xlabels$x.prop>0) %>% ggplot2::ggplot()+
   ggrepel::geom_text_repel(ggplot2::aes_string(x="x",y=.2,label="lab",fontface="fontface",segment.size="stroke"),
                            seed=randomSeed,
                            family="Kanit",size=font_size,show.legend = FALSE,direction="y",col=gpColors("galactic black"),force=10,
-                           box.padding=0.5,point.padding=0.25)+
+                           box.padding=1.5,point.padding=0.25)+
   #scale y to pad text according to user input
   ggplot2::scale_y_continuous(limits=c(0,0.2),expand=ggplot2::expansion(c(0,0)))+
   ggplot2::scale_x_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0,0)))+
