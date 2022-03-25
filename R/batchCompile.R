@@ -25,7 +25,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
    }
 
     #allow shorthand for compiling everything
-    if(tolower(choices)=="all"){choices <- c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
+    if(tolower(choices)[1]=="all"){choices <- c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
 
     #quell Rcheck
     lumpItems<-whichRepo <- catalogURL <- expandMDLinks <- NULL
@@ -199,45 +199,53 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     # markdown links to supporting materials allowed
     # expandMDLinks takes relative links in [](x.jpg) format and makes a full path to GP catalog
     # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
-    background<-list(
-      `__component`="lesson-plan.collapsible-text-section",
-      SectionTitle= "Background",
-      Content= ifelse(
-        current_data$ConnectionToResearch == "",
-        current_data$Background,
-        paste("#### Connection to Research\n",current_data$ConnectionToResearch,
-          "\n#### Research Background\n",
-          current_data$Background
-        ))%>% expandMDLinks(repo=repo) %>% fixAnchorLinks() %>% parseGPmarkdown(WD=WD),#allow smooth-scrolling to in-page references and expand {vidLinks}
-      InitiallyExpanded=TRUE
-    )
+    # BACKGROUND
+    if (!is_empty(current_data$background)){
+    background <- list(`__component` = "lesson-plan.collapsible-text-section",
+      SectionTitle = "Background", Content = ifelse(current_data$ConnectionToResearch ==
+        "", current_data$Background, paste("#### Connection to Research\n",
+        current_data$ConnectionToResearch, "\n#### Research Background\n",
+        current_data$Background)) %>% expandMDLinks(repo = repo) %>%
+        fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
+      InitiallyExpanded = TRUE)
 
-
-    # markdown links to supporting materials allowed
-     feedback<-list(
-      `__component`="lesson-plan.collapsible-text-section",
-      SectionTitle= "Feedback",
-      Content= expandMDLinks(current_data$Feedback,repo)%>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
-      InitiallyExpanded=TRUE
-    )
-      # markdown links to supporting materials allowed
-
-     credits<-list(
-      `__component`="lesson-plan.collapsible-text-section",
-      SectionTitle= "Credits",
-      Content= expandMDLinks(current_data$Credits,repo)%>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
-      InitiallyExpanded=TRUE
-    )
-
-
-    # Write all non-optional lesson pieces
-    jsonlite::write_json(header,path = fs::path(destFolder,"header",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
-    jsonlite::write_json(overview,path = fs::path(destFolder,"overview",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
-    jsonlite::write_json(preview,path = fs::path(destFolder,"preview",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
-    jsonlite::write_json(background,path = fs::path(destFolder,"background",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
-    jsonlite::write_json(feedback,path = fs::path(destFolder,"feedback",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
-    jsonlite::write_json(credits,path = fs::path(destFolder,"credits",ext = "json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+    jsonlite::write_json(background, path = fs::path(destFolder,
+      "background", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
+      na = "null", null = "null")
     }
+
+    # FEEDBACK
+    if (!is_empty(current_data$feedback)){
+    feedback <- list(`__component` = "lesson-plan.collapsible-text-section",
+      SectionTitle = "Feedback", Content = expandMDLinks(current_data$Feedback,
+        repo) %>% fixAnchorLinks(), InitiallyExpanded = TRUE)
+
+        jsonlite::write_json(feedback, path = fs::path(destFolder,
+      "feedback", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
+      na = "null", null = "null")
+    }
+
+    #CREDITS
+    if (!is_empty(current_data$Extensions)){
+    credits <- list(`__component` = "lesson-plan.collapsible-text-section",
+      SectionTitle = "Credits", Content = expandMDLinks(current_data$Credits,
+        repo) %>% fixAnchorLinks(), InitiallyExpanded = TRUE)
+
+    jsonlite::write_json(credits, path = fs::path(destFolder,
+      "credits", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
+      na = "null", null = "null")
+    }
+
+    jsonlite::write_json(header, path = fs::path(destFolder,
+      "header", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
+      na = "null", null = "null")
+    jsonlite::write_json(overview, path = fs::path(destFolder,
+      "overview", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
+      na = "null", null = "null")
+    jsonlite::write_json(preview, path = fs::path(destFolder,
+      "preview", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
+      na = "null", null = "null")
+  }
 
 
 
