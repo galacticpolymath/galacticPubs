@@ -426,51 +426,7 @@ server <- function(input, output,session) {
             selected = isolate(vals$current_data$ReadyToCompile)
           ),
           actionButton("compile", "Save & Compile Materials", class = "compile-button")
-        ),
-
-        # checkboxGroupInput(
-        #   "LearningEpaulette",
-        #   label = "Horizontal LearningEpaulette (for large displays)",
-        #   choices = matching_files(rel_path = "assets/learning-plots/",
-        #                            pattern = "^(?!_vert).*?[Ee]paulet[^_]*$",
-        #                            WD),
-        #   selected = isolate({
-        #     if (vals$current_data$LearningEpaulette[1] == "") {
-        #       NULL
-        #     } else{
-        #       vals$current_data$LearningEpaulette
-        #     }
-        #   })
-        # ),
-        # checkboxGroupInput(
-        #   "LearningEpaulette_vert",
-        #   label = "Vertical LearningEpaulette (for mobile)",
-        #   choices = matching_files(rel_path = "assets/learning-plots/",
-        #                            pattern = "^.*_vert",
-        #                            WD),
-        #   selected = isolate({
-        #     if (vals$current_data$LearningEpaulette_vert == "") {
-        #       NULL
-        #     } else{
-        #       vals$current_data$LearningEpaulette_vert
-        #     }
-        #   })
-        # ),
-        # checkboxGroupInput(
-        #   "LearningChart",
-        #   "Learning Chart (Shows much lower on Preview page, with Standards)",
-        #   choices = matching_files(
-        #     "assets/learning-plots",
-        #     "^.*[cC]hart.*\\.[png|PNG|jpeg|jpg]",
-        #     WD
-        #   ),
-        #   selected = isolate({
-        #     if (vals$current_data$LearningChart == "") {
-        #       NULL
-        #     } else{
-        #       vals$current_data$LearningChart
-        #     }
-        #   }))
+        )
         ),  #end left pane
 
 

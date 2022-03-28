@@ -99,7 +99,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
 
     #set learning epaulette filename from default file output on learningEpaulette function
     #(since this file doesn't exist in yaml on first run)
-    current_data$LearningEpaulette<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,ext="png"))
+    current_data$LearningEpaulette<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,".png"))
     current_data$LearningEpaulette_vert<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
     #copy files to working directory
     copyUpdatedFiles(fs::path(WD,
