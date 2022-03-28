@@ -538,7 +538,7 @@ server <- function(input, output,session) {
     } ) %>% bindEvent(input$compile)
 
 
-  #Update Epaulette Previews
+  #Update Epaulette Previews if remake button pushed
   observe({
     output$epaulette_fig <- renderImage({
       isolate({
@@ -550,6 +550,9 @@ server <- function(input, output,session) {
           randomSeed = (input$LearningEpaulette_params_randomSeed)
         )
       })
+      #update filenames
+      vals$current_data$LearningEpaulette<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,".png"))
+      vals$current_data$LearningEpaulette_vert<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
 
       #copy image to www folder
       isolate({
