@@ -549,10 +549,11 @@ server <- function(input, output,session) {
           heightScalar = (input$LearningEpaulette_params_heightScalar),
           randomSeed = (input$LearningEpaulette_params_randomSeed)
         )
-      })
       #update filenames
       vals$current_data$LearningEpaulette<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,".png"))
       vals$current_data$LearningEpaulette_vert<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
+      })
+
 
       #copy image to www folder
       isolate({
