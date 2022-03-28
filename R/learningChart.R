@@ -58,7 +58,8 @@ if(!standardsFound){warning("Compiled Standards not found at: ",standardsFile)
 
 
 if(captionN){
-  avgN<-table(compiledAlignment$compiled$gradeBand) %>% floor(mean(na.rm=T))
+
+  avgN<-table(compiledAlignment$compiled$gradeBand) %>% as.vector() %>% mean(na.rm=T) %>% floor()
   caption <- paste0(caption," (~",avgN," standards per grade band)")
   }
 
