@@ -4,72 +4,70 @@
 #'
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/processedProcedure.json
 #' @importFrom rlang .data
 #' @export
 #'
-compileJSON <- function(destFolder="meta/JSON/" ,outputFileName="LESSON.json"){
+compileJSON <- function(outputFileName="LESSON.json",WD=getwd()){
 
-# import other JSONs ----------------------------------------------
-# -meta/acknowledgments.json
-# -meta/procedure.json
-# -meta/standards_*.json
-# -meta/teachingMaterials.json
-# -meta/versions.json
-  jsonNames<-c("teachingMaterials","procedure","standards","acknowledgments","versions")
-  jsonFilenames<-paste0(jsonNames,".json")
+  destFolder=fs::path(WD,"meta","JSON")
+
+  #   jsonNames should be ordered; this is telling which json files to look for and assemble them in this order
+  jsonNames<-c("header","overview","preview","teaching-materials","procedure","background","standards-header","learning-chart","standards","bonus","extensions","feedback","job-viz","credits","acknowledgments","versions")
+
+  potentialFilenames<-paste0(jsonNames,".json")
+
   #test for missings or duplicates
-  json_ls<-list.files("meta/json")
-  matches<-data.frame(file=json_ls,match=sapply(substr(json_ls,1,7),function(x){jsonNames[pmatch(x,jsonNames)]}),row.names=NULL)
-  message("\n *",length(json_ls)," JSON files found: \n   -",paste(json_ls,collapse="\n   -"),"\n")
-  #count up how many JSONs found for each expected filename
-  jsonNameMatchCounts<-sapply(jsonNames,function(x) sum(x==matches$match,na.rm=T))
-  #test if there's 1 of each expected json in the meta/json folder. Stop with message if not.
-  if(sum(jsonNameMatchCounts)>length(jsonNames)){
-    dupedJSON_abbrev<-substr(names(jsonNameMatchCounts)[which(jsonNameMatchCounts>1)],1,7)
-    dupedFilenames<-json_ls[which(substr(json_ls,1,7)%in%dupedJSON_abbrev)] %>% stats::na.omit() %>% as.character()
+  json_ls<-list.files(destFolder)
 
-    stop("   You can only have 1 JSON per category. \n\t  Delete one of each category:\n\t  -",
-         paste(dupedFilenames,collapse="\n\t  -"))
-  }else{
-           if(sum(jsonNameMatchCounts)<length(jsonNames)){
-             missingJSON<-paste0(names(jsonNameMatchCounts)[which(jsonNameMatchCounts<1)],".json")
-             stop("\n\tYou're missing:\n\t -",paste(missingJSON,collapse="\n\t -"),"\n")
-           }else{
-          lesson<-list()
-          filenamez.df<-matches %>% dplyr::filter(stats::complete.cases(.data$match))
-          #sort to have desired order (specified in jsonNames)
-          filenamez.df<-filenamez.df[match(filenamez.df$match,jsonNames),]
-          filenamez<-filenamez.df%>% dplyr::select("file") %>% unlist()
+  matches<-data.frame(file=potentialFilenames,found=potentialFilenames%in%json_ls)
+  format(matches,justify="none")
+  #point out missing sections
+  if (sum(matches$found) < length(jsonNames)) {
+    missingJSON <- subset(matches, !matches$found)$file
+    warning("\n\tFYI, you're missing:\n\t -",
+            paste(missingJSON, collapse = "\n\t -"),
+            "\n")
+  }
+
+  filenamez.df<-subset(matches,matches$found)
+
+  #read in all the json pieces
+  lesson_data<-lapply(filenamez.df$file,function(x){
+    jsonlite::read_json(fs::path(destFolder,x),na="null",null="null")
+  })
+  names(lesson_data)<-gsub("^(.*)\\..*","\\1", filenamez.df$file) #removes file extension
 
 
-          lesson<-lapply(filenamez,function(x){
-                  jsonlite::read_json(fs::path("meta/json/",x))
-                  })
-          names(lesson)<-filenamez.df$match
-          message("\n *JSON files imported:\n  -",paste(filenamez,collapse="\n  -"),"\n")
-          }
+  #body of the lesson plan (minus header)
+  lesson_body<-list(lapply(2:length(lesson_data),function(x){lesson_data[[x]]}))
 
-    }
+  names(lesson_body[[1]]) <- names(lesson_data)[-1]
 
-# create directory if necessary & prep output filename --------------------
-dir.create(destFolder,showWarnings=FALSE,recursive=T)
-outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(outputFileName))),ext="json")
+  #reorganize slightly to match legacy structure
+  lesson<-c(lesson_data[["header"]],
+               Section = lesson_body,
+               CoverImage = lesson_data[["images"]]$CoverImage,
+               SponsorImage = lesson_data[["images"]]$SponsorImage
+              )
 
 
-# Write JSON for GP Simple Lesson Plan -----------------------------------
-compiled_json<-jsonlite::toJSON(lesson,pretty=TRUE,auto_unbox = TRUE)
-con<-file(outFile)
-writeLines(compiled_json,con)
-close(con)
+  # create directory if necessary & prep output filename --------------------
+  dir.create(destFolder,showWarnings=FALSE,recursive=T)
+  outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(outputFileName))),ext="json")
 
-# printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
 
-# return compiled output --------------------------------------------------
-message(" ",rep("-",30),"\n Lesson successfully compiled:")
-# print(printToScreenTable)
-message("\n JSON file saved\n @ ",outFile,"\n")
-message(" ",rep("-",30))
+  # Write JSON for GP Simple Lesson Plan -----------------------------------
+  jsonlite::write_json(lesson,outFile,pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+
+  # printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
+
+  # return compiled output --------------------------------------------------
+  message(" ",rep("-",30),"\n Lesson successfully compiled:")
+  # print(printToScreenTable)
+  message("\n Combined JSON file saved\n @ ",outFile,"\n")
+  message(" ",rep("-",30))
 
 
 }
