@@ -8,10 +8,16 @@
 #' @param clear do you want to delete everything in the target directory? default: T
 #' @export
 
-stageAssets <- function(current_data, WD=getwd(), dest_folder=NULL,clear=TRUE){
+stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TRUE){
  .=NULL
- #this defaults to wd if not specified b/c of app.R interface's weird path scoping
- if(is.null(dest_folder)){dest_folder<-fs::path(getwd(),"www")}
+
+  meta_path<-fs::path(WD,"meta")
+ if(is.null(current_data)){
+    # I need to edit both of these files to update First Publication status, etc.
+    current_data<-safe_read_yaml(fs::path(meta_path,"front-matter.yml"))
+ }
+ #this defaults to published
+ if(is.null(dest_folder)){dest_folder<-fs::path(WD,"published")}
 
   #copy images over to dest_folder folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningEpaulette_vert","LearningChart","SupportingMedia")
@@ -27,6 +33,11 @@ stageAssets <- function(current_data, WD=getwd(), dest_folder=NULL,clear=TRUE){
 
     flz<-items2copy_filenames$path
     names(flz)<-items2copy_filenames$category
+    #add on lesson.json file path if going to published directory
+    if(grepl("published",dest_folder)){
+      flz<-c(flz, fs::path(meta_path,"JSON","LESSON.json"))
+      names(flz)[length(flz)]<-"LESSON.json"
+      }
 
     # clear target directory and copy updated files
     ec<-tryCatch(copyUpdatedFiles(flz,dest_folder,clear=clear),error=function(e){e})

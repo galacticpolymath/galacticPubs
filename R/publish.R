@@ -16,36 +16,42 @@ publish<- function(commit_msg=NULL,WD=getwd()){
 
     published_path<-fs::path(WD,"published")
     meta_path<-fs::path(WD,"meta")
+
+    # I need to edit both of these files to update First Publication status, etc.
     current_data<-safe_read_yaml(fs::path(meta_path,"front-matter.yml"))
+    lesson<-jsonlite::read_json(fs::path(published_path,"LESSON.json"),null="null")
 
     #update publication dates, etc
     #FirstPublicationDate is set upon first publishing; only changed manually after that
     #Same for id (based on how many lessons currently in catalog)
-    if(current_data$FirstPublicationDate==""){
-      current_data$FirstPublicationDate<-as.character(Sys.time())
+    time_stamp<-as.character(Sys.time())
+
+    if(is_empty(current_data$FirstPublicationDate)){
+      current_data$FirstPublicationDate<-time_stamp
+      lesson$FirstPublicationDate<-time_stamp
     }
 
+    # Assign new id based on what should come next in the catalog
     if(current_data$id==""){
       #count how many lessons there are currently on gp-catalog
       current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
-
-      current_data$id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
+      next_id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
+      current_data$id<-next_id
+      lesson$id<-next_id
       message("Lesson ID assigned: ",current_data$id)
 
     }
 
-    if(is_empty(current_data$FirstPublicationDate)){
-      current_data$FirstPublicationDate<-as.character(Sys.time())
-    }
-
     #always update LastUpdated timestamp
-    current_data$LastUpdated<-as.character(Sys.time())
-    current_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
+    current_data$LastUpdated<-time_stamp
+    lesson$LastUpdated<-time_stamp
+    current_data$galacticPubsVer<-as.character
+    lesson$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
     #Save time stamp changes
     yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
 
     #rewrite it before pushing to cloud
-    jsonlite::write_json(current_data,fs::path(published_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+    jsonlite::write_json(lesson,fs::path(published_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
 
 
     #############
