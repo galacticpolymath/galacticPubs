@@ -172,7 +172,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
       QuickPrep= current_data$QuickPrep %>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
       InitiallyExpanded=TRUE
     )
-
+    browser()
     #BONUS (optional section)
     # markdown links to supporting materials allowed
     if(!is_empty(current_data$Bonus)){
@@ -200,7 +200,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     # expandMDLinks takes relative links in [](x.jpg) format and makes a full path to GP catalog
     # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
     # BACKGROUND
-    if (!is_empty(current_data$background)){
+    if (!is_empty(current_data$Background)){
     background <- list(`__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Background", Content = ifelse(current_data$ConnectionToResearch ==
         "", current_data$Background, paste("#### Connection to Research\n",

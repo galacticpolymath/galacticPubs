@@ -332,7 +332,7 @@ YTembed<-function(link){
   #if byLink is blank, but by is galactic polymath, add our Youtube channel
   m$byLink <- ifelse(is.na(m$byLink)&!is.na(m$by),"https://www.youtube.com/channel/UCfyBNvN3CH4uWmwOCQVhmhg/featured",m$byLink)
 
-multimedia<-lapply(1:nrow(linksMedia),function(i){
+multimedia<-lapply(1:nrow(m),function(i){
   d<-m[i,]
   list(order=d$order,
     type=d$type,
