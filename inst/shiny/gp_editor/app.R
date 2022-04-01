@@ -723,57 +723,28 @@ output$supporting_media<-renderUI({
   observe({
 
     #Reconcile input and yaml saved data before finalizing
-    current_data<-prep_input(input,yaml_path)$current_data
-    stageAssets(current_data,WD,img_loc,clear=TRUE)
+    current_data<-prep_input(input,yaml_path, vals$current_data)$current_data
+    #this copies images to www folder
 
-    #files from www folder used to generate preview (or other files dumped there like Supporting Media (at Preview stage))
-    #Should really make a function that checks time stamps and existence of files on a manifest
-    www_file_paths<-list.files(fs::path(getwd(),"/www"),pattern="^.*\\..*",full.names = TRUE)
-    if(length(www_file_paths)==0){www_file_paths<-{}}
-    lesson_file_path<-fs::path(WD,"meta/json/LESSON.json")
-    if(!file.exists(lesson_file_path)){
-      warning("Lesson File Not Found! (Compile first)!\n - ",lesson_file_path)
-      lesson_file_path<-{}
-    }
-    #update publication dates, etc
-    #FirstPublicationDate is set upon first publishing; only changed manually after that
-    #Same for id (based on how many lessons currently in catalog)
-    if(current_data$FirstPublicationDate==""){
-      current_data$FirstPublicationDate<-as.character(Sys.time())
-    }
 
-    if(current_data$id==""){
-      #count how many lessons there are currently on gp-catalog
-      current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
+    # #files from www folder used to generate preview (or other files dumped there like Supporting Media (at Preview stage))
+    # #Should really make a function that checks time stamps and existence of files on a manifest
+    # www_file_paths<-list.files(fs::path(getwd(),"www"),pattern="^.*\\..*",full.names = TRUE)
+    # if(length(www_file_paths)==0){www_file_paths<-{}}
+    # lesson_file_path<-fs::path(WD,"meta/json/LESSON.json")
+    # if(!file.exists(lesson_file_path)){
+    #   warning("Lesson File Not Found! (Compile first)!\n - ",lesson_file_path)
+    #   lesson_file_path<-{}
+    # }
 
-      current_data$id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
-      message("Lesson ID assigned: ",current_data$id)
-
-    }
-    #always update LastUpdated timestamp
-    current_data$LastUpdated<-as.character(Sys.time())
-    current_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
-
-    #Save time stamp changes
-    yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
-
-    #Read lesson back in to edit timestamps
-    lesson<-jsonlite::read_json(path = lesson_file_path,null="null")
-    lesson$FirstPublicationDate<-current_data$FirstPublicationDate
-    lesson$LastUpdated<-current_data$LastUpdated
-    lesson$galacticPubsVer<-current_data$galacticPubsVer
-
-    #rewrite it before staging it in `published/`
-    jsonlite::write_json(lesson,lesson_file_path,pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
-    files2copy<-c(www_file_paths,lesson_file_path)
-    destFolder<-fs::path(WD,"published")
-    dir.create(destFolder,showWarnings = FALSE)
-    #delete existing published contents
-    unlink(list.files(destFolder,full.names = TRUE))
-    #replace w/ new files
-    ec<-tryCatch(fs::file_copy(files2copy,destFolder),error=function(e){e})
+    # files2copy<-c(www_file_paths,lesson_file_path)
+    # destFolder<-fs::path(WD,"published")
+    # dir.create(destFolder,showWarnings = FALSE)
+    # #delete existing published contents
+    # unlink(list.files(destFolder,full.names = TRUE))
+    # #replace w/ new files
+    ec<-stageAssets(current_data,WD,destFolder<-fs::path(WD,"published"),clear=TRUE)
     if(!"error"%in%class(ec)){
-      message("Files successfully staged:\n -",paste(files2copy,collapse="\n -"))
       output$stageStatus<-renderText({"\u2713 Success"})
       vals$staged <- TRUE
     }else{

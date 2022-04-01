@@ -8,9 +8,47 @@
 #' @export
 
 publish<- function(WD=getwd(),commit_msg=NULL){
+
+
   #test that WD is in the root directory with the R Project
   if(list.files(WD,pattern="\\.Rproj") %>% length() ==1){
     wdpath<-paste0("'",fs::as_fs_path((WD)),"'")
+
+    published_path<-fs::path(WD,"published")
+    meta_path<-fs::path(WD,"meta")
+    current_data<-safe_read_yaml(fs::path(meta_path,"front-matter.yml"))
+
+    #update publication dates, etc
+    #FirstPublicationDate is set upon first publishing; only changed manually after that
+    #Same for id (based on how many lessons currently in catalog)
+    if(current_data$FirstPublicationDate==""){
+      current_data$FirstPublicationDate<-as.character(Sys.time())
+    }
+
+    if(current_data$id==""){
+      #count how many lessons there are currently on gp-catalog
+      current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
+
+      current_data$id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
+      current_data$FirstPublicationDate<-current_data$FirstPublicationDate
+      message("Lesson ID assigned: ",current_data$id)
+
+    }
+
+    #always update LastUpdated timestamp
+    current_data$LastUpdated<-as.character(Sys.time())
+    current_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
+    #Save time stamp changes
+    yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
+
+    #rewrite it before pushing to cloud
+    jsonlite::write_json(current_data,fs::path(published_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+
+
+    #############
+    # push to GitHub
+    #
+
     if(!is.null(commit_msg)){
       commit_msg<-paste("\n",commit_msg)
     }
@@ -28,9 +66,12 @@ publish<- function(WD=getwd(),commit_msg=NULL){
     success_test<-grepl("nothing to commit",status) %>% sum()==1
 
     dplyr::tibble(repo=basename(WD),check="pass",success=success_test,path=WD)
+
+  ###############
+  # Throw warning if WD doesn't look right (and don't do anything else)
   }else{
     warning("WD does not point to the root project folder where the .Rproj file is")
-    out<-dplyr::tibble(repo=basename(WD),check="FAIL",success=FALSE,path=WD)
-    return(out)
+    dplyr::tibble(repo=basename(WD),check="FAIL",success=FALSE,path=WD)
+
   }
 }

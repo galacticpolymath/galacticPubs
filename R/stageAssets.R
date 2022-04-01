@@ -4,13 +4,16 @@
 #'
 #' @param current_data either data read in from front-matter.yml or made with the Shiny helper function prep_input()
 #' @param WD what's the project working directory? default: getwd()
-#' @param img_loc where you want things to go
-#' @param clear do you want to delete everything in the target directory? default: F
+#' @param dest_folder where you want things to go (defaults to www)
+#' @param clear do you want to delete everything in the target directory? default: T
 #' @export
 
-stageAssets <- function(current_data, WD=getwd(), img_loc=fs::path(getwd(),"www"),clear=FALSE){
+stageAssets <- function(current_data, WD=getwd(), dest_folder=NULL,clear=TRUE){
  .=NULL
-  #copy images over to www folder for previewing
+ #this defaults to wd if not specified b/c of app.R interface's weird path scoping
+ if(is.null(dest_folder)){dest_folder<-fs::path(getwd(),"www")}
+
+  #copy images over to dest_folder folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningEpaulette_vert","LearningChart","SupportingMedia")
     #read in filenames; if empty, return empty; else add WD to create full path
     items2copy_filenames<-lapply(1:length(items2copy), function(i) {
@@ -26,6 +29,8 @@ stageAssets <- function(current_data, WD=getwd(), img_loc=fs::path(getwd(),"www"
     names(flz)<-items2copy_filenames$category
 
     # clear target directory and copy updated files
-    copyUpdatedFiles(flz,img_loc,clear=TRUE)
+    ec<-tryCatch(copyUpdatedFiles(flz,dest_folder,clear=clear),error=function(e){e})
+
+    ec
 
 }

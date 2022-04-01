@@ -4,21 +4,16 @@
 \alias{stageAssets}
 \title{stageAssets}
 \usage{
-stageAssets(
-  current_data,
-  WD = getwd(),
-  img_loc = fs::path(getwd(), "www"),
-  clear = FALSE
-)
+stageAssets(current_data, WD = getwd(), dest_folder = NULL, clear = TRUE)
 }
 \arguments{
 \item{current_data}{either data read in from front-matter.yml or made with the Shiny helper function prep_input()}
 
 \item{WD}{what's the project working directory? default: getwd()}
 
-\item{img_loc}{where you want things to go}
+\item{dest_folder}{where you want things to go (defaults to www)}
 
-\item{clear}{do you want to delete everything in the target directory? default: F}
+\item{clear}{do you want to delete everything in the target directory? default: T}
 }
 \description{
 Copy all lesson assets to the desired location to prep for lesson publishing
