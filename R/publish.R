@@ -2,12 +2,12 @@
 #'
 #' Commit all files and push to Github, which will automatically publish to catalog.galacticpolymath.com and update the lesson on galacticpolymath.com (if it is current and set to PublicationStatus: "Live")
 #'
-#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param commit_msg What do you want to say about this update? Default= "automated galacticPubs::publish()"
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #'
 #' @export
 
-publish<- function(WD=getwd(),commit_msg=NULL){
+publish<- function(commit_msg=NULL,WD=getwd()){
 
 
   #test that WD is in the root directory with the R Project
@@ -30,9 +30,12 @@ publish<- function(WD=getwd(),commit_msg=NULL){
       current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
 
       current_data$id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
-      current_data$FirstPublicationDate<-current_data$FirstPublicationDate
       message("Lesson ID assigned: ",current_data$id)
 
+    }
+
+    if(is_empty(current_data$FirstPublicationDate)){
+      current_data$FirstPublicationDate<-as.character(Sys.time())
     }
 
     #always update LastUpdated timestamp
