@@ -159,20 +159,7 @@ ui <- navbarPage(
         p("Files found in ./assets/supporting-media/. They'll be copied to ./published/ upon Preview and can be referenced in markdown text."),
         p("  Ex: insert image with ![alt text](filename.png) in any text input section."),
 
-      checkboxGroupInput(
-        "SupportingMedia",
-        "Supporting Media Files to be Published",
-        choiceValues =
-          fs::path_rel(list.files(fs::path(WD, "assets/supporting-media/"),
-                     pattern = "[^help.txt]",full.names=TRUE),WD),
-        choiceNames = basename(list.files(
-          fs::path(WD, "assets/supporting-media/"),
-          pattern = "[^help.txt]"
-        )),
-        selected = y$SupportingMedia
-      ),
-        tableOutput("supportingMediaFiles"),
-
+      htmlOutput("supporting_media"),
 
         hr(class="blhr"),
         h3("But wait, there's more!"),
@@ -276,8 +263,9 @@ server <- function(input, output,session) {
     #don't run until full page rendered
     if(!is.null(input$DrivingQ)){
 
-    data_check<-prep_input(isolate(input),yaml_path)
+    data_check<-prep_input(isolate(input),yaml_path,existing_current_data=vals$current_data)
     vals$current_data<-data_check$current_data
+    vals$saved_data<-data_check$saved_data
 
     outOfDate<-if(!identical(length(data_check[[1]]), length(data_check[[2]]))) {
       1000
@@ -346,11 +334,7 @@ server <- function(input, output,session) {
   # Save YAML when button clicked -------------------------------------------
   observe({
     isolate({
-      data_check <- prep_input(input, yaml_path)
-      vals$current_data <- data_check$current_data
-      template_upgraded <-
-        data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
-
+      template_upgraded <-vals$current_data$TemplateVer > vals$saved_data$TemplateVer
       # if template upgraded, trigger rebuild of all materials in batchCompile.R
       if (template_upgraded) {
         vals$current_data$RebuildAllMaterials <- TRUE
@@ -371,12 +355,23 @@ server <- function(input, output,session) {
 
   #####################################
   # 1. Edit/Prepare stuff
+output$supporting_media<-renderUI({
+  #add to reactive values so renderTable can read this in next section
+  # ignore help.txt with negative lookbehind regular expression
+  tmp<-grep(".*(?<!help.txt)$",fs::dir_ls(fs::path(WD, "assets","supporting-media")),perl=TRUE,value=TRUE)
+  vals$SM_full_paths<-tmp
+  vals$current_data$SupportingMedia<-fs::path_rel(tmp,WD)
+  tagList({
+    tableOutput("supportingMediaFiles")
+  })
+})
 
+# Render supporting media files table for above UI section
   output$supportingMediaFiles<-renderTable({
-    f<-list.files(fs::path(WD,"assets/supporting-media"),pattern = "[^help.txt]",full.names = TRUE)
-    if(length(f)==0){return(data.frame(file="No files found at assets/supporting-media"))
+    filez<-vals$SM_full_paths
+    if(length(filez)==0){return(data.frame(file="No files found at assets/supporting-media"))
     }else{
-    info<-file.info(f)
+    info<-file.info(filez)
     fn<-basename(rownames(info))
     info_table<-dplyr::tibble(file=fn,type=RCurl::guessMIMEType(fn),size_MB=sprintf("%.1f", info$size/1e6)) %>% dplyr::arrange(.data$type,.data$file)
     info_table
