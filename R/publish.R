@@ -45,7 +45,7 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     #always update LastUpdated timestamp
     saved_data$LastUpdated<-time_stamp
     lesson$LastUpdated<-time_stamp
-    saved_data$galacticPubsVer<-as.character
+    saved_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
     lesson$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
     #Save time stamp changes
     yaml::write_yaml(saved_data, fs::path(meta_path,"front-matter.yml"))

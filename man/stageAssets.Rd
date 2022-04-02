@@ -4,7 +4,12 @@
 \alias{stageAssets}
 \title{stageAssets}
 \usage{
-stageAssets(current_data, WD = getwd(), dest_folder = NULL, clear = TRUE)
+stageAssets(
+  current_data = NULL,
+  WD = getwd(),
+  dest_folder = NULL,
+  clear = TRUE
+)
 }
 \arguments{
 \item{current_data}{either data read in from front-matter.yml or made with the Shiny helper function prep_input()}

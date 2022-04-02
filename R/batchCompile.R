@@ -14,15 +14,13 @@
 #' @importFrom rlang .data
 #' @export
 #'
-batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="meta/JSON/" ,outputFileName="LESSON.json",WD=getwd(),img_loc,clean=FALSE){
+batchCompile <- function(current_data, choices=c("Front Matter"),destFolder ,outputFileName="LESSON.json",WD=getwd(),img_loc,clean=FALSE){
 
-  if(is.null(current_data)){current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))}
+  if(missing(current_data)){current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))}
+  if(missing(destFolder)){destFolder<-fs::path(WD,"meta","JSON")}
 
   rebuild<-current_data$RebuildAllMaterials
-   #if WD supplied, append it to destFolder
-   if(!identical(WD, getwd())) {
-     destFolder <- fs::path(WD, destFolder)
-   }
+
 
     #allow shorthand for compiling everything
     if(tolower(choices)[1]=="all"){choices <- c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
@@ -53,7 +51,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     #set learning chart filename from default file output on learningChart function
     #(since this file doesn't exist in yaml yet)
     current_data$LearningChart<-fs::path("assets","learning-plots",paste0(formals(learningChart)$fileName,".png"))
-    copyUpdatedFiles(fs::path(WD,current_data$LearningChart),img_loc)
+    # copyUpdatedFiles(fs::path(WD,current_data$LearningChart),img_loc)
 
     #export learning chart section
     lc<-list(
@@ -102,11 +100,11 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     current_data$LearningEpaulette<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,".png"))
     current_data$LearningEpaulette_vert<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
     #copy files to working directory
-    copyUpdatedFiles(fs::path(WD,
-      c(current_data$LearningEpaulette,
-        current_data$LearningEpaulette_vert
-      )
-    ), img_loc)
+    # copyUpdatedFiles(fs::path(WD,
+    #   c(current_data$LearningEpaulette,
+    #     current_data$LearningEpaulette_vert
+    #   )
+    # ), img_loc)
   }
 
   if("Teaching Materials" %in% choices){
@@ -162,6 +160,17 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder="met
     mmExists<-file.exists(fs::path(WD,"meta","JSON","multimedia.json"))
     if(mmExists){
       mm<-jsonlite::read_json(fs::path(WD,"meta","JSON","multimedia.json"),null="null")
+      #process multimedia entries a little bit
+      mm<-lapply(1:length(mm),function(i){
+        #change pdf file gdrive endings from view? to preview
+        li<-mm[[i]]
+        #ensure that type is always lowercase
+        li$type<-tolower(li$type)
+        if(li$type=="pdf"){
+          li$mainLink<-gsub("/view?.*$","/preview",li$mainLink)
+        }
+        li
+      })
     }
 
     # Make lesson preview section

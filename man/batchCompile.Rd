@@ -7,7 +7,7 @@
 batchCompile(
   current_data,
   choices = c("Front Matter"),
-  destFolder = "meta/JSON/",
+  destFolder,
   outputFileName = "LESSON.json",
   WD = getwd(),
   img_loc,
