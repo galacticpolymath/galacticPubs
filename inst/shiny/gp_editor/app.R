@@ -743,7 +743,7 @@ output$supporting_media<-renderUI({
     # #delete existing published contents
     # unlink(list.files(destFolder,full.names = TRUE))
     # #replace w/ new files
-    ec<-stageAssets(current_data,WD,destFolder<-fs::path(WD,"published"),clear=TRUE)
+    ec<-stageAssets(current_data,WD,destFolder<-fs::path(WD,"published"),clear=TRUE,status = input$PublicationStatus)
     if(!"error"%in%class(ec)){
       output$stageStatus<-renderText({"\u2713 Success"})
       vals$staged <- TRUE

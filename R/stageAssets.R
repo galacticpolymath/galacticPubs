@@ -6,9 +6,10 @@
 #' @param WD what's the project working directory? default: getwd()
 #' @param dest_folder where you want things to go (defaults to www)
 #' @param clear do you want to delete everything in the target directory? default: T
+#' @param status if staging assets for publishing, you can toggle "Draft" or "Live"; default=NULL
 #' @export
 
-stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TRUE){
+stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TRUE, status=NULL){
  .=NULL
 
   meta_path<-fs::path(WD,"meta")
@@ -18,6 +19,12 @@ stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TR
  }
  #this defaults to published
  if(is.null(dest_folder)){dest_folder<-fs::path(WD,"published")}
+
+ if(!is.null(status)){
+   #allow short and variable versions of live and draft
+   stat<-tolower(substr(status,1,1))
+   status<-switch(stat,l="Live",d="Draft",NA)
+ }
 
   #copy images over to dest_folder folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningEpaulette_vert","LearningChart","SupportingMedia")
@@ -35,8 +42,22 @@ stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TR
     names(flz)<-items2copy_filenames$category
     #add on lesson.json file path if going to published directory
     if(grepl("published",dest_folder)){
-      flz<-c(flz, fs::path(meta_path,"JSON","LESSON.json"))
+      lesson_path<-fs::path(meta_path,"JSON","LESSON.json")
+      flz<-c(flz, lesson_path)
       names(flz)[length(flz)]<-"LESSON.json"
+
+      #if status provided, update yaml and json and save
+      if(!is.null(status)){
+        if(is.na(status)){
+          warning("status must be 'Live', 'Draft' or NULL")
+        }else{
+          current_data$PublicationStatus<-status
+          yaml::write_yaml(current_data,fs::path(meta_path,"front-matter.yml"))
+          lesson_tmp<-jsonlite::read_json(lesson_path,null="null")
+          lesson_tmp$PublicationStatus<-status
+          jsonlite::write_json(lesson_tmp,lesson_path,pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+        }
+      }
       }
 
     # clear target directory and copy updated files
