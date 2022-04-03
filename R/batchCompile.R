@@ -10,16 +10,19 @@
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param img_loc where files are being stored (www folder)
 #' @param clean delete all JSON files in meta/ and start over? default=FALSE
+#' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
 #' @return a JSON is saved to meta/JSON/LESSON.json
 #' @importFrom rlang .data
 #' @export
 #'
-batchCompile <- function(current_data, choices=c("Front Matter"),destFolder ,outputFileName="LESSON.json",WD=getwd(),img_loc,clean=FALSE){
+batchCompile <- function(current_data, choices=c("Front Matter"),destFolder ,outputFileName="LESSON.json",WD=getwd(),img_loc,clean=FALSE,rebuild=NULL){
 
   if(missing(current_data)){current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))}
   if(missing(destFolder)){destFolder<-fs::path(WD,"meta","JSON")}
 
+  if(is.null(rebuild)){
   rebuild<-current_data$RebuildAllMaterials
+  }
 
 
     #allow shorthand for compiling everything

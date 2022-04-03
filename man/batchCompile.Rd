@@ -11,7 +11,8 @@ batchCompile(
   outputFileName = "LESSON.json",
   WD = getwd(),
   img_loc,
-  clean = FALSE
+  clean = FALSE,
+  rebuild = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ batchCompile(
 \item{img_loc}{where files are being stored (www folder)}
 
 \item{clean}{delete all JSON files in meta/ and start over? default=FALSE}
+
+\item{rebuild}{if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL}
 }
 \value{
 a JSON is saved to meta/JSON/LESSON.json
