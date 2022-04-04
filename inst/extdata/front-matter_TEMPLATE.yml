@@ -3,7 +3,7 @@
 #---> Except for ShortTitle, these are operational variables that will be ignored by editor(), but kept in output
 id: ''
 ShortTitle: ''
-TemplateVer: 0.2.7
+TemplateVer: 0.2.8
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
@@ -41,11 +41,10 @@ MiscMD: ''
 Tags: ''
 Description: ''
 QuickPrep: |
-  1. Watch Video(s) for Part 1
-  2. Look over [Background](#background)
-  3. Look over [Procedure](#procedure)
-  4. [Teach it!](#teaching_materials)
-  5. Repeat for each part and [tell us what you think.](#feedback)
+  1. Check out lesson multimedia above
+  2. Look over [Teaching Materials](#teaching_materials)
+  3. Read our easy [Procedure](#procedure)
+  4. Teach it and [let us know what you think!](#feedback)
 Bonus: ''
 Extensions: ''
 Background: ''
