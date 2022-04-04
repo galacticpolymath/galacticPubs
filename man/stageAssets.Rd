@@ -8,7 +8,8 @@ stageAssets(
   current_data = NULL,
   WD = getwd(),
   dest_folder = NULL,
-  clear = TRUE
+  clear = TRUE,
+  status = NULL
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ stageAssets(
 \item{dest_folder}{where you want things to go (defaults to www)}
 
 \item{clear}{do you want to delete everything in the target directory? default: T}
+
+\item{status}{if staging assets for publishing, you can toggle "Draft" or "Live"; default=NULL}
 }
 \description{
 Copy all lesson assets to the desired location to prep for lesson publishing

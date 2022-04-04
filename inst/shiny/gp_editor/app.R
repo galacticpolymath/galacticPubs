@@ -724,6 +724,7 @@ output$supporting_media<-renderUI({
 
     #Reconcile input and yaml saved data before finalizing
     current_data<-prep_input(input,yaml_path, vals$current_data)$current_data
+    yaml::write_yaml(current_data, yaml_path)
     #this copies images to www folder
 
 

@@ -13,5 +13,5 @@ efx(function_name)
 Edit function definition in /R subfolder
 }
 \details{
-A convenience wrapper for \code{\link[usethis]{edit_file}} to edit or View a galacticPubs function. If in the galacticPubs dev project, it will edit; otherwise view.
+A convenience wrapper for \code{\link[usethis]{edit_file}} to edit or View a galacticPubs function. If in the galacticPubs dev project, it will edit; otherwise view. If you're in the galacticPubs dev project and name a nonexistent function, it'll prompt you if you want to create one.
 }
