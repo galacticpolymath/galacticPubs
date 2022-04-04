@@ -147,27 +147,6 @@ updateTeachingMatLinks<-function(shortTitle,
         if(length(dirID)==0){return(NA)}
         dirDribble<-googledrive::drive_find(q=paste0("'",dirID,"' in parents"))
 
-        # #handle quickprep "data category"
-        # if(dataCat_k=="quickPrep_feedback"){
-        #     excelTab<-tmKey$tab[match(paste(dataCat_k,""),paste(tmKey$dataCat,tmKey$subCat))]
-        #     #If the filename has "-part 1-" in it, extract part, otherwise put an NA (i.e. for forms)
-        #     qp_part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",dirDribble$name,perl=T),
-        #                 gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",dirDribble$name,perl=T),NA)
-        #     qp_links<-sapply(dirDribble$drive_resource,function(x) {x$webViewLink})
-        #     qp_mimeTypes<-sapply(dirDribble$drive_resource,function(x){x$mimeType})
-        #     qp_filetypes<-mimeKey$human_type[match(qp_mimeTypes,mimeKey$mime_type)]
-        #     qp_baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",qp_links,perl=T)
-        #
-        #     qp_gPresentLink=paste0(qp_baseLink,"present")
-        #     # Make PresentLink NA for non-presentation files
-        #     qp_gPresentLink[which(googledrive::drive_reveal(dirDribble,"mime_type")$mime_type!="application/vnd.google-apps.presentation")]<-NA
-        #
-        #     #output Quickprep & Feedback Table
-        #     data.frame(dataCat=dataCat_k,grades=NA,part=qp_part,filename=dirDribble$name,filetype=qp_filetypes,
-        #                gDriveLink=qp_links,gPresentLink=qp_gPresentLink,gID=dirDribble$id,excelTab=excelTab) %>% dplyr::filter(.data$filename!=".gitkeep")
-        #
-        # #handle all remote and classroom environments differently
-        # }else{
           gradeDirs<-dirDribble[sapply(dirDribble$drive_resource,function(x) x$mimeType=="application/vnd.google-apps.folder"),]
 
           #Test if there are no grade directories for this data category
@@ -187,44 +166,86 @@ updateTeachingMatLinks<-function(shortTitle,
             out.category<-pbapply::pblapply(existingCategories,function(category){
               excelTab<-tmKey$tab[match(paste(dataCat_k,category),paste(tmKey$dataCat,tmKey$subCat))]
               currCatFiles<-googledrive::drive_find(q=paste0("'",gradeDirDribble_i$id[which(gradeDirDribble_i$name==category)],"' in parents"))
-              #extract part numbers from _P1_ in file name
-              part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",currCatFiles$name,perl=T),
-                        gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",currCatFiles$name,perl=T),NA)
-              link<-sapply(currCatFiles$drive_resource,function(x) x$webViewLink)
-              baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",link,perl=T)
-              currCatFiles_mimeTypes<-sapply(currCatFiles$drive_resource,function(x){x$mimeType})
-              filetype<-mimeKey$human_type[match(currCatFiles_mimeTypes,mimeKey$mime_type)]
-              gShareLink<-paste0(baseLink,"template/preview")
+              currCatFiles$mimeTypes<-sapply(currCatFiles$drive_resource,function(x){x$mimeType})
+              #remove .gitkeep and other files from currCatFiles
+              currCatFiles<-subset(currCatFiles,mimeTypes!="application/octet-stream")
 
-                if(category=="handouts"){
-                  #extract SvT (student vs teacher) version from filename
-                  SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",toupper(currCatFiles$name),perl=T),
-                          gsub(".*(TEACHER|STUDENT).*","\\1",toupper(currCatFiles$name),perl=T),NA)
-                  #PDF export syntax is different for google presentations compared to google docs :/
-                  pdfExportString<-ifelse((filetype=="ppt"|filetype=="pptx"|filetype=="presentation"),"export/pdf","export?format=pdf")
-                  pdfLink<-paste0(baseLink,pdfExportString)
-                  gShareLink=baseLink
-                  #for all handouts, add a pdfLink...For remote lessons, we don't (yet) have access to distrLink for cloudinary.
-                  # This needs to be added manually
-                  data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=SvT,filename=currCatFiles$name,filetype=filetype,gDriveLink=link,gID=currCatFiles$id,gShareLink=gShareLink,pdfLink=pdfLink,excelTab=excelTab)
-                }else{
-                  #for presentations, there's no student/teacher versioning
-                  SvT=NA
-                  #different share links for the 2 environments
-                  if(dataCat_k=="classroom"){
-                    gPresentLink<-paste0(baseLink,"present")
-                    data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=SvT,filename=currCatFiles$name,filetype=filetype,gDriveLink=link,gID=currCatFiles$id,gShareLink=gShareLink,gPresentLink=gPresentLink,excelTab=excelTab)
+              #Check for Null current category file list
+              if(nrow(currCatFiles)==0){
+              return(NA)
+              }else{
+                currCatFiles$filetype<-mimeKey$human_type[match(currCatFiles$mimeTypes,mimeKey$mime_type)]
+
+                #extract part numbers from _P1_ in file name
+                currCatFiles$part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",currCatFiles$name,perl=T),
+                          gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",currCatFiles$name,perl=T),NA)
+                currCatFiles$link<-sapply(currCatFiles$drive_resource,function(x) x$webViewLink)
+                baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",currCatFiles$link,perl=T)
+                currCatFiles$gShareLink<-paste0(baseLink,"template/preview")
+                  if(category=="handouts"){
+                    #extract SvT (student vs teacher) version from filename
+                    currCatFiles$SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",toupper(currCatFiles$name),perl=T),
+                            gsub(".*(TEACHER|STUDENT).*","\\1",toupper(currCatFiles$name),perl=T),NA)
+                    #PDF export syntax is different for google presentations compared to google docs :/
+                    pdfExportString<-ifelse((currCatFiles$filetype=="ppt"|currCatFiles$filetype=="pptx"|currCatFiles$filetype=="presentation"),"export/pdf","export?format=pdf")
+                    # for shared resources that are already PDFs, avoid making an export pdf string...
+                    currCatFiles$pdfLink<-ifelse(currCatFiles$filetype=="pdf",baseLink,paste0(baseLink,pdfExportString))
+                    #
+                    currCatFiles$gShareLink=ifelse(currCatFiles$filetype=="pdf",NA,baseLink)
+                    #for all handouts, add a pdfLink...For remote lessons, we don't (yet) have access to distrLink for cloudinary.
+                    # This needs to be added manually
+                    data.frame(
+                      dataCat = dataCat_k,
+                      grades = grades[i],
+                      part = currCatFiles$part,
+                      SvT = currCatFiles$SvT,
+                      filename = currCatFiles$name,
+                      filetype = currCatFiles$filetype,
+                      gDriveLink = currCatFiles$link,
+                      gID = currCatFiles$id,
+                      gShareLink = currCatFiles$gShareLink,
+                      pdfLink = currCatFiles$pdfLink,
+                      excelTab = excelTab
+                    )
                   }else{
-                    #for remote environment, we don't have access to nearpod share links to create nShareLink
-                    data.frame(dataCat=dataCat_k,grades=grades[i],part=part,SvT=SvT,filename=currCatFiles$name,filetype=filetype,gDriveLink=link,gID=currCatFiles$id,gShareLink=gShareLink,excelTab=excelTab)
-                  }
-                }# end handout vs. presentation handling
+                    #for presentations, there's no student/teacher versioning
+                    currCatFiles$SvT=NA
+                    #different share links for the 2 environments
+                    if(dataCat_k=="classroom"){
+                      currCatFiles$gPresentLink<-paste0(baseLink,"present")
+                      data.frame(
+                        dataCat = dataCat_k,
+                        grades = grades[i],
+                        part = currCatFiles$part,
+                        SvT = currCatFiles$SvT,
+                        filename = currCatFiles$name,
+                        filetype = currCatFiles$filetype,
+                        gDriveLink = currCatFiles$link,
+                        gID = currCatFiles$id,
+                        gShareLink = currCatFiles$gShareLink,
+                        gPresentLink = currCatFiles$gPresentLink,
+                        excelTab = excelTab
+                      )
+                    }else{
+                      #for remote environment, we don't have access to nearpod share links to create nShareLink
+                      data.frame(
+                        dataCat = dataCat_k,
+                        grades = grades[i],
+                        part = currCatFiles$part,
+                        SvT = currCatFiles$SvT,
+                        filename = currCatFiles$name,
+                        filetype = currCatFiles$filetype,
+                        gDriveLink = currCatFiles$link,
+                        gID = currCatFiles$id,
+                        gShareLink = currCatFiles$gShareLink,
+                        excelTab = excelTab
+                      )
+                    }
+                  }# end handout vs. presentation handling
+              }#end check for null currCatFile
             })#end out.category lapply
 
-            #remove any .gitkeep files
-            out.category2<-lapply(1:length(out.category), function(i) dplyr::filter(out.category[[i]],.data$filename!=".gitkeep"))
-            names(out.category2)<-existingCategories
-            out.category2
+            out.category
           })
           names(out.grades)<-paste0("g",grades)
           out.grades
@@ -300,6 +321,8 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
         if(nrow(excel_Data_i.aug)>0){
 
+          #*** I Don't like this at all! Needs a rethink. Mostly just want to keep title and overwrite everything else.
+
           #merge .x and .y into 1 coalesced column for variables that overlap
           #(added as new colName (without .x/.y); those cols still there)
 
@@ -366,6 +389,8 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
     message(linksFile," Updated and Saved")
 
-    if(returnWorkbook){tmImported.merged; message(">> Link Updating Complete")}else{message(">> Link Updating Complete")}
+    if(returnWorkbook){message(">> Link Updating Complete")
+      return(tmImported.merged)
+      }else{message(">> Link Updating Complete")}
 
 }

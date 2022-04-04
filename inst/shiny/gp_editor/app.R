@@ -725,25 +725,6 @@ output$supporting_media<-renderUI({
     #Reconcile input and yaml saved data before finalizing
     current_data<-prep_input(input,yaml_path, vals$current_data)$current_data
     yaml::write_yaml(current_data, yaml_path)
-    #this copies images to www folder
-
-
-    # #files from www folder used to generate preview (or other files dumped there like Supporting Media (at Preview stage))
-    # #Should really make a function that checks time stamps and existence of files on a manifest
-    # www_file_paths<-list.files(fs::path(getwd(),"www"),pattern="^.*\\..*",full.names = TRUE)
-    # if(length(www_file_paths)==0){www_file_paths<-{}}
-    # lesson_file_path<-fs::path(WD,"meta/json/LESSON.json")
-    # if(!file.exists(lesson_file_path)){
-    #   warning("Lesson File Not Found! (Compile first)!\n - ",lesson_file_path)
-    #   lesson_file_path<-{}
-    # }
-
-    # files2copy<-c(www_file_paths,lesson_file_path)
-    # destFolder<-fs::path(WD,"published")
-    # dir.create(destFolder,showWarnings = FALSE)
-    # #delete existing published contents
-    # unlink(list.files(destFolder,full.names = TRUE))
-    # #replace w/ new files
     ec<-stageAssets(current_data,WD,destFolder<-fs::path(WD,"published"),clear=TRUE,status = input$PublicationStatus)
     if(!"error"%in%class(ec)){
       output$stageStatus<-renderText({"\u2713 Success"})
