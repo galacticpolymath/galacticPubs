@@ -623,7 +623,7 @@ output$supporting_media<-renderUI({
   # 3. Output the preview of the lesson plan
    output$preview<-renderUI({
 
-    current_data<-prep_input(input,yaml_path)$current_data
+    current_data<-prep_input(input,yaml_path,vals$current_data)$current_data
 
     stageAssets(current_data,WD,img_loc,clear=TRUE)
 
@@ -762,6 +762,9 @@ output$supporting_media<-renderUI({
   # Publish button
   observe({
     pub_status<-publish(WD=WD,commit_msg = input$commit_msg)
+    #prevent "unsaved" trigger from trying to overwrite new LastUpdated value
+    browser()
+    vals$current_data$LastUpdated<-safe_read_yaml(yaml_path)
     if(pub_status$success){
       output$publishReport<-renderUI(h4(paste0("\u2713 Publication Success! ",Sys.time()) ))
     }else{
