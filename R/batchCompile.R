@@ -238,7 +238,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder ,out
     }
 
     #CREDITS
-    if (!is_empty(current_data$Extensions)){
+    if (!is_empty(current_data$Credits)){
     credits <- list(`__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Credits", Content = expandMDLinks(current_data$Credits,
         repo) %>% fixAnchorLinks(), InitiallyExpanded = TRUE)
