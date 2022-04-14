@@ -6,7 +6,7 @@
 #'
 #' @param shortTitle The unique short title of this lesson which is prefixed on the lesson folder name in the shared
 #' @param dataCat which info do you want to merge with your teaching-materials spreadsheet? Options= "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.
-#' @param linksFile file location of the lesson teaching-resource-links XLSX worksheet. gdrive; *CaseSensitive!
+#' @param linksFile name of the file we're updating in the meta/ subfolder; default="teaching-materials.xlsx". gdrive *CaseSensitive!
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param sortOutput logical; if T, outputs are sorted by grade, part, filetype, then filename
 #' @param returnWorkbook Logical; if T, returns the list which was written to linksFile
@@ -14,7 +14,7 @@
 #'
 updateTeachingMatLinks<-function(shortTitle,
                                  dataCat = c("download",  "remote", "classroom"),
-                                 linksFile = "meta/teaching-materials.xlsx",
+                                 linksFile = "teaching-materials.xlsx",
                                  WD = getwd(),
                                  sortOutput = T,
                                  returnWorkbook = F
@@ -22,9 +22,8 @@ updateTeachingMatLinks<-function(shortTitle,
 
 
   #if WD supplied, append it to destFolder
-  if(!identical(WD, getwd())) {
-    linksFile <-  paste0(WD, linksFile)
-  }
+  linksFile <-  fs::path(WD,"meta", linksFile)
+
 
 #define dplyr::coalesce function that doesn't crash with 2 NAs!
   discardNA<-function(x,y){
