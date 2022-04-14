@@ -14,7 +14,7 @@ compileJSON <- function(outputFileName="LESSON.json",destFolder, WD=getwd()){
   if(missing(destFolder)){destFolder=fs::path(WD,"meta","JSON")}
 
   #   jsonNames should be ordered; this is telling which json files to look for and assemble them in this order
-  jsonNames<-c("header","overview","preview","multimedia","teaching-materials","procedure","background","standards-header","learning-chart","standards","bonus","extensions","feedback","job-viz","credits","acknowledgments","versions")
+  jsonNames<-c("header","overview","preview","teaching-materials","procedure","background","standards-header","learning-chart","standards","bonus","extensions","feedback","job-viz","credits","acknowledgments","versions")
 
   potentialFilenames<-paste0(jsonNames,".json")
 
