@@ -3,8 +3,8 @@
 #' Processes a subset of data chosen by user using the GP Shiny Editor
 #'
 #' Combines functionality of compileProcedure, compileStandards, compileAcknowledgements, compileJSON, etc.
-#' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
 #' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All"
+#' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
@@ -15,7 +15,7 @@
 #' @importFrom rlang .data
 #' @export
 #'
-batchCompile <- function(current_data, choices=c("Front Matter"),destFolder ,outputFileName="LESSON.json",WD=getwd(),img_loc,clean=FALSE,rebuild=NULL){
+batchCompile <- function(choices=c("Front Matter"),current_data,destFolder ,outputFileName="LESSON.json",WD=getwd(),img_loc,clean=FALSE,rebuild=NULL){
 
   if(missing(current_data)){current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))}
   if(missing(destFolder)){destFolder<-fs::path(WD,"meta","JSON")}
@@ -162,11 +162,11 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder ,out
     #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
     mmExists<-file.exists(fs::path(WD,"meta","JSON","multimedia.json"))
     if(mmExists){
-      mm<-jsonlite::read_json(fs::path(WD,"meta","JSON","multimedia.json"),null="null")
+      mm_0<-jsonlite::read_json(fs::path(WD,"meta","JSON","multimedia.json"),null="null")
       #process multimedia entries a little bit
-      mm<-lapply(1:length(mm),function(i){
+      mm<-lapply(1:length(mm_0),function(i){
         #change pdf file gdrive endings from view? to preview
-        li<-mm[[i]]
+        li<-mm_0[[i]]
         #ensure that type is always lowercase
         li$type<-tolower(li$type)
         if(li$type=="pdf"){
@@ -174,16 +174,26 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder ,out
         }
         li
       })
-    }
+    }else{mm<-{}}
 
-    # Make lesson preview section
+    #PREVIEW
     preview<-list(
       `__component`="lesson-plan.lesson-preview",
       SectionTitle= "Lesson Preview",
-      Multimedia= if(mmExists){mm}else{},
+      Multimedia= mm,
       QuickPrep= current_data$QuickPrep %>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
       InitiallyExpanded=TRUE
     )
+    #write preview json
+      jsonlite::write_json(
+        preview,
+        path = fs::path(destFolder,
+                        "preview", ext = "json"),
+        pretty = TRUE,
+        auto_unbox = TRUE,
+        na = "null",
+        null = "null"
+      )
 
     #BONUS (optional section)
     # markdown links to supporting materials allowed
@@ -254,9 +264,7 @@ batchCompile <- function(current_data, choices=c("Front Matter"),destFolder ,out
     jsonlite::write_json(overview, path = fs::path(destFolder,
       "overview", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
       na = "null", null = "null")
-    jsonlite::write_json(preview, path = fs::path(destFolder,
-      "preview", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
-      na = "null", null = "null")
+
   }
 
 

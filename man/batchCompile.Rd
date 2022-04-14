@@ -5,8 +5,8 @@
 \title{batchCompile}
 \usage{
 batchCompile(
-  current_data,
   choices = c("Front Matter"),
+  current_data,
   destFolder,
   outputFileName = "LESSON.json",
   WD = getwd(),
@@ -16,9 +16,9 @@ batchCompile(
 )
 }
 \arguments{
-\item{current_data}{the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml}
-
 \item{choices}{one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All"}
+
+\item{current_data}{the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml}
 
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
 

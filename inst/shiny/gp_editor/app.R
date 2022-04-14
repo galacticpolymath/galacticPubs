@@ -526,9 +526,9 @@ output$supporting_media<-renderUI({
   observe({
 
     #Save data before compiling
-    current_data<-prep_input(input,yaml_path)$current_data
-    yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
-    batchCompile(current_data,choices=input$ReadyToCompile,WD=WD,img_loc=img_loc)
+    vals$current_data<-prep_input(input,yaml_path)$current_data
+    yaml::write_yaml(vals$current_data, fs::path(meta_path,"front-matter.yml"))
+    batchCompile(choices=input$ReadyToCompile,current_data=vals$current_data,WD=WD,img_loc=img_loc)
 
     } ) %>% bindEvent(input$compile)
 
