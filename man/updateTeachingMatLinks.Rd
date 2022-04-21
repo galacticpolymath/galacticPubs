@@ -7,7 +7,7 @@
 updateTeachingMatLinks(
   shortTitle,
   dataCat = c("download", "remote", "classroom"),
-  linksFile = "meta/teaching-materials.xlsx",
+  linksFile = "teaching-materials.xlsx",
   WD = getwd(),
   sortOutput = T,
   returnWorkbook = F
@@ -18,7 +18,7 @@ updateTeachingMatLinks(
 
 \item{dataCat}{which info do you want to merge with your teaching-materials spreadsheet? Options= "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.}
 
-\item{linksFile}{file location of the lesson teaching-resource-links XLSX worksheet. gdrive; *CaseSensitive!}
+\item{linksFile}{name of the file we're updating in the meta/ subfolder; default="teaching-materials.xlsx". gdrive *CaseSensitive!}
 
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 
