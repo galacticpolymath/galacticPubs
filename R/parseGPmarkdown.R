@@ -1,6 +1,6 @@
 #' @title parseGPmarkdown
 #'
-#' @description Functions to replace custom expressions with appropriate links or text. Custom tags include {vid 1}, {vid 2} or {item 1}, {item 2} more generally. Both have the same effect, but vid is clearer when reading and enforces video type, while item is more flexible. Symbols for media types: 'video'= ▶, 'pdf' or default= ➚. Special case for media titles with keyword "Cards"= ♧
+#' @description Functions to replace custom expressions with appropriate links or text. Custom tags include "\{vid 1\}", "\{vid 2\}" or "\{item 1\}", "\{item 2\}" more generally. Both have the same effect, but vid is clearer when reading and enforces video type, while item is more flexible. Symbols for media types: 'video'= ▶, 'pdf' or default= ➚. Special case for media titles with keyword "Cards"= ♧
 #'
 #' @param x a text string to parse
 #' @param linksFile file location of the lesson teaching-materials XLSX worksheet. This is used for our custom
