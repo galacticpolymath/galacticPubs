@@ -33,7 +33,7 @@ compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
    formatVocab<-function(vocabTextVector){
      sapply(1:length(vocabTextVector),function(i){
        vocab_i<-vocabTextVector[i]
-       stringr::str_replace_all(vocab_i,"(.*)=[ ]*(.*\n?)","- **\\1:** \\2")
+       stringr::str_replace_all(vocab_i,"(?<=^|\\\n)[ ]?(.*?\\b)[ ]*?[=|:][ ]*?(.*?)(?=\\n|$)","- **\\1:** \\2")
      })
    }
 
@@ -53,9 +53,13 @@ compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
   #read in Part titles and lesson + Part prefaces
   procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble() %>% rmNArows()
 
-  #Basic test
-  nPartsTest<-length(unique(proc$Part))==length(unique(procTitles$Part))
-  message("\n  TEST: Num. Parts in 'NamesAndNotes' = 'Procedure'?   ** ",ifelse(nPartsTest,"PASS","FAIL")," **\n")
+  #Basic length test
+  nPartsTest<-length(as.vector(na.omit(unique(proc$Part))))==length(as.vector(na.omit(unique(procTitles$Part))))
+  message("\n**TEST: Num. Parts in 'NamesAndNotes' = 'Procedure'?** ",ifelse(nPartsTest,"\n  >PASS","\n  >FAIL: Make sure Procedure entries and 'NamesAndNotes' Tab of procedure have same length"))
+
+  #Check for errors flagged on spreadsheet (matching documented chunks with expected duration)
+  procFlags<-sum(grepl("\u2716",proc$TestChunkSums,fixed=T))
+  message("\n**TEST: Flags on procedure spreadsheet?** ",ifelse(procFlags==0,"\n  >PASS","\n  >FAIL: Check procedure spreadsheet 'TestChunkSums' column on 'Procedure' tab"))
 
   #####
   #Parse all the text columns to expand {vidN} notation into full video links

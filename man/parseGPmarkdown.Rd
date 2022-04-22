@@ -20,7 +20,7 @@ that has order=1}
 formatted replacement text
 }
 \description{
-Functions to replace custom expressions with appropriate links or text. Custom tags include {vid 1}, {vid 2} or {item 1}, {item 2} more generally. Both have the same effect, but vid is clearer when reading and enforces video type, while item is more flexible. Symbols for media types: 'video'= ▶, 'pdf' or default= ➚. Special case for media titles with keyword "Cards"= ♧
+Functions to replace custom expressions with appropriate links or text. Custom tags include "\{vid 1\}", "\{vid 2\}" or "\{item 1\}", "\{item 2\}" more generally. Both have the same effect, but vid is clearer when reading and enforces video type, while item is more flexible. Symbols for media types: 'video'= ▶, 'pdf' or default= ➚. Special case for media titles with keyword "Cards"= ♧
 }
 \seealso{
 Other markdown: 
