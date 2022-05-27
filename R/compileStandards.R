@@ -27,6 +27,12 @@ if(!identical(WD,getwd())){
   destFolder<-paste0(WD,destFolder)
   standardsFile<-paste0(WD,standardsFile)}
 
+#If targetSubj not provided, use front-matter.yml
+if(missing(targetSubj)){
+   tempSubj<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))$TargetSubj
+   if(!galacticPubs::is_empty(tempSubj)){targetSubj<-tolower(tempSubj)}
+}
+
  # Import XLSX files -------------------------------------------------------
 #Import master alignment with ALL standards from https://github.com/galacticpolymath/standardX or the supplied standardsFile
 

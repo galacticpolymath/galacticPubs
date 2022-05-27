@@ -393,7 +393,7 @@ jsonlite::write_json(out,outFile,pretty=TRUE,auto_unbox=TRUE,na="null",null="nul
 #write json for multimedia
 jsonlite::write_json(multimedia,fs::path(destFolder,"multimedia.json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
 
-
+browser()
 
 # printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
 
