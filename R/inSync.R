@@ -15,9 +15,12 @@ inSync <- function(path1, path2,..., verbose = FALSE) {
   existence <- sapply(pathz, file.exists)
   good_path_sum<-sum(existence)
   if (good_path_sum < length(pathz)) {
-    bad_paths<-dplyr::tibble(file_n=which(!existence),not_found_here=names(existence)[which(!existence)])
+    bad_paths<-dplyr::tibble(file_n=which(!existence),
+                             #Return just the last folder in the path of the path
+                             not_found_here=fs::path_rel(names(existence)[which(!existence)], WD))
     warning("\n****\nSome Path(s) Not Found:\n***")
-    print(bad_paths)
+    print.data.frame(bad_paths)
+    browser()
       out <- FALSE
 
   } else{
@@ -27,15 +30,18 @@ inSync <- function(path1, path2,..., verbose = FALSE) {
                            file.info(x)))[c(1, 4:6)]
 
     if (verbose) {
+      message("PATH INFO")
       print(path_info)
     }
     #Is path 1 newer than dependent paths??
     test <-sapply(2:length(existence),function(i){path_info$mtime[1] >= path_info$mtime[i]})
-    # the test has n-1 comparisons; does the numer of passes equal length of entries?
+    # the test has n-1 comparisons; does the number of test passes equal length of entries?
+    # out should be TRUE if everything is in sync
     out<-ifelse(sum(test)+1==length(existence),TRUE,FALSE)
     #output file paths that are missing if applicable
     if(!out){
-      bad_paths<-dplyr::tibble(file_n=which(!test),out_of_date=pathz[which(!test)+1])
+      bad_paths<-dplyr::tibble(file_n=which(!test),
+                               out_of_date=fs::path_rel(pathz[which(!test)+1],WD))
       warning("\n****\nNeeds Update:\n***")
       print(bad_paths)
     }

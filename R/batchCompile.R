@@ -8,16 +8,16 @@
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
-#' @param img_loc where files are being stored (www folder)
 #' @param clean delete all JSON files in meta/ and start over? default=FALSE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
 #' @return a JSON is saved to meta/JSON/LESSON.json
 #' @importFrom rlang .data
 #' @export
 #'
-batchCompile <- function(choices=c("Front Matter"),current_data,destFolder ,outputFileName="LESSON.json",WD=getwd(),img_loc,clean=FALSE,rebuild=NULL){
+batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON.json",WD=getwd(),clean=FALSE,rebuild=NULL){
 
   if(missing(current_data)){current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))}
+  if(missing(choices)){choices<-current_data$ReadyToCompile}
   if(missing(destFolder)){destFolder<-fs::path(WD,"meta","JSON")}
 
   if(is.null(rebuild)){
@@ -36,10 +36,11 @@ batchCompile <- function(choices=c("Front Matter"),current_data,destFolder ,outp
 
   # Standards alignment & learning plots -----------------------------------------------------
     # test if standards json is out of sync with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
-    stnds_out_of_date<-!inSync(fs::path(WD,"assets","learning-plots","GP-Learning-Chart.png"),
-                               fs::path(WD,"assets","learning-plots","GP-Learning-Epaulette.png"),
+    stnds_out_of_date<-!inSync(fs::path(WD,"assets","learning-plots","GP-Learning-Epaulette.png"),
+                               fs::path(WD,"assets","learning-plots","GP-Learning-Chart.png"),
                                fs::path(WD,"meta","json","standards.json"),
                                fs::path(WD,"meta","standards_GSheetsOnly.xlsx"))
+    browser()
   if("Standards Alignment"%in% choices & (stnds_out_of_date | rebuild) ){
 
     alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)
@@ -57,7 +58,6 @@ batchCompile <- function(choices=c("Front Matter"),current_data,destFolder ,outp
     #set learning chart filename from default file output on learningChart function
     #(since this file doesn't exist in yaml yet)
     current_data$LearningChart<-fs::path("assets","learning-plots",paste0(formals(learningChart)$fileName,".png"))
-    # copyUpdatedFiles(fs::path(WD,current_data$LearningChart),img_loc)
 
     #export learning chart section
     lc<-list(
@@ -105,12 +105,7 @@ batchCompile <- function(choices=c("Front Matter"),current_data,destFolder ,outp
     #(since this file doesn't exist in yaml on first run)
     current_data$LearningEpaulette<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,".png"))
     current_data$LearningEpaulette_vert<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
-    #copy files to working directory
-    # copyUpdatedFiles(fs::path(WD,
-    #   c(current_data$LearningEpaulette,
-    #     current_data$LearningEpaulette_vert
-    #   )
-    # ), img_loc)
+
   }
 
   if("Teaching Materials" %in% choices){
@@ -124,6 +119,7 @@ batchCompile <- function(choices=c("Front Matter"),current_data,destFolder ,outp
 
 
 # Separate parts of Front Matter ------------------------------------------
+
   if("Front Matter" %in% choices){
 
     #Take everything from TemplateVer to SponsoredBy
@@ -301,5 +297,5 @@ compileJSON(WD=WD)
   }
 
   #Save update YAML
-  yaml::write_yaml(current_data, fs::path(WD,"meta/front-matter.yml"))
+  yaml::write_yaml(current_data, fs::path(WD,"meta","front-matter.yml"))
 }
