@@ -37,12 +37,12 @@ compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
      })
    }
 
-
   #read in main procedure
   #import and make sure numbered columns are integers
   proc<-openxlsx::read.xlsx(procedureFile,sheet="Procedure") %>%
-          dplyr::tibble() %>%
+          dplyr::filter(.data$Step!=0) %>%
           rmNArows() %>%
+          dplyr::tibble() %>%
           dplyr::mutate(Part=as.integer(.data$Part),
                         Chunk=as.integer(.data$Chunk),
                         ChunkDur=as.integer(.data$ChunkDur),
@@ -71,7 +71,7 @@ compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
 
   ####
   #Add Chunk Start Times
-  proc$ChunkStart<-sapply(unique(proc$Part),function(p) {
+  proc$ChunkStart<-sapply(unique_sans_na(proc$Part),function(p) {
                     p_i<-subset(proc,proc$Part==p)
                     newChunkIndx<-sapply(1:nrow(p_i),function(i) which.max(p_i$Chunk[1:i])) %>% unique()
                     chunkStart<-rep(NA,nrow(p_i))

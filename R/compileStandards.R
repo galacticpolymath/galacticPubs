@@ -344,7 +344,8 @@ return(
     input = dplyr::as_tibble(a0),
     compiled = dplyr::as_tibble(A),
     problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
-    gradeBands= uniqueGradeBands
+    gradeBands= uniqueGradeBands,
+    targetSubj=targetSubj
   )
 )
 

@@ -35,8 +35,11 @@ batchCompile <- function(choices=c("Front Matter"),current_data,destFolder ,outp
     repo<-whichRepo()
 
   # Standards alignment & learning plots -----------------------------------------------------
-    # test if standards json is out of sync with the standards_GSheetsOnly.xlsx file
-    stnds_out_of_date<-!inSync(fs::path(WD,"meta","json","standards.json"),fs::path(WD,"meta","standards_GSheetsOnly.xlsx"))
+    # test if standards json is out of sync with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
+    stnds_out_of_date<-!inSync(fs::path(WD,"assets","learning-plots","GP-Learning-Chart.png"),
+                               fs::path(WD,"assets","learning-plots","GP-Learning-Epaulette.png"),
+                               fs::path(WD,"meta","json","standards.json"),
+                               fs::path(WD,"meta","standards_GSheetsOnly.xlsx"))
   if("Standards Alignment"%in% choices & (stnds_out_of_date | rebuild) ){
 
     alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)

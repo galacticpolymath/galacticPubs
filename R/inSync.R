@@ -1,41 +1,44 @@
 #' inSync
 #'
-#' Checks if 2 files exist, and whether path1 is the same age or newer than path2
+#' Checks if all files exist, and whether path 1 (the most derived file) is the same age or newer than path 2- path n (which are used to create path 1)
 #'
-#' @param path1 path to file of interest (the one that may or may not need updating)
+#' @param path1 path to file of interest (e.g. that is created from the other paths)
 #' @param path2 path to reference file (expected to be at least slightly older)
+#' @param ... path to other reference files to compare modified date to path1; separated by commas
 #' @param verbose print out table with information? default=FALSE
 #'
 #' @returns T if timestamps match, F if they don't or if path 1 is missing
 #' @export
 
-inSync <- function(path1, path2, verbose = FALSE) {
-  path12 <- c(path1, path2)
-  existence <- sapply(path12, file.exists)
-
-  if (sum(existence) < 2) {
-    if (!existence[2]) {
-      warning("Path 2 (reference file) not found! \n >", path2)
+inSync <- function(path1, path2,..., verbose = FALSE) {
+  pathz <- c(path1, path2,...)
+  existence <- sapply(pathz, file.exists)
+  good_path_sum<-sum(existence)
+  if (good_path_sum < length(pathz)) {
+    bad_paths<-dplyr::tibble(file_n=which(!existence),not_found_here=names(existence)[which(!existence)])
+    warning("\n****\nSome Path(s) Not Found:\n***")
+    print(bad_paths)
       out <- FALSE
 
-    } else if (!existence[1]) {
-      if (verbose) {
-        warning("Path 1 file not found in destination Folder \n >", path2)
-      }
-      out <- FALSE
-    }
   } else{
-    #if both files found, compare time stamps
+    #if all files found, compare time stamps
     path_info <- do.call(dplyr::bind_rows,
-                         lapply(path12, function(x)
+                         lapply(pathz, function(x)
                            file.info(x)))[c(1, 4:6)]
 
     if (verbose) {
       print(path_info)
     }
-    #Is path 1 newer than path 2??
-    out <-
-      ifelse(path_info$mtime[1] >= path_info$mtime[2], TRUE, FALSE)
+    #Is path 1 newer than dependent paths??
+    test <-sapply(2:length(existence),function(i){path_info$mtime[1] >= path_info$mtime[i]})
+    # the test has n-1 comparisons; does the numer of passes equal length of entries?
+    out<-ifelse(sum(test)+1==length(existence),TRUE,FALSE)
+    #output file paths that are missing if applicable
+    if(!out){
+      bad_paths<-dplyr::tibble(file_n=which(!test),out_of_date=pathz[which(!test)+1])
+      warning("\n****\nNeeds Update:\n***")
+      print(bad_paths)
+    }
   }
 
   out
