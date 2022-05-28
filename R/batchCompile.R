@@ -40,7 +40,6 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
                                fs::path(WD,"assets","learning-plots","GP-Learning-Chart.png"),
                                fs::path(WD,"meta","json","standards.json"),
                                fs::path(WD,"meta","standards_GSheetsOnly.xlsx"))
-    browser()
   if("Standards Alignment"%in% choices & (stnds_out_of_date | rebuild) ){
 
     alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)

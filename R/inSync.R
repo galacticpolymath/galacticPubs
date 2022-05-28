@@ -19,8 +19,9 @@ inSync <- function(path1, path2,..., verbose = FALSE) {
                              #Return just the last folder in the path of the path
                              not_found_here=fs::path_rel(names(existence)[which(!existence)], WD))
     warning("\n****\nSome Path(s) Not Found:\n***")
-    print.data.frame(bad_paths)
-    browser()
+    #Don't know why I can't print to the console, but nothing works...
+    # print.data.frame(bad_paths)
+    # message(bad_paths)
       out <- FALSE
 
   } else{
