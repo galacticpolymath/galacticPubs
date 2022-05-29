@@ -24,6 +24,11 @@ updateTeachingMatLinks<-function(shortTitle,
   #if WD supplied, append it to destFolder
   linksFile <-  fs::path(WD,"meta", linksFile)
 
+  if(missing(shortTitle)){
+    current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))
+    shortTitle<-current_data$ShortTitle
+    if(is_empty(shortTitle)){stop("Please enter a lesson shortTitle")}
+    }
 
 #define dplyr::coalesce function that doesn't crash with 2 NAs!
   discardNA<-function(x,y){
