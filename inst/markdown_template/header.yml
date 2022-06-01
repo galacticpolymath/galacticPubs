@@ -1,7 +1,9 @@
-title: "Testing"
+title: ""
+subtitle: ""
 runtitle: "Short Title"
 documentclass: frontiersSCNS  
-preprint: true
+publicationdate: ""
+lastupdated: ""
 author:
   - name: First Author
     affiliation: '1'
@@ -36,6 +38,8 @@ affiliation:
     city: City X
     state: State XX # only USA, Australia, Canada
     country: Country X
+url: ""
+doi: ""
 output: 
   bookdown::pdf_book:
     base_format: rticles::frontiers_article

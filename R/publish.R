@@ -42,6 +42,8 @@ publish<- function(commit_msg=NULL,WD=getwd()){
 
     }
 
+    if(is_empty(lesson$URL)){lesson$URL<-paste0("https://galacticpolymath.com/lessons/",lesson$id)}
+
     #always update LastUpdated timestamp
     saved_data$LastUpdated<-time_stamp
     lesson$LastUpdated<-time_stamp
