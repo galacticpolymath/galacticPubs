@@ -4,18 +4,22 @@
 \alias{inSync}
 \title{inSync}
 \usage{
-inSync(path1, path2, verbose = FALSE)
+inSync(path1, path2, ..., verbose = FALSE, WD = getwd())
 }
 \arguments{
-\item{path1}{path to file of interest (the one that may or may not need updating)}
+\item{path1}{path to file of interest (e.g. that is created from the other paths)}
 
 \item{path2}{path to reference file (expected to be at least slightly older)}
 
+\item{...}{path to other reference files to compare modified date to path1; separated by commas}
+
 \item{verbose}{print out table with information? default=FALSE}
+
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 }
 \value{
 T if timestamps match, F if they don't or if path 1 is missing
 }
 \description{
-Checks if 2 files exist, and whether path1 is the same age or newer than path2
+Checks if all files exist, and whether path 1 (the most derived file) is the same age or newer than path 2- path n (which are used to create path 1)
 }

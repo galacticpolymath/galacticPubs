@@ -172,7 +172,7 @@ updateTeachingMatLinks<-function(shortTitle,
               currCatFiles<-googledrive::drive_find(q=paste0("'",gradeDirDribble_i$id[which(gradeDirDribble_i$name==category)],"' in parents"))
               currCatFiles$mimeTypes<-sapply(currCatFiles$drive_resource,function(x){x$mimeType})
               #remove .gitkeep and other files from currCatFiles
-              currCatFiles<-subset(currCatFiles,mimeTypes!="application/octet-stream")
+              currCatFiles<-subset(currCatFiles,currCatFiles$mimeTypes!="application/octet-stream")
 
               #Check for Null current category file list
               if(nrow(currCatFiles)==0){

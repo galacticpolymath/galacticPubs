@@ -5,12 +5,11 @@
 \title{batchCompile}
 \usage{
 batchCompile(
-  choices = c("Front Matter"),
+  choices,
   current_data,
   destFolder,
   outputFileName = "LESSON.json",
   WD = getwd(),
-  img_loc,
   clean = FALSE,
   rebuild = NULL
 )
@@ -25,8 +24,6 @@ batchCompile(
 \item{outputFileName}{output file name; default= "processedProcedure.json"}
 
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
-
-\item{img_loc}{where files are being stored (www folder)}
 
 \item{clean}{delete all JSON files in meta/ and start over? default=FALSE}
 

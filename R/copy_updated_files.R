@@ -1,25 +1,25 @@
-#' copyUpdatedFiles
+#' copy_updated_files
 #'
 #' Copy files to destination only if the file is missing or out of date at the destination
 #'
 #' @param paths vector of file paths you want to check and/or copy
-#' @param destFolder directory where you want files to be transferred
+#' @param dest_folder directory where you want files to be transferred
 #' @param clear do you want to delete all files in the destination folder before copying? default=FALSE
 #' @param verbose print summary table? default=T
 #' @returns tibble of path1 files and statuses
 #' @export
 
 
-copyUpdatedFiles<-function(paths,destFolder,clear=FALSE,verbose=TRUE){
+copy_updated_files<-function(paths,dest_folder,clear=FALSE,verbose=TRUE){
   if(clear) {
-    unlink(list.files(destFolder, pattern = "\\.", full.names = TRUE))
-    message("@ Folder cleared: ",destFolder)
+    unlink(list.files(dest_folder, pattern = "\\.", full.names = TRUE))
+    message("@ Folder cleared: ",dest_folder)
   }
 
   out<-lapply(paths, function(FILE) {
 
     viable <- file.exists(FILE) & fs::is_file(FILE)
-    newPath <- fs::path(destFolder, basename(FILE))
+    newPath <- fs::path(dest_folder, basename(FILE))
     # if file exists...
     if (viable) {
       #if we didn't delete dest. directory contents...

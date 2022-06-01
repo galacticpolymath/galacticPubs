@@ -552,7 +552,7 @@ output$supporting_media<-renderUI({
 
       #copy image to www folder
       isolate({
-        copyUpdatedFiles(paste0(WD,
+        copy_updated_files(paste0(WD,
                                 c((vals$current_data$LearningEpaulette),
                                   (vals$current_data$LearningEpaulette_vert)
                                 )), img_loc)
@@ -603,7 +603,7 @@ output$supporting_media<-renderUI({
       #copy image to www folder
       #this call to vals is what connects it to learningChart()
         isolate({
-        copyUpdatedFiles(fs::path(WD, vals$current_data$LearningChart),
+        copy_updated_files(fs::path(WD, vals$current_data$LearningChart),
                                img_loc)
         })
       #return file info to UI

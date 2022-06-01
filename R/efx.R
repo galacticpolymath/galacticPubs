@@ -15,5 +15,5 @@ efx <- function(function_name){
       if(resp=="n"){stop()}
     }
     usethis::edit_file((fs::path("R",substitute(function_name),ext="R")))
-  }else{View(eval(parse(text=paste0("galacticPubs::",substitute(function_name)))))}
+  }else{utils::View(eval(parse(text=paste0("galacticPubs::",substitute(function_name)))))}
 }

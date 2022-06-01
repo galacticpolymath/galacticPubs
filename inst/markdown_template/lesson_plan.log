@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.5.31)  1 JUN 2022 00:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.5.31)  1 JUN 2022 10:47
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**testing.tex
-(./testing.tex
+**lesson_plan.tex
+(./lesson_plan.tex
 LaTeX2e <2021-11-15> patch level 1
 L3 programming layer <2022-05-30> (./frontiersSCNS.cls
 Document Class: frontiersSCNS 2016/11/10 2.6
@@ -469,8 +469,8 @@ File: l3backend-pdftex.def 2022-04-20 L3 backend support: PDF output (pdfTeX)
 LaTeX Warning: Unused global option(s):
     [utf8].
 
-(./testing.aux)
-\openout1 = `testing.aux'.
+(./lesson_plan.aux)
+\openout1 = `lesson_plan.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 177.
 LaTeX Font Info:    ... okay on input line 177.
@@ -506,9 +506,9 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
 Package hyperref Info: Link coloring OFF on input line 177.
-(./testing.out) (./testing.out)
+(./lesson_plan.out) (./lesson_plan.out)
 \@outlinefile=\write4
-\openout4 = `testing.out'.
+\openout4 = `lesson_plan.out'.
 
 LaTeX Info: Redefining \microtypecontext on input line 177.
 Package microtype Info: Applying patch `item' on input line 177.
@@ -542,7 +542,7 @@ Package microtype Info: Loading generic protrusion settings for font family
 
 
 pdfTeX warning: pdflatex (file ./GP_banner_dark.pdf): PDF inclusion: found PDF version <1.6>, but at most version <1.5> allowed
-<./GP_banner_dark.pdf, id=48, 614.295pt x 39.87608pt>
+<./GP_banner_dark.pdf, id=52, 614.295pt x 39.87608pt>
 File: ./GP_banner_dark.pdf Graphic file (type pdf)
 <use ./GP_banner_dark.pdf>
 Package pdftex.def Info: ./GP_banner_dark.pdf  used on input line 193.
@@ -590,59 +590,52 @@ Underfull \hbox (badness 2680) in paragraph at lines 196--199
 []\OT1/phv/m/n/12 (+20) Abstract length and content varies depending on article type. Refer to []$\OT1/pcr/m/n/12 http : / /
  []
 
-LaTeX Font Info:    Trying to load font information for OML+pcr on input line 227.
+LaTeX Font Info:    Trying to load font information for OML+pcr on input line 225.
 (/Users/mattwilkins/Library/TinyTeX/texmf-dist/tex/latex/psnfss/omlpcr.fd
 File: omlpcr.fd 
 )
 LaTeX Font Info:    Font shape `OML/pcr/m/n' in size <12> not available
-(Font)              Font shape `OML/cmm/m/it' tried instead on input line 227.
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 225.
 [1
 
 
 
 {/Users/mattwilkins/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./GP_banner_dark.pdf>]
-Underfull \hbox (badness 2809) in paragraph at lines 295--299
+Underfull \hbox (badness 2809) in paragraph at lines 293--297
 []\OT1/ptm/m/n/12 (+20) Author4, N., and Author5, N. (2013). Title of the article. \OT1/ptm/m/it/12 (+20) Frontiers in Neurorobotics \OT1/ptm/m/n/12 (+20) 7.
  []
 
-<testing_files/figure-latex/Figure-1-1.pdf, id=77, 289.08pt x 289.08pt>
-File: testing_files/figure-latex/Figure-1-1.pdf Graphic file (type pdf)
-<use testing_files/figure-latex/Figure-1-1.pdf>
-Package pdftex.def Info: testing_files/figure-latex/Figure-1-1.pdf  used on input line 318.
-(pdftex.def)             Requested size: 241.8463pt x 241.8463pt.
+<GP-Learning-Epaulette.png, id=81, 794.97pt x 80.58105pt>
+File: GP-Learning-Epaulette.png Graphic file (type png)
+<use GP-Learning-Epaulette.png>
+Package pdftex.def Info: GP-Learning-Epaulette.png  used on input line 317.
+(pdftex.def)             Requested size: 794.96806pt x 80.58084pt.
+
+Overfull \hbox (290.96806pt too wide) in paragraph at lines 317--318
+[]
+ []
+
 
 Package caption Warning: Unused \captionsetup[sub] on input line 17.
 See the caption package documentation for explanation.
 
 LaTeX Font Info:    Font shape `OT1/phv/b/it' in size <11> not available
-(Font)              Font shape `OT1/phv/b/sl' tried instead on input line 326.
+(Font)              Font shape `OT1/phv/b/sl' tried instead on input line 320.
 
 Overfull \vbox (3.49998pt too high) has occurred while \output is active []
 
-[2]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \vbox (3.49998pt too high) has occurred while \output is active []
-
-[3 <./testing_files/figure-latex/Figure-1-1.pdf>] (./testing.aux)
-Package rerunfilecheck Info: File `testing.out' has not changed.
-(rerunfilecheck)             Checksum: 20A43BA41310504577641B29261E4695;1333.
+[2 <./GP-Learning-Epaulette.png>] (./lesson_plan.aux)
+Package rerunfilecheck Info: File `lesson_plan.out' has not changed.
+(rerunfilecheck)             Checksum: 7AC92E8A75B0ED62714DD7288B060378;1436.
  ) 
 Here is how much of TeX's memory you used:
- 16424 strings out of 480253
- 268112 string characters out of 5893018
- 598350 words of memory out of 5000000
- 33902 multiletter control sequences out of 15000+600000
- 503949 words of font info for 152 fonts, out of 8000000 for 9000
+ 16405 strings out of 480253
+ 267737 string characters out of 5893018
+ 598355 words of memory out of 5000000
+ 33893 multiletter control sequences out of 15000+600000
+ 502091 words of font info for 146 fonts, out of 8000000 for 9000
  18 hyphenation exceptions out of 8191
- 85i,8n,131p,1033b,426s stack positions out of 10000i,1000n,20000p,200000b,200000s
-
-pdfTeX warning (dest): name{section*.8} has been referenced but does not exist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{section*.7} has been referenced but does not exist, replaced by a fixed one
-
+ 85i,8n,131p,1037b,426s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 pdfTeX warning (dest): name{section*.6} has been referenced but does not exist, replaced by a fixed one
 
@@ -650,16 +643,16 @@ pdfTeX warning (dest): name{section*.6} has been referenced but does not exist, 
 pdfTeX warning (dest): name{section*.5} has been referenced but does not exist, replaced by a fixed one
 
 
-pdfTeX warning (dest): name{section*.2} has been referenced but does not exist, replaced by a fixed one
+pdfTeX warning (dest): name{section*.4} has been referenced but does not exist, replaced by a fixed one
 
 
-pdfTeX warning (dest): name{section*.1} has been referenced but does not exist, replaced by a fixed one
+pdfTeX warning (dest): name{section*.3} has been referenced but does not exist, replaced by a fixed one
 
-{/Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}</Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on testing.pdf (3 pages, 113728 bytes).
+{/Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}</Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvbo8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></Users/mattwilkins/Library/TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on lesson_plan.pdf (2 pages, 119518 bytes).
 PDF statistics:
- 153 PDF objects out of 1000 (max. 8388607)
- 124 compressed objects within 2 object streams
+ 145 PDF objects out of 1000 (max. 8388607)
+ 119 compressed objects within 2 object streams
  31 named destinations out of 1000 (max. 500000)
- 65635 words of extra memory for PDF output out of 74296 (max. 10000000)
+ 61547 words of extra memory for PDF output out of 61914 (max. 10000000)
 

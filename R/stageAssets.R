@@ -61,7 +61,7 @@ stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TR
       }
 
     # clear target directory and copy updated files
-    ec<-tryCatch(copyUpdatedFiles(flz,dest_folder,clear=clear),error=function(e){e})
+    ec<-tryCatch(copy_updated_files(flz,dest_folder,clear=clear),error=function(e){e})
 
     ec
 

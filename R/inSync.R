@@ -6,11 +6,12 @@
 #' @param path2 path to reference file (expected to be at least slightly older)
 #' @param ... path to other reference files to compare modified date to path1; separated by commas
 #' @param verbose print out table with information? default=FALSE
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #'
 #' @returns T if timestamps match, F if they don't or if path 1 is missing
 #' @export
 
-inSync <- function(path1, path2,..., verbose = FALSE) {
+inSync <- function(path1, path2,..., verbose = FALSE, WD=getwd()) {
   pathz <- c(path1, path2,...)
   existence <- sapply(pathz, file.exists)
   good_path_sum<-sum(existence)

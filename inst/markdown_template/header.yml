@@ -1,0 +1,44 @@
+title: "Testing"
+runtitle: "Short Title"
+documentclass: frontiersSCNS  
+preprint: true
+author:
+  - name: First Author
+    affiliation: '1'
+    etal: LASTNAME # First author's last name. 
+  - name: Co-Author
+    affiliation: '2'
+  - name: Co-Author
+    affiliation: '1,3'
+    email: email@uni.edu # Indicates corresponding Author
+    institution: Laboratory X, Institute X, Department X, Organization X
+    street: Street X
+    city: City X
+    state: State XX # only USA, Australia, Canada
+    zip: Zip Code X
+    country: Country X
+affiliation:
+  - id: '1'
+    department: Department X
+    institution: Institution X
+    city: City X
+    state: State XX # only USA, Australia, Canada
+    country: Country X
+  - id: '2' 
+    department: Department X
+    institution: Institution X
+    city: City X
+    state: State XX # only USA, Australia, Canada
+    country: Country X
+  - id: '3' 
+    department: Department X
+    institution: Institution X
+    city: City X
+    state: State XX # only USA, Australia, Canada
+    country: Country X
+output: 
+  bookdown::pdf_book:
+    base_format: rticles::frontiers_article
+    keep_tex: yes
+csl: frontiers.csl
+bibliography: lesson_plan.bib

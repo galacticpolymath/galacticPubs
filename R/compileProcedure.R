@@ -54,7 +54,7 @@ compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
   procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble() %>% rmNArows()
 
   #Basic length test
-  nPartsTest<-length(as.vector(na.omit(unique(proc$Part))))==length(as.vector(na.omit(unique(procTitles$Part))))
+  nPartsTest<-length(as.vector(stats::na.omit(unique(proc$Part))))==length(as.vector(stats::na.omit(unique(procTitles$Part))))
   message("\n**TEST: Num. Parts in 'NamesAndNotes' = 'Procedure'?** ",ifelse(nPartsTest,"\n  >PASS","\n  >FAIL: Make sure Procedure entries and 'NamesAndNotes' Tab of procedure have same length"))
 
   #Check for errors flagged on spreadsheet (matching documented chunks with expected duration)
