@@ -55,11 +55,14 @@ copy_updated_files<-function(paths,dest_folder,clear=FALSE,verbose=TRUE){
   })#end out (lapply)
   OUT<-do.call(dplyr::bind_rows,out)
   OUT$category<-names(paths)
+  #simplify filename to fit on screen
+  out_for_printing<-OUT
+  out_for_printing$file<-basename(out_for_printing$file)
   if(verbose){
     message("@ Copying summary:")
-    print(OUT)}
+    print(out_for_printing)}
 
-  errs<-subset(OUT,log=="Not Found")
+  errs<-subset(out_for_printing,log=="Not Found")
   if(nrow(errs>0)){
     warning("The following files were not found:\n\t- ",
              ifelse(is.na(errs$file),paste0("NO FILE (Category: ",errs$category,")"), paste(errs$file,collapse="\n\t- "))

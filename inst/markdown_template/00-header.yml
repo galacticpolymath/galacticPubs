@@ -1,13 +1,13 @@
-title: ""
-subtitle: ""
-runtitle: "Short Title"
-documentclass: frontiersSCNS  
+Title: ""
+Subtitle: ""
+ShortTitle: "Short Title"
+documentclass: article
 publicationdate: ""
 lastupdated: ""
 author:
   - name: First Author
     affiliation: '1'
-    etal: LASTNAME # First author's last name. 
+    etal: LASTNAME # First author's last name.
   - name: Co-Author
     affiliation: '2'
   - name: Co-Author
@@ -26,23 +26,32 @@ affiliation:
     city: City X
     state: State XX # only USA, Australia, Canada
     country: Country X
-  - id: '2' 
+  - id: '2'
     department: Department X
     institution: Institution X
     city: City X
     state: State XX # only USA, Australia, Canada
     country: Country X
-  - id: '3' 
+  - id: '3'
     department: Department X
     institution: Institution X
     city: City X
     state: State XX # only USA, Australia, Canada
     country: Country X
-url: ""
-doi: ""
-output: 
-  bookdown::pdf_book:
-    base_format: rticles::frontiers_article
-    keep_tex: yes
+URL: ""
+DOI: ""
+TargetSubject: ""
+EstLessonTime: ""
+ForGrades: ""
+SponsorLogo: ""
+LessonBanner: ""
+# The header-includes is changed based on function logic for make_printable(); that's
+# why it's separated from the other LaTeX in 000-preamble.tex
+header-includes: "\\usepackage[letterpaper,total={6.5in, 9in}]{geometry}"
+output:
+  pdf_document:
+      includes:
+        in_header: "000-preamble.tex"
+      keep_tex: yes
 csl: frontiers.csl
 bibliography: lesson_plan.bib

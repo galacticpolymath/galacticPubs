@@ -26,6 +26,8 @@ stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TR
    status<-switch(stat,l="Live",d="Draft",NA)
  }
 
+if(is.null(clear)){clear<-FALSE}
+
   #copy images over to dest_folder folder for previewing
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningEpaulette_vert","LearningChart","SupportingMedia")
     #read in filenames; if empty, return empty; else add WD to create full path
@@ -63,6 +65,6 @@ stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TR
     # clear target directory and copy updated files
     ec<-tryCatch(copy_updated_files(flz,dest_folder,clear=clear),error=function(e){e})
 
-    ec
+    return(invisible(ec))
 
 }

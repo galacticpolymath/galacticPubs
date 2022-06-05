@@ -1,0 +1,14 @@
+% This is a LaTeX preamble. Everything that needs to be defined before \begin{document}
+\usepackage[defaultfam,tabular,lining]{montserrat}
+\usepackage[T1]{fontenc}
+\renewcommand*\oldstylenums[1]{{\fontfamily{Montserrat-TOsF}\selectfont #1}}
+\usepackage[export]{adjustbox}
+\usepackage{graphicx,xcolor}
+\usepackage{multicol}
+\usepackage{hyperref}
+%Define custom colors
+\definecolor{subtlegray}{HTML}{E6E7E8}
+%Define inline graphics include
+\newcommand{\vcenteredinclude}[2]{\begingroup
+\setbox0=\hbox{\includegraphics[width=#1]{#2}}%
+\parbox{\wd0}{\box0}\endgroup}

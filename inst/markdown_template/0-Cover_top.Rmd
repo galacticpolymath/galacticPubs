@@ -1,0 +1,142 @@
+```{=latex}
+% Banner
+\begin{center}
+    \includegraphics[width=\linewidth]{static_icons/GP_banner_dark.pdf}
+\end{center}
+\vspace{-0.2in}
+% Title and dashboard
+\begin{minipage}[t]{0.7\linewidth}
+    \begin{flushleft}
+        \vspace{0.1in}
+        \tiny{Galactic Polymath Lessons (2022), 1 (3). doi: zenodo.3238.3}\\
+        \footnotesize{The Authors will go here}
+        \par\vspace{2pt}
+        \huge{\textbf{%
+        %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$Title`
+          %<<<<<<<<<<<<<<<<<<<
+}}\par
+        \vspace{3pt}
+        \large{%
+        %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$Subtitle`
+          %<<<<<<<<<<<<<<<<<<<
+}\par
+        \includegraphics[width=\linewidth]{%
+        %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$LessonBanner`
+          %<<<<<<<<<<<<<<<<<<<
+}\\
+        \parbox[t][0.75in]{\linewidth}{
+        \par\vspace{-0.2in}
+        \begin{multicols}{3}
+        \begin{center}
+            \textbf{\small{Target subject}}\\
+            \vspace{0.075in}
+            \vcenteredinclude{0.17\linewidth}{static_icons/icon_book.png} \small{%
+            %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$TargetSubject`
+          %<<<<<<<<<<<<<<<<<<<
+}\\
+            \textbf{\small{Grades}} \\
+            \vspace{0.075in}
+            \vcenteredinclude{0.17\linewidth}{static_icons/icon_face.png}
+            \small{%
+            %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$ForGrades`
+          %<<<<<<<<<<<<<<<<<<<
+} \\
+            \textbf{\small{Estimated Time}}\\
+            \vspace{0.075in}
+            \vcenteredinclude{0.17\linewidth}{static_icons/icon_clock.png} \small{%
+             %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$EstLessonTime`
+          %<<<<<<<<<<<<<<<<<<<
+}
+        \end{center}
+        \end{multicols}
+        }
+    \par\vspace{-0.05in}
+    \centering \textbf{\small{Subject breakdown by standards alignment.}}
+    \includegraphics[width=0.9\linewidth]{dynamic_images/GP-Learning-Epaulette.png}
+    \end{flushleft}
+\end{minipage}
+%Right column with QR code and sponsors
+\begin{minipage}[t]{0.295\linewidth}
+    \hfill
+    \colorbox{subtlegray}{%     
+    \parbox[t][0.75in][c]{0.75\linewidth}{%
+    \vspace{-0.1in}
+    \begin{multicols}{2}
+        \small{Get digital materials here: \\}
+        \href{%
+        %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$URL`
+          %<<<<<<<<<<<<<<<<<<<
+        }{\includegraphics[width=0.5in,right]{dynamic_images/lesson_QR.pdf}}
+    \end{multicols}
+    \vspace{-0.1in}
+    \centering\tiny{\href{%
+          %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$URL`
+          %<<<<<<<<<<<<<<<<<<<
+        }{%
+          %>>>>>>>>>>>>>>>>>>>
+          % R code injection (Eventually I want this to be a bit.ly)
+          % For now it just takes the https::// off
+            `r gsub("https://(.*$)","\\1",rmarkdown::metadata$URL)`
+          %<<<<<<<<<<<<<<<<<<<
+        }}
+    }}
+    \par\hfill
+    \begin{minipage}[t]{0.75\linewidth}
+    \begin{center}
+        \vspace{0.1in}
+        \textbf{\small{Sponsored by:}}
+        \par\vspace{0.1in}
+        \includegraphics[height=0.75in]{%
+          %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$SponsorLogo[1]`}
+          %<<<<<<<<<<<<<<<<<<<
+        
+        \par\vspace{0.1in}
+        \includegraphics[height=0.75in]{%
+          %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$SponsorLogo[2]`}
+          %<<<<<<<<<<<<<<<<<<<
+
+        \par\vspace{0.1in}
+        \includegraphics[height=0.75in]{%
+          %>>>>>>>>>>>>>>>>>>>
+          % R code injection
+            `r rmarkdown::metadata$SponsorLogo[3]`}
+          %<<<<<<<<<<<<<<<<<<<
+          
+    \end{center}
+    \end{minipage}
+\end{minipage}
+% Text
+\par\vspace{0.25in}
+\begin{minipage}[t]{0.7\linewidth}
+    Driving questions go here \\Essential questions go here
+\end{minipage}
+%Teaching supplies frame
+\par\hfill
+\fbox
+{
+\begin{minipage}{0.295\linewidth}
+    RESOURCES NEEDED
+\end{minipage}
+}
+
+```
