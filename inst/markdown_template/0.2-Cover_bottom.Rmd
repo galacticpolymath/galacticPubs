@@ -1,0 +1,19 @@
+<!-- Cover page: Driving questions and Resources needed  -->
+```{=latex}
+% Text
+\par\vspace{0.25in}
+\begin{minipage}[t]{0.65\linewidth}
+
+    %>>>>>>>>>>>>>>>>>>>
+    % R code injection
+      `r rmarkdown::metadata$OverviewText`
+     %<<<<<<<<<<<<<<<<<<<
+
+\end{minipage}
+%Teaching supplies frame
+\begin{minipage}{0.3\linewidth}
+\hfill
+\fbox
+{    RESOURCES NEEDED}
+\end{minipage}
+```

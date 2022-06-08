@@ -52,6 +52,19 @@ header[matching_fields]<-fm[matching_fields]
  #replace missing logos (up to 3) with spacer PNGs
  header$SponsorLogo <- sapply(header$SponsorLogo,function(x) {ifelse(is.na(x),fs::path("static_icons","transp_logo_spacer.png"),fs::path("dynamic_images",x))},USE.NAMES = FALSE)
 
+ # Combine Driving Qs, etc. into 1 markdown blob; then convert that blob to latex
+ header$OverviewText<-lumpItems(
+            c("DrivingQ", "EssentialQ", "LearningObj", "MiscMD"),
+            item.labs = c(
+              "Driving Question(s):",
+              "Essential Question(s):",
+              "Learning Objective(s):",
+              ""
+            ),
+            list.obj=fm,
+            new.name = "Text"
+          )$Text %>%  commonmark::markdown_latex()
+
  # showframe logic for troubleshooting typesetting
  if(showframe){header$`header-includes`<-"\\usepackage[letterpaper,total={6.5in, 9in},showframe]{geometry}"}
 

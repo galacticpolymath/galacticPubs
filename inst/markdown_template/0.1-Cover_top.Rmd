@@ -125,18 +125,4 @@
     \end{center}
     \end{minipage}
 \end{minipage}
-% Text
-\par\vspace{0.25in}
-\begin{minipage}[t]{0.7\linewidth}
-    Driving questions go here \\Essential questions go here
-\end{minipage}
-%Teaching supplies frame
-\par\hfill
-\fbox
-{
-\begin{minipage}{0.295\linewidth}
-    RESOURCES NEEDED
-\end{minipage}
-}
-
 ```

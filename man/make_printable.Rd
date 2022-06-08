@@ -4,7 +4,13 @@
 \alias{make_printable}
 \title{make_printable}
 \usage{
-make_printable(WD = getwd(), dest_folder, rebuild = NULL)
+make_printable(
+  WD = getwd(),
+  dest_folder,
+  rebuild = NULL,
+  showframe = FALSE,
+  open = TRUE
+)
 }
 \arguments{
 \item{WD}{is working directory of the project; default= getwd()}
@@ -12,6 +18,10 @@ make_printable(WD = getwd(), dest_folder, rebuild = NULL)
 \item{dest_folder}{where do you want template and knitted files to go? default= "assets/lesson-plan-markdown"}
 
 \item{rebuild}{do you want to delete files in the dest_folder and start over? default=NULL}
+
+\item{showframe}{do you want boxes to be drawn to show margins? default= FALSE}
+
+\item{open}{do you want to open rendered PDF file? default=TRUE}
 }
 \description{
 Knit a concise, formatted PDF version of the lesson plan
