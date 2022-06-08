@@ -15,8 +15,8 @@ expandMDLinks(md, repo)
 Make markdown links into full paths to GP catalog
 }
 \details{
-Ex: "See ![image1](img.png) for details" becomes ->
-"See ![image1](https://catalog.galacticpolymath.com/ThisRepository/img.png) for details"
+Ex: "See \figure{img.png} for details" becomes ->
+"See \figure{https://catalog.galacticpolymath.com/ThisRepository/img.png} for details"
 }
 \seealso{
 Other markdown: 

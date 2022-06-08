@@ -7,5 +7,5 @@
 update_ISO_codes()
 }
 \description{
-Internal function for downloading the latest ISO codes using the ISOcodes package. Run with `galacticPubs:::update_ISO_codes()`
+Internal function for downloading the latest ISO codes using the ISOcodes package. Run with \code{galacticPubs:::update_ISO_codes()}
 }

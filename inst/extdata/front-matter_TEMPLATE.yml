@@ -1,16 +1,21 @@
 #DEFAULT VALUES FOR front-matter.
 #
-#---> Except for ShortTitle, these are operational variables that will be ignored by editor(), but kept in output
 id: ''
 ShortTitle: ''
-TemplateVer: 0.2.8
+Language: 'English'
+Country: 'United States'
+#---> operational variables (that don't have Shiny inputs
+lang: ''
+lng: ''
+locale: 'en-US'
+TemplateVer: 0.3.1
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
 URL: ''
 GPCatalogPath: ''
 GitHubPath: ''
-#<---
+#<--- operational variables (that don't have Shiny inputs)
 PublicationStatus: Draft
 RebuildAllMaterials: no
 ReleaseDate: ''

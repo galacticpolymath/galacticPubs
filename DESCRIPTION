@@ -10,6 +10,7 @@ Description: Code to enable the GP Nexus education publishing workflow. Outputs 
              and staging for publication.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
 LazyData: true
 Imports: 
     commonmark (>= 1.8.0),

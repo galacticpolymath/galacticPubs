@@ -78,14 +78,30 @@ ui <- navbarPage(
             inputId = "ShortTitle",
             label = "shortTitle (a unique prefix for key lesson materials)",
             value = y$ShortTitle,
-            width = 200
+            width = 170
           ),
           dateInput(
-            width = "200px",
+            width = "115",
             inputId = "ReleaseDate",
             label = "Official Release Date",
             value = y$ReleaseDate
-          )
+          ),
+          selectizeInput(
+            inputId = "Language",
+            label = "Language",
+            choices = language_codes$Name,
+            selected = y$Language,
+            options = list(create = TRUE),
+            width ="150"
+          ),
+          selectizeInput(
+            inputId = "Country",
+            label = "Country (leave blank if NA)",
+            choices = country_codes$Name,
+            selected = y$Country,
+            options = list(create = TRUE),
+            width ="150"
+          ),
         ),
         textInput(
             inputId = "Title",
@@ -528,7 +544,7 @@ output$supporting_media<-renderUI({
     #Save data before compiling
     vals$current_data<-prep_input(input,yaml_path)$current_data
     yaml::write_yaml(vals$current_data, fs::path(meta_path,"front-matter.yml"))
-    batchCompile(choices=input$ReadyToCompile,current_data=vals$current_data,WD=WD,img_loc=img_loc)
+    vals$current_data<-batchCompile(choices=input$ReadyToCompile,current_data=vals$current_data,WD=WD)
 
     } ) %>% bindEvent(input$compile)
 

@@ -10,10 +10,10 @@ fixAnchorLinks(md)
 \item{md}{a markdown string or vector}
 }
 \description{
-Converts `(blah)[#tag]` notation to react component: `<AnchorLink href="#tag">blah</AnchorLink>`
+Converts \verb{(blah)[#tag]} notation to react component: \verb{<AnchorLink href="#tag">blah</AnchorLink>}
 }
 \seealso{
-[parseGPmarkdown()]
+\code{\link[=parseGPmarkdown]{parseGPmarkdown()}}
 
 Other markdown: 
 \code{\link{expandMDLinks}()},

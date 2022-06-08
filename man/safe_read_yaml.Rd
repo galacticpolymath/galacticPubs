@@ -12,5 +12,5 @@ safe_read_yaml(yaml_path, eval.expr = TRUE)
 \item{eval.expr}{boolean; do you want to evaluate expression in yaml prepended with '!expr '? Default=TRUE}
 }
 \description{
-Wrapper for [read_yaml][yaml::read_yaml()] that simplifies all null and missing data to ''
+Wrapper for \link[yaml:read_yaml]{read_yaml} that simplifies all null and missing data to ''
 }

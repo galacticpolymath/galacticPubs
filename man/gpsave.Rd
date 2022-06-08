@@ -17,10 +17,10 @@ gpsave(filename, width = 6, height = 3.38, dpi = 300, bg = "transparent", ...)
 
 \item{bg}{background color (default= "transparent")}
 
-\item{...}{other parameters from [ggplot2::ggsave()]}
+\item{...}{other parameters from \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}}}
 }
 \description{
-Wrapper for [ggplot2::ggsave()] with galacticPubs defaults
+Wrapper for \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}} with galacticPubs defaults
 }
 \details{
 Most important thing it does is default to saving in the assets/R_outputs/ folder and save with reasonable dimensions that maintain large, readable text size of graph labels

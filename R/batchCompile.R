@@ -10,7 +10,7 @@
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param clean delete all JSON files in meta/ and start over? default=FALSE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
-#' @return a JSON is saved to meta/JSON/LESSON.json
+#' @return current_data; also a JSON is saved to meta/JSON/LESSON.json
 #' @importFrom rlang .data
 #' @export
 #'
@@ -120,10 +120,11 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
 # Separate parts of Front Matter ------------------------------------------
 
   if("Front Matter" %in% choices){
-
-    #Take everything from TemplateVer to SponsoredBy
-    header<-current_data[1:which(names(current_data)=="SponsoredBy")]
-    #make full catalog paths
+    #Add/Update the locale and lang fields with a nonexported internal function
+    current_data<-galacticPubs:::parse_locale(current_data)
+    #Include everything down to SponsoredBy in the header
+    header<-current_data[(1:which(names(current_data)=="SponsoredBy"))]
+    #make full catalog paths following naming conventions the frontend expects
     header$SponsorImage=list(url = catalogURL(basename(current_data$SponsorLogo),repo))
     header$CoverImage=list(url = catalogURL(basename(current_data$LessonBanner),repo))
 
@@ -295,6 +296,8 @@ compileJSON(WD=WD)
     current_data$RebuildAllMaterials<-FALSE
   }
 
-  #Save update YAML
+  #Save updated YAML
   yaml::write_yaml(current_data, fs::path(WD,"meta","front-matter.yml"))
+
+  return(current_data)
 }

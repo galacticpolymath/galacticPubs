@@ -13,5 +13,5 @@ is_empty(x)
 TRUE (if empty) or FALSE (if not empty)
 }
 \description{
-Logical test for all the different versions of empty values (NULL, "", NA, "`\\n`",list(),length(x)==0)
+Logical test for all the different versions of empty values (NULL, "", NA, "\verb{\\\\n}",list(),length(x)==0)
 }

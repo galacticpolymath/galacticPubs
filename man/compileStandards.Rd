@@ -23,7 +23,7 @@ compileStandards(
 
 \item{standardsRef}{where do you want to pull down statements and other info for the supplied standards codes? Default="standardX" (i.e. the \href{https://github.com/galacticpolymath/standardX}{standardX repository}); Options= "standardX" or "myFile" (which will use Tab 2 on the supplied XLSX workbook)}
 
-\item{targetSubj}{which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"}
+\item{targetSubj}{which subject\code{(}s\verb{)} is \code{(}are\verb{)} the focus of the lesson? opts= "math","ela","science","social studies"}
 
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 

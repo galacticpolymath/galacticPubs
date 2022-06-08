@@ -10,7 +10,7 @@ whichRepo(fullPath = FALSE)
 \item{fullPath}{do you want to export the full path, or just the repo name? Default=F (just name)}
 }
 \value{
-Either a warning or the name of the github repository connected to the current Rstudio project (extracted from `rstudioapi::getActiveProject()` and a call to `git remote -v`)
+Either a warning or the name of the github repository connected to the current Rstudio project (extracted from \code{rstudioapi::getActiveProject()} and a call to \verb{git remote -v})
 }
 \description{
 Get the name of the repo this is set up on. No error catching at the moment.

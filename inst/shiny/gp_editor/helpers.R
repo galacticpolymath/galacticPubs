@@ -203,8 +203,8 @@ prep_input<-function(input,yaml_path,existing_current_data=NULL){
     #Remove Nulls! They cause many problems when we output to character & get character(0)
     Y<- sapply(Y0B,function(x){if(is.null(x)){""}else{x}} ,simplify = F)
 
-    # operational variables in yaml we don't expect to be in input (everything before PublicationStatus, but skipping ShortTitle (2), which we is important)
-    yaml_op_var<-names(template_yaml)[c(1,3:(which(names(template_yaml)=="PublicationStatus")-1))]
+    # operational variables in yaml we don't expect to be in input (everything between Country and PublicationStatus, but skipping ShortTitle (2), which is important)
+    yaml_op_var<-names(template_yaml)[c(1,(which(names(template_yaml)=="Country")+1):(which(names(template_yaml)=="PublicationStatus")-1))]
 
 
     template_fields0<-names(template_yaml)
@@ -257,7 +257,7 @@ prep_input<-function(input,yaml_path,existing_current_data=NULL){
       }
     }
 
-
+    #Return a list of current_data and saved_data to trigger an Save Changes? message in editor()
     #gotta make sure all POSIX Y4 elements are characters, cuz otherwise the publication date will get screwed up :/
     list(saved_data = saved_00,
          current_data = purrr::map(Y4, function(x) {
