@@ -120,6 +120,8 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
 # Separate parts of Front Matter ------------------------------------------
 
   if("Front Matter" %in% choices){
+    #add galacticPubsVer
+    current_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
     #Add/Update the locale and lang fields with a nonexported internal function
     current_data<-galacticPubs:::parse_locale(current_data)
     #Include everything down to SponsoredBy in the header
