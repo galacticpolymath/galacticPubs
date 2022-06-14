@@ -122,8 +122,7 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
   if("Front Matter" %in% choices){
     #add galacticPubsVer
     current_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
-    #Add/Update the locale and lang fields with a nonexported internal function
-    current_data<-galacticPubs:::parse_locale(current_data)
+
     #Include everything down to SponsoredBy in the header
     header<-current_data[(1:which(names(current_data)=="SponsoredBy"))]
     #make full catalog paths following naming conventions the frontend expects

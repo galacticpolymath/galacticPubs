@@ -257,10 +257,13 @@ prep_input<-function(input,yaml_path,existing_current_data=NULL){
       }
     }
 
+     #Add/Update the locale and lang fields with a nonexported internal function parse_locale(); overwrites existing lang and locale fields and returns the modified current_data list
+    Y5<-galacticPubs:::parse_locale(Y4)
+
     #Return a list of current_data and saved_data to trigger an Save Changes? message in editor()
     #gotta make sure all POSIX Y4 elements are characters, cuz otherwise the publication date will get screwed up :/
     list(saved_data = saved_00,
-         current_data = purrr::map(Y4, function(x) {
+         current_data = purrr::map(Y5, function(x) {
            if ("POSIXct" %in% class(x)|"Date"%in% class(x)) {
              as.character(x)
            } else{

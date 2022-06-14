@@ -279,7 +279,9 @@ server <- function(input, output,session) {
     #don't run until full page rendered
     if(!is.null(input$DrivingQ)){
 
-    data_check<-prep_input(isolate(input),yaml_path,existing_current_data=vals$current_data)
+    data_check<-prep_input(input,yaml_path,existing_current_data=vals$current_data)
+
+    #save updated current_data and saved_data to reactive values
     vals$current_data<-data_check$current_data
     vals$saved_data<-data_check$saved_data
 
@@ -331,8 +333,7 @@ server <- function(input, output,session) {
         )
     }
 
-
-    }
+  }
 
   })
 
