@@ -10,7 +10,7 @@ parse_locale(current_data)
 \item{current_data}{the reconciled data including yaml and input from the shiny app environment}
 }
 \value{
-locale string
+current data with locale added
 }
 \description{
 Takes the language and country chosen in the \code{\link[=editor]{editor()}} and creates a locale with a 3 digit language code and (if applicable), 2 digit country code. Only meant to run in the \code{\link[=batchCompile]{batchCompile()}} function.

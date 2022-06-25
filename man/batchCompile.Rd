@@ -30,7 +30,7 @@ batchCompile(
 \item{rebuild}{if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL}
 }
 \value{
-a JSON is saved to meta/JSON/LESSON.json
+current_data; also a JSON is saved to meta/JSON/LESSON.json
 }
 \description{
 Processes a subset of data chosen by user using the GP Shiny Editor

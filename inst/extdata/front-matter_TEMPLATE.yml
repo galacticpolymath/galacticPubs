@@ -41,9 +41,12 @@ SupportingMedia: ''
 #---> These are combined into "text" overview section in JSON output
 DrivingQ: ''
 EssentialQ: ''
-LearningObj: ''
+Hooks: ''
+LearningSummary: ''
 MiscMD: ''
 # <---
+#LearningObj will go in standards section on the web
+LearningObj: ''
 Tags: ''
 Description: ''
 QuickPrep: |

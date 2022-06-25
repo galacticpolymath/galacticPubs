@@ -279,7 +279,7 @@ server <- function(input, output,session) {
     #don't run until full page rendered
     if(!is.null(input$DrivingQ)){
 
-    data_check<-prep_input(input,yaml_path,existing_current_data=vals$current_data)
+    data_check<-prep_input(input,yaml_path,existing_current_data=vals$current_data,WD=WD)
 
     #save updated current_data and saved_data to reactive values
     vals$current_data<-data_check$current_data
@@ -530,7 +530,7 @@ output$supporting_media<-renderUI({
   observe({
     isolate({
     #Save selections
-    current_data<-prep_input(input,yaml_path)$current_data
+    current_data<-prep_input(input,yaml_path,WD=WD)$current_data
     yaml::write_yaml(current_data, fs::path(meta_path,"front-matter.yml"))
 
     scripts<-list.files(fs::path(WD,"scripts"),pattern=".R")
@@ -543,7 +543,7 @@ output$supporting_media<-renderUI({
   observe({
 
     #Save data before compiling
-    vals$current_data<-prep_input(input,yaml_path)$current_data
+    vals$current_data<-prep_input(input,yaml_path,WD=WD)$current_data
     yaml::write_yaml(vals$current_data, fs::path(meta_path,"front-matter.yml"))
     vals$current_data<-batchCompile(choices=input$ReadyToCompile,current_data=vals$current_data,WD=WD)
 
@@ -640,7 +640,7 @@ output$supporting_media<-renderUI({
   # 3. Output the preview of the lesson plan
    output$preview<-renderUI({
 
-    current_data<-prep_input(input,yaml_path,vals$current_data)$current_data
+    current_data<-prep_input(input,yaml_path,vals$current_data,WD=WD)$current_data
 
     stageAssets(current_data,WD,img_loc,clear=TRUE)
 
@@ -740,7 +740,7 @@ output$supporting_media<-renderUI({
   observe({
 
     #Reconcile input and yaml saved data before finalizing
-    current_data<-prep_input(input,yaml_path, vals$current_data)$current_data
+    current_data<-prep_input(input,yaml_path, vals$current_data,WD=WD)$current_data
     yaml::write_yaml(current_data, yaml_path)
     ec<-stageAssets(current_data,WD,destFolder<-fs::path(WD,"published"),clear=TRUE,status = input$PublicationStatus)
     if(!"error"%in%class(ec)){
