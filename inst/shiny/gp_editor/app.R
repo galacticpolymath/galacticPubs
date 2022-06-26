@@ -155,7 +155,7 @@ ui <- navbarPage(
             "EstLessonTime",
             "Estimated Lesson Time",
             value = y$EstLessonTime,
-            placeholder = "format= '3 x 45 min'",
+            placeholder = "format= '3 x 45 min classes'",
             width = 300
           )
         ),
@@ -169,7 +169,7 @@ ui <- navbarPage(
             width = "100%",
             height = 200
           ),
-        selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE, width="100%"),
+        selectizeInput("Tags",label="Keywords (Tags):",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE, width="100%"),
 
         textAreaInput("Description",label="Lesson Description:",placeholder="Try to keep it as short as possible",value=y$Description,height="300px", width="100%"),
         hr(class="blhr"),

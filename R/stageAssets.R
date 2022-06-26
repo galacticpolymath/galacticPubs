@@ -20,6 +20,12 @@ stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TR
  #this defaults to published
  if(is.null(dest_folder)){dest_folder<-fs::path(WD,"published")}
 
+  #check if published folder exists
+  if(!dir.exists(dest_folder)){
+    dir.create(dest_folder)
+    message("@ Folder Created: ",dest_folder)
+  }
+
  if(!is.null(status)){
    #allow short and variable versions of live and draft
    stat<-tolower(substr(status,1,1))
