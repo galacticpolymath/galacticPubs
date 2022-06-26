@@ -159,9 +159,16 @@ ui <- navbarPage(
             width = 300
           )
         ),
-        #text block
+        #text block (Driving Questions, etc.)
         htmlOutput("overview_text_block"),
-
+        textAreaInput(
+            "LearningObj",
+            "Learning Objectives (this will appear in the Standards Section)",
+            value = y$LearningObj,
+            placeholder = "format= '3 x 45 min'",
+            width = "100%",
+            height = 200
+          ),
         selectizeInput("Tags",label="Tags:",choices=y$Tags,selected=y$Tags,options=list(create=TRUE),multiple=TRUE, width="100%"),
 
         textAreaInput("Description",label="Lesson Description:",placeholder="Try to keep it as short as possible",value=y$Description,height="300px", width="100%"),
@@ -264,13 +271,23 @@ server <- function(input, output,session) {
   #Finish generating all frontend items
   output$overview_text_block<-renderUI({
     div(class="text-block",p(class="text-block-title",strong("These sections combined in JSON output as 'Text'")),
-          textAreaInput("DrivingQ","Driving question(s):",y$DrivingQ, width="100%"),
+          textAreaInput("DrivingQ","Driving question(s) (What scientific problem(s) are we trying to solve?)",y$DrivingQ, width="100%",height=100),
           textAreaInput("EssentialQ",
-                        a("Essential question(s):",
+                        a("Essential question(s) (What's the broader point?)",
                           href="https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
-                        y$EssentialQ, width="100%"),
-          textAreaInput("LearningObj","Learning Objective(s):",y$LearningObj,height="300px", width="100%"),
-          textAreaInput("MiscMD","Additional text. (Create header with '#### Hook:' & start '- First point' on new line",y$MiscMD, width="100%")
+                        y$EssentialQ, width="100%",height=100),
+          textAreaInput("Hooks","Hook(s) i.e. How will students be engaged in the lesson?:",y$Hooks,height="100px", width="100%"),
+          textAreaInput(
+            "LearningSummary",
+            paste0('Learning Summary (Concise, jargon-free lesson summary. i.e. "The Tweet" )'),
+            y$LearningSummary,
+            height = 150,
+            width = "100%"
+          ),div(class="char-count",
+                renderText(paste0("Character Count= ",nchar(input$LearningSummary),
+                   " of 280 characters"))
+                ),
+          textAreaInput("MiscMD","Additional text to be added to Overview. (Create header with '#### Header Title:' & start with '- First point' on new line for bullets",y$MiscMD, width="100%")
         )
   })
 

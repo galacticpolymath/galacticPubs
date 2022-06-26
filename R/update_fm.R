@@ -7,11 +7,12 @@
 #' @param WD Working drive; default=getwd()
 #' @param save_output do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
+#' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,) will trigger a full lesson rebuild when batchCompile() is run.
 #' @return silently returns updated front-matter.yml object as a list
 #' @export
 #'
 
-update_fm <- function(WD=getwd(),save_output=TRUE,reorder=TRUE){
+update_fm <- function(WD=getwd(),save_output=TRUE,reorder=TRUE,change_this=NULL){
 
   galacticPubs_template<-safe_read_yaml(system.file("extdata",
                                                     "front-matter_TEMPLATE.yml",
@@ -40,6 +41,15 @@ update_fm <- function(WD=getwd(),save_output=TRUE,reorder=TRUE){
       repo<-whichRepo()
       new_yaml$GPCatalogPath<-catalogURL("LESSON.json",repo)
     }
+
+
+# Make manual changes if requested ----------------------------------------
+  if(!is.null(change_this)){
+    for(i in 1:length(change_this)){
+      element_i<-names(change_this)[i]
+      new_yaml[[element_i]]<-change_this[[i]]
+    }
+  }
 
   #test if it's a new version
   version_bumped<-old_yaml$TemplateVer!=galacticPubs_template$TemplateVer

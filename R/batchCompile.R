@@ -34,6 +34,7 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
     #figure out which repo we're connected to (to create full paths to catalog.galacticpolymath.com)
     repo<-whichRepo()
 
+
   # Standards alignment & learning plots -----------------------------------------------------
     # test if standards json is out of sync with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
     stnds_out_of_date<-!inSync(fs::path(WD,"assets","learning-plots","GP-Learning-Epaulette.png"),
@@ -138,17 +139,19 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
         #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
 
         Text=lumpItems(
-            c("DrivingQ", "EssentialQ", "LearningObj", "MiscMD"),
+            c("DrivingQ", "EssentialQ", "Hooks","LearningSummary", "MiscMD"),
             item.labs = c(
               "Driving Question(s):",
               "Essential Question(s):",
-              "Learning Objective(s):",
+              "Hook(s):",
+              "Learning Summary:",
               ""
             ),
             list.obj=current_data,
             new.name = "Text"
           )$Text,
         Tags=lapply(current_data$Tags,function(x) list(Value=x)),
+        LearningObj=current_data$LearningObj,
         SteamEpaulette=list(
           url = catalogURL(basename(current_data$LearningEpaulette[1]),repo)
           #might want to add more complex image handling later
