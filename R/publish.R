@@ -9,7 +9,6 @@
 
 publish<- function(commit_msg=NULL,WD=getwd()){
 
-
   #test that WD is in the root directory with the R Project
   if(list.files(WD,pattern="\\.Rproj") %>% length() ==1){
     wdpath<-paste0("'",fs::as_fs_path((WD)),"'")
@@ -20,6 +19,12 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     lesson_staged<-file.exists(fs::path(published_path,"LESSON.json"))
     staged_lesson_up_to_date<-inSync(fs::path(published_path,"LESSON.json"),
                                      fs::path(meta_path,"JSON","LESSON.json"),WD=WD)
+
+    #Stage Assets if either check fails
+    if(!lesson_staged | !staged_lesson_up_to_date){
+      message("**** Staging Out-Of-Sync Lesson Materials ****")
+      stageAssets(WD=WD)
+    }
 
 
     # I need to edit both of these files to update First Publication status, etc.
@@ -64,7 +69,7 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     jsonlite::write_json(lesson,fs::path(published_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
     #also update the copy in the meta folder
     jsonlite::write_json(lesson,fs::path(meta_path,"JSON","LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
-
+browser()
 
     #############
     # push to GitHub

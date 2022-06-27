@@ -24,6 +24,7 @@ stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TR
   if(!dir.exists(dest_folder)){
     dir.create(dest_folder)
     message("@ Folder Created: ",dest_folder)
+    clear<-FALSE #no need to clear folder we're just creating
   }
 
  if(!is.null(status)){
