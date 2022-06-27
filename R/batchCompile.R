@@ -134,6 +134,7 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
     overview<-list(
         `__component`= "lesson-plan.overview",
         EstLessonTime=current_data$EstLessonTime,
+        GradesOrYears=current_data$GradesOrYears,
         ForGrades= current_data$ForGrades,
         TargetSubject= current_data$TargetSubject,
         #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
