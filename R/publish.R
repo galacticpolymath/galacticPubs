@@ -35,7 +35,8 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     if(is_empty(saved_data$id)){
       #count how many lessons there are currently on gp-catalog
       current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
-      next_id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
+
+      next_id<-(sapply(current_catalog, function(x) as.integer(x$id)) %>% max(na.rm=T) )+1 %>% as.integer()
       saved_data$id<-next_id
       lesson$id<-next_id
       message("\n************\n Lesson ID assigned: ",saved_data$id,"\n")
@@ -55,8 +56,8 @@ publish<- function(commit_msg=NULL,WD=getwd()){
 
     #rewrite it before pushing to cloud
     jsonlite::write_json(lesson,fs::path(published_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
-    #also in the meta folder
-    jsonlite::write_json(lesson,fs::path(meta_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+    #also update the copy in the meta folder
+    jsonlite::write_json(lesson,fs::path(meta_path,"JSON","LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
 
 
     #############
