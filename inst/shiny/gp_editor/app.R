@@ -798,7 +798,8 @@ output$supporting_media<-renderUI({
     pub_status<-publish(WD=WD,commit_msg = input$commit_msg)
     #prevent "unsaved" trigger from trying to overwrite new LastUpdated value
     #So we update the reactive value, which should supercede the now outdated input$LastUpdated
-    vals$current_data$LastUpdated<-safe_read_yaml(yaml_path)$LastUpdated
+    browser()
+    vals$current_data<-overwrite_matching(safe_read_yaml(yaml_path),vals$current_data)
     if(pub_status$success){
       output$publishReport<-renderUI(h4(paste0("\u2713 Publication Success! ",Sys.time()) ))
     }else{
