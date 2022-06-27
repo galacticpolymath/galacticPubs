@@ -32,16 +32,17 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     }
 
     # Assign new id based on what should come next in the catalog
-    if(lesson$id==""){
+    if(is_empty(lesson$id)){
       #count how many lessons there are currently on gp-catalog
       current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
       next_id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
       saved_data$id<-next_id
       lesson$id<-next_id
-      message("Lesson ID assigned: ",saved_data$id)
+      message("\n************\n Lesson ID assigned: ",saved_data$id,"\n")
 
     }
 
+    #Assign lesson URL after ID has been assigned
     if(is_empty(saved_data$URL)){
       lesson$URL<- saved_data$URL <- paste0("https://galacticpolymath.com/lessons/",lesson$id)}
 
@@ -54,6 +55,8 @@ publish<- function(commit_msg=NULL,WD=getwd()){
 
     #rewrite it before pushing to cloud
     jsonlite::write_json(lesson,fs::path(published_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+    #also in the meta folder
+    jsonlite::write_json(lesson,fs::path(meta_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
 
 
     #############
