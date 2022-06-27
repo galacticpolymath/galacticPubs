@@ -43,9 +43,10 @@ publish<- function(commit_msg=NULL,WD=getwd()){
 
     }
 
-    #Assign lesson URL after ID has been assigned
-    if(is_empty(saved_data$URL)){
-      lesson$URL<- saved_data$URL <- paste0("https://galacticpolymath.com/lessons/",saved_data$id)}
+    #Always update URL after ID has been assigned (in case manually changed)
+    # if(is_empty(saved_data$URL)){
+      lesson$URL<- saved_data$URL <- paste0("https://galacticpolymath.com/lessons/",saved_data$id)
+      # }
 
     #always update LastUpdated timestamp
     saved_data$LastUpdated<-lesson$LastUpdated<-time_stamp

@@ -8,6 +8,11 @@ catalogURL<-function(relative_ref,repo){
   if(is.na(repo)) {
     relative_ref
   } else{
-   paste0("https://catalog.galacticpolymath.com/lessons/",repo,"/",relative_ref)
+   if(is_empty(relative_ref)){
+     #don't assign a path to an empty relative reference!
+     relative_ref
+   }else{
+    paste0("https://catalog.galacticpolymath.com/lessons/",repo,"/",relative_ref)
+   }
   }
 }
