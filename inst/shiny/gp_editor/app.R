@@ -137,19 +137,35 @@ ui <- navbarPage(
         checkboxGroupInput("LessonEnvir","Lesson Environment",choices = c("Classroom","Remote"),selected=y$LessonEnvir,inline=TRUE),
         div(
           class = "inline-fields",
+          span(
+            style = " display: inline-block;vertical-align: top;",
+            radioButtons(
+              "GradesOrYears",
+              label = "Grades or Years",
+              selected = y$GradesOrYears,
+              choices = c("grades", "years"),
+              inline = T,
+              width = 150
+            )
+        ),
+
           textInput(
             inputId = "ForGrades",
-            label = "For Grades",
+            label = "For Grades (or Years)",
             value = y$ForGrades,
-            width = 300
-          ),
+            width = 150
+          )
+        ),
+        div(
+          class = "inline-fields",
+
           selectizeInput(
             inputId = "TargetSubject",
             label = "Target Subject",
             choices = c("Math", "Science", "Social Studies", "ELA"),
             selected = y$TargetSubject,
             options = list(create = TRUE),
-            width ="300px"
+            width = "300px"
           ),
           textInput(
             "EstLessonTime",
