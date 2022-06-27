@@ -32,7 +32,7 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     }
 
     # Assign new id based on what should come next in the catalog
-    if(is_empty(lesson$id)){
+    if(is_empty(saved_data$id)){
       #count how many lessons there are currently on gp-catalog
       current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
       next_id<-(sapply(current_catalog, function(x) as.numeric(x$id)) %>% max(na.rm=T) )+1
