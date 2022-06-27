@@ -25,8 +25,6 @@ YTembed<-function(link){
   gsub("^.*(?:v=|youtu.be\\/)([^&]*).*","https://www.youtube.com/embed/\\1",link)
 }
 
-
-
   .=NULL #to avoid errors with dplyr syntax
 
    #if WD supplied, append it to destFolder
@@ -35,6 +33,9 @@ YTembed<-function(link){
      procedureFile<-paste0(WD,procedureFile)
      destFolder <- paste0(WD, destFolder)
    }
+
+  #read in front-matter.yml
+  current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))
 
   #read in links
   rsrcSummary<-openxlsx::read.xlsx(linksFile,sheet="rsrcSumm",startRow=2)%>% dplyr::tibble()
@@ -106,9 +107,13 @@ YTembed<-function(link){
       unique(c(linksC$grades, linksCH$grades))[which(!is.na(unique(c(
         linksC$grades, linksCH$grades
       ))))]
+    #Remove any letters
+    coveredGrades<-gsub("[a-zA-Z]","",coveredGrades)
+
+
     #Build classroom resources list
     resourcesC <- lapply(coveredGrades, function(currGradeBand) {
-      gradePrefix = paste0("G", currGradeBand)
+      gradePrefix = paste0(substr(current_data$GradesOrYears,1,1), currGradeBand)
       currDownloadClass <-
         linksD %>% dplyr::filter(.data$envir == "classroom")
       currDownloadAll <-
@@ -172,7 +177,7 @@ YTembed<-function(link){
 
       #return list for the classroom lapply
       list(
-        grades = paste0("Grades ", currGradeBand),
+        grades = paste0(current_data$GradesOrYears," ", currGradeBand),
         gradePrefix = gradePrefix,
         links = list(
           linkText = ifelse(
@@ -307,9 +312,9 @@ YTembed<-function(link){
       })#end parts lapply
 
       #return list for the classroom lapply
-      gradePrefix = paste0("G", currGradeBand.R)
+      gradePrefix = paste0(substr(current_data$GradesOrYears,1,1), currGradeBand.R)
       list(
-        grades = paste0("Grades ", currGradeBand.R),
+        grades = paste0(current_data$GradesOrYears," ", currGradeBand.R),
         gradePrefix = gradePrefix,
         # links=list(
         #        linkText=paste0("Download ",gradePrefix," Materials for All Parts"),

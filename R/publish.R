@@ -69,7 +69,6 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     jsonlite::write_json(lesson,fs::path(published_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
     #also update the copy in the meta folder
     jsonlite::write_json(lesson,fs::path(meta_path,"JSON","LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
-browser()
 
     #############
     # push to GitHub

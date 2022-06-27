@@ -143,7 +143,7 @@ ui <- navbarPage(
               "GradesOrYears",
               label = "Grades or Years",
               selected = y$GradesOrYears,
-              choices = c("grades", "years"),
+              choices = c("Grades", "Years"),
               inline = T,
               width = 150
             )
