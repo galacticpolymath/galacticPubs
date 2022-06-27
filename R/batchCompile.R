@@ -174,6 +174,8 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
         li$type<-tolower(li$type)
         if(li$type=="pdf"){
           li$mainLink<-gsub("/view?.*$","/preview",li$mainLink)
+          #Alternatively, change /edit links, as well
+          li$mainLink<-gsub("/edit?.*$","/preview",li$mainLink)
         }
         li
       })
