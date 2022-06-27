@@ -10,7 +10,7 @@ catalogURL<-function(relative_ref,repo){
   } else{
    if(is_empty(relative_ref)){
      #don't assign a path to an empty relative reference!
-     relative_ref
+     NULL
    }else{
     paste0("https://catalog.galacticpolymath.com/lessons/",repo,"/",relative_ref)
    }
