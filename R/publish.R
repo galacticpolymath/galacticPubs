@@ -13,9 +13,14 @@ publish<- function(commit_msg=NULL,WD=getwd()){
   #test that WD is in the root directory with the R Project
   if(list.files(WD,pattern="\\.Rproj") %>% length() ==1){
     wdpath<-paste0("'",fs::as_fs_path((WD)),"'")
-
     published_path<-fs::path(WD,"published")
     meta_path<-fs::path(WD,"meta")
+
+# check if files have been staged and are up to date ----------------------
+    lesson_staged<-file.exists(fs::path(published_path,"LESSON.json"))
+    staged_lesson_up_to_date<-inSync(fs::path(published_path,"LESSON.json"),
+                                     fs::path(meta_path,"JSON","LESSON.json"),WD=WD)
+
 
     # I need to edit both of these files to update First Publication status, etc.
     saved_data<-safe_read_yaml(fs::path(meta_path,"front-matter.yml"))

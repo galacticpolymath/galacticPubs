@@ -19,10 +19,8 @@ inSync <- function(path1, path2,..., verbose = FALSE, WD=getwd()) {
     bad_paths<-dplyr::tibble(file_n=which(!existence),
                              #Return just the last folder in the path of the path
                              not_found_here=fs::path_rel(names(existence)[which(!existence)], WD))
-    warning("\n****\nSome Path(s) Not Found:\n***")
-    #Don't know why I can't print to the console, but nothing works...
-    # print.data.frame(bad_paths)
-    # message(bad_paths)
+    message("\n****\nSome Path(s) Not Found:\n***")
+    message(capture.output(print(as.data.frame(bad_paths)),type="message"))
       out <- FALSE
 
   } else{
@@ -35,17 +33,27 @@ inSync <- function(path1, path2,..., verbose = FALSE, WD=getwd()) {
       message("PATH INFO")
       print(path_info)
     }
-    #Is path 1 newer than dependent paths??
-    test <-sapply(2:length(existence),function(i){path_info$mtime[1] >= path_info$mtime[i]})
+
+    #Is path 1 newer than dependent paths?? (time1 should always be greater, and diff>=0)
+    ageDiff <-sapply(2:length(existence),function(i){round(path_info$mtime[1],0)-round(path_info$mtime[i],0)})
+    ageDiff_units<-sapply(2:length(existence),function(i){attr(round(path_info$mtime[1],0)-round(path_info$mtime[i],0),"units")})
+    test<-ageDiff>=0
     # the test has n-1 comparisons; does the number of test passes equal length of entries?
     # out should be TRUE if everything is in sync
     out<-ifelse(sum(test)+1==length(existence),TRUE,FALSE)
-    #output file paths that are missing if applicable
+    #output file paths that are newer than path1 file
     if(!out){
-      bad_paths<-dplyr::tibble(file_n=which(!test),
-                               out_of_date=fs::path_rel(pathz[which(!test)+1],WD))
-      warning("\n****\nNeeds Update:\n***")
-      print(bad_paths)
+      bad_paths<-dplyr::tibble(
+        file_n = which(!test),
+        newer = fs::path_rel(pathz[which(!test) +
+                                           1], WD),
+        by = round(abs(ageDiff[which(!test)]),2),
+        units=ageDiff_units[which(!test)]
+      )
+      message("\n*******\nPath1: ",path1,"\nOUT OF DATE","\n****")
+
+      message(capture.output(print(as.data.frame(bad_paths)),type="message"))
+
     }
   }
 
