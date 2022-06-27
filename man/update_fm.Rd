@@ -4,7 +4,7 @@
 \alias{update_fm}
 \title{update_fm (Update Front Matter)}
 \usage{
-update_fm(WD = getwd(), save_output = TRUE, reorder = TRUE)
+update_fm(WD = getwd(), save_output = TRUE, reorder = TRUE, change_this = NULL)
 }
 \arguments{
 \item{WD}{Working drive; default=getwd()}
@@ -12,6 +12,8 @@ update_fm(WD = getwd(), save_output = TRUE, reorder = TRUE)
 \item{save_output}{do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE}
 
 \item{reorder}{do you want to reorder the resulting list, based on template order? default=TRUE}
+
+\item{change_this}{A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,) will trigger a full lesson rebuild when batchCompile() is run.}
 }
 \value{
 silently returns updated front-matter.yml object as a list

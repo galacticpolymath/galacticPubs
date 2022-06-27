@@ -45,11 +45,11 @@ publish<- function(commit_msg=NULL,WD=getwd()){
 
     #Assign lesson URL after ID has been assigned
     if(is_empty(saved_data$URL)){
-      lesson$URL<- saved_data$URL <- paste0("https://galacticpolymath.com/lessons/",lesson$id)}
+      lesson$URL<- saved_data$URL <- paste0("https://galacticpolymath.com/lessons/",saved_data$id)}
 
     #always update LastUpdated timestamp
-    saved_data$LastUpdated<-time_stamp
-    lesson$LastUpdated<-time_stamp
+    saved_data$LastUpdated<-lesson$LastUpdated<-time_stamp
+
 
     #Save time stamp changes
     yaml::write_yaml(saved_data, fs::path(meta_path,"front-matter.yml"))
