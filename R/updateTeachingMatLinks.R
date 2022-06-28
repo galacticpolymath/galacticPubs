@@ -104,7 +104,9 @@ updateTeachingMatLinks<-function(shortTitle,
                   "' in parents"
                 )
               )
-            grades <- gsub("^.*_(.*)", "\\1", gradeDirDribble$name)
+            #just get the numbers at the end of the folder name, allowing for
+            #y, g, years, grades, etc.
+            grades <- gsub("^.*_[a-zA-Z ]*([\\d-]*)", "\\1", gradeDirDribble$name)
 
             #lapply for each grade
             out.grades <- lapply(1:nrow(gradeDirDribble), function(i) {
@@ -156,8 +158,7 @@ updateTeachingMatLinks<-function(shortTitle,
           #Test if there are no grade directories for this data category
           if(nrow(gradeDirs)==0){return(NA)}
 
-
-          grades0<-gsub("^.*_(.*)","\\1",gradeDirs$name)
+          grades0<-gsub("^.*_[a-zA-Z ]*([\\d-]*)","\\1",gradeDirs$name)
           grades<-grades0[which(grades0!="")]
 
           # lapply loop for grades
@@ -269,8 +270,6 @@ updateTeachingMatLinks<-function(shortTitle,
 gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
 
-
-
      #Read in tabs from the teaching-materials.xlsx for selected data types
 
 
@@ -305,79 +304,50 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
     # lapply loop for each excelTab in the imported list
     tmImported.merged<-lapply(1:length(tmImported2),function(i){
 
-      excelData_i<-tmImported2[[i]] %>% dplyr::tibble()
+
       excelTab_i<-names(tmImported2)[i]
-
       dataCat_i<-tmKey$dataCat[which(tmKey$tab==excelTab_i)]
-
 
       gData_i<-gData %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble() %>% dplyr::mutate(updateNotes=NA)
 
 
+      excelData_i<-tmImported2[[i]] %>% dplyr::tibble()
+
+      #Overwrite all data on dL tab
+      if(excelTab_i=="dL") {
+        mergedData_i <- gData_i[, names(excelData_i)]
+
+      #In all other tabs, preserve title field
+      } else{
+        #overwrite intersecting names
+        #which columns overlap (besides filename)?
+        insct <-intersect(names(excelData_i),
+                          names(gData_i))[-which(intersect(names(excelData_i),
+                                                           names(gData_i)) =="filename")]
+        browser()
+        #filter out excel data with filenames that aren't found on the web
+        excelData_i <-excelData_i %>% dplyr::filter(.data$filename %in% gData_i$filename) %>% dplyr::mutate(dplyr::across(.fns=as.character))
+
+        #Set all these columns in excelData_i to NULL
+        excelData_i[, insct] <- NULL
+
+        #Now merge, which should preserve titles
+        mergedData_i <-
+          dplyr::full_join(excelData_i,
+                           gData_i,
+                           by = "filename")
+      }
 
 
-      #add missing data to Spreadsheet dataframe from gDrive meta info; mutate_all avoids class mismatches when merging:
-      excel_Data_i.aug <- dplyr::left_join(excelData_i %>% dplyr::mutate_all(as.character),gData_i%>% dplyr::mutate_all(as.character),by="gID")
-
-      #which columns overlap (besides gID)? which will need to be coalesced
-      insct<-intersect(names(excelData_i),names(gData_i))[-which(intersect(names(excelData_i),names(gData_i))=="gID")]
-
-
-        if(nrow(excel_Data_i.aug)>0){
-
-          #*** I Don't like this at all! Needs a rethink. Mostly just want to keep title and overwrite everything else.
-
-          #merge .x and .y into 1 coalesced column for variables that overlap
-          #(added as new colName (without .x/.y); those cols still there)
-
-          for (colName in insct){
-          fullColNames<-paste0("excel_Data_i.aug$",colName,c(".x",".y"))
-          replacement<-discardNA(x=eval(parse(text=fullColNames[1])),y=eval(parse(text=fullColNames[2])))
-            #create new merged column
-          excel_Data_i.aug[,colName]<-replacement
-            }
-
-          #Find out which rows in excel data are not actually on the drive (maybe trashed or moved)
-          trashed<-dplyr::anti_join(excelData_i,gData_i,by="gID")
-          #add updateNotes for trashed
-          excel_Data_i.aug$updateNotes[excel_Data_i.aug$gID%in%trashed$gID]<-"trashed?"
-        }
-
-
-      #which rows exist on gDrive, but not the Excel sheet, and should be added?
-      missing<-dplyr::anti_join(gData_i,excelData_i,by="gID")
-
-
-      #if there are missing data, prep a compatible dataframe
-        if(nrow(missing)>=1){
-
-        warning("The following files are missing and record(s) should probably be manually deleted from updateTeachingMatLinks.xlsx:\n",missing)
-
-        #make missing a compatible df to bind to final df
-        missing.df<-matrix(nrow=nrow(missing),ncol=ncol(excelData_i)) %>% as.data.frame()
-        names(missing.df)<-names(excelData_i)
-        missing.df[,insct]<-missing[,insct]
-        missing.df$updateNotes<-date()
-          #if the excel data isn't empty, bind the old excel data with the new missing data from gdrive info
-          if(nrow(excel_Data_i.aug)>0){
-            final<-dplyr::bind_rows(excel_Data_i.aug[names(excelData_i)],missing.df)
-          #if excel data is empty, the only data to output is the missing data
-          }else{
-             final<-missing.df
-          }
-        #otherwise, the output data is just the augmented excel data (with bits filled in from gdrive info)
-        }else{
-          final<-excel_Data_i.aug[,names(excelData_i)]
-        }
 
       #Sort output if requested, otherwise output whatcha got
       if(sortOutput){
         sortnames<-as.vector(sortStringL[which(names(sortStringL)==excelTab_i)])
-        indx<-match(unlist(sortnames),names(final))
-        out0 <- final %>% dplyr::arrange(dplyr::across(indx))
-      }else{out0<-final}
+        indx<-match(unlist(sortnames),names(mergedData_i))
+        out0 <- mergedData_i %>% dplyr::arrange(dplyr::across(indx))
+      }else{out0<-mergedData_i}
       #remove NA rows
-      out<-rmNArows(out0)[,-which(names(out0)=="gID")]
+      out<-rmNArows(out0)
 
       #overwrite old data with final (this is not writing to the hard drive until the saveWorkbook stage)
       XLConnect::writeWorksheet(tmXLSX,sheet=excelTab_i,data=out,startCol=1,startRow=3,header=F)
