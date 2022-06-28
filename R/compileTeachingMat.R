@@ -29,14 +29,13 @@ YTembed<-function(link){
 
    #if WD supplied, append it to destFolder
    if(!identical(WD, getwd())) {
-     linksFile<- paste0(WD,linksFile)
-     procedureFile<-paste0(WD,procedureFile)
-     destFolder <- paste0(WD, destFolder)
+     linksFile<- fs::path(WD,linksFile)
+     procedureFile<-fs::path(WD,procedureFile)
+     destFolder <- fs::path(WD, destFolder)
    }
 
   #read in front-matter.yml
   current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))
-
   #read in links
   rsrcSummary<-openxlsx::read.xlsx(linksFile,sheet="rsrcSumm",startRow=2)%>% dplyr::tibble()
   linksD<-openxlsx::read.xlsx(linksFile,sheet="dL",startRow=2)%>% dplyr::tibble()

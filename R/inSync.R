@@ -56,6 +56,5 @@ inSync <- function(path1, path2,..., verbose = FALSE, WD=getwd()) {
 
     }
   }
-
   out
 }

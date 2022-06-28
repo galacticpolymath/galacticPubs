@@ -24,9 +24,9 @@ compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
 
      #if WD supplied, append it to destFolder
    if (!identical(WD, getwd())) {
-     destFolder <- paste0(WD, destFolder)
-     procedureFile <- paste0(WD, procedureFile)
-     linksFile <- paste0(WD, linksFile)
+     destFolder <- fs::path(WD, destFolder)
+     procedureFile <- fs::path(WD, procedureFile)
+     linksFile <- fs::path(WD, linksFile)
    }
 
    #Function to change shorthand word=def into bulleted list with bold word ("- **word:** definition")

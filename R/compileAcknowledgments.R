@@ -20,8 +20,8 @@ compileAcknowledgments <- function(WD = getwd(),
 
      #if WD supplied, append it to destFolder
    if (!identical(WD, getwd())) {
-     inputFileName<-paste0(WD, inputFileName)
-     destFolder <- paste0(WD, destFolder)
+     inputFileName<-fs::path(WD, inputFileName)
+     destFolder <- fs::path(WD, destFolder)
    }
 
  # Import XLSX files -------------------------------------------------------

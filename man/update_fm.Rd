@@ -13,7 +13,7 @@ update_fm(WD = getwd(), save_output = TRUE, reorder = TRUE, change_this = NULL)
 
 \item{reorder}{do you want to reorder the resulting list, based on template order? default=TRUE}
 
-\item{change_this}{A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,) will trigger a full lesson rebuild when batchCompile() is run.}
+\item{change_this}{A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when batchCompile() is run and change the Language and locale.}
 }
 \value{
 silently returns updated front-matter.yml object as a list

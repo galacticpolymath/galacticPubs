@@ -21,3 +21,6 @@ A data frame that has the structure of df1, with matching ids and columns replac
 \description{
 Merge one dataframe into another, replacing data frame 1's values with matching values from data frame 2 without a bunch of .x .y column duplication BS. This is a destructive function, so back up your data and make sure you're getting the expected output.
 }
+\details{
+If df2 contains rows not matched in df1, they will get added to the result. Note that even if df2 has NA for a matching id, it will overwrite a value in df1. (That's why it's "hard" left_join).
+}

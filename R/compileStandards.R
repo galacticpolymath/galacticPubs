@@ -24,8 +24,8 @@ compileStandards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
 
    #if WD supplied, append it to destFolder
 if(!identical(WD,getwd())){
-  destFolder<-paste0(WD,destFolder)
-  standardsFile<-paste0(WD,standardsFile)}
+  destFolder<-fs::path(WD,destFolder)
+  standardsFile<-fs::path(WD,standardsFile)}
 
 #If targetSubj not provided, use front-matter.yml
 if(missing(targetSubj)){

@@ -1,6 +1,6 @@
 #' overwrite_matching
 #'
-#' For 2 lists, take matching values from List 1 and overwrite them on List 2
+#' For 2 lists, take matching values from List 1 and overwrite them on List 2. This is pretty much the list version of [hard_left_join()]
 #'
 #' The lists don't have to have the same dimensions. Output will look like list2 with matching elements from list1 subbed in
 #'
