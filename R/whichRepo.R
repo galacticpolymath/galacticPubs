@@ -1,14 +1,20 @@
 #' whichRepo
 #'
-#' Get the name of the repo this is set up on. No error catching at the moment.
+#' Get the name of the GitHub repo associated with a project. No error catching at the moment.
 #'
-#' @param fullPath do you want to export the full path, or just the repo name? Default=F (just name)
+#' This assumes you have Google Drive for Desktop set up, permissions to access lesson folder, and git installed and authenticated in Rstudio.
+#'
+#' @param WD working directory for the lesson project folder for which you want to find out the associated GitHub repository
+#' @param fullPath do you want to export the full git path, or just the repo name? Default=F (just name)
 #' @returns Either a warning or the name of the github repository connected to the current Rstudio project (extracted from `rstudioapi::getActiveProject()` and a call to `git remote -v`)
 #' @export
 
 
-whichRepo<-function(fullPath=FALSE){
-  origin<-system(paste0("cd '",rstudioapi::getActiveProject(),"' && git remote -v"),intern=TRUE)[1]
+whichRepo<-function(WD,fullPath=FALSE){
+  if(missing(WD)){
+    WD<-rstudioapi::getActiveProject()
+  }
+  origin<-system(paste0("cd '",WD,"' && git remote -v"),intern=TRUE)[1]
   repo<-ifelse(fullPath,gsub(".*(git@github.com:.[^ ]*).*$","\\1",origin),gsub("^.*/(.*)\\.git.*$","\\1", origin))
   if(is.na(repo)) {
     warning(

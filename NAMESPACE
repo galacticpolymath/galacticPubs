@@ -3,6 +3,7 @@
 export("%>%")
 export(add_missing_fields)
 export(batchCompile)
+export(batch_publish)
 export(catalogURL)
 export(change_lesson_git)
 export(clearTeachingMatExcelData)

@@ -355,13 +355,12 @@ server <- function(input, output,session) {
     #Check if Github link is present
     ## Add github URL if missing in yaml
     if(is_empty(data_check$saved_data$GitHubPath)) {
-      data_check$current_data$GitHubPath <- whichRepo(fullPath=TRUE)
-      #write current data
-      yaml::write_yaml(data_check$current_data, fs::path(meta_path, "front-matter.yml"))
-      vals$saved <- TRUE
+      vals$current_data$GitHubPath <- whichRepo(WD=WD,fullPath=TRUE)
+      # #write current data
+      # yaml::write_yaml(data_check$current_data, fs::path(meta_path, "front-matter.yml"))
       vals$yaml_update_txt <-
         txt <- paste0(
-          "GitHubRepo attached:\n",basename(data_check$current_data$GitHubPath)
+          "Save to attach GitHubRepo:\n",basename(data_check$current_data$GitHubPath)
 
         )
     }

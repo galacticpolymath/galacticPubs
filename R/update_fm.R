@@ -47,7 +47,7 @@ update_fm <- function(WD=getwd(),save_output=TRUE,reorder=TRUE,change_this=NULL)
 
   #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)
     if(new_yaml$GPCatalogPath==""){
-      repo<-whichRepo()
+      repo<-whichRepo(WD=WD)
       new_yaml$GPCatalogPath<-catalogURL("LESSON.json",repo)
     }
 

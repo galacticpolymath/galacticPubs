@@ -32,7 +32,7 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
     lumpItems<-whichRepo <- catalogURL <- expandMDLinks <- NULL
 
     #figure out which repo we're connected to (to create full paths to catalog.galacticpolymath.com)
-    repo<-whichRepo()
+    repo<-whichRepo(WD=WD)
 
 
   # Standards alignment & learning plots -----------------------------------------------------
