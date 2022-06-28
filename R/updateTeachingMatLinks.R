@@ -182,8 +182,7 @@ updateTeachingMatLinks<-function(shortTitle,
                 currCatFiles$filetype<-mimeKey$human_type[match(currCatFiles$mimeTypes,mimeKey$mime_type)]
 
                 #extract part numbers from _P1_ in file name
-                currCatFiles$part<-ifelse(grepl("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*",currCatFiles$name,perl=T),
-                          gsub("^.*[-_].*[P|p][^\\d]*(\\d*).*[_-].*","\\1",currCatFiles$name,perl=T),NA)
+                currCatFiles$part<-gsub("^.*?_[Pp][^_\\d]*(\\d*)_.*?$","\\1",currCatFiles$name,perl=T)
                 currCatFiles$link<-sapply(currCatFiles$drive_resource,function(x) x$webViewLink)
                 baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",currCatFiles$link,perl=T)
                 currCatFiles$gShareLink<-paste0(baseLink,"template/preview")
@@ -310,32 +309,28 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
       gData_i<-gData %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble() %>% dplyr::mutate(updateNotes=NA)
 
-
-      excelData_i<-tmImported2[[i]] %>% dplyr::tibble()
+         #The X filter is in case there's an untitled column with some stuff in it that accidentally gets imported
+      excelData_i_0<-tmImported2[[i]] %>% dplyr::tibble() %>% dplyr::select(!dplyr::starts_with("X"))
 
       #Overwrite all data on dL tab
       if(excelTab_i=="dL") {
-        mergedData_i <- gData_i[, names(excelData_i)]
+        mergedData_i <- gData_i[, names(excelData_i_0)]
 
       #In all other tabs, preserve title field
       } else{
         #overwrite intersecting names
         #which columns overlap (besides filename)?
-        insct <-intersect(names(excelData_i),
-                          names(gData_i))[-which(intersect(names(excelData_i),
+        insct <-intersect(names(excelData_i_0),
+                          names(gData_i))[-which(intersect(names(excelData_i_0),
                                                            names(gData_i)) =="filename")]
-        browser()
-        #filter out excel data with filenames that aren't found on the web
-        excelData_i <-excelData_i %>% dplyr::filter(.data$filename %in% gData_i$filename) %>% dplyr::mutate(dplyr::across(.fns=as.character))
 
-        #Set all these columns in excelData_i to NULL
-        excelData_i[, insct] <- NULL
+        #filter out excel data with filenames that aren't found on the web
+        excelData_i <-excelData_i_0 %>% dplyr::filter(.data$filename %in% gData_i$filename)
+
 
         #Now merge, which should preserve titles
-        mergedData_i <-
-          dplyr::full_join(excelData_i,
-                           gData_i,
-                           by = "filename")
+        mergedData_i <-  hard_left_join(excelData_i,gData_i,by="filename",as_character=TRUE)
+
       }
 
 
