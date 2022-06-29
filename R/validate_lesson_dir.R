@@ -23,7 +23,7 @@ validate_lesson_dir<-function(lesson_dir){
           if(contains_meta&contains_Rproj&is_published){
             TRUE #Valid lesson folder
           }else{
-            message("Folder with missing .Rproj or meta folder:\n  - ",f_i)
+            message("Folder with missing .Rproj, meta folder, or published folder:\n  - ",f_i)
             FALSE #Invalid lesson folder
           }
         }

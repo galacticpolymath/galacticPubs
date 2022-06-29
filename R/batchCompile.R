@@ -229,6 +229,7 @@ batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON
     # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
     # BACKGROUND
     if (!is_empty(current_data$Background)){
+
     background <- list(`__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Background", Content = ifelse(current_data$ConnectionToResearch ==
         "", current_data$Background, paste("#### Connection to Research\n",
