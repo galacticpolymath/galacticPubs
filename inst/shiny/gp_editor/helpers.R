@@ -56,18 +56,6 @@ robust_txt<-function(input_txt,label="Some Text"){
   }else{input_txt}
 }
 
-# #specifically for batchCompile.R, test if a parameter exists in the current data,
-# #if so, use it; if not, return {}
-# robust_par<-function(param,current_data){
-#   if(param %in% names(current_data)){
-#     current_data[param]
-#   }else{}
-# }
-#
-
-
-
-
 
 
 # Prep 'input' for comparing to YAML read in from hard drive (saved)

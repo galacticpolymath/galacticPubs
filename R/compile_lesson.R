@@ -1,27 +1,45 @@
-#' batchCompile
+#' compile_lesson
 #'
-#' Processes a subset of data chosen by user using the GP Shiny Editor
+#' Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to [stageAssets()] and [publish()] to publish these changes to the web.
 #'
-#' Combines functionality of compileProcedure, compileStandards, compileAcknowledgements, compileJSON, etc.
-#' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All"
+#' Combines functionality of:
+#' - [compileProcedure()]
+#' - [compileStandards()]
+#' - [learningChart()] and [learningEpaulette()]
+#' - [compileAcknowledgements()]
+#' - [compileVersions()]
+#' - [compileJSON()]
+#'
+#' Intended for a single lesson in the current RStudio project. Use [batch_rebuild()] to compile and rebuild more than one lesson (or a single lesson outside the current project).
+#'
+#' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All". If missing, will compile things in the ReadyToCompile entry in front-matter.yml for the WD folder.
 #' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
-#' @param clean delete all JSON files in meta/ and start over? default=FALSE
+#' @param clean delete all JSON files in meta/ and start over? default=TRUE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
-#' @return current_data; also a JSON is saved to meta/JSON/LESSON.json
+#' @return current_data; also the lesson JSON is saved to `meta/JSON/LESSON.json`
 #' @importFrom rlang .data
 #' @export
 #'
-batchCompile <- function(choices,current_data,destFolder ,outputFileName="LESSON.json",WD=getwd(),clean=FALSE,rebuild=NULL){
+compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESSON.json",WD=getwd(),clean=TRUE,rebuild=NULL){
 
   if(missing(current_data)){current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))}
   if(missing(choices)){choices<-current_data$ReadyToCompile}
   if(missing(destFolder)){destFolder<-fs::path(WD,"meta","JSON")}
 
+  if(!dir.exists(destFolder)){stop("Directory not found: ",destFolder)}
+
   if(is.null(rebuild)){
   rebuild<-current_data$RebuildAllMaterials
+  }
+
+  #clean JSON folder if asked for
+  if(clean){
+    to_delete<-list.files(destFolder,pattern = "*\\.json",full.names = TRUE)
+    unlink(to_delete)
+    message("\nFolder cleared: ",destFolder,"\n")
   }
 
 

@@ -7,7 +7,7 @@
 #' @param WD Working drive; default=getwd()
 #' @param save_output do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
-#' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when batchCompile() is run and change the Language and locale.
+#' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when [compile_lesson()] is run and change the Language and locale.
 #' @return silently returns updated front-matter.yml object as a list
 #' @export
 #'

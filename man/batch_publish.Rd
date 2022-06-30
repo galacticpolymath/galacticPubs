@@ -4,14 +4,14 @@
 \alias{batch_publish}
 \title{batch_publish}
 \usage{
-batch_publish(shortName, lessons_dir, commit_msg = NULL)
+batch_publish(shortName, commit_msg = NULL, lessons_dir)
 }
 \arguments{
 \item{shortName}{The lesson short name(s) (i.e. the folder name(s)) for the lesson(s) you want to update and rebuild; use "all" if you want to rebuild all the lessons.}
 
-\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons/assumptionsMatter_femalesSing_math"}
-
 \item{commit_msg}{What do you want to say about this update? Default=NULL, i.e. "automated galacticPubs::publish()"}
+
+\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons/assumptionsMatter_femalesSing_math"}
 }
 \description{
 Publish one or more lessons that have been staged in the published/ folder of a lesson directory

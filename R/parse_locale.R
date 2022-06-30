@@ -1,6 +1,6 @@
 #' parse_locale
 #'
-#' Takes the language and country chosen in the [galacticPubs::editor()] and creates a locale with a 3 digit language code and (if applicable), 2 digit country code. Only meant to run in the [galacticPubs::batchCompile()] function.
+#' Takes the language and country chosen in the [galacticPubs::editor()] and creates a locale with a 3 digit language code and (if applicable), 2 digit country code. Only meant to run in the [galacticPubs::compile_lesson()] function.
 #'
 #' Not exported, so use galacticPubs:::parse_locale()
 #' @param current_data the reconciled data including yaml and input from the shiny app environment

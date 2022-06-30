@@ -384,7 +384,7 @@ server <- function(input, output,session) {
   observe({
     isolate({
       template_upgraded <-vals$current_data$TemplateVer > vals$saved_data$TemplateVer
-      # if template upgraded, trigger rebuild of all materials in batchCompile.R
+      # if template upgraded, trigger rebuild of all materials in compile_lesson
       if (template_upgraded) {
         vals$current_data$RebuildAllMaterials <- TRUE
       }
@@ -577,7 +577,7 @@ output$supporting_media<-renderUI({
     #Save data before compiling
     vals$current_data<-prep_input(input,yaml_path,WD=WD)$current_data
     yaml::write_yaml(vals$current_data, fs::path(meta_path,"front-matter.yml"))
-    vals$current_data<-batchCompile(choices=input$ReadyToCompile,current_data=vals$current_data,WD=WD)
+    vals$current_data<-compile_lesson(choices=input$ReadyToCompile,current_data=vals$current_data,WD=WD)
 
     } ) %>% bindEvent(input$compile)
 

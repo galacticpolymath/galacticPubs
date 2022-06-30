@@ -12,9 +12,6 @@
 #'
 #'
 batch_publish <- function(shortName,commit_msg=NULL,lessons_dir){
-  if(missing(shortName)) {
-    stop("Enter the shortName i.e. the folder name of the lesson")
-  }
 
   if (missing(lessons_dir)) {
     lessons_dir <-
@@ -24,6 +21,11 @@ batch_publish <- function(shortName,commit_msg=NULL,lessons_dir){
   if(!dir.exists(lessons_dir)){
     stop("Directory not found: ",lessons_dir)
   }else{
+    #if specific shortName not included, let user choose one
+    if(missing(shortName)) {
+    shortName <- pick_lesson(lessons_dir)
+    }
+
     # Get a vector of potential lesson project folders if we want to rebuild all
     if(tolower(shortName)=="all"){
       projects0<-fs::dir_ls(lessons_dir,type="directory")
