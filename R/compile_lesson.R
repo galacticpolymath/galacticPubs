@@ -54,10 +54,10 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
 
 
   # Standards alignment & learning plots -----------------------------------------------------
-    # test if standards json is out of sync with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
+    # test if learningEpaulette is in up-to-date with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
     stnds_out_of_date<-!inSync(fs::path(WD,"assets","learning-plots","GP-Learning-Epaulette.png"),
                                fs::path(WD,"assets","learning-plots","GP-Learning-Chart.png"),
-                               fs::path(WD,"meta","json","standards.json"),
+                               fs::path(WD,"meta","standards.RDS"),
                                fs::path(WD,"meta","standards_GSheetsOnly.xlsx"))
   if("Standards Alignment"%in% choices & (stnds_out_of_date | rebuild) ){
 
@@ -137,7 +137,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
 
 
 # Separate parts of Front Matter ------------------------------------------
-
+  #always rebuild front matter if it's in choices
   if("Front Matter" %in% choices){
     #add galacticPubsVer
     current_data$galacticPubsVer<-as.character(utils::packageVersion("galacticPubs"))
@@ -204,8 +204,8 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     preview<-list(
       `__component`="lesson-plan.lesson-preview",
       SectionTitle= "Lesson Preview",
-      Multimedia= mm,
       QuickPrep= current_data$QuickPrep %>% fixAnchorLinks(),#allow smooth-scrolling to in-page references
+      Multimedia= mm,
       InitiallyExpanded=TRUE
     )
     #write preview json
@@ -283,6 +283,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
       na = "null", null = "null")
     }
 
+    #always output this stuff
     jsonlite::write_json(header, path = fs::path(destFolder,
       "header", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
       na = "null", null = "null")
@@ -290,7 +291,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
       "overview", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
       na = "null", null = "null")
 
-  }
+  }#End of Front Matter export
 
 
 

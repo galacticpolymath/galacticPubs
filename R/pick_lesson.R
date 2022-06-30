@@ -16,9 +16,10 @@ pick_lesson<- function(lessons_dir){
   projects<-projects0[which(!grepl("^.*Lessons[\\/]~",projects0)&
                                 !grepl("OLD_",projects0))] %>% basename() %>% sort()
 
-  d<-dplyr::tibble(`#`=1:length(projects),projects) %>% dplyr::add_row(`#`=0,projects="all")
-  print(d)
+  d<-data.frame(CHOICE=1:length(projects),PROJECT=projects)
+  d<-rbind(d,c(CHOICE=0,PROJECT="all"))
+  message(capture.output(print(d,row.names=F),type="message"))
   num<-readline("Which lesson? > ") %>% as.integer()
-  return(d$projects[match(num,d$`#`)])
+  return(d$PROJECT[match(num,d$CHOICE)])
 
 }

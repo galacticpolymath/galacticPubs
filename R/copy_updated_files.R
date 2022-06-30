@@ -50,7 +50,7 @@ copy_updated_files<-function(paths,dest_folder,clear=FALSE,verbose=TRUE){
     }
 
     #make summary entry
-    dplyr::tibble(file=FILE,log=status)
+    dplyr::tibble(file=basename(FILE),log=status)
 
   })#end out (lapply)
   OUT<-do.call(dplyr::bind_rows,out)

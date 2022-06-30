@@ -4,14 +4,14 @@
 #'
 #' This assumes that you have Google Drive for Desktop set up and have permissions to access the lesson files.
 #'
-#' @param shortName The lesson short name(s) (i.e. the folder name(s)) for the lesson(s) you want to update and rebuild; use "all" if you want to rebuild all the lessons.
 #' @param commit_msg What do you want to say about this update? Default=NULL, i.e. "automated galacticPubs::publish()"
+#' @param shortName The lesson short name(s) (i.e. the folder name(s)) for the lesson(s) you want to update and rebuild; use "all" if you want to rebuild all the lessons. If left blank, a picker will try to give you a list of options
 #' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons/assumptionsMatter_femalesSing_math"
 #'
 #' @export
 #'
 #'
-batch_publish <- function(shortName,commit_msg=NULL,lessons_dir){
+batch_publish <- function(commit_msg=NULL,shortName,lessons_dir){
 
   if (missing(lessons_dir)) {
     lessons_dir <-

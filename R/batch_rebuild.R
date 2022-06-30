@@ -9,11 +9,12 @@
 #' @param stage do you want to call [stageAssets()] to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE
 #' @param change_this A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If shortName=="all", make sure you set this to something you want to change for everything.
 #' @param clean Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to [compile_lesson()]). Default=TRUE
+#' @param complete_rebuild Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to [compile_lesson()])
 #'
 #' @export
 #'
 #'
-batch_rebuild <- function(shortName,lessons_dir,stage=TRUE,change_this=NULL,clean=TRUE){
+batch_rebuild <- function(shortName,lessons_dir,stage=TRUE,change_this=NULL,clean=TRUE, complete_rebuild=FALSE){
   timer <- FALSE
   #If Suggested tictoc package is available, time how long the rebuild takes
   if(requireNamespace("tictoc")){
@@ -52,7 +53,7 @@ batch_rebuild <- function(shortName,lessons_dir,stage=TRUE,change_this=NULL,clea
       update_fm(WD,change_this=change_this)
 
       #2. compile all parts of the lesson
-      compile_lesson(WD=WD,rebuild=TRUE,clean=clean)
+      compile_lesson(WD=WD,rebuild=complete_rebuild,clean=clean)
 
       #3. stageAssets if requested
       if(stage){
@@ -70,7 +71,7 @@ batch_rebuild <- function(shortName,lessons_dir,stage=TRUE,change_this=NULL,clea
 
   #turn off timer if it was started
   if(timer){
-    toc()
+    tictoc::toc()
   }
 
 }

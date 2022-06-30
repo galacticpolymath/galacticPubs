@@ -36,6 +36,7 @@ stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TR
 if(is.null(clear)){clear<-FALSE}
 
   #copy images over to dest_folder folder for previewing
+  #list front-matter items that point to necessary assets for the publishing bundle
     items2copy<-c("LessonBanner","SponsorLogo","LearningEpaulette","LearningEpaulette_vert","LearningChart","SupportingMedia")
     #read in filenames; if empty, return empty; else add WD to create full path
     items2copy_filenames<-lapply(1:length(items2copy), function(i) {
@@ -49,6 +50,7 @@ if(is.null(clear)){clear<-FALSE}
 
     flz<-items2copy_filenames$path
     names(flz)<-items2copy_filenames$category
+
     #add on lesson.json file path if going to published directory
     if(grepl("published",dest_folder)){
       lesson_path<-fs::path(meta_path,"JSON","LESSON.json")
