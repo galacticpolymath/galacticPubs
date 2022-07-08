@@ -1,9 +1,6 @@
 ```{=latex}
 % Banner
-\begin{center}
-    \includegraphics[width=\linewidth]{static_icons/GP_banner_dark.pdf}
-\end{center}
-\vspace{-0.2in}
+\thispagestyle{firstpage}
 % Title and dashboard
 \begin{minipage}[t]{0.7\linewidth}
     \begin{flushleft}

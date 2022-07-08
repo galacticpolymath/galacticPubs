@@ -1,7 +1,7 @@
 Title: ""
 Subtitle: ""
 ShortTitle: "Short Title"
-documentclass: article
+# documentclass: article
 publicationdate: ""
 lastupdated: ""
 author:
@@ -49,7 +49,6 @@ OverviewText: ""
 
 # The header-includes is changed based on function logic for make_printable(); that's
 # why it's separated from the other LaTeX in 000-preamble.tex
-header-includes: "\\usepackage[letterpaper,total={6.5in, 9in}]{geometry}"
 output:
   pdf_document:
       includes:

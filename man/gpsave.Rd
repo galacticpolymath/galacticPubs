@@ -4,14 +4,14 @@
 \alias{gpsave}
 \title{gpsave}
 \usage{
-gpsave(filename, width = 6, height = 3.38, dpi = 300, bg = "transparent", ...)
+gpsave(filename, width = 7, height = 3.94, dpi = 300, bg = "transparent", ...)
 }
 \arguments{
 \item{filename}{expects filename, with file extension (e.g. "plot.png"); can also include subfolder (e.g. "newfolder/plot.png")}
 
-\item{width}{plot width in inches (default= 6)}
+\item{width}{plot width in inches (default= 7)}
 
-\item{height}{plot height in inches (default= 3.38, i.e. 16:9 aspect ratio)}
+\item{height}{plot height in inches (default= 3.94, i.e. 16:9 aspect ratio)}
 
 \item{dpi}{dots per inch resolution (default= 300); note changing this will unfortunately also change the output relative text size}
 

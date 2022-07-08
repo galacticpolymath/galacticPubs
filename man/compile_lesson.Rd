@@ -10,7 +10,7 @@ compile_lesson(
   destFolder,
   outputFileName = "LESSON.json",
   WD = getwd(),
-  clean = FALSE,
+  clean = TRUE,
   rebuild = NULL
 )
 }
@@ -25,7 +25,7 @@ compile_lesson(
 
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 
-\item{clean}{delete all JSON files in meta/ and start over? default=FALSE}
+\item{clean}{delete all JSON files in meta/ and start over? default=TRUE}
 
 \item{rebuild}{if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL}
 }

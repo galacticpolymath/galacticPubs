@@ -16,15 +16,15 @@ copy_updated_files<-function(paths,dest_folder,clear=FALSE,verbose=TRUE){
     message("@ Folder cleared: ",dest_folder)
   }
 
-  out<-lapply(paths, function(FILE) {
+  out<-lapply(paths, function(REF_FILE) {
 
-    viable <- file.exists(FILE) & fs::is_file(FILE)
-    newPath <- fs::path(dest_folder, basename(FILE))
+    viable <- file.exists(REF_FILE) & fs::is_file(REF_FILE)
+    newPath <- fs::path(dest_folder, basename(REF_FILE))
     # if file exists...
     if (viable) {
       #if we didn't delete dest. directory contents...
       if (!clear) {
-        up_to_date <- suppressWarnings(inSync(FILE, newPath))
+        up_to_date <- suppressWarnings(inSync(newPath, REF_FILE))
         if (identical(up_to_date, TRUE)) {
           status <- "Up-to-Date"
           toCopy <- FALSE
@@ -43,14 +43,14 @@ copy_updated_files<-function(paths,dest_folder,clear=FALSE,verbose=TRUE){
       toCopy <- FALSE
     }
     if (toCopy) {
-      fs::file_copy(FILE, newPath, overwrite = TRUE)
+      fs::file_copy(REF_FILE, newPath, overwrite = TRUE)
       #make timestamps match bc effing function changes modified date upon *copy*
-      fs::file_touch(newPath,modification_time = file.info(FILE)$mtime)
+      fs::file_touch(newPath,modification_time = file.info(REF_FILE)$mtime)
 
     }
 
     #make summary entry
-    dplyr::tibble(file=basename(FILE),log=status)
+    dplyr::tibble(file=basename(REF_FILE),log=status)
 
   })#end out (lapply)
   OUT<-do.call(dplyr::bind_rows,out)

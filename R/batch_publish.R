@@ -12,6 +12,13 @@
 #'
 #'
 batch_publish <- function(commit_msg=NULL,shortName,lessons_dir){
+  timer <- FALSE
+  #If Suggested tictoc package is available, time how long the rebuild takes
+  if(requireNamespace("tictoc")){
+    tictoc::tic()
+    timer<-TRUE
+  }
+
 
   if (missing(lessons_dir)) {
     lessons_dir <-
@@ -52,4 +59,8 @@ batch_publish <- function(commit_msg=NULL,shortName,lessons_dir){
           paste0(basename(good_projects),collapse="\n - "),
           hl)))
 
+    #turn off timer if it was started
+  if(timer){
+    tictoc::toc()
+  }
 }

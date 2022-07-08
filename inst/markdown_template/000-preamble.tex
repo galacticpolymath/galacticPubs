@@ -3,12 +3,68 @@
 \usepackage[T1]{fontenc}
 \renewcommand*\oldstylenums[1]{{\fontfamily{Montserrat-TOsF}\selectfont #1}}
 \usepackage[export]{adjustbox}
-\usepackage{graphicx,xcolor}
+\usepackage{graphicx,xcolor,amssymb}
 \usepackage{multicol}
+\usepackage[skins,breakable,hooks]{tcolorbox}
 \usepackage{hyperref}
-%Define custom colors
+\usepackage{fancyhdr,lastpage}
+\usepackage{enumitem}
+\newlist{checklist}{itemize}{1}
+\setlist[checklist]{nolistsep,label=$\square$,leftmargin=*}
+\setitemize{leftmargin=*}
+%%% Define custom colors
 \definecolor{subtlegray}{HTML}{E6E7E8}
-%Define inline graphics include
+%%% Define inline graphics include
 \newcommand{\vcenteredinclude}[2]{\begingroup
 \setbox0=\hbox{\includegraphics[width=#1]{#2}}%
 \parbox{\wd0}{\box0}\endgroup}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[R]{{\thepage} / \pageref{LastPage}}
+\fancyfoot[L]{
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{\vcenteredinclude{0.13\linewidth}{static_icons/CC-BY-NC.png}} \hspace{0.18in}
+\parbox[c]{0.73\linewidth}{
+\scriptsize{© Galactic Polymath 2022. Licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}. Share + Remix, with attribution. Don’t sell.}}
+}
+\fancyhead[R]{\footnotesize{geneticRescue\_sci}}
+\fancypagestyle{firstpage}{%
+  \fancyhf{}% clear default for head and foot
+  \chead{\includegraphics[width=\linewidth]{static_icons/GP_banner_dark.pdf}}
+  \fancyfoot[R]{{\thepage} / \pageref{LastPage}}
+  \fancyfoot[L]{
+    \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{\vcenteredinclude{0.13\linewidth}{static_icons/CC-BY-NC.png}} \hspace{0.18in}
+    \parbox[c]{0.73\linewidth}{
+    \scriptsize{© Galactic Polymath 2022. Licensed under a \href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}. Share + Remix, with attribution. Don’t sell.}}
+    }
+}
+%\usepackage{xpatch}
+% \xapptocmd{\firstpage}{\thispagestyle{firstpage}}{}{}
+%%  Define box on right
+\newtcolorbox{rightbox}[1][]{
+    colback=white,
+    right=0pt,
+    left=1ex,
+    top=0pt,
+    arc=0pt,
+    outer arc=0pt,
+    enlarge right by=0.295\linewidth,
+    enlarge left by=-\dimexpr0.295\linewidth+\parindent\relax,
+    left=\dimexpr0.295\linewidth+\parindent\relax,
+    right=\parindent\relax,
+    leftrule=pt,
+    rightrule=0pt,
+    toprule=0pt,
+    bottomrule=0pt,
+    breakable,
+    nobeforeafter,
+    enhanced jigsaw,
+    overlay unbroken and first={%
+      \node[anchor=north west,inner ysep=0pt,align=right,text width=0.29\linewidth]
+        at ([xshift=2ex]frame.north east) {\vspace{-0.1in}\hfill#1};
+
+    },
+    underlay unbroken and first={\draw[width=1pt]
+([shift={(0.15,0.3)}]frame.north east)
+rectangle ([shift={(5.4,-5.95)}]frame.east); }
+    before=\vskip2\itemsep\noindent
+}

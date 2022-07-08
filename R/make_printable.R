@@ -13,7 +13,7 @@ make_printable=function(WD=getwd(),dest_folder,rebuild=NULL, showframe=FALSE, op
   if(missing(dest_folder)){
     dest_folder <- fs::path(WD,"assets","lesson-plan-markdown")
   }else{dest_folder<-fs::path(WD,dest_folder)}
-  clear<-ifelse(is.null(rebuild),FALSE,TRUE)
+  clear<-ifelse(is.null(rebuild),FALSE,rebuild)
 
 # 1) Prep template files in assets folder -------------------------------------------
  toCopy<-list.files( system.file("markdown_template", package ="galacticPubs"),full.names = TRUE,include.dirs = FALSE,recursive=TRUE)
@@ -25,7 +25,7 @@ if(!dir.exists(icons_folder)){dir.create(icons_folder);message("\nDirectory crea
   img_folder<-fs::path(dest_folder,"dynamic_images")
  if(!dir.exists(img_folder)){dir.create(img_folder);message("\nDirectory created:\n@ ",img_folder,"\n")}
 
-  #copy lesson images to img_folder, deleting everything if rebuild is triggered
+  #copy lesson images to img_folder subfolder, deleting everything if rebuild is triggered
   stageAssets(WD=WD,clear=clear,dest_folder=img_folder)
 
   #copy latest template files into the directory, clearing it if rebuild has been triggered

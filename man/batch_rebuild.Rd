@@ -9,19 +9,22 @@ batch_rebuild(
   lessons_dir,
   stage = TRUE,
   change_this = NULL,
-  clean = FALSE
+  clean = TRUE,
+  complete_rebuild = FALSE
 )
 }
 \arguments{
 \item{shortName}{What is the lesson short name (i.e. the folder name) for the lesson you want to update and rebuild; use "all" if you want to rebuild all the lessons.}
 
-\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons/assumptionsMatter_femalesSing_math"}
+\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
 
-\item{stage}{do you want to stage assets that are rebuilt in the published/ folder for that lesson (prep to be published)? default=TRUE}
+\item{stage}{do you want to call \code{\link[=stageAssets]{stageAssets()}} to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE}
 
 \item{change_this}{A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If shortName=="all", make sure you set this to something you want to change for everything.}
 
-\item{clean}{Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to \code{\link[=compile_lesson]{compile_lesson()}}). Default=FALSE}
+\item{clean}{Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to \code{\link[=compile_lesson]{compile_lesson()}}). Default=TRUE}
+
+\item{complete_rebuild}{Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to \code{\link[=compile_lesson]{compile_lesson()}})}
 }
 \description{
 Function to rebuild a lesson or lessons that is (are) in a virtualized Google Drive folder. It will also stage the lesson in the published folder if requested, but will not publish.
