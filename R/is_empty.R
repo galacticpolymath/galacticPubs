@@ -21,18 +21,22 @@
 #' @export
 #tests for all variations on NULL, "", NA, etc
 is_empty <- function(x) {
-  nulls <- sapply(1:length(x), function(i) {
-    if (identical(x[[i]], NULL) |
-        identical(x[[i]], "") |
-        identical(x[[i]], NA) |
-        identical(x[[i]], "\n") |
-        identical(x[[i]], list()) |
-        length(x[[i]]) == 0) {
-      TRUE
-    } else{
-      FALSE
-    }
-  })
+  if(length(x)==0){
+    nulls<-TRUE
+  }else{
+    nulls <- sapply(1:length(x), function(i) {
+      if (identical(x[[i]], NULL) |
+          identical(x[[i]], "") |
+          identical(x[[i]], NA) |
+          identical(x[[i]], "\n") |
+          identical(x[[i]], list()) |
+          length(x[[i]]) == 0) {
+        TRUE
+      } else{
+        FALSE
+      }
+    })
+  }
   # True if all values are nulls, else FALSE
   ifelse(sum(nulls)==length(nulls),TRUE,FALSE)
 
