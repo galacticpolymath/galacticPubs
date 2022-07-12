@@ -185,6 +185,8 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     mmExists<-file.exists(fs::path(WD,"meta","JSON","multimedia.json"))
     if(mmExists){
       mm_0<-jsonlite::read_json(fs::path(WD,"meta","JSON","multimedia.json"),null="null")
+      #if (first row is completely empty, nothin' to import)
+      if(!is_empty(mm_0[[1]])){
       #process multimedia entries a little bit
       mm<-lapply(1:length(mm_0),function(i){
         #change pdf file gdrive endings from view? to preview
@@ -198,7 +200,8 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
         }
         li
       })
-    }else{mm<-{}}
+      }else{mm<-NULL}
+    }else{mm<-NULL}
 
     #PREVIEW
     preview<-list(
