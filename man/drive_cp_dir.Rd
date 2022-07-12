@@ -2,10 +2,25 @@
 % Please edit documentation in R/drive_cp_dir.R
 \name{drive_cp_dir}
 \alias{drive_cp_dir}
-\title{Clone a Google Drive Folder}
+\title{Copy a Google Drive Folder}
 \usage{
-drive_cp_dir(source_folder, dest_folder)
+drive_cp_dir(new_dir_name, source_dir, dest_dir)
+}
+\arguments{
+\item{new_dir_name}{What's the name of the new (cloned) directory?}
+
+\item{source_dir}{Source directory; must be a string path for \code{\link[=drive_find_path]{drive_find_path()}} or a dribble, e.g. from \code{\link[googledrive:drive_find]{googledrive::drive_find()}}}
+
+\item{dest_dir}{Destination directory; if not supplied, assumes same parent as source_dir (i.e. will be cloned side-by-side)}
 }
 \description{
 Copies all files (Google Workspace or otherwise) from one destination to another. This is a workaround for the absence of this functionality in the GDrive API. It's accomplished by recursive calls to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}.
 }
+\details{
+Throws an error if the new_dir_name already exists in  dest_dir.
+}
+\seealso{
+Other Google Drive Functions: 
+\code{\link{drive_find_path}()}
+}
+\concept{Google Drive Functions}

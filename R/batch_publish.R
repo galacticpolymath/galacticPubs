@@ -52,6 +52,13 @@ batch_publish <- function(commit_msg = NULL, shortName, lessons_dir) {
       publish(WD = WD, commit_msg = commit_msg)
     })
   }
+
+    # turn off timer if it was started
+  if (timer) {
+    tictoc::toc()
+  }
+
+
   # report results
   hl <- paste0(c("\n", rep("_", 30), "\n"), collapse = "")
   message(paste0(
@@ -63,8 +70,5 @@ batch_publish <- function(commit_msg = NULL, shortName, lessons_dir) {
     )
   ))
 
-  # turn off timer if it was started
-  if (timer) {
-    tictoc::toc()
-  }
+
 }
