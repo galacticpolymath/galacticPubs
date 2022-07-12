@@ -4,7 +4,7 @@
 \alias{drive_cp_dir}
 \title{Copy a Google Drive Folder}
 \usage{
-drive_cp_dir(new_dir_name, source_dir, dest_dir)
+drive_cp_dir(new_dir_name, source_dir, dest_dir, share_anyone = FALSE, ...)
 }
 \arguments{
 \item{new_dir_name}{What's the name of the new (cloned) directory?}
@@ -12,6 +12,10 @@ drive_cp_dir(new_dir_name, source_dir, dest_dir)
 \item{source_dir}{Source directory; must be a string path for \code{\link[=drive_find_path]{drive_find_path()}} or a dribble, e.g. from \code{\link[googledrive:drive_find]{googledrive::drive_find()}}}
 
 \item{dest_dir}{Destination directory; if not supplied, assumes same parent as source_dir (i.e. will be cloned side-by-side)}
+
+\item{share_anyone}{do you want copied files to be viewable by anyone with the link? Default=FALSE}
+
+\item{...}{Pass other parameters to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}}
 }
 \description{
 Copies all files (Google Workspace or otherwise) from one destination to another. This is a workaround for the absence of this functionality in the GDrive API. It's accomplished by recursive calls to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}.

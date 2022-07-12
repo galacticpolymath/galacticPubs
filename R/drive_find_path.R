@@ -2,7 +2,7 @@
 #'
 #' Simulates Finder/File Explorer functionality by repeated calls to [googledrive::drive_find()].
 #'
-#' @param drive_path in the form "FolderName1/FolderName2", where "My Drive" is understood to be at the root above "Folder Name1". Will match case INsensitively.
+#' @param drive_path in the form "directory/subdirectory", where "My Drive" is understood to be at the root above "Folder Name1". Will match case INsensitively.
 #'
 #'@family Google Drive Functions
 #' @export

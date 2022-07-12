@@ -6,22 +6,25 @@
 #'@param new_dir_name What's the name of the new (cloned) directory?
 #'@param source_dir Source directory; must be a string path for [drive_find_path()] or a dribble, e.g. from [googledrive::drive_find()]
 #'@param dest_dir Destination directory; if not supplied, assumes same parent as source_dir (i.e. will be cloned side-by-side)
+#'@param share_anyone do you want copied files to be viewable by anyone with the link? Default=FALSE
+#'@param ... Pass other parameters to [googledrive::drive_cp()]
 #'@family Google Drive Functions
 #'@export
 
 
 drive_cp_dir<-function(new_dir_name,
                        source_dir,
-                       dest_dir
+                       dest_dir,
+                       share_anyone=FALSE,
+                       ...
 ){
+  if(missing(new_dir_name)){stop("\n* Must supply new_dir_name")}
   timer <- FALSE
   # If Suggested tictoc package is available, time how long the rebuild takes
   if (requireNamespace("tictoc")) {
     tictoc::tic()
     timer <- TRUE
   }
-
-
 
   #if directories are input as paths, send to helper function
   if(is.character(source_dir)){
@@ -34,7 +37,7 @@ drive_cp_dir<-function(new_dir_name,
   }
   #If destination folder not supplied, copy source in same parent folder
   if(missing(dest_dir)) {
-    dest_folder <-
+    dest_dir <-
       googledrive::drive_get(id = source_dir$drive_resource[[1]]$parents[[1]][1])
   } else{
     if (is.character(dest_dir)) {
@@ -62,7 +65,7 @@ drive_cp_dir<-function(new_dir_name,
   if(already_exists){
     stop(paste0("Destination folder '",dest_dir$name,"' already has a folder called '",new_dir_name,"'"))
   }else{
-  new_dir_dribble<-googledrive::drive_mkdir(new_dir_name,path=lessons_dir$id)
+  new_dir_dribble<-googledrive::drive_mkdir(new_dir_name,path=dest_dir$id)
   }
 
 
@@ -73,20 +76,22 @@ drive_cp_dir<-function(new_dir_name,
 # Copy all items to new destination folder --------------------------------
   copylog<-pbapply::pblapply(1:nrow(source_dir_contents), function(i) {
     if (!googledrive::is_folder(source_dir_contents[i,])) {
-      googledrive::drive_cp(
-        source_dir_contents[i,],
-        path = new_dir_dribble,
-        name = unlist(source_dir_contents[i, "name"])
-      )
+      file_i <- googledrive::drive_cp(source_dir_contents[i, ],
+                                      path = new_dir_dribble,
+                                      name = unlist(source_dir_contents[i, "name"]))
+      if(share_anyone){googledrive::drive_share_anyone(file_i)}
+
     }
   })
+
+  out<-copylog%>% dplyr::bind_rows()
 
       # turn off timer if it was started
   if (timer) {
     tictoc::toc()
   }
-
+  message("\n@ ",nrow(out)," files copied to ",paste0(p,collapse="/"))
   #return results
-  copylog %>% dplyr::bind_rows()
+  out
 
 }

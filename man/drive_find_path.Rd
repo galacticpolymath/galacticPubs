@@ -7,7 +7,7 @@
 drive_find_path(drive_path)
 }
 \arguments{
-\item{drive_path}{in the form "FolderName1/FolderName2", where "My Drive" is understood to be at the root above "Folder Name1". Will match case INsensitively.}
+\item{drive_path}{in the form "directory/subdirectory", where "My Drive" is understood to be at the root above "Folder Name1". Will match case INsensitively.}
 }
 \description{
 Simulates Finder/File Explorer functionality by repeated calls to \code{\link[googledrive:drive_find]{googledrive::drive_find()}}.
