@@ -11,12 +11,12 @@
 #' @export
 #'
 #'
-batch_publish <- function(commit_msg=NULL,shortName,lessons_dir){
+batch_publish <- function(commit_msg = NULL, shortName, lessons_dir) {
   timer <- FALSE
-  #If Suggested tictoc package is available, time how long the rebuild takes
-  if(requireNamespace("tictoc")){
+  # If Suggested tictoc package is available, time how long the rebuild takes
+  if (requireNamespace("tictoc")) {
     tictoc::tic()
-    timer<-TRUE
+    timer <- TRUE
   }
 
 
@@ -25,42 +25,46 @@ batch_publish <- function(commit_msg=NULL,shortName,lessons_dir){
       fs::path("/Volumes", "GoogleDrive", "My Drive", "Edu", "Lessons")
   }
 
-  if(!dir.exists(lessons_dir)){
-    stop("Directory not found: ",lessons_dir)
-  }else{
-    #if specific shortName not included, let user choose one
-    if(missing(shortName)) {
-    shortName <- pick_lesson(lessons_dir)
+  if (!dir.exists(lessons_dir)) {
+    stop("Directory not found: ", lessons_dir)
+  } else {
+    # if specific shortName not included, let user choose one
+    if (missing(shortName)) {
+      shortName <- pick_lesson(lessons_dir)
     }
 
     # Get a vector of potential lesson project folders if we want to rebuild all
-    if(tolower(shortName)=="all"){
-      projects0<-fs::dir_ls(lessons_dir,type="directory")
-                #Filter out some patterns for things we don't want to not process
-      projects<-projects0[which(!grepl("^.*Lessons[\\/]~",projects0)&
-                                !grepl("OLD_",projects0))]
-    }else{
-      #otherwise, pass lessons_dir on to get validated
-      projects<-fs::path(lessons_dir,shortName)
+    if (tolower(shortName) == "all") {
+      projects0 <- fs::dir_ls(lessons_dir, type = "directory")
+      # Filter out some patterns for things we don't want to not process
+      projects <- projects0[which(!grepl("^.*Lessons[\\/]~", projects0) &
+        !grepl("OLD_", projects0))]
+    } else {
+      # otherwise, pass lessons_dir on to get validated
+      projects <- fs::path(lessons_dir, shortName)
     }
 
-    #Now validate these projects as another safeguard (using unexported function)
-    good_projects<-projects[galacticPubs:::validate_lesson_dir(projects)] %>% sort()
+    # Now validate these projects as another safeguard (using unexported function)
+    good_projects <- projects[galacticPubs:::validate_lesson_dir(projects)] %>% sort()
 
-    update_list<-lapply(good_projects,function(WD){
-      message("Publishing: ",basename(WD))
-      publish(WD=WD,commit_msg=commit_msg)
+    update_list <- lapply(good_projects, function(WD) {
+      message("Publishing: ", basename(WD))
+      publish(WD = WD, commit_msg = commit_msg)
     })
   }
-  #report results
-  hl<-paste0(c("\n",rep("_",30),"\n"),collapse="")
-  message(paste0(hl,
-                 paste0("Lessons published:\n - ",
-          paste0(basename(good_projects),collapse="\n - "),
-          hl)))
+  # report results
+  hl <- paste0(c("\n", rep("_", 30), "\n"), collapse = "")
+  message(paste0(
+    hl,
+    paste0(
+      "Lessons published:\n - ",
+      paste0(basename(good_projects), collapse = "\n - "),
+      hl
+    )
+  ))
 
-    #turn off timer if it was started
-  if(timer){
+  # turn off timer if it was started
+  if (timer) {
     tictoc::toc()
   }
 }

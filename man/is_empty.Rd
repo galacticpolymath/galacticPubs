@@ -13,5 +13,23 @@ is_empty(x)
 TRUE (if empty) or FALSE (if not empty)
 }
 \description{
-Logical test for all the different versions of empty values (NULL, "", NA, "\verb{\\\\n}",list(),length(x)==0)
+Logical test for all the different versions of empty values, i.e.:
+\itemize{
+\item NULL
+\item ""
+\item NA
+\item "\verb{\\\\n}"
+\item list()
+\item length(x)==0
+}
+}
+\details{
+Works on values, vectors, or a flat list
+}
+\examples{
+is_empty("")
+is_empty(3)
+is_empty(c("",NA,NULL))
+is_empty(list(a="",b=NA,c=NULL))
+is_empty(list(a="",b=NA,c="nonempty cell"))
 }
