@@ -1,14 +1,17 @@
-#' Add this repository to galacticpolymath github
+#' Push new "forked" project to GitHub
 #'
-#' This functino expects that:
+#' This is what you do after you've copied a cloned a lesson project in order to make a new language version. See [how_fork_lesson()]
+#'
+#' This function expects that:
 #' - You have [gh cli](https://cli.github.com/manual/installation) (github command line) installed
 #' - You're set up with git in Rstudio
 #' - You have credentials to write to galacticpolymath github repos
 #'
 #' @export
+#' @family GitHub Functions
 #'
 
-gh_add_this_repo<-function(){
+gh_push_forked_repo<-function() {
   #test if this project is in the lessons directory, otherwise throw error
   WD<-getwd()
   project<-basename(WD)

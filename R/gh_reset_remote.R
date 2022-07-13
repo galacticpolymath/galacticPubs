@@ -1,14 +1,15 @@
-#' change_lesson_git
+#' Reset Remote GitHub Remote Repository
 #'
-#' Change the GitHub URL associated with this project (i.e. after you rename the repo on <https://github.com/galacticpolymath>)
+#' Change the GitHub URL associated with this project (i.e. after you rename the repo on <https://github.com/galacticpolymath>) or after you've "forked" a project to make a new language version of the project.
 #'
 #' Will run some validation checks and let you know whether the new_name repo exists on the web. May also prompt to run [editor()] to initialize some fields.
-#' @param new_name The name of the new repo (should be exactly as it is named on <https://github.com/galacticpolymath>); It's just the project name--a full URL is not expected.
+#' @param new_name The name of the new (empty) repo you want to connect to (should be exactly as it is named on <https://github.com/galacticpolymath>); It's just the project name--a full URL is not expected.
 #' @param WD working directory; default= getwd()
 #' @param check_current do you want to check whether the current listed GitHubPath in the front-matter.yml is good? default=F
 #' @export
+#' @family GitHub Functions
 
-change_lesson_git<-function(new_name,WD=getwd(),check_current=FALSE){
+gh_reset_remote<-function(new_name,WD=getwd(),check_current=FALSE){
   if(missing(new_name)){stop("Include 'new_name'")}
 
   yaml_path<-fs::path(WD,"meta","front-matter.yml")
@@ -23,9 +24,10 @@ change_lesson_git<-function(new_name,WD=getwd(),check_current=FALSE){
   git_initialized<-!is_empty(y$GitHubPath)
   if(!git_initialized){message("GitHubPath is blank in front-matter.yml. We'll update it now.")}
 
+  test_wd<-check_wd()
+  if(!test_wd){stop("Make sure you're in the project working directory. Run 'getwd()'")}
 
-
-
+  WD<-getwd()
   wdpath<-paste0("'",fs::as_fs_path((WD)),"'")
   git_ping_test_cmd<-paste0('git ls-remote')
   #####

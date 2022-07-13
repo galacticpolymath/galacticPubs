@@ -4,10 +4,12 @@
 \alias{check_wd}
 \title{Check if Working Directory Looks Good}
 \usage{
-check_wd(simple_out = TRUE)
+check_wd(simple_out = TRUE, throw_error = TRUE)
 }
 \arguments{
-\item{simple_out}{logical; if TRUE results will be T/F; if F, returns a list of test_result, and project_folder_name}
+\item{simple_out}{logical; if TRUE results will be T/F (i.e. TRUE=looks good). If F, returns a list of test_result, parent_folder_name, and project_folder_name. default=T}
+
+\item{throw_error}{logical; Do you want to stop code if error (T) or just throw a warning (F)? default=T}
 }
 \value{
 depends on simple_out
