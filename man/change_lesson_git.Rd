@@ -7,7 +7,7 @@
 change_lesson_git(new_name, WD = getwd(), check_current = FALSE)
 }
 \arguments{
-\item{new_name}{The name of the new repo (should be exactly as it is named on \url{https://github.com/galacticpolymath})}
+\item{new_name}{The name of the new repo (should be exactly as it is named on \url{https://github.com/galacticpolymath}); It's just the project name--a full URL is not expected.}
 
 \item{WD}{working directory; default= getwd()}
 

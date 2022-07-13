@@ -3,7 +3,7 @@
 #' Change the GitHub URL associated with this project (i.e. after you rename the repo on <https://github.com/galacticpolymath>)
 #'
 #' Will run some validation checks and let you know whether the new_name repo exists on the web. May also prompt to run [editor()] to initialize some fields.
-#' @param new_name The name of the new repo (should be exactly as it is named on <https://github.com/galacticpolymath>)
+#' @param new_name The name of the new repo (should be exactly as it is named on <https://github.com/galacticpolymath>); It's just the project name--a full URL is not expected.
 #' @param WD working directory; default= getwd()
 #' @param check_current do you want to check whether the current listed GitHubPath in the front-matter.yml is good? default=F
 #' @export
@@ -23,9 +23,7 @@ change_lesson_git<-function(new_name,WD=getwd(),check_current=FALSE){
   git_initialized<-!is_empty(y$GitHubPath)
   if(!git_initialized){message("GitHubPath is blank in front-matter.yml. We'll update it now.")}
 
-   #test that WD is in the root directory with the R Project
-  loc_check<-list.files(WD,pattern="\\.Rproj") %>% length() ==1
-  if(!loc_check){stop("Make sure you're in the write WD (working directory)\n")}
+
 
 
   wdpath<-paste0("'",fs::as_fs_path((WD)),"'")

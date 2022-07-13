@@ -7,7 +7,7 @@
 drive_find_path(drive_path)
 }
 \arguments{
-\item{drive_path}{in the form "directory/subdirectory", where "My Drive" is understood to be at the root above "Folder Name1". Will match case INsensitively.}
+\item{drive_path}{in the form "directory/subdirectory", where "My Drive" is understood to be at the root above "directory". Will match case InSeNsItIvElY. If you want to place an item on the bare "My Drive" folder, set drive_path="~" or "root".}
 }
 \description{
 Simulates Finder/File Explorer functionality by repeated calls to \code{\link[googledrive:drive_find]{googledrive::drive_find()}}.
