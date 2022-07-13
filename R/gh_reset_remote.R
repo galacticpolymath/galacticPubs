@@ -25,7 +25,7 @@ gh_reset_remote<-function(new_name,WD=getwd(),check_current=FALSE){
   if(!git_initialized){message("GitHubPath is blank in front-matter.yml. We'll update it now.")}
 
   test_wd<-check_wd()
-  if(!test_wd){stop("Make sure you're in the project working directory. Run 'getwd()'")}
+
 
   WD<-getwd()
   wdpath<-paste0("'",fs::as_fs_path((WD)),"'")
@@ -52,8 +52,10 @@ gh_reset_remote<-function(new_name,WD=getwd(),check_current=FALSE){
   # Run Git command
   git_response2<-tryCatch(system2("cd",paste0(wdpath," && ",git_ping_test_cmd),stdout=TRUE,stderr=FALSE), error=function(e){e})
 
-  #test for length >0 or if 0, test for error status
-  git_connected2<-ifelse(length(git_response2)>0,TRUE,attr(git_response2,"status")==1 )
+
+  #test for null error status code
+  git_connected2<-is.null(attr(git_response2,"status"))
+
   if(!git_connected2){
     stop("Something went wrong trying to connect to your repo with 'git ls-remote'\nMake sure the repo you're connecting to exists online:\n\n  > ",new_git_url,"\n\n*You may need to rename the repo through the github.com interface.\n")}else{
     message("\nSuccessfully updated repo connection!:\n OLD > ",y$GitHubPath,"\n NEW > ",new_git_url,"\n")

@@ -20,7 +20,7 @@ how_fork_lesson<- function(){
     "4) Check 'Open in new session to keep this window open'\n",
     "   - Make sure it's going in Edu/Lessons Folder and click 'Create Project'\n",
     "5) IMPORTANT, you have to push this new repo to our Github page with gh cli",
-    "   - run gh_add_this_repo()"
+    "   - run gh_push_forked_repo()"
   )
 
 }
