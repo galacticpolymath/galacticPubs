@@ -13,20 +13,42 @@
 
 gh_push_forked_repo<-function() {
   #test if this project is in the lessons directory, otherwise throw error
+  test_wd<-check_wd(simple_out = FALSE)
   WD<-getwd()
-  project<-basename(WD)
-  parent<-gsub(paste0("^.*/([^/]*)/",project,"$"),"\\1",WD)
-  if(parent!="Lessons"){
-    stop("This project doesn't appear to be in the 'Lessons' folder")
-  }else{
+  wdpath<-paste0("'",fs::as_fs_path((WD)),"'")
+
+  project<-test_wd$project_folder_name
+  parent<-test_wd$parent_folder_name
+
     #Ref: https://docs.github.com/en/get-started/importing-your-projects-to-github/importing-source-code-to-github/adding-locally-hosted-code-to-github
-    #initial commit
-    git_cmd<-paste0("git add . && git commit -m 'initial commit'")
-    tryCatch(system2("cd", paste0(WD," && ",git_cmd)), error=function(e){e})
 
-    #push new repo to github
-    gh_cmd<-paste0("gh create galacticpolymath/",project)
-    tryCatch(system2("cd", paste0(WD," && ",gh_cmd)), error=function(e){e})
+  #Create new empty remote repo
+    gh_cmd<-paste0("gh repo create galacticpolymath/",project," --public")
+    gh_cmd_all<-paste0(wdpath, " && ", gh_cmd)
+    test<-tryCatch(
+      system2(command = "cd", gh_cmd_all),error = function(e) {e}
+    )
 
+
+    #Reset remote to the new name you just created
+    galacticPubs::gh_reset_remote(new_name=project)
+
+        #initial commit
+    git_cmd_init<-paste0("git add . && git commit -m 'initial commit'")
+    tryCatch(system2(command="cd",paste0(wdpath," && ",git_cmd_init)), error=function(e){e})
+
+    # Push everything to new branch
+    git_cmd_push<-paste0("git push -u origin main")
+    test2<-tryCatch(system2(command="cd",paste0(wdpath," && ",git_cmd_push)), error=function(e){e})
+
+    success<-!"error" %in% class(test2)
+
+    if(success) {
+      message("\n*New repo '", project, "' successfully pushed to GitHub!\n")
+    } else{
+      stop("!Something went wrong.\nCode: ",test2)
     }
+
+
+
 }

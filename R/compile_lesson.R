@@ -55,6 +55,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
 
   # Standards alignment & learning plots -----------------------------------------------------
     # test if learningEpaulette is in up-to-date with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
+
     stnds_out_of_date<-!inSync(fs::path(WD,"assets","learning-plots","GP-Learning-Epaulette.png"),
                                fs::path(WD,"assets","learning-plots","GP-Learning-Chart.png"),
                                fs::path(WD,"meta","standards.RDS"),

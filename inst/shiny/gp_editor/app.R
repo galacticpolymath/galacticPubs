@@ -85,11 +85,13 @@ ui <- navbarPage(
             inputId = "ReleaseDate",
             label = "Official Release Date",
             value = y$ReleaseDate
-          ),
+          )
+        ),
+        div(class="inline-fields",
           selectizeInput(
             inputId = "Language",
             label = "Language",
-            choices = language_codes$Name,
+            choices = c("",language_codes$Name),
             selected = y$Language,
             options = list(create = TRUE),
             width ="150"
@@ -97,8 +99,24 @@ ui <- navbarPage(
           selectizeInput(
             inputId = "Country",
             label = "Country (leave blank if NA)",
-            choices = country_codes$Name,
+            choices = c("",country_codes$Name),
             selected = y$Country,
+            options = list(create = TRUE),
+            width ="150"
+          ),
+          selectizeInput(
+            inputId = "DefaultLanguage",
+            label = "DEFAULT Language",
+            choices = c("",language_codes$Name),
+            selected = y$DefaultLanguage,
+            options = list(create = TRUE),
+            width ="150"
+          ),
+          selectizeInput(
+            inputId = "DefaultCountry",
+            label = "DEFAULT Country (leave blank if NA)",
+            choices = c("",country_codes$Name),
+            selected = y$DefaultCountry,
             options = list(create = TRUE),
             width ="150"
           ),

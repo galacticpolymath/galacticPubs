@@ -1,21 +1,25 @@
 #DEFAULT VALUES FOR front-matter.
-#
 id: ''
 ShortTitle: ''
 Language: 'English'
 Country: 'United States'
-#---> operational variables (that don't have Shiny inputs
+DefaultLanguage: 'English'
+DefaultCountry: 'United States'
+
+#!!---> operational variables (that don't have Shiny inputs
 lang: ''
 lng: ''
 locale: 'en-US'
-TemplateVer: 0.3.3
+DefaultLocale: 'en-US'
+TemplateVer: 0.3.4
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
 URL: ''
 GPCatalogPath: ''
 GitHubPath: ''
-#<--- operational variables (that don't have Shiny inputs)
+#!!<--- operational variables (that don't have Shiny inputs)
+
 PublicationStatus: Draft
 RebuildAllMaterials: no
 ReleaseDate: ''

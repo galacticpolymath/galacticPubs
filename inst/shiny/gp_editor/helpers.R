@@ -117,13 +117,12 @@ prep_input<-function(input,yaml_path,existing_current_data=NULL,WD=getwd()){
     #Remove Nulls! They cause many problems when we output to character & get character(0)
     Y<- sapply(Y0B,function(x){if(is.null(x)){""}else{x}} ,simplify = F)
 
-    # operational variables in yaml we don't expect to be in input (everything between Country and PublicationStatus, but keeping ShortTitle (2), which is important)
-    yaml_op_var<-names(updated)[c(1,(which(names(updated)=="Country")+1):(which(names(updated)=="PublicationStatus")-1))]
+    # operational variables in yaml we don't expect to be in input (everything from lang to the last thing before PublicationStatus, but keeping ShortTitle (2), which is important)
+    yaml_op_var<-names(updated)[c(1,(which(names(updated)=="lang")+1):(which(names(updated)=="PublicationStatus")-1))]
 
     template_fields0<-names(updated)
     #template_fields sans operational variables
     template_fields<-template_fields0[!template_fields0%in%yaml_op_var]
-
     ######
     #Put any missing fields that are in 'input', but not the template yml, at the end
     input_not_in_template<-Y[which(is.na(match(names(Y),template_fields)))]

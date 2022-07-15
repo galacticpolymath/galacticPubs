@@ -63,15 +63,15 @@ update_fm <- function(WD=getwd(),save_output=TRUE,reorder=TRUE,change_this=NULL)
     message("\nfront-matter.yml template will be upgraded upon save: ",old_yaml$TemplateVer,"->",new_yaml$TemplateVer)
   }
 
-  #Change LastUpdated field
-  new_yaml$LastUpdated<-Sys.time() %>% as.character()
 
 
     #save updated file if requested
-    if(save_output){
-      yaml::write_yaml(new_yaml,yaml_path)
-      message("\n@ Updated meta/front-matter.yml saved to disk.")
-    }
+  if(save_output) {
+    #Change LastUpdated field
+    new_yaml$LastUpdated <- Sys.time() %>% as.character()
+    yaml::write_yaml(new_yaml, yaml_path)
+    message("\n@ Updated meta/front-matter.yml saved to disk.")
+  }
 
   }
 
