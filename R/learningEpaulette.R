@@ -8,7 +8,7 @@
 #' @param destFolder where do you want to save the folder; by default in the "assets/learning-plots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" for ggsave output image file
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
-#' @param font_size size of font in pts
+#' @param font_size size of font in pts;default=11
 #' @param width plot width in inches
 #' @param height plot height in inches
 #' @param dpi resolution in dots per inch; by default 150
@@ -21,7 +21,7 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(heightScalar=1,epauletteHeight=0.2,randomSeed=101,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=19,width=11,height=1.6,dpi=200,showPlot=TRUE,...){
+learningEpaulette<-function(heightScalar=1,epauletteHeight=0.2,randomSeed=101,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=10,width=11,height=1.6,dpi=200,showPlot=TRUE,...){
 
   # #test for NULL values being supplied; replace with defaults
   # a<-match.call(expand.dots=TRUE)[-1] %>% as.list()
@@ -60,7 +60,7 @@ epaulette<-
   ggplot2::scale_colour_manual(values=clrs,aesthetics=c("color","fill"))+
   #Add Target border(s) if necessary
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax"),fill="transparent",colour=rectangles$border,size=2.3,show.legend = F)+
-  ggplot2::scale_x_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0,0)))+
+  ggplot2::scale_x_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0,0),0))+
   ggplot2::theme_void()+
     ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
 
@@ -72,8 +72,8 @@ subject_labels<-subset(xlabels,xlabels$x.prop>0) %>% ggplot2::ggplot()+
                            family="Kanit",size=font_size,show.legend = FALSE,direction="both",col=gpColors("galactic black"),force=6,
                            point.padding=0.25)+
   #scale y to pad text according to user input
-  ggplot2::scale_y_continuous(limits=c(0,0.2),expand=ggplot2::expansion(c(0,0)))+
-  ggplot2::scale_x_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0,0)))+
+  ggplot2::scale_y_continuous(limits=c(0,0.2),expand=ggplot2::expansion(c(0,0),0))+
+  ggplot2::scale_x_continuous(limits = c(0,1),expand=ggplot2::expansion(c(0,0),0))+
    ggplot2::theme_void()+
     ggplot2::theme(plot.background=ggplot2::element_blank(),panel.background = ggplot2::element_blank())
 
@@ -91,10 +91,6 @@ G <- epaulette / subject_labels  + patchwork::plot_layout(ncol = 1, heights = c(
     panel.background = ggplot2::element_blank(),
     plot.margin=ggplot2::unit(c(0,0,5,0),"points")
     )
-
-
-
-
 
 
 

@@ -5,7 +5,7 @@
 \title{batch_rebuild}
 \usage{
 batch_rebuild(
-  shortName,
+  gh_proj_name,
   lessons_dir,
   stage = TRUE,
   change_this = NULL,
@@ -14,13 +14,13 @@ batch_rebuild(
 )
 }
 \arguments{
-\item{shortName}{What is the lesson short name (i.e. the folder name) for the lesson you want to update and rebuild; use "all" if you want to rebuild all the lessons.}
+\item{gh_proj_name}{The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.}
 
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
 
 \item{stage}{do you want to call \code{\link[=stageAssets]{stageAssets()}} to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE}
 
-\item{change_this}{A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If shortName=="all", make sure you set this to something you want to change for everything.}
+\item{change_this}{A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If gh_proj_name=="all", make sure you set this to something you want to change for everything.}
 
 \item{clean}{Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to \code{\link[=compile_lesson]{compile_lesson()}}). Default=TRUE}
 

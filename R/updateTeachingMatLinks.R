@@ -4,7 +4,7 @@
 #'
 #' Just a note that I'm using 2 libraries to handle XLSX files. Not ideal, but the imported data from openxlsx::read.xlsx is nicer than XLConnect::readWorksheetFromFile, but the editing of data from a complex spreadsheet is MUCH better in XLConnect.
 #'
-#' @param shortTitle The unique short title of this lesson which is prefixed on the lesson folder name in the shared
+#' @param gh_proj_name The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.
 #' @param dataCat which info do you want to merge with your teaching-materials spreadsheet? Options= "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.
 #' @param linksFile name of the file we're updating in the meta/ subfolder; default="teaching-materials.xlsx". gdrive *CaseSensitive!
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
@@ -12,7 +12,7 @@
 #' @param returnWorkbook Logical; if T, returns the list which was written to linksFile
 #' @export
 #'
-updateTeachingMatLinks<-function(shortTitle,
+updateTeachingMatLinks<-function(gh_proj_name,
                                  dataCat = c("download",  "remote", "classroom"),
                                  linksFile = "teaching-materials.xlsx",
                                  WD = getwd(),
@@ -24,10 +24,14 @@ updateTeachingMatLinks<-function(shortTitle,
   #if WD supplied, append it to destFolder
   linksFile <-  fs::path(WD,"meta", linksFile)
 
-  if(missing(shortTitle)){
+  if(missing(gh_proj_name)){
     current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))
-    shortTitle<-current_data$ShortTitle
-    if(is_empty(shortTitle)){stop("Please enter a lesson shortTitle")}
+        if(is_empty(current_data$GitHubPath)){stop("Please enter the GitHub Project Name (gh_proj_name)")
+        }else{
+          gh_proj_name<-current_data$GitHubPath %>% basename %>% tools::file_path_sans_ext()
+          }
+    #exception if this is the galacticPubs project
+    if(gh_proj_name=="galacticPubs"){gh_proj_name<-current_data$ShortTitle}
     }
 
 #define dplyr::coalesce function that doesn't crash with 2 NAs!
@@ -62,15 +66,13 @@ updateTeachingMatLinks<-function(shortTitle,
   #################
 
 
-
 # Query Google Drive to find locations ------------------------------------
-    EduDirID<-googledrive::drive_find(q=paste0("name='Edu' and mimeType= 'application/vnd.google-apps.folder' and 'root' in parents"))$id
-    LessonsDirID<-googledrive::drive_find(q=paste0("name='Lessons' and mimeType= 'application/vnd.google-apps.folder' and '",EduDirID,"' in parents"))$id
-    currLessonDir<-googledrive::drive_find(q=paste0("mimeType='application/vnd.google-apps.folder' and '",LessonsDirID,"' in parents"),pattern=shortTitle)
+
+    currLessonDir<-drive_find_path(paste0("Edu/lessons/",gh_proj_name))
     currLessonDirID<-currLessonDir$id
 
-    #Test if valid "shortTitle" was provided
-    if(length(currLessonDir)==0){stop(paste0("No lessons matching \"",shortTitle,"\" found."))}else{
+    #Test if valid "gh_proj_name" was provided
+    if(nrow(currLessonDir)==0){stop(paste0("No lessons matching \"",gh_proj_name,"\" found."))}else{
       message("\n>> ",nrow(currLessonDir)," lesson(s) found: ",paste(currLessonDir$name),"\n")
     }
 

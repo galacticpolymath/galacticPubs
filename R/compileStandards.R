@@ -269,12 +269,9 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
     proportions=a_combined  %>% dplyr::group_by(.data$subject)%>% dplyr::summarise(proportion=round(sum(.data$n_prop_adj),2),.groups="drop")
 
 
-
     xlabels<-sapply(proportions$proportion,scales::percent) %>% dplyr::as_tibble()
     xlabels$x.prop=(proportions$proportion)
     xlabels$x=cumsum(proportions$proportion)-(proportions$proportion/2)
-
-
 
 
     xlabels$subj<-c("math","ela","science","socstudies")
@@ -298,7 +295,9 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
     rectangles$subject<-factor(rectangles$subject,ordered=T,levels=c("Math","ELA","Science","Soc. Studies"))
     rectangles$border<-"transparent"
 
-    # segs<-dplyr::tibble(x=xlabels$x,xend=xlabels$x,y=1-thickness-0.04,yend=xlabels$yend,subject=xlabels$subject,segCol=clrs,targetSegCol=NA)
+    #Ensure that xmax[4] is 1, so there's never a gap at the right
+  rectangles$xmax[4] <- 1
+
 
     #boldenize & embiggenate if targetSubj indicated
     if(!is.null(targetSubj)){

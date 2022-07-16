@@ -128,9 +128,9 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
   }
 
   if("Teaching Materials" %in% choices){
-    if(current_data$ShortTitle==""){warning("You need to enter a unique ShortTitle in Edit Tab")
+    if(current_data$GitHubPath==""){warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
     }else{
-      updateTeachingMatLinks(shortTitle = current_data$ShortTitle, WD = WD,dataCat=c("download",tolower(current_data$LessonEnvir)))
+      updateTeachingMatLinks( WD = WD,dataCat=c("download",tolower(current_data$LessonEnvir)))
       compileTeachingMat(LessonEnvir=current_data$LessonEnvir,WD = WD)
     }
 
