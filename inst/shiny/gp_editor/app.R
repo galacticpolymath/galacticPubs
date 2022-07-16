@@ -90,7 +90,7 @@ ui <- navbarPage(
         div(class="inline-fields",
           selectizeInput(
             inputId = "Language",
-            label = "Language",
+            label = "LESSON\nLanguage",
             choices = c("",language_codes$Name),
             selected = y$Language,
             options = list(create = TRUE),
@@ -98,11 +98,11 @@ ui <- navbarPage(
           ),
           selectizeInput(
             inputId = "Country",
-            label = "Country (leave blank if NA)",
+            label = "LESSON Country (can leave blank)",
             choices = c("",country_codes$Name),
             selected = y$Country,
             options = list(create = TRUE),
-            width ="150"
+            width ="200"
           ),
           selectizeInput(
             inputId = "DefaultLanguage",
@@ -114,11 +114,11 @@ ui <- navbarPage(
           ),
           selectizeInput(
             inputId = "DefaultCountry",
-            label = "DEFAULT Country (leave blank if NA)",
+            label = "DEFAULT Country  (can leave blank)",
             choices = c("",country_codes$Name),
             selected = y$DefaultCountry,
             options = list(create = TRUE),
-            width ="150"
+            width ="200"
           ),
         ),
         textInput(
@@ -325,65 +325,82 @@ server <- function(input, output,session) {
         )
   })
 
-  # check whether there are unsaved changes
+
+# Monitor whether there are unsaved changes -------------------------------
   observe({
     #don't run until full page rendered
-    if(!is.null(input$DrivingQ)){
+    if (!is.null(input$DrivingQ)) {
+      data_check <-
+        prep_input(
+          input,
+          yaml_path,
+          existing_current_data = vals$current_data,
+          WD = WD
+        )
+      #save updated current_data and saved_data to reactive values
+      isolate({
+      vals$current_data <- data_check$current_data
+      vals$saved_data <- data_check$saved_data
+      })
 
-    data_check<-prep_input(input,yaml_path,existing_current_data=vals$current_data,WD=WD)
-
-    #save updated current_data and saved_data to reactive values
-    vals$current_data<-data_check$current_data
-    vals$saved_data<-data_check$saved_data
-
-    outOfDate<-if(!identical(length(data_check[[1]]), length(data_check[[2]]))) {
-      1000
-    } else{
-
-      lapply(1:length(data_check[[1]]), function(i) {
-        # if out-of-date,
-        #each element of the list should not be identical (unlist necessary to avoid narrow issue w/ <NA> vs `NA` names)
-        !(identical(unlist(data_check[[1]][i],use.names=FALSE), unlist(data_check[[2]][i],use.names=FALSE)) |
+      outOfDate <-
+        if (!identical(length(data_check[[1]]), length(data_check[[2]]))) {
+          longer_list<-which.max(lengths(data_check))
+          longer_list_names<-names(data_check[[longer_list]])
+          shorter_list_names<-names(data_check[[-longer_list]])
+          probs_names<-longer_list_names[is.na(match(longer_list_names,shorter_list_names))]
+          #Entries missing (probably in saved_data)
+          probs_names
+        } else{
+         probs<- lapply(1:length(data_check[[1]]), function(i) {
+            # if out-of-date, each element of the list should not be identical
+            # (unlist necessary to avoid narrow issue w/ <NA> vs `NA` names)
+            !(identical(
+              unlist(data_check[[1]][i], use.names = FALSE),
+              unlist(data_check[[2]][i], use.names = FALSE)) |
             #or any variety of mismatched "", NULL, NA,etc (empties)
             (is_empty(data_check[[1]][[i]]) &
                is_empty(data_check[[2]][[i]])))
-      }) %>% unlist()
-    }
+          }) %>% unlist()
+          prob_names<-names(data_check[[1]])[probs]
+          prob_names
+        }
 
 
-    count_outOfDate<-sum(outOfDate)
+      count_outOfDate <- length(outOfDate)
 
-    #Check if template upgraded
-    template_upgraded<-data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
-    if(count_outOfDate>0){
-      if(template_upgraded){
-        vals$yaml_update_txt<-paste0(
-          "Save & Upgrade template:\n",
-          data_check$saved_data$TemplateVer,
-          " -> ",
-          data_check$current_data$TemplateVer
-        )
-      }else{
-      vals$yaml_update_txt <- ("Not saved, yo ->")
+      #Check if template upgraded
+      template_upgraded <-
+        data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
+      if (count_outOfDate > 0) {
+        if (template_upgraded) {
+          vals$yaml_update_txt <- paste0(
+            "Save & Upgrade template:\n",
+            data_check$saved_data$TemplateVer,
+            " -> ",
+            data_check$current_data$TemplateVer
+          )
+        } else{
+          vals$yaml_update_txt <- ("Not saved, yo ->")
+        }
+        vals$saved <- FALSE
+      } else if (substr(vals$yaml_update_txt, 1, 1) == "N") {
+        vals$yaml_update_txt <- ("")
+        vals$saved <- TRUE
       }
-    vals$saved<-FALSE
-    }else if(substr(vals$yaml_update_txt,1,1)=="N"){vals$yaml_update_txt <- ("")
-    vals$saved<-TRUE}
 
-    #Check if Github link is present
-    ## Add github URL if missing in yaml
-    if(is_empty(data_check$saved_data$GitHubPath)) {
-      vals$current_data$GitHubPath <- whichRepo(WD=WD,fullPath=TRUE)
-      # #write current data
-      # yaml::write_yaml(data_check$current_data, fs::path(meta_path, "front-matter.yml"))
-      vals$yaml_update_txt <-
-        txt <- paste0(
-          "Save to attach GitHubRepo:\n",basename(data_check$current_data$GitHubPath)
+      #Check if Github link is present
+      ## Add github URL if missing in yaml
+      if (is_empty(data_check$saved_data$GitHubPath)) {
+        vals$current_data$GitHubPath <- whichRepo(WD = WD, fullPath = TRUE)
+        # #write current data
+        # yaml::write_yaml(data_check$current_data, fs::path(meta_path, "front-matter.yml"))
+        vals$yaml_update_txt <-
+          txt <- paste0("Save to attach GitHubRepo:\n",
+                        basename(data_check$current_data$GitHubPath))
+      }
 
-        )
     }
-
-  }
 
   })
 
@@ -398,9 +415,9 @@ server <- function(input, output,session) {
 
 
   #######################################
-  # Save YAML when button clicked -------------------------------------------
+  # Save YAML when save button clicked -------------------------------------------
   observe({
-    isolate({
+
       template_upgraded <-vals$current_data$TemplateVer > vals$saved_data$TemplateVer
       # if template upgraded, trigger rebuild of all materials in compile_lesson
       if (template_upgraded) {
@@ -410,12 +427,13 @@ server <- function(input, output,session) {
       #write current data
       yaml::write_yaml(vals$current_data, fs::path(meta_path, "front-matter.yml"))
       vals$saved <- TRUE
+      vals$saved_data<-vals$current_data
       vals$yaml_update_txt <-
         txt <- (paste0(
           "front-matter.yml updated:<br>",
           format(Sys.time(), "%Y-%b-%d %r")
         ))
-    })
+
   }) %>% bindEvent(input$save)
 
 
