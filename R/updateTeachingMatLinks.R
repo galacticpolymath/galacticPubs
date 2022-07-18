@@ -184,20 +184,33 @@ updateTeachingMatLinks<-function(gh_proj_name,
                 currCatFiles$filetype<-mimeKey$human_type[match(currCatFiles$mimeTypes,mimeKey$mime_type)]
 
                 #extract part numbers from _P1_ in file name
-                currCatFiles$part<-gsub("^.*?_[Pp][^_\\d]*(\\d*)_.*?$","\\1",currCatFiles$name,perl=T)
+                (part_extr<-gsub("^.*[^\\d](_[Pp][^_ \\d]*)(\\d*)[ &_$]*.*$","\\2",currCatFiles$name,fixed=F,perl=T))
+                #only return part number if it's numeric; else return ""
+                currCatFiles$part<-sapply(part_extr,function(x) {
+                  if(is.na(as.numeric(x))){
+                    message("Part number not extracted from file: \n -'",x,"'")
+                    ""
+                    }else{x}})
+                #does same thing as googledrive::drive_link(), but eh, why not
                 currCatFiles$link<-sapply(currCatFiles$drive_resource,function(x) x$webViewLink)
                 baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",currCatFiles$link,perl=T)
-                currCatFiles$gShareLink<-paste0(baseLink,"template/preview")
+
+                currCatFiles$gShareLink<-sapply(1:nrow(currCatFiles),function(i){
+                  row_i<-currCatFiles[i,]
+                  # PDF share links can't handle template/preview suffix
+                  ifelse(row_i$filetype=="pdf",baseLink[i], paste0(baseLink,"template/preview"))
+                })
+
                   if(category=="handouts"){
                     #extract SvT (student vs teacher) version from filename
                     currCatFiles$SvT<-ifelse(grepl(".*(TEACHER|STUDENT).*",toupper(currCatFiles$name),perl=T),
                             gsub(".*(TEACHER|STUDENT).*","\\1",toupper(currCatFiles$name),perl=T),NA)
+
                     #PDF export syntax is different for google presentations compared to google docs :/
                     pdfExportString<-ifelse((currCatFiles$filetype=="ppt"|currCatFiles$filetype=="pptx"|currCatFiles$filetype=="presentation"),"export/pdf","export?format=pdf")
                     # for shared resources that are already PDFs, avoid making an export pdf string...
                     currCatFiles$pdfLink<-ifelse(currCatFiles$filetype=="pdf",baseLink,paste0(baseLink,pdfExportString))
-                    #
-                    currCatFiles$gShareLink=ifelse(currCatFiles$filetype=="pdf",NA,baseLink)
+
                     #for all handouts, add a pdfLink...For remote lessons, we don't (yet) have access to distrLink for cloudinary.
                     # This needs to be added manually
                     data.frame(
@@ -329,7 +342,6 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
         #filter out excel data with filenames that aren't found on the web
         excelData_i <-excelData_i_0 %>% dplyr::filter(.data$filename %in% gData_i$filename)
 
-
         #Now merge, which should preserve titles
         mergedData_i <-  hard_left_join(excelData_i,gData_i,by="filename",as_character=TRUE)
 
@@ -345,6 +357,38 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
       }else{out0<-mergedData_i}
       #remove NA rows
       out<-rmNArows(out0)
+
+      #If title missing, try to guess from filename
+      #
+      if("title"%in%names(out)){
+      out$title<-sapply(1:nrow(out),function(i){
+        row_i<-out[i,]
+        if(is.na(row_i$title)){
+            # if wksht or worksheet in title, return "Worksheet"
+            descriptor_wksht<-ifelse(grepl(".*(wo?r?kshe?e?t).*", row_i$filename, ignore.case = TRUE),
+                                     "Worksheet",
+                                     NA)
+            descriptor_handout<-ifelse(grepl(".*(handout).*", row_i$filename, ignore.case = TRUE),
+                                     "Worksheet",
+                                     NA)
+            #parts, accommodating (1&2) multipart descriptors
+            partpat<-"^.*[^\\d](_[Pp][^_ \\d]*)(\\d*[^_]*).*$"
+            descriptor_parts<-ifelse(grepl(partpat,row_i$filename,perl=TRUE),
+                                     gsub(partpat,"\\2",row_i$filename,fixed=F,perl=T),
+                                     NA)
+
+            descriptor<-c(row_i$SvT,descriptor_wksht,descriptor_handout,ifelse(!is.na(descriptor_parts),paste0("(P",descriptor_parts,")"),NA)) %>% unique_sans_na()
+
+          title_guess<-paste(ifelse(!is.na(descriptor),descriptor,""),collapse=" ")
+          title_guess
+        }else{
+          row_i$title
+        }
+      })
+      }
+
+
+
 
       #overwrite old data with final (this is not writing to the hard drive until the saveWorkbook stage)
       XLConnect::writeWorksheet(tmXLSX,sheet=excelTab_i,data=out,startCol=1,startRow=3,header=F)

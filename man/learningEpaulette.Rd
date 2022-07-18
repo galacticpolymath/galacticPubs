@@ -12,7 +12,7 @@ learningEpaulette(
   destFolder = "assets/learning-plots/",
   fileName = "GP-Learning-Epaulette",
   WD = getwd(),
-  font_size = 19,
+  font_size = 10,
   width = 11,
   height = 1.6,
   dpi = 200,
@@ -35,7 +35,7 @@ learningEpaulette(
 
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 
-\item{font_size}{size of font in pts}
+\item{font_size}{size of font in pts;default=11}
 
 \item{width}{plot width in inches}
 

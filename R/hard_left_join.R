@@ -27,16 +27,14 @@ hard_left_join<-function(df1,df2,by,as_character=FALSE){
   ixn<-intersect(names(df1),names(df2))
   ixn <- ixn[!ixn%in%by]
 
-  df2_rows_with_matches<-unlist(df2[,by]) %in% unlist(df1[,by]) %>% which()
+  df2_index_in_df1<-match(unlist(df2[,by]),unlist(df1[,by]))
 
-  #matching rows
-  df1_rows_with_matches<-unlist(df1[,by]) %in% unlist(df2[,by]) %>%  which()
 
   #output should be in the format of df1
   df3<-df1
   #do the replacement
-  if(length(df1_rows_with_matches)>0){
-  df3[df1_rows_with_matches,ixn] <- df2[df2_rows_with_matches,ixn]
+  if(length(unique_sans_na(df2_index_in_df1))>0){
+  df3[df2_index_in_df1,ixn] <- df2[,ixn]
   }
   #Add unmatched rows in df2
   df2_unmatched<-dplyr::anti_join(df2,df3,by=by) %>% dplyr::select(by,ixn)

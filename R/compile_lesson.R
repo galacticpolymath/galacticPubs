@@ -117,6 +117,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
       WD = WD,
       showPlot = FALSE,
       heightScalar = current_data$LearningEpaulette_params_heightScalar,
+      epauletteHeight = current_data$LearningEpaulette_params_epauletteHeight,
       randomSeed = current_data$LearningEpaulette_params_randomSeed
     )
 
