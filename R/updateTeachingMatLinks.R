@@ -198,7 +198,7 @@ updateTeachingMatLinks<-function(gh_proj_name,
                 currCatFiles$gShareLink<-sapply(1:nrow(currCatFiles),function(i){
                   row_i<-currCatFiles[i,]
                   # PDF share links can't handle template/preview suffix
-                  ifelse(row_i$filetype=="pdf",baseLink[i], paste0(baseLink,"template/preview"))
+                  ifelse(row_i$filetype=="pdf",baseLink[i], paste0(baseLink[i],"template/preview"))
                 })
 
                   if(category=="handouts"){
