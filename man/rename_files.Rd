@@ -4,7 +4,14 @@
 \alias{rename_files}
 \title{Rename files based on a pattern}
 \usage{
-rename_files(pattern, replacement, dir_path, ignore.case = FALSE, perl = TRUE)
+rename_files(
+  pattern,
+  replacement,
+  dir_path,
+  ignore.case = FALSE,
+  perl = TRUE,
+  inner = FALSE
+)
 }
 \arguments{
 \item{pattern}{a regular expression to be passed to \code{\link[=gsub]{gsub()}}; e.g. "Short[ ]?Title" Will grab 'ShortTitle' and 'Short Title' prefixes and replace them with the replacement string
@@ -18,6 +25,8 @@ rename_files(pattern, replacement, dir_path, ignore.case = FALSE, perl = TRUE)
 \item{ignore.case}{if FALSE, the pattern matching is case sensitive and if TRUE, case is ignored during matching. default= FALSE}
 
 \item{perl}{logical. Should Perl-compatible regexps be used? default=TRUE}
+
+\item{inner}{logical. Is this being run recursively within a rename_files call? If TRUE, suppresses output. default=FALSE}
 }
 \description{
 Searches a directory recursively and replaces files by passing arguments to \code{\link[=gsub]{gsub()}}

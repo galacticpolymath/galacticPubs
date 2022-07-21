@@ -4,7 +4,13 @@
 \alias{rename_lesson}
 \title{rename_lesson}
 \usage{
-rename_lesson(new_name, gh_proj_name, lessons_dir, change_this = NULL)
+rename_lesson(
+  new_name,
+  gh_proj_name,
+  lessons_dir,
+  change_this = NULL,
+  preserve_spaces = FALSE
+)
 }
 \arguments{
 \item{new_name}{The new name you want to give the selected project}
@@ -14,6 +20,8 @@ rename_lesson(new_name, gh_proj_name, lessons_dir, change_this = NULL)
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
 
 \item{change_this}{passed to \code{\link[=update_fm]{update_fm()}} if you want to make any other changes to front matter. Must be a list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey book If gh_proj_name=="all", make sure you set this to something you want to change for everything.}
+
+\item{preserve_spaces}{if some files have a space in the 'Short Title', do you want to preserve this? default=FALSE}
 }
 \description{
 Don't run this from the RStudio session of the lesson you want to rename! Does several things:
@@ -26,5 +34,5 @@ Don't run this from the RStudio session of the lesson you want to rename! Does s
 }
 }
 \details{
-Assumes that you have Google Drive for Desktop set up with access to Lessons/ folder; github and gh CLI set up with proper permissions with GP GitHub.
+Assumes that you have Google Drive for Desktop set up with access to Lessons/ folder; github and gh CLI set up with proper permissions with GP GitHub. Will ignore case to account for different user behaviors.
 }
