@@ -1,38 +1,33 @@
 #' Reset Remote GitHub Remote Repository
 #'
-#' Change the GitHub URL associated with this project (i.e. after you rename the repo on <https://github.com/galacticpolymath>) or after you've "forked" a project to make a new language version of the project.
+#' Change the GitHub URL associated with this project (i.e. after you rename the repo on <https://github.com/galacticpolymath>) or after you've "forked" a project to make a new language version of the project. That is, you're specifying an *existing GitHub Repository's URL* that you want your local RStudio session to connect to when tracking changes. You don't have to specify the whole URL, just the specific name of the project (`new_name`) *exactly as it's spelled on GitHub*.
 #'
 #' Will run some validation checks and let you know whether the new_name repo exists on the web. May also prompt to run [editor()] to initialize some fields.
 #' @param new_name The name of the new (empty) repo you want to connect to (should be exactly as it is named on <https://github.com/galacticpolymath>); It's just the project name--a full URL is not expected.
 #' @param WD working directory; default= getwd()
-#' @param check_current do you want to check whether the current listed GitHubPath in the front-matter.yml is good? default=F
+#' @param check_current_gh do you want to check whether the current listed GitHubPath in the front-matter.yml is good? If T, will throw an error and stop if a current GitHub connection does not exist. default=F
+#' @param run_check_wd logical; do you want to run [check_wd()]? Basically looks for files and folders you expect in a valid lesson project. default=TRUE
 #' @export
 #' @family GitHub Functions
 
-gh_reset_remote<-function(new_name,WD=getwd(),check_current=FALSE){
+gh_reset_remote<-function(new_name,
+                          WD = getwd(),
+                          check_current_gh = FALSE,
+                          run_check_wd = TRUE) {
+
   if(missing(new_name)){stop("Include 'new_name'")}
 
-  yaml_path<-fs::path(WD,"meta","front-matter.yml")
-  yaml_found<-file.exists(yaml_path)
-  if(!yaml_found){stop("front-matter.yml not found. Run 'editor()' to initialize. Set language and country. Then try again.\n")}
-  y<-safe_read_yaml(yaml_path)
+  check_yaml(WD=WD)
 
-  locale_initialized<-!is_empty(y$locale)
-  if(!locale_initialized){stop("Run editor() and set language (and country, if applicable). Then try again.\n")}
-  #rename
+  if(run_check_wd){
+  test_wd<-check_wd(WD,simple_out = TRUE)
+  }else{test_wd<-NA}
 
-  git_initialized<-!is_empty(y$GitHubPath)
-  if(!git_initialized){message("GitHubPath is blank in front-matter.yml. We'll update it now.")}
-
-  test_wd<-check_wd()
-
-
-  WD<-getwd()
   wdpath<-paste0("'",fs::as_fs_path((WD)),"'")
   git_ping_test_cmd<-paste0('git ls-remote')
   #####
   #Test current git connection if asked
-  if(check_current){
+  if(check_current_gh){
     # Run Git command
     git_response<-tryCatch(system2("cd",paste0(wdpath," && ",git_ping_test_cmd),stdout=TRUE,stderr=FALSE), error=function(e){e})
     git_connected<-length(git_response)!=0 #results in character(0) if error

@@ -4,17 +4,24 @@
 \alias{gh_reset_remote}
 \title{Reset Remote GitHub Remote Repository}
 \usage{
-gh_reset_remote(new_name, WD = getwd(), check_current = FALSE)
+gh_reset_remote(
+  new_name,
+  WD = getwd(),
+  check_current_gh = FALSE,
+  run_check_wd = TRUE
+)
 }
 \arguments{
 \item{new_name}{The name of the new (empty) repo you want to connect to (should be exactly as it is named on \url{https://github.com/galacticpolymath}); It's just the project name--a full URL is not expected.}
 
 \item{WD}{working directory; default= getwd()}
 
-\item{check_current}{do you want to check whether the current listed GitHubPath in the front-matter.yml is good? default=F}
+\item{check_current_gh}{do you want to check whether the current listed GitHubPath in the front-matter.yml is good? If T, will throw an error and stop if a current GitHub connection does not exist. default=F}
+
+\item{run_check_wd}{logical; do you want to run \code{\link[=check_wd]{check_wd()}}? Basically looks for files and folders you expect in a valid lesson project. default=TRUE}
 }
 \description{
-Change the GitHub URL associated with this project (i.e. after you rename the repo on \url{https://github.com/galacticpolymath}) or after you've "forked" a project to make a new language version of the project.
+Change the GitHub URL associated with this project (i.e. after you rename the repo on \url{https://github.com/galacticpolymath}) or after you've "forked" a project to make a new language version of the project. That is, you're specifying an \emph{existing GitHub Repository's URL} that you want your local RStudio session to connect to when tracking changes. You don't have to specify the whole URL, just the specific name of the project (\code{new_name}) \emph{exactly as it's spelled on GitHub}.
 }
 \details{
 Will run some validation checks and let you know whether the new_name repo exists on the web. May also prompt to run \code{\link[=editor]{editor()}} to initialize some fields.
