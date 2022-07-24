@@ -5,38 +5,45 @@
 \title{rename_lesson}
 \usage{
 rename_lesson(
-  new_name,
+  new_proj_name,
+  new_ShortTitle,
   gh_proj_name,
+  curr_ShortTitle,
   lessons_dir,
   ignore_suffix = TRUE,
   change_this = NULL,
   preserve_spaces = FALSE,
-  run_check_wd = TRUE
+  run_check_wd = TRUE,
+  force_init_capital = TRUE
 )
 }
 \arguments{
-\item{new_name}{The new name you want to give the selected project}
+\item{new_proj_name}{The new name you want to give the selected project}
 
-\item{gh_proj_name}{The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.}
+\item{new_ShortTitle}{New ShortTitles to be swapped out in lesson project file names. If blank, will try to guess by ignoring terminal "_suffixes"}
+
+\item{gh_proj_name}{The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not \emph{necessarily} the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.}
+
+\item{curr_ShortTitle}{Current ShortTitle prefixed to lesson project files. If missing, will try to read this from ShortTitle in the existing front-matter.yml}
 
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
-
-\item{ignore_suffix}{logical. Do you want to ignore "_suffix" in gh_proj_name when renaming files and subfolders below the project level? e.g. if set to TRUE, files in a project called "GuardianFrogs_es" would be renamed with "...GuardianFrogs...", not "...GuardianFrogs_es..." Default=TRUE}
 
 \item{change_this}{passed to \code{\link[=update_fm]{update_fm()}} if you want to make any other changes to front matter. Must be a list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey book If gh_proj_name=="all", make sure you set this to something you want to change for everything.}
 
 \item{preserve_spaces}{if some files have a space in the 'Short Title', do you want to preserve this? default=FALSE}
 
 \item{run_check_wd}{logical; do you want to run \code{\link[=check_wd]{check_wd()}}? Basically looks for files and folders you expect in a valid lesson project. default=TRUE}
+
+\item{force_init_capital}{do you want to force the output to start with a capital letter? default=FALSE}
 }
 \description{
 Don't run this from the RStudio session of the lesson you want to rename! Does several things:
 \enumerate{
-\item Renames top-level folder of the lesson
-\item Finds and renames all file names found in the project folder e.g. OldShortName_yadayada.* -> NewShortName_yadayada. This is done locally using Google Drive for Desktop virtualization of the Lessons Folder
-\item Changes name of GitHub Repo at galacticpolymath/ and galacticpolymath/catalog
+\item Renames top-level folder of the lesson with "new_proj_name"
+\item Finds and renames all file names to found in the project folder e.g. OldShortTitle_yadayada.* -> NewShortTitle_yadayada. This is done locally using Google Drive for Desktop virtualization of the Lessons Folder
+\item Changes name of GitHub Repo at galacticpolymath/ and galacticpolymath/catalog to "new_proj_name"
 \item Reassociates lesson folder to new GitHub name with \code{\link[=gh_reset_remote]{gh_reset_remote()}}
-\item Changes the ShortName and GPCatalogPath and GitHubPath items in front-matter.yml using \code{\link[=update_fm]{update_fm()}}.
+\item Changes the ShortTitle and GPCatalogPath and GitHubPath items in front-matter.yml using \code{\link[=update_fm]{update_fm()}}.
 }
 }
 \details{

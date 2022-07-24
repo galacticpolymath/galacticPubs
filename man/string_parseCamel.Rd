@@ -9,15 +9,20 @@ string_parseCamel(x, flex_space = FALSE, force_init_capital = FALSE)
 \arguments{
 \item{x}{the string to parse}
 
-\item{flex_space}{logical. If true, returns [ ]? between a lower case and Upper case letter to allow a (grepl[]) call to detect the string if it has a space or not. Otherwise returns a space with no '?'. default=FALSE
+\item{flex_space}{logical. If true, returns \verb{[ ]}? between a lower case and Upper case letter to allow a (grepl[]) call to detect the string if it has a space or not. Otherwise returns a space with no '?'. default=FALSE
 
 [ ]: R:\%20}
 
 \item{force_init_capital}{do you want to force the output to start with a capital letter? default=FALSE}
 }
 \description{
-This function takes a string e.g. "HelloWorld" and returns a regex expression "Hello World" or "Hello[ ]?World" to allow for flexible string detection.
+This function takes a string e.g. "HelloWorld" and returns a regex expression "Hello World" or "\code{Hello[ ]?World}" to allow for flexible string detection.
 
 [ ]: R:\%20
 }
+\seealso{
+Other simple text string manipulation functions: 
+\code{\link{string_capitalize_first}()}
+}
 \concept{regex functions}
+\concept{simple text string manipulation functions}
