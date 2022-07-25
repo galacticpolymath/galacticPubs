@@ -9,13 +9,14 @@
 
 publish<- function(commit_msg=NULL,WD=getwd()){
 
-  #test that WD is in the root directory with the R Project
-  if(list.files(WD,pattern="\\.Rproj") %>% length() ==1){
-    wdpath<-paste0("'",fs::as_fs_path((WD)),"'")
-    published_path<-fs::path(WD,"published")
-    meta_path<-fs::path(WD,"meta")
+  #test that WD is in the root directory with the R Project,
+  #but don't throw an error (e.g. if run from galacticPubs)
+  check_wd(WD=WD,throw_error = FALSE)
+
 
 # check if files have been staged and are up to date ----------------------
+    published_path<-fs::path(WD,"published")
+    meta_path<-fs::path(WD,"meta")
     lesson_staged<-file.exists(fs::path(published_path,"LESSON.json"))
     staged_lesson_up_to_date<-inSync(fs::path(published_path,"LESSON.json"),
                                      fs::path(meta_path,"JSON","LESSON.json"),WD=WD)
@@ -81,26 +82,13 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     # add all changed files and commit
     commit_msg_2 <- paste0('\"galacticPubs::publish() [',Sys.time(),"] ",commit_msg,'\"')
     #Add all files by default
-    gert::git_add(".")
-    test_commit<-catch_err(gert::git_commit_all(message = commit_msg_2))
-    test_push<-catch_err(gert::git_push())
-    test_status<-ifelse(nrow(gert::git_status())==0,TRUE,FALSE)
+    gert::git_add(files=".", repo=WD)
+    test_commit<-catch_err(gert::git_commit_all(message = commit_msg_2, repo=WD))
+    test_push<-catch_err(gert::git_push(repo=WD))
+    # change log should be empty after push.
+    test_status<-ifelse(nrow(gert::git_status(repo=WD))==0,TRUE,FALSE)
 
-    #concatenate system commands; go to target dir; run git commit command
-    tryCatch(system2("cd", paste0(wdpath," && ",cmd_commit)), error=function(e){e})
+    dplyr::tibble(repo=basename(WD),commit=convert_T_to_check(test_commit),push=convert_T_to_check(test_push),success=convert_T_to_check(test_status),path=WD)
 
-    tryCatch(system2("cd", paste0(wdpath," && ",cmd_push)), error=function(e){e})
 
-    status<-tryCatch(system2("cd", paste0(wdpath," && ",cmd_status),stdout=TRUE), warning=function(e){e})
-    success_test<-grepl("nothing to commit",status) %>% sum()==1
-
-    dplyr::tibble(repo=basename(WD),check="pass",success=success_test,path=WD)
-
-  ###############
-  # Throw warning if WD doesn't look right (and don't do anything else)
-  }else{
-    warning("WD does not point to the root project folder where the .Rproj file is")
-    dplyr::tibble(repo=basename(WD),check="FAIL",success=FALSE,path=WD)
-
-  }
 }
