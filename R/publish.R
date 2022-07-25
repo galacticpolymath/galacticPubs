@@ -88,7 +88,7 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     # change log should be empty after push.
     test_status<-ifelse(nrow(gert::git_status(repo=WD))==0,TRUE,FALSE)
 
-    dplyr::tibble(repo=basename(WD),commit=convert_T_to_check(test_commit),push=convert_T_to_check(test_push),success=convert_T_to_check(test_status),path=WD)
+    dplyr::tibble(repo=basename(WD),commit=convert_T_to_check(test_commit),push=convert_T_to_check(test_push),success=test_status,path=WD)
 
 
 }
