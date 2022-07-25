@@ -37,7 +37,7 @@ gh_push_forked_repo<-function() {
     git_cmd_init<-paste0("git add . && git commit -m 'initial commit'")
     tryCatch(system2(command="cd",paste0(wdpath," && ",git_cmd_init)), error=function(e){e})
 
-    # Push everything to new branch
+    # Push everything to new repository
     git_cmd_push<-paste0("git push -u origin main")
     test2<-tryCatch(system2(command="cd",paste0(wdpath," && ",git_cmd_push)), error=function(e){e})
 

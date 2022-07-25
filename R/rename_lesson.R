@@ -201,17 +201,17 @@ if(preserve_spaces) {
 }
 #
 # # 3. Changes name of GitHub Repo at galacticpolymath/ and galactic --------
-# test_reset_remote <- tryCatch(
-#   gh_reset_remote(
-#     new_name = new_name,
-#     WD = new_proj_dir,
-#     check_current_gh = TRUE,
-#     run_check_wd = run_check_wd
-#   ),
-#   error = function(e) {
-#     e
-#   }
-# )
+test_reset_remote <- tryCatch(
+  gh_reset_remote(
+    new_name = new_proj_name,
+    WD = new_proj_dir,
+    check_current_gh = TRUE,
+    run_check_wd = run_check_wd
+  ),
+  error = function(e) {
+    e
+  }
+)
 
 # 4. Reassociates lesson folder to new GitHub name with [gh_reset_ --------
 

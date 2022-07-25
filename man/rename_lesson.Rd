@@ -9,9 +9,9 @@ rename_lesson(
   new_ShortTitle,
   gh_proj_name,
   curr_ShortTitle,
-  lessons_dir,
-  ignore_suffix = TRUE,
   change_this = NULL,
+  lessons_dir,
+  only_rename_prefixes = TRUE,
   preserve_spaces = FALSE,
   run_check_wd = TRUE,
   force_init_capital = TRUE
@@ -26,9 +26,11 @@ rename_lesson(
 
 \item{curr_ShortTitle}{Current ShortTitle prefixed to lesson project files. If missing, will try to read this from ShortTitle in the existing front-matter.yml}
 
+\item{change_this}{passed to \code{\link[=update_fm]{update_fm()}} if you want to make any other changes to front matter. Must be a list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey book If gh_proj_name=="all", make sure you set this to something you want to change for everything.}
+
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
 
-\item{change_this}{passed to \code{\link[=update_fm]{update_fm()}} if you want to make any other changes to front matter. Must be a list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey book If gh_proj_name=="all", make sure you set this to something you want to change for everything.}
+\item{only_rename_prefixes}{Do you want to only change project files with the ShortTitle at the beginning of the filename? (Could avoid accidental replacements if short title is a common phrase); default=TRUE}
 
 \item{preserve_spaces}{if some files have a space in the 'Short Title', do you want to preserve this? default=FALSE}
 
