@@ -84,9 +84,15 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     #Add all files by default
     gert::git_add(files=".", repo=WD)
     test_commit<-catch_err(gert::git_commit_all(message = commit_msg_2, repo=WD))
+
+    if(test_commit){
     test_push<-catch_err(gert::git_push(repo=WD))
+    }else{test_push<-FALSE}
+
     # change log should be empty after push.
+    if(test_commit&test_push){
     test_status<-ifelse(nrow(gert::git_status(repo=WD))==0,TRUE,FALSE)
+    }else{test_status<-FALSE}
 
     dplyr::tibble(repo=basename(WD),commit=convert_T_to_check(test_commit),push=convert_T_to_check(test_push),success=test_status,path=WD)
 
