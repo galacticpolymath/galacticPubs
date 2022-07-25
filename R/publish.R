@@ -79,9 +79,12 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     }
 
     # add all changed files and commit
-    cmd_commit <- paste0('git add . && git commit -m \"galacticPubs::publish() [',Sys.time(),"] ",commit_msg,'\"')
-    cmd_push<- paste0("git push")
-    cmd_status<- paste0("git status")
+    commit_msg_2 <- paste0('\"galacticPubs::publish() [',Sys.time(),"] ",commit_msg,'\"')
+
+    test_commit<-tryCatch(gert::git_commit_all(message = commit_msg_2),error=function(e){e})
+    gert::git_push()
+    cmd_status<-gert::git_status()
+
     #concatenate system commands; go to target dir; run git commit command
     tryCatch(system2("cd", paste0(wdpath," && ",cmd_commit)), error=function(e){e})
 
