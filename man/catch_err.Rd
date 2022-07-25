@@ -4,12 +4,18 @@
 \alias{catch_err}
 \title{Simplified error handling}
 \usage{
-catch_err(x)
+catch_err(x, keep_results = FALSE)
 }
 \arguments{
 \item{x}{the expression to be evaluated}
 
-\item{results}{logical. TRUE= no error; FALSE= error.}
+\item{keep_results}{Affects output. See returns.}
+}
+\value{
+\itemize{
+\item if keep_results=F, logical. TRUE= no error; FALSE= error.
+\item if keep_results=T, a list with success (T/F) and result (expression result)
+}
 }
 \description{
 Evaluate expression, returning F if it catches an error. Will downgrade error to warning. FYI, the expression is expected to do something to some other environmental variable; i.e. the result will not be the result of the expression.

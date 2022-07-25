@@ -11,7 +11,7 @@
 #' @export
 #'
 
-check_yaml <- function(WD = getwd(),
+check_fm <- function(WD = getwd(),
                        skip = NULL,
                        throw_error = TRUE) {
 
@@ -78,5 +78,3 @@ check_yaml <- function(WD = getwd(),
   return(results)
 
 }
-#alias
-check_yml <- check_yaml

@@ -1,23 +1,23 @@
 #' Reset Remote GitHub Remote Repository
 #'
-#' Change the GitHub URL associated with this project (i.e. after you rename the repo on <https://github.com/galacticpolymath>) or after you've "forked" a project to make a new language version of the project. That is, you're specifying an *existing GitHub Repository's URL* that you want your local RStudio session to connect to when tracking changes. You don't have to specify the whole URL, just the specific name of the project (`new_name`) *exactly as it's spelled on GitHub*.
+#' Change the GitHub URL associated with this project (i.e. after you rename the repo on <https://github.com/galacticpolymath>) or after you've "forked" a project to make a new language version of the project. That is, you're specifying an *existing GitHub Repository's URL* that you want your local RStudio session to connect to when tracking changes. You don't have to specify the whole URL, just the specific name of the project (`new_proj_name`) *exactly as it's spelled on GitHub*.
 #'
-#' Will run some validation checks and let you know whether the new_name repo exists on the web. May also prompt to run [editor()] to initialize some fields.
-#' @param new_name The name of the new (empty) repo you want to connect to (should be exactly as it is named on <https://github.com/galacticpolymath>); It's just the project name--a full URL is not expected.
+#' Will run some validation checks and let you know whether the new_proj_name repo exists on the web. May also prompt to run [editor()] to initialize some fields.
+#' @param new_proj_name The name of the new (empty) repo you want to connect to (should be exactly as it is named on <https://github.com/galacticpolymath>); It's just the project name--a full URL is not expected.
 #' @param WD working directory; default= getwd()
 #' @param check_current_gh do you want to check whether the current listed GitHubPath in the front-matter.yml is good? If T, will throw an error and stop if a current GitHub connection does not exist. default=F
 #' @param run_check_wd logical; do you want to run [check_wd()]? Basically looks for files and folders you expect in a valid lesson project. default=TRUE
 #' @export
 #' @family GitHub Functions
 
-gh_reset_remote<-function(new_name,
+gh_reset_remote<-function(new_proj_name,
                           WD = getwd(),
                           check_current_gh = FALSE,
                           run_check_wd = TRUE) {
 
-  if(missing(new_name)){stop("Include 'new_name'")}
+  if(missing(new_proj_name)){stop("Include 'new_proj_name'")}
 
-  check_yaml(WD=WD)
+  check_fm(WD=WD)
 
   if(run_check_wd){
   test_wd<-check_wd(WD,simple_out = TRUE)
@@ -36,7 +36,7 @@ gh_reset_remote<-function(new_name,
 
   #####
   #Try to reset connection to remote repo
-  new_git_url<-paste0('git@github.com:galacticpolymath/',new_name,".git")
+  new_git_url<-paste0('git@github.com:galacticpolymath/',new_proj_name,".git")
   git_seturl_cmd<-paste0('git remote set-url origin ',new_git_url)
   # Run Git Command
   git_seturl_test<-tryCatch(system2("cd",paste0(wdpath," && ",git_seturl_cmd),stdout=TRUE,stderr=FALSE), error=function(e){e})

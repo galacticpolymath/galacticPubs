@@ -33,6 +33,8 @@ rename_lesson <- function(new_proj_name,
                           force_init_capital = TRUE) {
 
 
+# 0.  Checks and validation -----------------------------------------------
+
   if (missing(lessons_dir)) {
     lessons_dir <-
       fs::path("/Volumes", "GoogleDrive", "My Drive", "Edu", "Lessons")
@@ -60,16 +62,16 @@ rename_lesson <- function(new_proj_name,
     stop("You seem to be in the project you want to modify. You need to run rename_lesson() from a different RStudio project.")
   }
 
-    #check change_this
+    #check change_this; must be a list
   if(!is.list(change_this)&!is.null(change_this)){
     stop("change_this parameter must be a list. See ?update_fm() for help.")
   }
 
-  #check that yaml exists and then read it in
-  test_check_yaml<-check_yaml(WD = WD,throw_error = FALSE)
+  #check that yaml exists, create one if necessary, and store path
+  fm_path<-init_fm(WD = gh_proj_dir)
 
   #read in yaml
-  y<-safe_read_yaml(yaml_path=fs::path(WD,"meta","front-matter.yml"))
+  y<-safe_read_yaml(fm_path)
 
 
 
@@ -78,6 +80,7 @@ rename_lesson <- function(new_proj_name,
     # IGNORED_|ExtractedString_IGNORED
     pat<-"(?<![|_] )([^|_]*?)_[^_]*?$"
     new_ShortTitle<-gsub(pat,"\\1",new_proj_name,perl=TRUE)
+    message("Guessing new_ShortTitle from front-matter.yml: '",new_ShortTitle,"'")
   }
 
   #Enforce initial capital letter in all names if requested
@@ -89,8 +92,18 @@ rename_lesson <- function(new_proj_name,
 
   if(missing(curr_ShortTitle)){
     curr_ShortTitle<-y$ShortTitle
+    #very dangerous to provide an empty regex pattern! ('') will capture anything!
+    if(is_empty(curr_ShortTitle)){
+      pat<-"(?<![|_] )([^|_]*?)_[^_]*?$"
+      curr_ShortTitle<-gsub(pat,"\\1",gh_proj_name,perl=TRUE)
+
+    }
+    message("Guessing curr_ShortTitle from front-matter.yml: '",curr_ShortTitle,"'")
   }
 
+  if(is_empty(curr_ShortTitle)){
+    stop("curr_ShortTitle cannot be empty ('')! This will change every file.")
+  }
 
 message("\nCAREFUL!")
 message(
@@ -103,7 +116,7 @@ message(
     curr_ShortTitle,
     "' to '",
     new_ShortTitle,
-    "\n    -only change prefixes: ",
+    "'\n\n  *only change prefixes: ",
     only_rename_prefixes,
     "'?\n!!!\n"
   )
@@ -115,8 +128,11 @@ if(continue%in%c("N","n")){
 
 
 
-# 1. Rename top level folder -------------------------------------------------
+# 1. Rename top level folder & project name-------------------------------------------
 test_folderRename <- file.rename(from=gh_proj_dir,to = new_proj_dir)
+Rproj_file<- list.files(new_proj_dir,pattern=".Rproj",full.names = T)
+#Keep full (new) project name in the Rproject file
+test_RprojRename<- file.rename(from=Rproj_file, to=fs::path(new_proj_dir,new_proj_name,ext="Rproj"))
 if(test_folderRename){
   message("Project Folder Renamed:\n from: ",gh_proj_dir,"\n to:   ",new_proj_dir)
 }
@@ -132,23 +148,30 @@ if(only_rename_prefixes){
 
 #In this case, we need to rename things through an intermediate temp name
 
-# browser()
+#capture all change_logs
+change_log<-NULL
 if(preserve_spaces) {
   if (newstr_is_substr) {
     #rename exact matches to curr_ShortTitle to "TmpName"
-    rename_files(
-      pattern = curr_ShortTitle,
-      replacement = "NombreTemporario",
-      dir_path = new_proj_dir,
-      ignore.case = TRUE
+    change_log <- c(
+      change_log,
+      rename_files(
+        pattern = curr_ShortTitle,
+        replacement = "NombreTemporario",
+        dir_path = new_proj_dir,
+        ignore.case = TRUE
+      )
     )
 
     #rename matches with spaces to "Tmp Name"
-    rename_files(
-      pattern = string_parseCamel(curr_ShortTitle, flex_space = FALSE),
-      replacement = "Nombre Temporario",
-      dir_path = new_proj_dir,
-      ignore.case = TRUE
+    change_log <- c(
+      change_log,
+      rename_files(
+        pattern = string_parseCamel(curr_ShortTitle, flex_space = FALSE),
+        replacement = "Nombre Temporario",
+        dir_path = new_proj_dir,
+        ignore.case = TRUE
+      )
     )
 
     pattern2 <- "NombreTemporario"
@@ -157,18 +180,24 @@ if(preserve_spaces) {
   }
 
   #rename exact matches to curr_ShortTitle
-  rename_files(
-    pattern = pattern2,
-    replacement = new_ShortTitle,
-    dir_path = new_proj_dir,
-    ignore.case = TRUE
+  change_log <- c(
+    change_log,
+    rename_files(
+      pattern = pattern2,
+      replacement = new_ShortTitle,
+      dir_path = new_proj_dir,
+      ignore.case = TRUE
+    )
   )
   #rename curr_ShortTitle, preserving any spaces. e.g. Old Name -> New Name instead of Old Name -> NewName
-  rename_files(
-    pattern = string_parseCamel(pattern2, flex_space = FALSE),
-    replacement = string_parseCamel(new_ShortTitle, flex_space = FALSE),
-    dir_path = new_proj_dir,
-    ignore.case = TRUE
+  change_log <- c(
+    change_log,
+    rename_files(
+      pattern = string_parseCamel(pattern2, flex_space = FALSE),
+      replacement = string_parseCamel(new_ShortTitle, flex_space = FALSE),
+      dir_path = new_proj_dir,
+      ignore.case = TRUE
+    )
   )
 
 
@@ -178,11 +207,14 @@ if(preserve_spaces) {
   if (newstr_is_substr) {
     #rename exact matches to curr_ShortTitle to "TmpName"
     #first, exact matches
-    rename_files(
-      pattern = string_parseCamel(curr_ShortTitle, flex_space = TRUE),
-      replacement = "NombreTemporario",
-      dir_path = new_proj_dir,
-      ignore.case = TRUE
+    change_log <- c(
+      change_log,
+      rename_files(
+        pattern = string_parseCamel(curr_ShortTitle, flex_space = TRUE),
+        replacement = "NombreTemporario",
+        dir_path = new_proj_dir,
+        ignore.case = TRUE
+      )
     )
 
     pattern2 <- "NombreTemporario"
@@ -192,33 +224,92 @@ if(preserve_spaces) {
   }
 
   #rename curr_ShortTitle, WITHOUT preserving any spaces. e.g. "Old Name"  -> "NewName"
-  rename_files(
-    pattern = string_parseCamel(pattern2, flex_space = TRUE),
-    replacement = new_ShortTitle,
-    dir_path = new_proj_dir,
-    ignore.case = TRUE
+  change_log <- c(
+    change_log,
+    rename_files(
+      pattern = string_parseCamel(pattern2, flex_space = TRUE),
+      replacement = new_ShortTitle,
+      dir_path = new_proj_dir,
+      ignore.case = TRUE
+    )
   )
 }
+browser()
 #
 # # 3. Changes name of GitHub Repo at galacticpolymath/ and galactic --------
+test_rename_remote <- catch_err(
+  gh_rename_repo(
+    new_proj_name = new_proj_name,
+    gh_proj_name = new_proj_name,
+    prompt_user = FALSE,
+    lessons_dir = lessons_dir
+  )
+)
+
+
+# 4. Reassociate lesson folder with renamed GitHub repo --------
 test_reset_remote <- catch_err(
   gh_reset_remote(
-    new_name = new_proj_name,
+    new_proj_name = new_proj_name,
     WD = new_proj_dir,
     check_current_gh = TRUE,
     run_check_wd = run_check_wd
   )
 )
 
-# 4. Reassociates lesson folder to new GitHub name with [gh_reset_ --------
+# 5. Change the ShortTitle and GPCatalogPath and GitHubPath items  --------
+#only update front-matter.yml if previous steps succeeded
 
+# make a test of non-NA tests
+proceed0 <-
+  c(
+    test_check_wd,
+    test_check_fm,
+    test_folderRename,
+    test_RprojRename,
+    test_rename_remote,
+    test_reset_remote
+  ) %>% na.omit() %>% as.vector()
+proceed <-
+    eval(parse(text = paste0(as.character(results0), collapse = "&")))
+if(proceed){
+  #define things to update, including user-supplied items
+  change_this2 <-
+    c(change_this,
+      list(
+        ShortTitle = new_proj_name,
+        GPCatalogPath = paste0("https://catalog.galacticpolymath.com/lessons/",new_proj_name,"/LESSON.json"),
+        GitHubPath = paste0("git@github.com:galacticpolymath/", new_proj_name, ".git"),
+        LastUpdated = Sys.time()
+      ))
 
-# 5. Changes the ShortTitle and GPCatalogPath and GitHubPath items  --------
-
+  test_update_fm<-
+    catch_err(update_fm(WD=gh_proj_dir,change_this = change_this2))
+}else{
+  test_update_fm<-FALSE
+}
 
 
 #'
 #'
 
+# 6.  Summarize results ---------------------------------------------------
+
+if(proceed & test_update_fm){
+  message("Project successfully renamed to: ",new_proj_name)
+}else{
+  warning("Project renaming failed somewhere for: ",gh_proj_name)
+}
+tests<-c(
+    test_check_wd,
+    test_check_fm,
+    test_folderRename,
+    test_RprojRename,
+    test_rename_remote,
+    test_reset_remote,
+    test_update_fm
+  )
+change_log<- dplyr::bind_rows(change_log)
+summary <- dplyr::tibble(result=convert_T_to_check(tests),test=c("Check Working Directory","Validate YAML","Rename Project Folder","Rename Rproj","Rename GitHub Remote","Reset Local<->Remote","Update front-matter.yml"))
 
 }

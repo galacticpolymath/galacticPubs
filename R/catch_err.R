@@ -5,16 +5,24 @@
 #' Don't use this if you want the expression to stop on an error!
 #'
 #' @param x the expression to be evaluated
-#' @param results logical. TRUE= no error; FALSE= error.
+#' @param keep_results Affects output. See returns.
+#' @returns
+#' - if keep_results=F, logical. TRUE= no error; FALSE= error.
+#' - if keep_results=T, a list with success (T/F) and result (expression result)
 #' @export
 #'
-catch_err <- function(x){
+catch_err <- function(x,keep_results=FALSE){
   result <- tryCatch(x,error=function(e){e})
 
   if(inherits(result,"error")){
     warning(result$message)
-    FALSE
+    success <- FALSE
   }else{
-    TRUE
+    success <- TRUE
+  }
+  if(!keep_results){
+    return(success)
+  }else{
+    return(list(success=success,result=result))
   }
 }
