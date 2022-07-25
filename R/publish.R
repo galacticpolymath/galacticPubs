@@ -82,7 +82,7 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     commit_msg_2 <- paste0('\"galacticPubs::publish() [',Sys.time(),"] ",commit_msg,'\"')
 
     test_commit<-catch_err(gert::git_commit_all(message = commit_msg_2))
-    test_push<-gert::git_push()
+    test_push<-catch_err(gert::git_push())
     cmd_status<-gert::git_status()
 
     #concatenate system commands; go to target dir; run git commit command
