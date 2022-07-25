@@ -36,7 +36,7 @@ discard_changes <- function(gh_proj_name,commit_msg="rolling back with discard_c
       paste0(
         "!!!\n Are you sure you want to discard changes from:\n  -'",
         gh_proj_name,
-        "'?\n\n *All changes will be lost!\n!!!"
+        "'?\n\n *All changes will be lost since last commit!\n!!!"
       )
     )
     continue <- readline("(y/n) > ")

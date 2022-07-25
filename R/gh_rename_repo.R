@@ -30,10 +30,10 @@ gh_rename_repo <- function(new_proj_name,gh_proj_name,lessons_dir,prompt_user=TR
 
   #check existence of gh_proj_name on GitHub
   proj_url <- paste0("https://github.com/galacticpolymath/",gh_proj_name)
-  test_exists <- catch_err(gert::git_remote_ls(remote=proj_url,repo=WD))
+  test_exists <- catch_err(gert::git_remote_ls(remote=proj_url,repo=gh_proj_dir))
 
   if(!test_exists){
-    stop("Project not found at '",proj_url,"'")
+    warning("Project not found at '",proj_url,"'")
   }else{
     #Verify user wants to do this
     if (prompt_user) {

@@ -26,11 +26,13 @@ rename_files <- function(pattern,
                      basename(filez),
                      ignore.case = ignore.case,
                      perl = perl) &
-    #protect against similar replacement names
+    #protect against similar replacement names, as long as replacement != ""
+              ifelse(is_empty(replacement),TRUE,{
                !grepl(replacement,
                      basename(filez),
                      ignore.case = ignore.case,
-                     perl = perl))%>% which()
+                     perl = perl)}
+               ))%>% which()
   #check matches  filez[to_change]
 
 
@@ -84,11 +86,13 @@ rename_files <- function(pattern,
                      basename(filez2),
                      ignore.case = ignore.case,
                      perl = perl) &
-    #protect against similar replacement names
+    #protect against similar replacement names, except when replacement is empty ('')
+               ifelse(is_empty(replacement),TRUE,{
                !grepl(replacement,
                      basename(filez2),
                      ignore.case = ignore.case,
-                     perl = perl))%>% which()
+                     perl = perl)}
+               ))%>% which()
 
     if(length(to_change2)>0){
       #recurse if still stuff to change
