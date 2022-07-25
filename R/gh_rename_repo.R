@@ -1,8 +1,8 @@
 #' Rename a Galactic Polymath lesson GitHub repository online
 #'
 #' This is for renaming the GitHub remote repository **after** you've renamed the project folder locally. Uses the gh command line interface (which needs to be set up) and [gh::gh()] to check existence of the repo and change it online.
-#' @param new_proj_name The new name you want to give the selected project
-#' @param gh_proj_name The unique project title of this lesson as it is named on [https://github.com/galacticpolymath](https://github.com/galacticpolymath). Not *necessarily* the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. No default.
+#' @param new_proj_name The NEW (recently renamed) folder name you want to update on GitHub
+#' @param gh_proj_name The (OLD) unique project title of this lesson as it is named on [https://github.com/galacticpolymath](https://github.com/galacticpolymath). Not *necessarily* the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. No default.
 #' @param prompt_user do you want to ask user if they def want to rename this before doing so? default=TRUE
 #' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"
 #' @export
@@ -15,26 +15,27 @@ gh_rename_repo <- function(new_proj_name,gh_proj_name,lessons_dir,prompt_user=TR
       fs::path("/Volumes", "GoogleDrive", "My Drive", "Edu", "Lessons")
   }
 
-  if(missing(new_proj_name)){
-    stop("You gotta supply 'new_proj_name'")
+  if(missing(gh_proj_name)){
+    stop("You gotta supply the OLD name as it is on GitHub: 'gh_proj_name'")
   }
 
   #if specific gh_proj_name not included, let user choose one
-  if (missing(gh_proj_name)) {
-    gh_proj_dir <- pick_lesson(lessons_dir, full_path = TRUE)
-    gh_proj_name<- basename(gh_proj_dir)
+  if (missing(new_proj_name)) {
+    new_proj_dir <- pick_lesson(lessons_dir, full_path = TRUE)
+    new_proj_name<- basename(new_proj_dir)
   }else{
-    gh_proj_dir<- fs::path(lessons_dir,gh_proj_name)
+    new_proj_dir<- fs::path(lessons_dir,new_proj_name)
   }
 
 
   #check existence of gh_proj_name on GitHub
-  proj_url <- paste0("https://github.com/galacticpolymath/",gh_proj_name)
-  test_exists <- catch_err(gert::git_remote_ls(remote=proj_url,repo=gh_proj_dir))
+  old_proj_url <- paste0("https://github.com/galacticpolymath/",gh_proj_name)
+  test_exists <- catch_err(gert::git_remote_ls(remote=old_proj_url,repo=new_proj_dir))
 
   if(!test_exists){
-    warning("Project not found at '",proj_url,"'")
-  }else{
+    warning("Project not found at '",old_proj_url,"'; unable to validate remote repo existence.")
+  }
+
     #Verify user wants to do this
     if (prompt_user) {
       message("\nCAREFUL!")
@@ -62,23 +63,30 @@ gh_rename_repo <- function(new_proj_name,gh_proj_name,lessons_dir,prompt_user=TR
     gh_cmd<-paste0("repo rename ",new_proj_name," --repo ",paste0("galacticpolymath/",gh_proj_name))
 
     #run gh from the project subfolder
-    b<-system2(command = "gh", gh_cmd)
+    test_gh_rename<-catch_err(system2(command = "gh", gh_cmd))
 
     new_proj_url <- paste0("https://github.com/galacticpolymath/",new_proj_name)
-    test_rename<- catch_err(gert::git_remote_ls(remote=new_proj_url,repo=gh_proj_dir))
-    if(test_rename){
+    test_remote_ls<- catch_err(gert::git_remote_ls(remote=new_proj_url,repo=new_proj_dir))
+    if(test_remote_ls){
     message("\nSuccess! '",gh_proj_name,"' renamed to '",new_proj_name,"' on GitHub\n")
     }else{
-      warning("\nGitHub project renaming failed for: '",gh_proj_name,"'")
+      warning("\nUnable to verify that GitHub renaming worked: '",gh_proj_name,"'")
     }
-    return(
-      dplyr::tibble(
+    out<-dplyr::tibble(
         old_proj_name = gh_proj_name,
         new_proj_name = new_proj_name,
-        success = test_rename
+        gh_rename=convert_T_to_check(test_gh_rename),
+        success = ifelse(test_remote_ls,TRUE,"?"),
+        url=new_proj_url
       )
+    #add error class to output if rename fails
+    if(!test_remote_ls){
+    class(out)<-c("error",class(out))
+    }
+    return(
+      out
     )
 
-  }
+
 
 }

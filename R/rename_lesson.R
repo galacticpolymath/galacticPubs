@@ -48,8 +48,6 @@ rename_lesson <- function(new_proj_name,
     gh_proj_dir<- fs::path(lessons_dir,gh_proj_name)
   }
 
-  new_proj_dir<-fs::path(lessons_dir,new_proj_name)
-
   #double check that gh_proj_dir looks like a valid lesson directory
   if(run_check_wd) {
     test_check_wd <- check_wd(WD = gh_proj_dir)
@@ -76,10 +74,10 @@ rename_lesson <- function(new_proj_name,
 
 
   #guess at new shortTitle if missing
+  short_title_pat<-"(?<![|_] )([^|_]*?)_[^_]*?$"
   if(missing(new_ShortTitle)){
     # IGNORED_|ExtractedString_IGNORED
-    pat<-"(?<![|_] )([^|_]*?)_[^_]*?$"
-    new_ShortTitle<-gsub(pat,"\\1",new_proj_name,perl=TRUE)
+    new_ShortTitle<-gsub(short_title_pat,"\\1",new_proj_name,perl=TRUE)
     message("Guessing new_ShortTitle from front-matter.yml: '",new_ShortTitle,"'")
   }
 
@@ -88,14 +86,14 @@ rename_lesson <- function(new_proj_name,
     new_ShortTitle<-string_capitalize_first(new_ShortTitle)
     new_proj_name <- string_capitalize_first(new_proj_name)
   }
-
+  #Define project directory now we've settled on new_proj_name
+  new_proj_dir<-fs::path(lessons_dir,new_proj_name)
 
   if(missing(curr_ShortTitle)){
     curr_ShortTitle<-y$ShortTitle
     #very dangerous to provide an empty regex pattern! ('') will capture anything!
     if(is_empty(curr_ShortTitle)){
-      pat<-"(?<![|_] )([^|_]*?)_[^_]*?$"
-      curr_ShortTitle<-gsub(pat,"\\1",gh_proj_name,perl=TRUE)
+      curr_ShortTitle<-gsub(short_title_pat,"\\1",gh_proj_name,perl=TRUE)
 
     }
     message("Guessing curr_ShortTitle from front-matter.yml: '",curr_ShortTitle,"'")
@@ -127,120 +125,126 @@ if(continue%in%c("N","n")){
 }
 
 
-
 # 1. Rename top level folder & project name-------------------------------------------
 test_folderRename <- file.rename(from=gh_proj_dir,to = new_proj_dir)
 Rproj_file<- list.files(new_proj_dir,pattern=".Rproj",full.names = T)
+new_Rproj_file <- fs::path(new_proj_dir,new_proj_name,ext="Rproj")
 #Keep full (new) project name in the Rproject file
-test_RprojRename<- file.rename(from=Rproj_file, to=fs::path(new_proj_dir,new_proj_name,ext="Rproj"))
-if(test_folderRename){
+test_RprojRename<- file.rename(from=Rproj_file, to=new_Rproj_file)
+if(test_folderRename & new_Rproj_file!=Rproj_file){
   message("Project Folder Renamed:\n from: ",gh_proj_dir,"\n to:   ",new_proj_dir)
 }
 
 # 2. Find and rename all files & subfolders found in the project folder  --------
 #Deal with specific scenario where replacement is substring of current name
-newstr_is_substr<-grepl(new_ShortTitle,curr_ShortTitle)
+newstr_is_oldstr<-new_ShortTitle==curr_ShortTitle
+newstr_is_substr<-grepl(new_ShortTitle,curr_ShortTitle,ignore.case = T)
 
 #Now add prefix to gsub pattern to just grab prefixes, if requested
 if(only_rename_prefixes){
   curr_ShortTitle<-paste0("^",curr_ShortTitle)
 }
 
-#In this case, we need to rename things through an intermediate temp name
-
 #capture all change_logs
 change_log<-NULL
-if(preserve_spaces) {
-  if (newstr_is_substr) {
-    #rename exact matches to curr_ShortTitle to "TmpName"
-    change_log <- c(
+
+#Don't do this renaming if the strings are the same
+if(newstr_is_oldstr) {
+  message("No file names to change")
+} else{
+  #In the case where new is a substring of old, we need to rename things through an intermediate temp name
+  if (preserve_spaces) {
+    if (newstr_is_substr) {
+      #rename exact matches to curr_ShortTitle to "TmpName"
+      change_log <- dplyr::bind_rows(
+        change_log,
+        rename_files(
+          pattern = curr_ShortTitle,
+          replacement = "NombreTemporario",
+          dir_path = new_proj_dir,
+          ignore.case = TRUE
+        )$change_log
+      )
+
+      #rename matches with spaces to "Tmp Name"
+      change_log <- dplyr::bind_rows(
+        change_log,
+        rename_files(
+          pattern = string_parseCamel(curr_ShortTitle, flex_space = FALSE),
+          replacement = "Nombre Temporario",
+          dir_path = new_proj_dir,
+          ignore.case = TRUE
+        )$change_log
+      )
+
+      pattern2 <- "NombreTemporario"
+    } else{
+      pattern2 <- curr_ShortTitle
+    }
+
+    #rename exact matches to curr_ShortTitle
+    change_log <- dplyr::bind_rows(
       change_log,
       rename_files(
-        pattern = curr_ShortTitle,
-        replacement = "NombreTemporario",
+        pattern = pattern2,
+        replacement = new_ShortTitle,
         dir_path = new_proj_dir,
         ignore.case = TRUE
-      )
+      )$change_log
     )
-
-    #rename matches with spaces to "Tmp Name"
-    change_log <- c(
+    #rename curr_ShortTitle, preserving any spaces. e.g. Old Name -> New Name instead of Old Name -> NewName
+    change_log <- dplyr::bind_rows(
       change_log,
       rename_files(
-        pattern = string_parseCamel(curr_ShortTitle, flex_space = FALSE),
-        replacement = "Nombre Temporario",
+        pattern = string_parseCamel(pattern2, flex_space = FALSE),
+        replacement = string_parseCamel(new_ShortTitle, flex_space = FALSE),
         dir_path = new_proj_dir,
         ignore.case = TRUE
-      )
+      )$change_log
     )
 
-    pattern2 <- "NombreTemporario"
+
+    #If not preserving spaces...a bit more concise
   } else{
-    pattern2 <- curr_ShortTitle
-  }
+    #still gotta go through intermediate if we shortening the name e.g. "guardianFrogs_fr" to "guardians"
+    if (newstr_is_substr) {
+      #rename exact matches to curr_ShortTitle to "TmpName"
+      #first, exact matches
+      change_log <- dplyr::bind_rows(
+        change_log,
+        rename_files(
+          pattern = string_parseCamel(curr_ShortTitle, flex_space = TRUE),
+          replacement = "NombreTemporario",
+          dir_path = new_proj_dir,
+          ignore.case = TRUE
+        )$change_log
+      )
 
-  #rename exact matches to curr_ShortTitle
-  change_log <- c(
-    change_log,
-    rename_files(
-      pattern = pattern2,
-      replacement = new_ShortTitle,
-      dir_path = new_proj_dir,
-      ignore.case = TRUE
-    )
-  )
-  #rename curr_ShortTitle, preserving any spaces. e.g. Old Name -> New Name instead of Old Name -> NewName
-  change_log <- c(
-    change_log,
-    rename_files(
-      pattern = string_parseCamel(pattern2, flex_space = FALSE),
-      replacement = string_parseCamel(new_ShortTitle, flex_space = FALSE),
-      dir_path = new_proj_dir,
-      ignore.case = TRUE
-    )
-  )
+      pattern2 <- "NombreTemporario"
+      #if new name is not a substring of current name
+    } else{
+      pattern2 <- curr_ShortTitle
+    }
 
-
-#If not preserving spaces...a bit more concise
-}else{
-  #still gotta go through intermediate if we shortening the name e.g. "guardianFrogs_fr" to "guardians"
-  if (newstr_is_substr) {
-    #rename exact matches to curr_ShortTitle to "TmpName"
-    #first, exact matches
-    change_log <- c(
+    #rename curr_ShortTitle, WITHOUT preserving any spaces. e.g. "Old Name"  -> "NewName"
+    change_log <- dplyr::bind_rows(
       change_log,
       rename_files(
-        pattern = string_parseCamel(curr_ShortTitle, flex_space = TRUE),
-        replacement = "NombreTemporario",
+        pattern = string_parseCamel(pattern2, flex_space = TRUE),
+        replacement = new_ShortTitle,
         dir_path = new_proj_dir,
         ignore.case = TRUE
-      )
+      )$change_log
     )
-
-    pattern2 <- "NombreTemporario"
-    #if new name is not a substring of current name
-  } else{
-    pattern2 <- curr_ShortTitle
   }
-
-  #rename curr_ShortTitle, WITHOUT preserving any spaces. e.g. "Old Name"  -> "NewName"
-  change_log <- c(
-    change_log,
-    rename_files(
-      pattern = string_parseCamel(pattern2, flex_space = TRUE),
-      replacement = new_ShortTitle,
-      dir_path = new_proj_dir,
-      ignore.case = TRUE
-    )
-  )
 }
-browser()
+
 #
 # # 3. Changes name of GitHub Repo at galacticpolymath/ and galactic --------
 test_rename_remote <- catch_err(
   gh_rename_repo(
     new_proj_name = new_proj_name,
-    gh_proj_name = new_proj_name,
+    gh_proj_name = gh_proj_name,
     prompt_user = FALSE,
     lessons_dir = lessons_dir
   )
@@ -252,10 +256,10 @@ test_reset_remote <- catch_err(
   gh_reset_remote(
     new_proj_name = new_proj_name,
     WD = new_proj_dir,
-    check_current_gh = TRUE,
     run_check_wd = run_check_wd
   )
 )
+
 
 # 5. Change the ShortTitle and GPCatalogPath and GitHubPath items  --------
 #only update front-matter.yml if previous steps succeeded
@@ -264,27 +268,26 @@ test_reset_remote <- catch_err(
 proceed0 <-
   c(
     test_check_wd,
-    test_check_fm,
     test_folderRename,
     test_RprojRename,
     test_rename_remote,
     test_reset_remote
   ) %>% na.omit() %>% as.vector()
 proceed <-
-    eval(parse(text = paste0(as.character(results0), collapse = "&")))
+    eval(parse(text = paste0(as.character(proceed0), collapse = "&")))
 if(proceed){
   #define things to update, including user-supplied items
   change_this2 <-
     c(change_this,
       list(
-        ShortTitle = new_proj_name,
+        ShortTitle = new_ShortTitle,
         GPCatalogPath = paste0("https://catalog.galacticpolymath.com/lessons/",new_proj_name,"/LESSON.json"),
         GitHubPath = paste0("git@github.com:galacticpolymath/", new_proj_name, ".git"),
         LastUpdated = Sys.time()
       ))
 
   test_update_fm<-
-    catch_err(update_fm(WD=gh_proj_dir,change_this = change_this2))
+    catch_err(update_fm(WD=new_proj_dir,change_this = change_this2))
 }else{
   test_update_fm<-FALSE
 }
@@ -302,7 +305,6 @@ if(proceed & test_update_fm){
 }
 tests<-c(
     test_check_wd,
-    test_check_fm,
     test_folderRename,
     test_RprojRename,
     test_rename_remote,
@@ -310,6 +312,7 @@ tests<-c(
     test_update_fm
   )
 change_log<- dplyr::bind_rows(change_log)
-summary <- dplyr::tibble(result=convert_T_to_check(tests),test=c("Check Working Directory","Validate YAML","Rename Project Folder","Rename Rproj","Rename GitHub Remote","Reset Local<->Remote","Update front-matter.yml"))
+summ <- dplyr::tibble(result=convert_T_to_check(tests),test=c("Checked Working Directory","Renamed Project Folder","Renamed Rproj","Renamed GitHub Remote","Reset Local<->Remote Connection","Updated front-matter.yml"))
+return(list(change_log = change_log, summary = summ))
 
 }

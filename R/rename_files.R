@@ -15,86 +15,113 @@ rename_files <- function(pattern,
                          dir_path,
                          ignore.case = FALSE,
                          perl = TRUE,
-                         inner=FALSE) {
+                         inner = FALSE) {
+  pattern_is_replacement <- pattern == replacement
+  if (pattern_is_replacement) {
+    message("Nothing to change.")
+    change_log <- NULL
 
-  if(!dir.exists(dir_path)) {
-    stop("dir_path doesn't exist: \n - ", dir_path)
-  }
-
-  filez<-fs::dir_ls(dir_path, recurse = TRUE)
-  to_change <- (grepl(pattern,
-                     basename(filez),
-                     ignore.case = ignore.case,
-                     perl = perl) &
-    #protect against similar replacement names, as long as replacement != ""
-              ifelse(is_empty(replacement),TRUE,{
-               !grepl(replacement,
-                     basename(filez),
-                     ignore.case = ignore.case,
-                     perl = perl)}
-               ))%>% which()
-  #check matches  filez[to_change]
-
-
-# Do the renaming ---------------------------------------------------------
-  if (length(to_change) == 0) {
-    if(!inner){message("Nothing to rename. No pattern matches found.")}
-    return(change_log <-NULL)
+  #Begin Big Else
   } else{
-      i=1
+    if(missing(dir_path)){
+      dir_path <- pick_lesson(full_path=TRUE)
+    }
+
+    if (!dir.exists(dir_path)) {
+      stop("dir_path doesn't exist: \n - ", dir_path)
+    }
+
+
+    filez <- fs::dir_ls(dir_path, recurse = TRUE)
+    to_change <- (
+      grepl(
+        pattern,
+        basename(filez),
+        ignore.case = ignore.case,
+        perl = perl
+      ) &
+        #protect against similar replacement names, as long as replacement != ""
+        ifelse(is_empty(replacement), TRUE, {
+          !grepl(replacement,
+                 basename(filez),
+                 ignore.case = ignore.case,
+                 perl = perl)
+        })
+    ) %>% which()
+    #check matches  filez[to_change]
+
+
+    # Do the renaming ---------------------------------------------------------
+    if (length(to_change) == 0) {
+      if (!inner) {
+        message("Nothing to rename. No pattern matches found.")
+      }
+      return(change_log <- NULL)
+    } else{
+      i = 1
       filez_i <- filez[to_change[i]]
       #prevent overzealously overwriting path folders...only change 1 endpoint at a time
       #This selects everything before the last / in the path
-      filez_i_path<-gsub("(^.*)/[^/]*$","\\1",filez_i)
+      filez_i_path <- gsub("(^.*)/[^/]*$", "\\1", filez_i)
 
       filez_i_newname <-
-        gsub(pattern,
-             replacement,
-             basename(filez_i),
-             ignore.case = ignore.case,
-             perl = perl)
+        gsub(
+          pattern,
+          replacement,
+          basename(filez_i),
+          ignore.case = ignore.case,
+          perl = perl
+        )
 
-      filez_i_new<-fs::path(filez_i_path,filez_i_newname)
+      filez_i_new <- fs::path(filez_i_path, filez_i_newname)
       #
 
       test_rename <- file.rename(from = filez_i, to = filez_i_new)
       if (test_rename) {
-          message("Renamed:\n from: ",
+        message("Renamed:\n from: ",
                 filez_i,
                 "\n to:   ",
                 filez_i_new)
 
         change_log <-
-          dplyr::tibble(success = TRUE,
-                        old_name = basename(filez_i),
-                        new_name = basename(filez_i_new))
+          dplyr::tibble(
+            success = TRUE,
+            old_name = basename(filez_i),
+            new_name = basename(filez_i_new)
+          )
       } else{
         warning("FAILED to Rename:\n from: ",
                 filez_i,
                 "\n to:   ",
                 filez_i_new)
         change_log <-
-          dplyr::tibble(success = FALSE,
-                        old_name = basename(filez_i),
-                        new_name = basename(filez_i_new))
+          dplyr::tibble(
+            success = FALSE,
+            old_name = basename(filez_i),
+            new_name = basename(filez_i_new)
+          )
       }
     }
 
     #recursive logic
-    filez2<-fs::dir_ls(dir_path, recurse = TRUE)
-    to_change2 <- (grepl(pattern,
-                     basename(filez2),
-                     ignore.case = ignore.case,
-                     perl = perl) &
-    #protect against similar replacement names, except when replacement is empty ('')
-               ifelse(is_empty(replacement),TRUE,{
-               !grepl(replacement,
-                     basename(filez2),
-                     ignore.case = ignore.case,
-                     perl = perl)}
-               ))%>% which()
+    filez2 <- fs::dir_ls(dir_path, recurse = TRUE)
+    to_change2 <- (
+      grepl(
+        pattern,
+        basename(filez2),
+        ignore.case = ignore.case,
+        perl = perl
+      ) &
+        #protect against similar replacement names, except when replacement is empty ('')
+        ifelse(is_empty(replacement), TRUE, {
+          !grepl(replacement,
+                 basename(filez2),
+                 ignore.case = ignore.case,
+                 perl = perl)
+        })
+    ) %>% which()
 
-    if(length(to_change2)>0){
+    if (length(to_change2) > 0) {
       #recurse if still stuff to change
       change_log <- change_log %>% dplyr::add_row(
         rename_files(
@@ -107,8 +134,9 @@ rename_files <- function(pattern,
         )
       )
     }
+  }
 
-  if(!inner){
+  if (!inner) {
     if (length(change_log) == 0) {
       successes <- failures <- 0
     } else{
@@ -124,7 +152,7 @@ rename_files <- function(pattern,
       failures,
       " failed to be renamed for some reason"
     )
-  }
+  }# End Big Else
 
   if (inner) {
     return(change_log)

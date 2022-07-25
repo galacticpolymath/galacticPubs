@@ -12,6 +12,7 @@
 #' @export
 #'
 catch_err <- function(x,keep_results=FALSE){
+
   result <- tryCatch(x,error=function(e){e})
 
   if(inherits(result,"error")){

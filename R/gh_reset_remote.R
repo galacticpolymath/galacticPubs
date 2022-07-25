@@ -17,7 +17,12 @@ gh_reset_remote<-function(new_proj_name,
 
   if(missing(new_proj_name)){stop("Include 'new_proj_name'")}
 
-  check_fm(WD=WD)
+
+  fm_exists<-check_fm(WD=WD,throw_error = FALSE,skip="gh")
+  if(fm_exists){
+    yaml_path<-fs::path(WD,"meta","front-matter.yml")
+    y<-safe_read_yaml(yaml_path=yaml_path)
+  }
 
   if(run_check_wd){
   test_wd<-check_wd(WD,simple_out = TRUE)
