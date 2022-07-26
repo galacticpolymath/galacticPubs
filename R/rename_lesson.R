@@ -106,7 +106,10 @@ rename_lesson <- function(new_proj_name,
 message("\nCAREFUL!")
 message(
   paste0(
-    "!!!\n Are you sure you want to rename:\n  -Project Folder: \n    -from '",
+    "---------------------------------------------------------------------------\n",
+    paste0(" Make sure to SAVE and CLOSE '",gh_proj_name,"' if it's open elsewhere.\n"),
+    "---------------------------------------------------------------------------\n",
+    "\n Are you sure you want to rename:\n  -Project Folder: \n    -from '",
     gh_proj_name,
     "' to '",
     new_proj_name,
@@ -114,9 +117,9 @@ message(
     curr_ShortTitle,
     "' to '",
     new_ShortTitle,
-    "'\n\n  *only change prefixes: ",
+    "'\n\n  *only changing prefixes: ",
     only_rename_prefixes,
-    "'?\n!!!\n"
+    "'?\n"
   )
 )
 continue <- readline("(y/n) > ")
