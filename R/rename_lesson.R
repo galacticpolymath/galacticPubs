@@ -34,7 +34,7 @@ rename_lesson <- function(new_proj_name,
 
 
 # 0.  Checks and validation -----------------------------------------------
-
+  if(missing(new_proj_name)){stop("You must supply new_proj_name.")}
   if (missing(lessons_dir)) {
     lessons_dir <-
       fs::path("/Volumes", "GoogleDrive", "My Drive", "Edu", "Lessons")
@@ -150,7 +150,7 @@ if(only_rename_prefixes){
 
 #capture all change_logs
 change_log<-NULL
-
+browser()
 #Don't do this renaming if the strings are the same
 if(newstr_is_oldstr) {
   message("No file names to change")
@@ -303,6 +303,13 @@ if(proceed){
 
 if(proceed & test_update_fm){
   message("Project successfully renamed to: ",new_proj_name)
+  warning("*You may want manually change names. \n Create tasks by pasting the list below into a new Clickup Task.\n",
+          "-------------------------------------------------------\n",
+  paste0("Change '",gh_proj_name,"' to '",new_proj_name,"' in:\n",
+          " • Handout Headers\n",
+          " • Presentation Slides\n",
+          " • Client facing Roadmap and other docs\n"),
+          "-------------------------------------------------------\n")
 }else{
   warning("Project renaming failed somewhere for: ",gh_proj_name)
 }

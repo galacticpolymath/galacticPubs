@@ -17,10 +17,14 @@ rename_files <- function(pattern,
                          perl = TRUE,
                          inner = FALSE) {
   pattern_is_replacement <- pattern == replacement
+
   if (pattern_is_replacement) {
     message("Nothing to change.")
     change_log <- NULL
-
+    #Don't let someone supply an empty replacement, which can wreak havoc
+  }else if(is_empty(replacement)){
+    warning("Can't supply an empty replacement. Dangerous.")
+    message("Nothing changed.")
   #Begin Big Else
   } else{
     if(missing(dir_path)){
@@ -34,19 +38,13 @@ rename_files <- function(pattern,
 
     filez <- fs::dir_ls(dir_path, recurse = TRUE)
     to_change <- (
+      #matches
       grepl(
         pattern,
         basename(filez),
         ignore.case = ignore.case,
         perl = perl
-      ) &
-        #protect against similar replacement names, as long as replacement != ""
-        ifelse(is_empty(replacement), TRUE, {
-          !grepl(replacement,
-                 basename(filez),
-                 ignore.case = ignore.case,
-                 perl = perl)
-        })
+      )
     ) %>% which()
     #check matches  filez[to_change]
 
@@ -111,14 +109,7 @@ rename_files <- function(pattern,
         basename(filez2),
         ignore.case = ignore.case,
         perl = perl
-      ) &
-        #protect against similar replacement names, except when replacement is empty ('')
-        ifelse(is_empty(replacement), TRUE, {
-          !grepl(replacement,
-                 basename(filez2),
-                 ignore.case = ignore.case,
-                 perl = perl)
-        })
+      )
     ) %>% which()
 
     if (length(to_change2) > 0) {
