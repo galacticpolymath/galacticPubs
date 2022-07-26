@@ -41,7 +41,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     unlink(to_delete)
     message("\nFolder cleared: ",destFolder,"\n")
   }
-
+browser()
 
     #allow shorthand for compiling everything
     if(tolower(choices)[1]=="all"){choices <- c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
@@ -63,7 +63,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
   if("Standards Alignment"%in% choices & (stnds_out_of_date | rebuild) ){
 
     alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)
-    if(current_data$TargetSubject==""){warning("Enter a Target Subject on the Edit tab and try again.")}
+    if(is.na(current_data$TargetSubject)){warning("Enter a Target Subject on the Edit tab and try again.")}
     message("\nGenerating Learning Chart\n")
 
     #LEARNING CHART
@@ -129,7 +129,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
   }
 
   if("Teaching Materials" %in% choices){
-    if(current_data$GitHubPath==""){warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
+    if(is.na(current_data$GitHubPath)){warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
     }else{
       updateTeachingMatLinks( WD = WD,dataCat=c("download",tolower(current_data$LessonEnvir)))
       compileTeachingMat(LessonEnvir=current_data$LessonEnvir,WD = WD)
@@ -251,20 +251,35 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     # expandMDLinks takes relative links in [](x.jpg) format and makes a full path to GP catalog
     # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
     # BACKGROUND
-    if (!is_empty(current_data$Background)){
+      if (!is_empty(current_data$Background)) {
+        background <-
+          list(
+            `__component` = "lesson-plan.collapsible-text-section",
+            SectionTitle = "Background",
+            Content = ifelse(
+              is.na(current_data$ConnectionToResearch),
+              current_data$Background,
+              paste(
+                "#### Connection to Research\n",
+                current_data$ConnectionToResearch,
+                "\n#### Research Background\n",
+                current_data$Background
+              )
+            ) %>% expandMDLinks(repo = repo) %>%
+              fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
+            InitiallyExpanded = TRUE
+          )
 
-    background <- list(`__component` = "lesson-plan.collapsible-text-section",
-      SectionTitle = "Background", Content = ifelse(current_data$ConnectionToResearch ==
-        "", current_data$Background, paste("#### Connection to Research\n",
-        current_data$ConnectionToResearch, "\n#### Research Background\n",
-        current_data$Background)) %>% expandMDLinks(repo = repo) %>%
-        fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
-      InitiallyExpanded = TRUE)
-
-    jsonlite::write_json(background, path = fs::path(destFolder,
-      "background", ext = "json"), pretty = TRUE, auto_unbox = TRUE,
-      na = "null", null = "null")
-    }
+        jsonlite::write_json(
+          background,
+          path = fs::path(destFolder,
+                          "background", ext = "json"),
+          pretty = TRUE,
+          auto_unbox = TRUE,
+          na = "null",
+          null = "null"
+        )
+      }
 
     # FEEDBACK
     if (!is_empty(current_data$Feedback)){

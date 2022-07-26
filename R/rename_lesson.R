@@ -150,7 +150,7 @@ if(only_rename_prefixes){
 
 #capture all change_logs
 change_log<-NULL
-browser()
+
 #Don't do this renaming if the strings are the same
 if(newstr_is_oldstr) {
   message("No file names to change")

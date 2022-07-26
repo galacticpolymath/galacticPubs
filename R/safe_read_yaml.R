@@ -11,7 +11,7 @@ safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
 
   y2<-lapply(1:length(y), function(i){
     yi<-y[[i]]
-    if(is_empty(yi)){yi<-''
+    if(is_empty(yi)){yi<-NA
     }else{yi}
   })
   names(y2)<-names(y)

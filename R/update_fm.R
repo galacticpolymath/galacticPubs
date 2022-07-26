@@ -46,7 +46,7 @@ update_fm <- function(WD=getwd(),save_output=TRUE,reorder=TRUE,change_this=NULL)
     new_yaml <- new_yaml %>% galacticPubs:::parse_locale()
 
   #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)
-    if(new_yaml$GPCatalogPath==""){
+    if(is.na(new_yaml$GPCatalogPath)){
       repo<-whichRepo(WD=WD)
       new_yaml$GPCatalogPath<-catalogURL("LESSON.json",repo)
     }

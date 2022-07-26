@@ -58,26 +58,18 @@ batch_rebuild <- function(gh_proj_name,lessons_dir,stage=TRUE,change_this=NULL,c
 
       #2. compile all parts of the lesson
       compile_success <-
-        !tryCatch(
-          compile_lesson(
+        catch_err(compile_lesson(
             WD = WD,
             rebuild = complete_rebuild,
             clean = clean
-          ),
-          error = function(e) {
-            e
-          }
-        ) %>% inherits(., "error")
+          ))
 
       #3. stageAssets if requested
       if(stage & compile_success){
-        stage_success<-!tryCatch(
-          stageAssets(WD = WD),
-          error = function(e) {
-            e
-          }
-        ) %>% inherits(., "error")
-      }
+        stage_success<-catch_err(
+          stageAssets(WD = WD)
+          )
+      }else{stage_success<-FALSE}
       dplyr::tibble(Lesson=basename(WD),Compiled_Successfully=compile_success,Staged_Successfully=stage_success)
     })
 

@@ -63,7 +63,7 @@ if(captionN){
   caption <- paste0(caption," (~",floor(avgN)," standards per grade band)")
   }
 
-if(centralText==""){
+if(is.na(centralText)){
   t_gradeBands<-compiledAlignment$compiled$gradeBand %>% table
   centralText<-paste0("grades\n",names(t_gradeBands)[which.max(t_gradeBands)])
 }

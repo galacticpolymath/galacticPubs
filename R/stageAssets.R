@@ -11,7 +11,7 @@
 
 stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TRUE, status=NULL){
  .=NULL
-
+browser()
   meta_path<-fs::path(WD,"meta")
  if(is.null(current_data)){
     # I need to edit both of these files to update First Publication status, etc.
