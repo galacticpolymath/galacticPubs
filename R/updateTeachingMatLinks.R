@@ -388,8 +388,6 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
       }
 
 
-
-
       #overwrite old data with final (this is not writing to the hard drive until the saveWorkbook stage)
       XLConnect::writeWorksheet(tmXLSX,sheet=excelTab_i,data=out,startCol=1,startRow=3,header=F)
 

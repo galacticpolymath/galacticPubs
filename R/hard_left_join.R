@@ -13,6 +13,18 @@
 
 hard_left_join<-function(df1,df2,by,as_character=FALSE){
   if(missing(by)){stop("Specify 'by' column for matching df1 and df2")}
+  #There's a problem reconciling files if all rows of "by" column aren't unique
+  df1_dups<-duplicated(df1[,by])
+  df2_dups<-duplicated(df2[,by])
+  if(sum(df1_dups)>0 ){
+
+    stop(paste0("The following duplicated values in df1 must be made unique: \n   -",paste0(unlist(df1[df1_dups,by]),sep="",collapse="\n   -")))
+  }
+
+  if(sum(df2_dups)>0 ){
+    stop(paste0("The following duplicated values in df2 must be made unique: \n   -",paste0(unlist(df2[df2_dups,by]),sep="",collapse="\n   -")))
+  }
+
   df1_0<-df1
   df2_0<-df2
   if(as_character){
@@ -34,7 +46,7 @@ hard_left_join<-function(df1,df2,by,as_character=FALSE){
   df3<-df1
   #do the replacement
   if(length(unique_sans_na(df2_index_in_df1))>0){
-  df3[df2_index_in_df1,ixn] <- df2[,ixn]
+  df3[unique_sans_na(df2_index_in_df1),ixn] <- df2[!is.na(df2_index_in_df1),ixn]
   }
   #Add unmatched rows in df2
   df2_unmatched<-dplyr::anti_join(df2,df3,by=by) %>% dplyr::select(by,ixn)

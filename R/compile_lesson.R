@@ -41,7 +41,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     unlink(to_delete)
     message("\nFolder cleared: ",destFolder,"\n")
   }
-browser()
+
 
     #allow shorthand for compiling everything
     if(tolower(choices)[1]=="all"){choices <- c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
@@ -56,30 +56,39 @@ browser()
   # Standards alignment & learning plots -----------------------------------------------------
     # test if learningEpaulette is in up-to-date with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
 
+
     stnds_out_of_date<-!inSync(fs::path(WD,"assets","learning-plots","GP-Learning-Epaulette.png"),
                                fs::path(WD,"assets","learning-plots","GP-Learning-Chart.png"),
                                fs::path(WD,"meta","standards.RDS"),
                                fs::path(WD,"meta","standards_GSheetsOnly.xlsx"))
-  if("Standards Alignment"%in% choices & (stnds_out_of_date | rebuild) ){
+    if("Standards Alignment"%in% choices &
+       (stnds_out_of_date | rebuild)) {
+      alignment <-
+        compileStandards(WD = WD, targetSubj = current_data$TargetSubject)
+      if (is.na(current_data$TargetSubject)) {
+        warning("Enter a Target Subject on the Edit tab and try again.")
+      }
+      message("\nGenerating Learning Chart\n")
 
-    alignment <- compileStandards(WD=WD, targetSubj=current_data$TargetSubject)
-    if(is.na(current_data$TargetSubject)){warning("Enter a Target Subject on the Edit tab and try again.")}
-    message("\nGenerating Learning Chart\n")
+      #LEARNING CHART
+      learningChart(
+        quotedTitle = current_data$Title,
+        centralText = current_data$LearningChart_params_centralText,
+        caption = current_data$LearningChart_params_caption,
+        captionN = current_data$LearningChart_params_captionN,
+        showPlot = FALSE,
+        WD = WD
+      )
 
-    #LEARNING CHART
-    learningChart(quotedTitle=current_data$Title,
-                  centralText = current_data$LearningChart_params_centralText,
-                  caption=current_data$LearningChart_params_caption,
-                  captionN=current_data$LearningChart_params_captionN,
-                  showPlot=FALSE,
-                  WD=WD)
+      #set learning chart filename from default file output on learningChart function
+      #(since this file doesn't exist in yaml yet)
+      current_data$LearningChart <-
+        fs::path("assets",
+                 "learning-plots",
+                 paste0(formals(learningChart)$fileName, ".png"))
 
-    #set learning chart filename from default file output on learningChart function
-    #(since this file doesn't exist in yaml yet)
-    current_data$LearningChart<-fs::path("assets","learning-plots",paste0(formals(learningChart)$fileName,".png"))
-
-    #export learning chart section
-    lc<-list(
+      #export learning chart section
+      lc <- list(
         `__component` = "lesson-plan.learning-chart",
         Title = "About the GP Learning Chart",
         Description =
@@ -93,49 +102,72 @@ browser()
             "."
           ),
         Footnote = "**Notes on Standards**\n\n*Standards are broken down into ***Target*** and ***Connected*** categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
-        Badge = list(url =
-                       catalogURL(basename(current_data$LearningChart[1]),repo)
-                     )
+        Badge = list(url =ifelse(is.na(current_data$LearningChart[1]),NA,
+                       catalogURL(
+                         basename(current_data$LearningChart[1]), repo
+                       )))
 
 
-    )
-    #write standards-header section
-    sh<-list(`__component` = "lesson-plan.section-heading",
-           SectionTitle = "Learning Standards")
-    jsonlite::write_json(sh,fs::path(destFolder,"standards-header.json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+      )
+      #write standards-header section
+      sh <- list(`__component` = "lesson-plan.section-heading",
+                 SectionTitle = "Learning Standards")
+      jsonlite::write_json(
+        sh,
+        fs::path(destFolder, "standards-header.json"),
+        pretty = TRUE,
+        auto_unbox = TRUE,
+        na = "null",
+        null = "null"
+      )
 
 
-    #write learning chart section before standards section
-    jsonlite::write_json(lc,fs::path(destFolder,"learning-chart.json"),pretty=TRUE,auto_unbox=TRUE,na="null",null="null")
+      #write learning chart section before standards section
+      jsonlite::write_json(
+        lc,
+        fs::path(destFolder, "learning-chart.json"),
+        pretty = TRUE,
+        auto_unbox = TRUE,
+        na = "null",
+        null = "null"
+      )
 
 
-    #####################
-    #LEARNING EPAULETTE
-    message("\nGenerating Learning Epaulette\n")
+      #####################
+      #LEARNING EPAULETTE
+      message("\nGenerating Learning Epaulette\n")
 
-    learningEpaulette(
-      WD = WD,
-      showPlot = FALSE,
-      heightScalar = current_data$LearningEpaulette_params_heightScalar,
-      epauletteHeight = current_data$LearningEpaulette_params_epauletteHeight,
-      randomSeed = current_data$LearningEpaulette_params_randomSeed
-    )
+      learningEpaulette(
+        WD = WD,
+        showPlot = FALSE,
+        heightScalar = current_data$LearningEpaulette_params_heightScalar,
+        epauletteHeight = current_data$LearningEpaulette_params_epauletteHeight,
+        randomSeed = current_data$LearningEpaulette_params_randomSeed
+      )
 
-    #set learning epaulette filename from default file output on learningEpaulette function
-    #(since this file doesn't exist in yaml on first run)
-    current_data$LearningEpaulette<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,".png"))
-    current_data$LearningEpaulette_vert<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
+      #set learning epaulette filename from default file output on learningEpaulette function
+      #(since this file doesn't exist in yaml on first run)
+      current_data$LearningEpaulette <-
+        fs::path("assets",
+                 "learning-plots",
+                 paste0(formals(learningEpaulette)$fileName, ".png"))
+      current_data$LearningEpaulette_vert <-
+        fs::path("assets",
+                 "learning-plots",
+                 paste0(formals(learningEpaulette)$fileName, "_vert.png"))
 
-  }
-
-  if("Teaching Materials" %in% choices){
-    if(is.na(current_data$GitHubPath)){warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
-    }else{
-      updateTeachingMatLinks( WD = WD,dataCat=c("download",tolower(current_data$LessonEnvir)))
-      compileTeachingMat(LessonEnvir=current_data$LessonEnvir,WD = WD)
     }
 
-  }
+    if ("Teaching Materials" %in% choices) {
+      if (is.na(current_data$GitHubPath)) {
+        warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
+      } else{
+
+        updateTeachingMatLinks(WD = WD, dataCat = c("download", tolower(current_data$LessonEnvir)))
+        compileTeachingMat(LessonEnvir = current_data$LessonEnvir, WD = WD)
+      }
+
+    }
 
 
 # Separate parts of Front Matter ------------------------------------------
@@ -147,8 +179,10 @@ browser()
     #Include everything down to SponsoredBy in the header
     header<-current_data[(1:which(names(current_data)=="SponsoredBy"))]
     #make full catalog paths following naming conventions the frontend expects
-    header$SponsorImage=list(url = catalogURL(basename(current_data$SponsorLogo),repo))
-    header$CoverImage=list(url = catalogURL(basename(current_data$LessonBanner),repo))
+    header$SponsorImage=list(url = ifelse(is.na(current_data$SponsorLogo),NA,
+                                                catalogURL(basename(current_data$SponsorLogo),repo)))
+    header$CoverImage=list(url = ifelse(is.na(current_data$LessonBanner),NA,
+                                        catalogURL(basename(current_data$LessonBanner),repo)))
 
 
     overview<-list(
@@ -174,11 +208,13 @@ browser()
         Tags=lapply(current_data$Tags,function(x) list(Value=x)),
         LearningObj=current_data$LearningObj,
         SteamEpaulette=list(
-          url = catalogURL(basename(current_data$LearningEpaulette[1]),repo)
+          url = ifelse(is.na(current_data$LearningEpaulette[1]),NA,
+                       catalogURL(basename(current_data$LearningEpaulette[1]),repo))
           #might want to add more complex image handling later
           ),
         SteamEpaulette_vert=list(
-          url = catalogURL(basename(current_data$LearningEpaulette_vert[1]),repo)
+          url = ifelse(is.na(current_data$LearningEpaulette_vert[1]),NA,
+                             catalogURL(basename(current_data$LearningEpaulette_vert[1]),repo))
           #might want to add more complex image handling later
           ),
          Description = current_data$Description %>% fixAnchorLinks() ) #allow smooth-scrolling to in-page references
@@ -346,5 +382,5 @@ compileJSON(WD=WD)
   #Save updated YAML
   yaml::write_yaml(current_data, fs::path(WD,"meta","front-matter.yml"))
 
-  return(current_data)
+  invisible(current_data)
 }
