@@ -79,6 +79,15 @@ header[matching_fields]<-fm[matching_fields]
  plot(qrcode::qr_code(fm$URL))
  dev.off()
 
+ #Update chunk graphs if necessary
+    chunk_file_loc<-fs::path(WD,"assets","lesson-plan-markdown","dynamic_images")
+    chunk_files<-list.files(chunk_file_loc,pattern="chunk",full.names = TRUE)
+    # If chunk_files missing or out of date, or rebuild triggered
+    if(!inSync(fs::path(WD, "meta", "procedure_GSheetsOnly.xlsx"),
+               chunk_files,newer = FALSE)| rebuild){
+      time_chunk(WD=WD)
+    }
+
 
 # 4) Make separate Rmd sections -------------------------------------------
 

@@ -494,14 +494,15 @@ output$supporting_media<-renderUI({
           h4("What to include:"),
           checkboxGroupInput(
             "ReadyToCompile",
-            "(Which items are done and should be compiled?)",
+            "(Which items are ready to be compiled?)",
             choices = c(
               "Front Matter",
               "Standards Alignment",
               "Teaching Materials",
               "Procedure",
               "Acknowledgments",
-              "Versions"
+              "Versions",
+              "Printable Lesson"
             ),
             selected = isolate(vals$current_data$ReadyToCompile)
           ),

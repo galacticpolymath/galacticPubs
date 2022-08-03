@@ -4,12 +4,14 @@
 \alias{inSync}
 \title{inSync}
 \usage{
-inSync(path1, path2, ..., verbose = FALSE, WD = getwd())
+inSync(path1, path2, newer = TRUE, ..., verbose = FALSE, WD = getwd())
 }
 \arguments{
-\item{path1}{path to file of interest (e.g. that is created from the other paths)}
+\item{path1}{path to file of interest (e.g. that is created from the other paths, for newer=T logic)}
 
-\item{path2}{path to reference file (expected to be at least slightly older)}
+\item{path2}{path to reference file (expected to be at least slightly older, if newer=T). Path 2 can also be}
+
+\item{newer}{logical; is path1 expected to be newer than (i.e. derived from) other paths? default=T. If newer=F, will test if path1 is older than all other paths.}
 
 \item{...}{path to other reference files to compare modified date to path1; separated by commas}
 

@@ -7,9 +7,9 @@
 gh_rename_repo(new_proj_name, gh_proj_name, lessons_dir, prompt_user = TRUE)
 }
 \arguments{
-\item{new_proj_name}{The new name you want to give the selected project}
+\item{new_proj_name}{The NEW (recently renamed) folder name you want to update on GitHub}
 
-\item{gh_proj_name}{The unique project title of this lesson as it is named on \url{https://github.com/galacticpolymath}. Not \emph{necessarily} the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. No default.}
+\item{gh_proj_name}{The (OLD) unique project title of this lesson as it is named on \url{https://github.com/galacticpolymath}. Not \emph{necessarily} the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. No default.}
 
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
 

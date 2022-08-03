@@ -44,7 +44,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
 
 
     #allow shorthand for compiling everything
-    if(tolower(choices)[1]=="all"){choices <- c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions")}
+    if(tolower(choices)[1]=="all"){choices <- c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions","Printable Lesson")}
 
     #quell Rcheck
     lumpItems<-whichRepo <- catalogURL <- expandMDLinks <- NULL
@@ -369,6 +369,17 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     compileVersions(WD=WD)
   }
 
+
+# Printable Lesson --------------------------------------------------------
+
+  if("Printable Lesson" %in% choices){
+
+    make_printable(WD=WD,rebuild=rebuild)
+
+
+
+
+  }
 
 ################################################################
 # Compile all JSONs ----------------------------------------------

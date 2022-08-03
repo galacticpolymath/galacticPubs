@@ -4,12 +4,24 @@
 \alias{discard_changes}
 \title{Discard local changes to git-watched files}
 \usage{
-discard_changes(gh_proj_name, lessons_dir)
+discard_changes(
+  gh_proj_name,
+  commit_msg = "rolling back with discard_changes()",
+  lessons_dir,
+  include_untracked = FALSE
+)
 }
 \arguments{
 \item{gh_proj_name}{The unique project title of this lesson as it is named on \url{https://github.com/galacticpolymath}. Not \emph{necessarily} the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.}
 
+\item{commit_msg}{string of commit message explaining why you're discarding changes.}
+
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
+
+\item{include_untracked}{logical; Stash (discard) changes to untracked files? Passed to \code{\link[gert:git_stash]{gert::git_stash_save()}}. default=FALSE}
+}
+\value{
+logical. TRUE if changes succeeded and clear git change list; FALSE if change list not empty.
 }
 \description{
 This will revert local changes for a lesson project folder. Does not \emph{currently} include files that are not watched (e.g. in assets/ or assembled-lesson-materials/ folders)
