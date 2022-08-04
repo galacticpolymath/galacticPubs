@@ -60,7 +60,9 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     stnds_out_of_date<-!inSync(fs::path(WD,"assets","learning-plots","GP-Learning-Epaulette.png"),
                                fs::path(WD,"assets","learning-plots","GP-Learning-Chart.png"),
                                fs::path(WD,"meta","standards.RDS"),
-                               fs::path(WD,"meta","standards_GSheetsOnly.xlsx"))
+                               fs::path(WD,"meta","JSON","standards.json"),
+                               fs::path(WD,"meta","standards_GSheetsOnly.xlsx"),
+                               newer=TRUE)
     if("Standards Alignment"%in% choices &
        (stnds_out_of_date | rebuild)) {
       alignment <-

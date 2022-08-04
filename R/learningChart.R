@@ -19,10 +19,10 @@
 #' @importFrom rlang .data
 
 
-learningChart=function(caption='',
+learningChart=function(caption=NA,
                        captionN = TRUE,
-                       centralText='',
-                       quotedTitle='',
+                       centralText=NA,
+                       quotedTitle=NA,
                        centralTextSize = 3.7,
                        saveFile = TRUE,
                        destFolder = "assets/learning-plots/",
@@ -35,9 +35,9 @@ learningChart=function(caption='',
 #if WD supplied, append it to destFolder
 if(!identical(WD,getwd())){destFolder<-fs::path(WD,destFolder)}
 
-if(quotedTitle==''){quotedTitle<-"this lesson"}else{quotedTitle<-paste0("\"",quotedTitle,"\"")}
+if(is.na(quotedTitle)){quotedTitle<-"this lesson"}else{quotedTitle<-paste0("\"",quotedTitle,"\"")}
 #deal with missing caption and add sample size if requested
-if(caption==''){caption=paste0("GP Learning Chart: Knowledge & skills taught in ",quotedTitle)}
+if(is.na(caption)){caption=paste0("GP Learning Chart: Knowledge & skills taught in ",quotedTitle)}
 
 # Standards exist?
 standardsFile<-fs::path(WD,"meta","standards.RDS")
