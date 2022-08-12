@@ -9,9 +9,12 @@
 
 publish<- function(commit_msg=NULL,WD=getwd()){
 
+  #if not run through the editor app,
   #test that WD is in the root directory with the R Project,
   #but don't throw an error (e.g. if run from galacticPubs)
-  check_wd(WD=WD,throw_error = FALSE)
+  if(!grepl("www",WD)&!grepl("galacticPubs",WD)){
+  check_wd(WD=WD)
+  }
 
 
 # check if files have been staged and are up to date ----------------------

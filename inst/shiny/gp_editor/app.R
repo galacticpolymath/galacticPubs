@@ -136,7 +136,7 @@ ui <- navbarPage(
         checkboxGroupInput("LessonBanner",label="Lesson Banner (found in assets/_banners_logos_etc)",
                   choices=matching_files(
                                        rel_path="assets/_banners_logos_etc/",
-                                       pattern="^.*/_banners_logos_etc/.*[Bb]anner.*\\.[png|PNG|jpeg|jpg]",
+                                       pattern="[Bb]anner.*\\.[png|PNG|jpeg|jpg]",
                                        WD),
                   selected=y$LessonBanner),
         selectizeInput("SponsorName",label="Sponsor Name(s) for Search Index:",choices=y$SponsorName,selected=y$SponsorName,options=list(create=TRUE),multiple=TRUE),
@@ -146,9 +146,9 @@ ui <- navbarPage(
           input_id = "SponsorLogo",
           text = "Sponsor Logo(s)— (add images w/ 'logo' in name to 'assets/_banners_logos_etc')",
           labels = matching_files(
+            rel_path="assets/_banners_logos_etc",
             pattern = "^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
-            WD=fs::path(WD,"assets","_banners_logos_etc"),
-            match_full_path=FALSE
+            WD=WD
           )
         ),
 
@@ -627,12 +627,12 @@ output$supporting_media<-renderUI({
         learningEpaulette(
           WD = WD,
           showPlot = FALSE,
-          heightScalar = (input$LearningEpaulette_params_heightScalar),
-          randomSeed = (input$LearningEpaulette_params_randomSeed)
+          heightScalar = input$LearningEpaulette_params_heightScalar,
+          randomSeed = input$LearningEpaulette_params_randomSeed
         )
       #update filenames
-      vals$current_data$LearningEpaulette<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,".png"))
-      vals$current_data$LearningEpaulette_vert<-fs::path("assets","learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
+      vals$current_data$LearningEpaulette<-fs::path("assets","_learning-plots",paste0(formals(learningEpaulette)$fileName,".png"))
+      vals$current_data$LearningEpaulette_vert<-fs::path("assets","_learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
       })
 
 
@@ -692,6 +692,8 @@ output$supporting_media<-renderUI({
         copy_updated_files(fs::path(WD, vals$current_data$LearningChart),
                                img_loc)
         })
+         #update filename
+      vals$current_data$LearningChart<-fs::path("assets","_learning-plots",paste0(formals(learningChart)$fileName,".png"))
       #return file info to UI
         isolate({
           list(src = fs::path("www", basename(vals$current_data$LearningChart)),

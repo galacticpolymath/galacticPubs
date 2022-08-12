@@ -4,7 +4,7 @@
 #'
 #' Combines functionality of:
 #' - [compileProcedure()]
-#' - [compileStandards()]
+#' - [compile_standards()]
 #' - [learningChart()] and [learningEpaulette()]
 #' - [compileAcknowledgements()]
 #' - [compileVersions()]
@@ -57,8 +57,8 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     # test if learningEpaulette is in up-to-date with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
 
 
-    stnds_out_of_date<-!inSync(fs::path(WD,"assets","learning-plots","GP-Learning-Epaulette.png"),
-                               fs::path(WD,"assets","learning-plots","GP-Learning-Chart.png"),
+    stnds_out_of_date<-!inSync(fs::path(WD,"assets","_learning-plots","GP-Learning-Epaulette.png"),
+                               fs::path(WD,"assets","_learning-plots","GP-Learning-Chart.png"),
                                fs::path(WD,"meta","standards.RDS"),
                                fs::path(WD,"meta","JSON","standards.json"),
                                fs::path(WD,"meta","standards_GSheetsOnly.xlsx"),
@@ -66,7 +66,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     if("Standards Alignment"%in% choices &
        (stnds_out_of_date | rebuild)) {
       alignment <-
-        compileStandards(WD = WD, targetSubj = current_data$TargetSubject)
+        compile_standards(WD = WD, targetSubj = current_data$TargetSubject)
       if (is.na(current_data$TargetSubject)) {
         warning("Enter a Target Subject on the Edit tab and try again.")
       }
@@ -86,7 +86,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
       #(since this file doesn't exist in yaml yet)
       current_data$LearningChart <-
         fs::path("assets",
-                 "learning-plots",
+                 "_learning-plots",
                  paste0(formals(learningChart)$fileName, ".png"))
 
       #export learning chart section
@@ -143,7 +143,6 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
         WD = WD,
         showPlot = FALSE,
         heightScalar = current_data$LearningEpaulette_params_heightScalar,
-        epauletteHeight = current_data$LearningEpaulette_params_epauletteHeight,
         randomSeed = current_data$LearningEpaulette_params_randomSeed
       )
 
@@ -151,11 +150,11 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
       #(since this file doesn't exist in yaml on first run)
       current_data$LearningEpaulette <-
         fs::path("assets",
-                 "learning-plots",
+                 "_learning-plots",
                  paste0(formals(learningEpaulette)$fileName, ".png"))
       current_data$LearningEpaulette_vert <-
         fs::path("assets",
-                 "learning-plots",
+                 "_learning-plots",
                  paste0(formals(learningEpaulette)$fileName, "_vert.png"))
 
     }

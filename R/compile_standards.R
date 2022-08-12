@@ -1,4 +1,4 @@
-#' compileStandards
+#' compile_standards
 #'
 #' Compile alignment info from a lesson standards matrix worksheet
 #' @param standardsFile file location of the lesson standards alignment XLSX worksheet; default: "meta/standards_GSheetsOnly.xlsx"
@@ -11,7 +11,7 @@
 #' @return list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." colum). A JSON is saved to the destFolder location.
 #' @export
 #'
-compileStandards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
+compile_standards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
                              destFolder = "meta/JSON/" ,
                              fileName = "standards.json",
                              standardsRef = "standardX",
@@ -348,4 +348,4 @@ return(
   )
 )
 
-}#end compileAlignment function def
+}#end compile_alignment function def
