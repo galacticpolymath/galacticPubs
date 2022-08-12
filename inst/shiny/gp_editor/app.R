@@ -133,10 +133,10 @@ ui <- navbarPage(
             value = y$Subtitle,
             width=600
         ),
-        checkboxGroupInput("LessonBanner",label="Lesson Banner (found in assets/banners_etc)",
+        checkboxGroupInput("LessonBanner",label="Lesson Banner (found in assets/_banners_logos_etc)",
                   choices=matching_files(
-                                       rel_path="assets/banners_etc/",
-                                       pattern="^.*/banners_etc/.*[Bb]anner.*\\.[png|PNG|jpeg|jpg]",
+                                       rel_path="assets/_banners_logos_etc/",
+                                       pattern="^.*/_banners_logos_etc/.*[Bb]anner.*\\.[png|PNG|jpeg|jpg]",
                                        WD),
                   selected=y$LessonBanner),
         selectizeInput("SponsorName",label="Sponsor Name(s) for Search Index:",choices=y$SponsorName,selected=y$SponsorName,options=list(create=TRUE),multiple=TRUE),
@@ -144,11 +144,11 @@ ui <- navbarPage(
 
         sortable::rank_list(
           input_id = "SponsorLogo",
-          text = "Sponsor Logo(s)— (add images w/ 'logo' in name to 'assets/orig-client-media_NoEdit')",
+          text = "Sponsor Logo(s)— (add images w/ 'logo' in name to 'assets/_banners_logos_etc')",
           labels = matching_files(
-            "assets/orig-client-media_NoEdit/",
             pattern = "^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
-            WD
+            WD=fs::path(WD,"assets","_banners_logos_etc"),
+            match_full_path=FALSE
           )
         ),
 
@@ -213,7 +213,7 @@ ui <- navbarPage(
       #Supporting Media
         hr(class="blhr"),
         h3("Supporting Media"),
-        p("Files found in ./assets/supporting-media/. They'll be copied to ./published/ upon Preview and can be referenced in markdown text."),
+        p("Files found in ./assets/_other-media-to-publish/. They'll be copied to ./published/ upon Preview and can be referenced in markdown text."),
         p("  Ex: insert image with ![alt text](filename.png) in any text input section."),
 
       htmlOutput("supporting_media"),
@@ -443,7 +443,7 @@ server <- function(input, output,session) {
 output$supporting_media<-renderUI({
   #add to reactive values so renderTable can read this in next section
   # ignore help.txt with negative lookbehind regular expression
-  tmp<-grep(".*(?<!help.txt)$",fs::dir_ls(fs::path(WD, "assets","supporting-media")),perl=TRUE,value=TRUE)
+  tmp<-grep(".*(?<!help.txt)$",fs::dir_ls(fs::path(WD, "assets","_other-media-to-publish")),perl=TRUE,value=TRUE)
   vals$SM_full_paths<-tmp
   vals$current_data$SupportingMedia<-fs::path_rel(tmp,WD)
   tagList({
@@ -454,7 +454,7 @@ output$supporting_media<-renderUI({
 # Render supporting media files table for above UI section
   output$supportingMediaFiles<-renderTable({
     filez<-vals$SM_full_paths
-    if(length(filez)==0){return(data.frame(file="No files found at assets/supporting-media"))
+    if(length(filez)==0){return(data.frame(file="No files found at 'assets/_other-media-to-publish'"))
     }else{
     info<-file.info(filez)
     fn<-basename(rownames(info))
@@ -604,7 +604,7 @@ output$supporting_media<-renderUI({
 
     scripts<-list.files(fs::path(WD,"scripts"),pattern=".R")
     script_subset <- scripts[scripts %in% input$ScriptsToRun]
-    runLessonScripts(script_subset,WD = WD)
+    run_lesson_scripts(script_subset,WD = WD)
     })
     } ) %>% bindEvent(input$run_lesson_scripts)
 

@@ -3,15 +3,22 @@
 
 
 #Function to find files that match a pattern and read them in if YAML entry is blank
-matching_files<-function(rel_path,pattern,WD){
+matching_files<-function(rel_path=NA,pattern,WD,match_full_path=TRUE){
   #have to include perl=TRUE and grep b/c list.files grep pattern recognition doesn't allow for lookarounds
-  fs::path_rel(grep(
+
+  filez<-list.files(fs::path(WD, ifelse(is.na(rel_path),"",rel_path)),
+               full.names = match_full_path)
+  results<-grep(
     pattern,
-    list.files(fs::path(WD, rel_path, collapse = "/"),
-               full.names = T),
+    filez,
     perl = TRUE,
     value = TRUE
-  ), WD)
+  )
+
+  if(!is.na(rel_path)){
+    results<-fs::path_rel(results,
+   WD)}
+  results
 
 
 }

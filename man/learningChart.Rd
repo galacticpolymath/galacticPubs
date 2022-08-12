@@ -5,13 +5,13 @@
 \title{learningChart}
 \usage{
 learningChart(
-  caption = "",
+  caption = NA,
   captionN = TRUE,
-  centralText = "",
-  quotedTitle = "",
+  centralText = NA,
+  quotedTitle = NA,
   centralTextSize = 3.7,
   saveFile = TRUE,
-  destFolder = "assets/learning-plots/",
+  destFolder,
   fileName = "GP-Learning-Chart",
   WD = getwd(),
   dpi = 200,

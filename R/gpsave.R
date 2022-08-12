@@ -2,7 +2,7 @@
 #'
 #' Wrapper for [ggplot2::ggsave()] with galacticPubs defaults
 #'
-#' Most important thing it does is default to saving in the assets/R_outputs/ folder and save with reasonable dimensions that maintain large, readable text size of graph labels
+#' Most important thing it does is default to saving in the assets/_R_outputs/ folder and save with reasonable dimensions that maintain large, readable text size of graph labels
 #'
 #' @param filename expects filename, with file extension (e.g. "plot.png"); can also include subfolder (e.g. "newfolder/plot.png")
 #' @param width plot width in inches (default= 7)
@@ -13,7 +13,7 @@
 #' @export
 
 gpsave<-function(filename,width=7, height=3.94,dpi=300,bg="transparent",  ...){
-  fn<-fs::path(getwd(),"assets","R_outputs",filename)
+  fn<-fs::path(getwd(),"assets","_R_outputs",filename)
   ggplot2::ggsave(filename=fn,width=width,height=height,dpi=dpi,...)
   message("@Saved: ",fn)
 }

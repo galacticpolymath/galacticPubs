@@ -5,7 +5,7 @@
 #' @param epauletteHeight relative size of the epaulette; default=0.2
 #' @param randomSeed random number for getting slightly different (but repeatable) repelled text labels
 #' @param saveFile T/F, save file or just print to screen?
-#' @param destFolder where do you want to save the folder; by default in the "assets/learning-plots" folder, 1 level up from the working directory
+#' @param destFolder where do you want to save the folder; by default in the "assets/_learning-plots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" for ggsave output image file
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param font_size size of font in pts;default=11
@@ -21,19 +21,20 @@
 #########################################
 ### GP Learning Mosaic Plot/Epaulet graphic
 
-learningEpaulette<-function(heightScalar=1,epauletteHeight=0.2,randomSeed=101,saveFile=TRUE,destFolder="assets/learning-plots/",fileName="GP-Learning-Epaulette",WD=getwd(),font_size=10,width=11,height=1.6,dpi=200,showPlot=TRUE,...){
+learningEpaulette<-function(heightScalar=1,epauletteHeight=0.2,randomSeed=101,saveFile=TRUE,destFolder,fileName="GP-Learning-Epaulette",WD=getwd(),font_size=10,width=11,height=1.6,dpi=200,showPlot=TRUE,...){
 
+  if(missing(destFolder)){destFolder<-fs::path("assets","_learning-plots")}
   # #test for NULL values being supplied; replace with defaults
   # a<-match.call(expand.dots=TRUE)[-1] %>% as.list()
   #
   # browser()
 
-  #if WD supplied, append it to destFolder
+  #if WD supplied that is not getwd(), append it to destFolder
   if(!identical(WD,getwd())){destFolder<-fs::path(WD,destFolder)}
 
 
 # Standards exist?
-standardsFile<-fs::path(WD,"meta/standards.RDS")
+standardsFile<-fs::path(WD,"meta","standards.RDS")
 standardsFound <- file.exists(standardsFile)
 
 ###########

@@ -5,6 +5,8 @@
 ^published.*$
 ^assets.*$
 ^scripts.*$
+^code.*$
+^reading-material.*$
 ^assembled-lesson-materials.*$
 ^inst/shiny/gp_editor/www/[^rsrc].*$
 
