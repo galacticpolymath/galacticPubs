@@ -13,7 +13,7 @@
 #' @export
 
 gpsave<-function(filename,width=7, height=3.94,dpi=300,bg="transparent",  ...){
-  fn<-fs::path(getwd(),"assets","R_outputs",filename)
+  fn<-fs::path(getwd(),"assets","~R_outputs",filename)
   ggplot2::ggsave(filename=fn,width=width,height=height,dpi=dpi,...)
   message("@Saved: ",fn)
 }
