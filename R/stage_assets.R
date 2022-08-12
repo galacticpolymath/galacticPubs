@@ -1,4 +1,4 @@
-#' stageAssets
+#' stage_assets
 #'
 #' Copy all lesson assets to the desired location to prep for lesson publishing
 #'
@@ -9,7 +9,7 @@
 #' @param status if staging assets for publishing, you can toggle "Draft" or "Live"; default=NULL
 #' @export
 
-stageAssets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TRUE, status=NULL){
+stage_assets <- function(current_data=NULL, WD=getwd(), dest_folder=NULL,clear=TRUE, status=NULL){
  .=NULL
 
   meta_path<-fs::path(WD,"meta")

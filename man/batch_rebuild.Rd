@@ -18,7 +18,7 @@ batch_rebuild(
 
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
 
-\item{stage}{do you want to call \code{\link[=stageAssets]{stageAssets()}} to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE}
+\item{stage}{do you want to call \code{\link[=stage_assets]{stage_assets()}} to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE}
 
 \item{change_this}{A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If gh_proj_name=="all", make sure you set this to something you want to change for everything.}
 

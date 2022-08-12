@@ -33,7 +33,7 @@ compile_lesson(
 current_data; also the lesson JSON is saved to \code{meta/JSON/LESSON.json}
 }
 \description{
-Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to \code{\link[=stageAssets]{stageAssets()}} and \code{\link[=publish]{publish()}} to publish these changes to the web.
+Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to \code{\link[=stage_assets]{stage_assets()}} and \code{\link[=publish]{publish()}} to publish these changes to the web.
 }
 \details{
 Combines functionality of:

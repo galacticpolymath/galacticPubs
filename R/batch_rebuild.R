@@ -6,7 +6,7 @@
 #'
 #' @param gh_proj_name The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.
 #' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"
-#' @param stage do you want to call [stageAssets()] to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE
+#' @param stage do you want to call [stage_assets()] to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE
 #' @param change_this A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If gh_proj_name=="all", make sure you set this to something you want to change for everything.
 #' @param clean Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to [compile_lesson()]). Default=TRUE
 #' @param complete_rebuild Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to [compile_lesson()])
@@ -64,10 +64,10 @@ batch_rebuild <- function(gh_proj_name,lessons_dir,stage=TRUE,change_this=NULL,c
             clean = clean
           ))
 
-      #3. stageAssets if requested
+      #3. stage_assets if requested
       if(stage & compile_success){
         stage_success<-catch_err(
-          stageAssets(WD = WD)
+          stage_assets(WD = WD)
           )
       }else{stage_success<-FALSE}
       dplyr::tibble(Lesson=basename(WD),Compiled_Successfully=compile_success,Staged_Successfully=stage_success)

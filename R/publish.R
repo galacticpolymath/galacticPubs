@@ -24,7 +24,7 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     #Stage Assets if either check fails
     if(!lesson_staged | !staged_lesson_up_to_date){
       message("**** Staging Out-Of-Sync Lesson Materials ****")
-      stageAssets(WD=WD)
+      stage_assets(WD=WD)
     }
 
 

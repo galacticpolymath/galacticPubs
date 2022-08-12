@@ -711,7 +711,7 @@ output$supporting_media<-renderUI({
 
     current_data<-prep_input(input,yaml_path,vals$current_data,WD=WD)$current_data
 
-    stageAssets(current_data,WD,img_loc,clear=TRUE)
+    stage_assets(current_data,WD,img_loc,clear=TRUE)
 
 
     #Custom extraction of bullets with regex!!
@@ -811,7 +811,7 @@ output$supporting_media<-renderUI({
     #Reconcile input and yaml saved data before finalizing
     current_data<-prep_input(input,yaml_path, vals$current_data,WD=WD)$current_data
     yaml::write_yaml(current_data, yaml_path)
-    ec<-stageAssets(current_data,WD,destFolder<-fs::path(WD,"published"),clear=TRUE,status = input$PublicationStatus)
+    ec<-stage_assets(current_data,WD,destFolder<-fs::path(WD,"published"),clear=TRUE,status = input$PublicationStatus)
     if(!"error"%in%class(ec)){
       output$stageStatus<-renderText({"\u2713 Success"})
       vals$staged <- TRUE

@@ -26,7 +26,7 @@ if(!dir.exists(icons_folder)){dir.create(icons_folder);message("\nDirectory crea
  if(!dir.exists(img_folder)){dir.create(img_folder);message("\nDirectory created:\n@ ",img_folder,"\n")}
 
   #copy lesson images to img_folder subfolder, deleting everything if rebuild is triggered
-  stageAssets(WD=WD,clear=clear,dest_folder=img_folder)
+  stage_assets(WD=WD,clear=clear,dest_folder=img_folder)
 
   #copy latest template files into the directory, clearing it if rebuild has been triggered
   toCopy_base_files<-toCopy[!grepl("static_icons",toCopy)]

@@ -1,6 +1,6 @@
 #' compile_lesson
 #'
-#' Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to [stageAssets()] and [publish()] to publish these changes to the web.
+#' Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to [stage_assets()] and [publish()] to publish these changes to the web.
 #'
 #' Combines functionality of:
 #' - [compileProcedure()]
