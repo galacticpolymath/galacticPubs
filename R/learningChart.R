@@ -38,9 +38,9 @@ if(missing(destFolder)){
   #if WD supplied, append it to destFolder
 if(!identical(WD,getwd())){destFolder<-fs::path(WD,destFolder)}
 
-if(is.na(quotedTitle)){quotedTitle<-"this lesson"}else{quotedTitle<-paste0("\"",quotedTitle,"\"")}
+if(is_empty(quotedTitle)){quotedTitle<-"this lesson"}else{quotedTitle<-paste0("\"",quotedTitle,"\"")}
 #deal with missing caption and add sample size if requested
-if(is.na(caption)){caption=paste0("GP Learning Chart: Knowledge & skills taught in ",quotedTitle)}
+if(is_empty(caption)){caption=paste0("GP Learning Chart: Knowledge & skills taught in ",quotedTitle)}
 
 # Standards exist?
 standardsFile<-fs::path(WD,"meta","standards.RDS")
@@ -66,7 +66,7 @@ if(captionN){
   caption <- paste0(caption," (~",floor(avgN)," standards per grade band)")
   }
 
-if(is.na(centralText)){
+if(is_empty(centralText)){
   t_gradeBands<-compiledAlignment$compiled$gradeBand %>% table
   centralText<-paste0("grades\n",names(t_gradeBands)[which.max(t_gradeBands)])
 }
