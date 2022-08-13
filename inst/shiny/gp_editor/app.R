@@ -764,7 +764,7 @@ output$supporting_media<-renderUI({
         md_txt('Driving Question(s)',current_data$DrivingQ),
         md_txt('Essential Question(s)',current_data$EssentialQ),
         md_txt('Learning Objective(s)',current_data$LearningObj),
-        md_txt('',current_data$MiscMD,required=FALSE),# no label and required=F makes this invisible if no text in current_data
+        if(!is_empty(current_data$MiscMD)){md_txt('',current_data$MiscMD,required=FALSE)}else{},# no label and required=F makes this invisible if no text in current_data#N
         # Keyword tags (w/ logic for adding placeholder if no values provided)
         if(is.null(current_data$Tags)){div(class="placeholder",h3("Keywords missing"))
           }else{div(class="keyword-cloud",h4("Keywords:"),lapply(current_data$Tags,function(x){span(class="keyword",x)}))},

@@ -28,6 +28,7 @@ is_empty <- function(x) {
       if (identical(x[[i]], NULL) |
           identical(x[[i]], "") |
           identical(x[[i]], NA) |
+          identical(x[[i]], "NA") |
           identical(x[[i]], "\n") |
           identical(x[[i]], list()) |
           length(x[[i]]) == 0) {

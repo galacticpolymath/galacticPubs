@@ -16,7 +16,13 @@ lumpItems<-function(items,item.labs,list.obj,new.name){
 
      applicable00<- match(items,names(list.obj))
      #remove empty items (not just NA)
-     applicable0<-as.vector(stats::na.omit(ifelse(is.na(list.obj[applicable00]),NA,applicable00)))
+     applicable0 <- sapply(1:length(applicable00), function(i) {
+       if (is_empty(list.obj[applicable00[i]])) {
+         NULL
+       } else{
+         applicable00[i]
+       }
+     }) %>% unlist()
      applicable <- names(list.obj)[applicable0]
      applicableLabs<-item.labs[as.vector(stats::na.omit(match(applicable,items)))]
      lumped<-sapply(1:length(applicable),function(i){
