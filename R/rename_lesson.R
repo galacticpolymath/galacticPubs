@@ -299,7 +299,11 @@ if(proceed){
 #'
 #'
 
-# 6.  Summarize results ---------------------------------------------------
+# 8.   Delete orphaned catalog entry if it exists -------------------------
+test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(gh_proj_name))
+
+
+# 7.  Summarize results ---------------------------------------------------
 
 if(proceed & test_update_fm){
   message("Project successfully renamed to: ",new_proj_name)
@@ -319,10 +323,11 @@ tests<-c(
     test_RprojRename,
     test_rename_remote,
     test_reset_remote,
-    test_update_fm
+    test_update_fm,
+    test_cleanup_catalog
   )
 change_log<- dplyr::bind_rows(change_log)
-summ <- dplyr::tibble(result=convert_T_to_check(tests),test=c("Checked Working Directory","Renamed Project Folder","Renamed Rproj","Renamed GitHub Remote","Reset Local<->Remote Connection","Updated front-matter.yml"))
+summ <- dplyr::tibble(result=convert_T_to_check(tests),test=c("Checked Working Directory","Renamed Project Folder","Renamed Rproj","Renamed GitHub Remote","Reset Local<->Remote Connection","Updated front-matter.yml","Remove orphaned gp-catalog entry"))
 return(list(change_log = change_log, summary = summ))
 
 }
