@@ -356,9 +356,32 @@ multimedia<-lapply(1:nrow(m),function(i){
 })
 
 
+# Assessments -------------------------------------------------------------
+ a_list<-if(is_empty(linksAssess)){}else{
+  list(part="last",
+       title="Assessments",
+       preface="",
+       itemList=lapply(1:nrow(linksAssess), function(i) {
+         d_i <- linksAssess[i,]
+         list(
+           itemTitle = ifelse(is_empty(d_i$title),d_i$filename,d_i$title),
+           itemCat = NULL,
+           links = list(
+             list(linkText = "PDF",
+                  url = d_i$pdfLink),
+             list(linkText = "Copy to My Google Drive",
+                  url = d_i$gShareLink)
+           )
+         )
+       })
+  )
+ }
+
 
 teachingMat0<-list(classroom = if (is.null(resourcesC)) {
                   } else{
+                    #Add assessments to the parts list
+                    resourcesC[[1]]$parts<-list(resourcesC[[1]]$parts,a_list)
                     list(
                       resourceSummary = rsrcSumm_C,
                       gradeVariantNotes = gradeVariantNotes,
@@ -367,6 +390,8 @@ teachingMat0<-list(classroom = if (is.null(resourcesC)) {
                   },
                   remote = if (is.null(resourcesR)) {
                   } else{
+                    #Add assessments to the parts list
+                    resourcesR[[1]]$parts<-list(resourcesR[[1]]$parts,a_list)
                     list(
                       resourceSummary = rsrcSumm_R,
                       gradeVariantNotes = gradeVariantNotes,

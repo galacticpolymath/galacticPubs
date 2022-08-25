@@ -25,13 +25,16 @@ updateTeachingMatLinks<-function(gh_proj_name,
   linksFile <-  fs::path(WD,"meta", linksFile)
 
   if(missing(gh_proj_name)){
+    if(grepl("galacticPubs",getwd())){
+      gh_proj_name<-pick_lesson()
+    }else{
     current_data<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))
         if(is_empty(current_data$GitHubPath)){stop("Please enter the GitHub Project Name (gh_proj_name)")
         }else{
           gh_proj_name<-current_data$GitHubPath %>% basename %>% tools::file_path_sans_ext()
           }
 
-    }
+    }}
 
 #define dplyr::coalesce function that doesn't crash with 2 NAs!
   discardNA<-function(x,y){

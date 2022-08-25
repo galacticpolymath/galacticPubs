@@ -23,19 +23,27 @@
 is_empty <- function(x) {
   if(length(x)==0){
     nulls<-TRUE
+  if(length(x)==1){
+          #True if 1 condition met
+  nulls <-identical(x, NULL) |
+          identical(x, "") |
+          identical(is.na(x), TRUE) |
+          identical(x, "NA") |
+          identical(x, "\n") |
+          identical(x, list()) |
+          length(x) == 0
+
+  }
   }else{
     nulls <- sapply(1:length(x), function(i) {
-      if (identical(x[[i]], NULL) |
+          identical(x[[i]], NULL) |
           identical(x[[i]], "") |
-          identical(x[[i]], NA) |
+          identical(is.na(x[[i]]), TRUE) |
           identical(x[[i]], "NA") |
           identical(x[[i]], "\n") |
           identical(x[[i]], list()) |
-          length(x[[i]]) == 0) {
-        TRUE
-      } else{
-        FALSE
-      }
+          length(x[[i]]) == 0
+
     })
   }
   # True if all values are nulls, else FALSE
