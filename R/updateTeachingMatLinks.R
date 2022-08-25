@@ -5,7 +5,7 @@
 #' Just a note that I'm using 2 libraries to handle XLSX files. Not ideal, but the imported data from openxlsx::read.xlsx is nicer than XLConnect::readWorksheetFromFile, but the editing of data from a complex spreadsheet is MUCH better in XLConnect.
 #'
 #' @param gh_proj_name The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.
-#' @param dataCat which info do you want to merge with your teaching-materials spreadsheet? Options= "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.
+#' @param dataCat which info do you want to merge with your teaching-materials spreadsheet? Options= "download", "classroom", "remote", and "assessments". Default is all. Abbreviation with first letters acceptable.
 #' @param linksFile name of the file we're updating in the meta/ subfolder; default="teaching-materials.xlsx". gdrive *CaseSensitive!
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param sortOutput logical; if T, outputs are sorted by grade, part, filetype, then filename
@@ -13,7 +13,7 @@
 #' @export
 #'
 updateTeachingMatLinks<-function(gh_proj_name,
-                                 dataCat = c("download",  "remote", "classroom"),
+                                 dataCat = c("download",  "remote", "classroom","assessments"),
                                  linksFile = "teaching-materials.xlsx",
                                  WD = getwd(),
                                  sortOutput = T,
@@ -30,8 +30,7 @@ updateTeachingMatLinks<-function(gh_proj_name,
         }else{
           gh_proj_name<-current_data$GitHubPath %>% basename %>% tools::file_path_sans_ext()
           }
-    #exception if this is the galacticPubs project
-    if(gh_proj_name=="galacticPubs"){gh_proj_name<-current_data$ShortTitle}
+
     }
 
 #define dplyr::coalesce function that doesn't crash with 2 NAs!
@@ -50,24 +49,43 @@ updateTeachingMatLinks<-function(gh_proj_name,
   #useful later for figuring out filetypes of dribble listings
   mimeKey<-googledrive::drive_mime_type(googledrive::expose())
   #Create key for connecting the dataCat file categories to the tabs on the .xlsx file.
-    tmKey<-data.frame(dataCat=c("download","classroom","classroom","remote","remote"),subCat=c("","presentations","handouts","presentations","handouts"),tab=c("dL","c_pres","c_handouts","r_pres","r_handouts"))
+  tmKey<-data.frame(
+    dataCat = c(
+      "download",
+      "classroom",
+      "classroom",
+      "remote",
+      "remote",
+      "assessments"
+    ),
+    subCat = c(
+      "",
+      "presentations",
+      "handouts",
+      "presentations",
+      "handouts",
+      ""
+    ),
+    tab = c("dL", "c_pres", "c_handouts", "r_pres", "r_handouts", "assess")
+  )
     #if shorthand was used in dataCat (e.g. 1st letter), make correction
     dataCat.orig<-dataCat
     dataCat<-unique(tmKey$dataCat)[pmatch(dataCat,unique(tmKey$dataCat))]
     #filter key to only the selected dataCats
     tmKey.selected<-tmKey[tmKey$dataCat %in% dataCat,]
   #If sorting output, what's the order of column sorting?
-    sortStringL<-list(dL=c("envir","grades","part"),
-                      c_pres=c("stage","grades","part","type"),
-                      c_handouts=c("stage","grades","part","type","SvT"),
-                      r_pres=c("stage","grades","part","type"),
-                      r_handouts=c("stage","grades","part","type","SvT")
-                      )
+    sortStringL<-list(
+      dL = c("envir", "grades", "part"),
+      c_pres = c("stage", "grades", "part", "type"),
+      c_handouts = c("stage", "grades", "part", "type", "SvT"),
+      r_pres = c("stage", "grades", "part", "type"),
+      r_handouts = c("stage", "grades", "part", "type", "SvT"),
+      assess= c("filename")
+    )
   #################
 
 
 # Query Google Drive to find locations ------------------------------------
-
     currLessonDir<-drive_find_path(paste0("Edu/lessons/",gh_proj_name))
     currLessonDirID<-currLessonDir$id
 
@@ -144,7 +162,60 @@ updateTeachingMatLinks<-function(gh_proj_name,
           #output Download Link matrix
           do.call(dplyr::bind_rows,dLdata)
 
-          }else{
+      } else if (dataCat_k == "assessments") {
+        dirID <-
+          assembledMatDribble$id[which(substr(assembledMatDribble$name, 1, 3) == substr(dataCat_k, 1, 3))]
+        #if the directory is missing for this dataCat, return ()
+        if (length(dirID) == 0) {
+          return(NA)
+        }
+        dirDribble <-
+          googledrive::drive_find(q = paste0("'", dirID, "' in parents"))
+        #filter out text files from results
+        dirDribble <-
+          dirDribble[!grepl(".txt", dirDribble$name, fixed = T), ]
+
+        # Add human-readable filetype info
+        dirDribble$mimeTypes<-sapply(dirDribble$drive_resource,function(x){x$mimeType})
+        dirDribble$filetype<-mimeKey$human_type[match(dirDribble$mimeTypes,mimeKey$mime_type)]
+        excelTab <- "assess"
+        baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",perl=T,
+                        x=googledrive::drive_link(dirDribble))
+
+        dirDribble$gShareLink <- sapply(1:nrow(dirDribble), function(i) {
+          row_i <- dirDribble[i, ]
+          # PDF share links can't handle template/preview suffix
+          ifelse(row_i$filetype == "pdf",
+                 baseLink[i],
+                 paste0(baseLink[i], "template/preview"))
+        })
+
+        #PDF export syntax is different for google presentations compared to google docs :/
+        pdfExportString <-
+          ifelse((
+            dirDribble$filetype == "ppt" |
+              dirDribble$filetype == "pptx" |
+              dirDribble$filetype == "presentation"
+          ),
+          "export/pdf",
+          "export?format=pdf"
+          )
+        # for shared resources that are already PDFs, avoid making an export pdf string...
+        dirDribble$pdfLink <-
+          ifelse(dirDribble$filetype == "pdf",
+                 baseLink,
+                 paste0(baseLink, pdfExportString))
+
+
+        data.frame(filename=dirDribble$name,
+                   gShareLink=dirDribble$gShareLink,
+                   pdfLink=dirDribble$pdfLink,
+                   #The below are used for item merging, not in final output to spreadsheet
+                   gID=dirDribble$id,
+                   excelTab=excelTab
+                   )
+
+      }else{
 
         ########
         #---> From here, applies to all data cats, except downloads
@@ -295,16 +366,23 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
     #Read in tabs and remove rows that are totally NA
     tmImported<-lapply(1:length(tmKey.selected2$tab),function(i) {
       d<-openxlsx::read.xlsx(linksFile,sheet=tmKey.selected2$tab[i],startRow=2)
-      rmNArows(d)
+      if(!is.null(d)){
+        rmNArows(d)
+      }else{
+        message("no data on teaching-materials tab: ",tmKey.selected2$tab[i])}
     })
+
 
     #add google drive ID for merging to imported data
     tmImported2<-lapply(1:length(tmImported),function(i) {
+      if(!is.null(tmImported[[i]])){
       #regex accounts for diff. link structures for downloads links (/folders/) vs file sharing (/d/)
       tmImported[[i]]$gID <- gsub("^.*\\/(?:d|folders)\\/([^\\/\n]*)\\/?.*$","\\1",tmImported[[i]]$gDriveLink)
+      }
       tmImported[[i]]
       })
     names(tmImported2)<-tmKey.selected2$tab
+
 
 ###########################################
 # merge data and write to appropriate tab ---------------------------------
@@ -322,6 +400,7 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
       excelTab_i<-names(tmImported2)[i]
       dataCat_i<-tmKey$dataCat[which(tmKey$tab==excelTab_i)]
 
+      #Create a holey dataset with NAs for missing column entries
       gData_i<-gData %>% dplyr::filter(.data$excelTab==excelTab_i)%>% dplyr::tibble() %>% dplyr::mutate(updateNotes=NA)
 
          #The X filter is in case there's an untitled column with some stuff in it that accidentally gets imported
@@ -340,10 +419,24 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
                                                            names(gData_i)) =="filename")]
 
         #filter out excel data with filenames that aren't found on the web
-        excelData_i <-excelData_i_0 %>% dplyr::filter(.data$filename %in% gData_i$filename)
+        test_excelData_i <-catch_err(excelData_i_0 %>% dplyr::filter(.data$filename %in% gData_i$filename), keep_results = TRUE)
 
-        #Now merge, which should preserve titles
-        mergedData_i <-  hard_left_join(excelData_i,gData_i,by="filename",as_character=TRUE)
+        if(!test_excelData_i$success){
+          #If nothing useful on spreadsheet, just use gdrive entries
+          tmp<-c(names(gData0[[i]]))
+          gnames<-tmp[!tmp %in% c("gID","excelTab")]
+          mergedData_i<-dplyr::tibble(gData_i[,gnames]) %>%
+            #ensure title is included (if it's not in)
+            dplyr::union_all(dplyr::tibble(title=character()))
+          if(excelTab_i=="assess"){
+            #preserve description field on assessment sheet & reorder
+            mergedData_i <- mergedData_i %>% dplyr::union_all(dplyr::tibble(description=character())) %>%
+              dplyr::select(c("filename","title","description"),"gShareLink","pdfLink")
+          }
+        }else{
+           mergedData_i <-  hard_left_join(test_excelData_i$result,gData_i,by="filename",as_character=TRUE)
+        }
+
 
       }
 

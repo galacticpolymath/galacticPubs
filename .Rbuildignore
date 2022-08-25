@@ -4,6 +4,7 @@
 ^meta.*$
 ^published.*$
 ^assets.*$
+^assembled-lesson-materials/assessments.*$
 ^scripts.*$
 ^code.*$
 ^reading-material.*$
