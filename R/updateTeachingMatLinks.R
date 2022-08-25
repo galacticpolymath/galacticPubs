@@ -377,7 +377,8 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
     tmImported2<-lapply(1:length(tmImported),function(i) {
       if(!is.null(tmImported[[i]])){
       #regex accounts for diff. link structures for downloads links (/folders/) vs file sharing (/d/)
-      tmImported[[i]]$gID <- gsub("^.*\\/(?:d|folders)\\/([^\\/\n]*)\\/?.*$","\\1",tmImported[[i]]$gDriveLink)
+      column_select<-ifelse("gShareLink"%in%names(tmImported[[i]]),"gShareLink","gDriveLink") #This is stupid. Need consistent naming across all tabs.
+      tmImported[[i]]$gID <- gsub("^.*\\/(?:d|folders)\\/([^\\/\n]*)\\/?.*$","\\1",tmImported[[i]][,column_select])
       }
       tmImported[[i]]
       })
