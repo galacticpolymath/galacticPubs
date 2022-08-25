@@ -456,10 +456,11 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
       out<-rmNArows(out0)
 
       #If title missing, try to guess from filename
-      #
-      if("title"%in%names(out)){
+      # BUT NOT FOR ASSESSMENTS!
+      if("title"%in%names(out)& excelTab_i!="assess"){
       out$title<-sapply(1:nrow(out),function(i){
         row_i<-out[i,]
+
         if(is.na(row_i$title)){
             # if wksht or worksheet in title, return "Worksheet"
             descriptor_wksht<-ifelse(grepl(".*(wo?r?kshe?e?t).*", row_i$filename, ignore.case = TRUE),
