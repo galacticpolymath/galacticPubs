@@ -381,7 +381,7 @@ multimedia<-lapply(1:nrow(m),function(i){
 teachingMat0<-list(classroom = if (is.null(resourcesC)) {
                   } else{
                     #Add assessments to the parts list
-                    resourcesC[[1]]$parts<-list(resourcesC[[1]]$parts,a_list)
+                    resourcesC[[1]]$parts<-c(resourcesC[[1]]$parts,a_list)
                     list(
                       resourceSummary = rsrcSumm_C,
                       gradeVariantNotes = gradeVariantNotes,
@@ -391,7 +391,7 @@ teachingMat0<-list(classroom = if (is.null(resourcesC)) {
                   remote = if (is.null(resourcesR)) {
                   } else{
                     #Add assessments to the parts list
-                    resourcesR[[1]]$parts<-list(resourcesR[[1]]$parts,a_list)
+                    resourcesR[[1]]$parts<-c(resourcesR[[1]]$parts,a_list)
                     list(
                       resourceSummary = rsrcSumm_R,
                       gradeVariantNotes = gradeVariantNotes,

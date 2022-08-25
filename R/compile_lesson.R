@@ -164,8 +164,8 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
         warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
       } else{
 
-        updateTeachingMatLinks(WD = WD, dataCat = c("download", tolower(current_data$LessonEnvir)))
-        compileTeachingMat(LessonEnvir = current_data$LessonEnvir, WD = WD)
+        updateTeachingMatLinks(WD = WD)
+        compileTeachingMat( WD = WD)
       }
 
     }
