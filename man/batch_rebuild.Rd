@@ -6,7 +6,7 @@
 \usage{
 batch_rebuild(
   gh_proj_name,
-  lessons_dir,
+  lessons_dir = NULL,
   stage = TRUE,
   change_this = NULL,
   clean = TRUE,

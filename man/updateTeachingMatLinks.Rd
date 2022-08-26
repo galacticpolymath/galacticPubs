@@ -6,7 +6,7 @@
 \usage{
 updateTeachingMatLinks(
   gh_proj_name,
-  dataCat = c("download", "remote", "classroom"),
+  dataCat = c("download", "remote", "classroom", "assessments"),
   linksFile = "teaching-materials.xlsx",
   WD = getwd(),
   sortOutput = T,
@@ -16,7 +16,7 @@ updateTeachingMatLinks(
 \arguments{
 \item{gh_proj_name}{The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.}
 
-\item{dataCat}{which info do you want to merge with your teaching-materials spreadsheet? Options= "download", "classroom" and "remote". Default is all. Abbreviation with first letters acceptable.}
+\item{dataCat}{which info do you want to merge with your teaching-materials spreadsheet? Options= "download", "classroom", "remote", and "assessments". Default is all. Abbreviation with first letters acceptable.}
 
 \item{linksFile}{name of the file we're updating in the meta/ subfolder; default="teaching-materials.xlsx". gdrive *CaseSensitive!}
 

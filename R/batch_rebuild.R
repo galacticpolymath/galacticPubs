@@ -5,7 +5,7 @@
 #' This assumes that you have Google Drive for Desktop set up and have permissions to access the lesson files.
 #'
 #' @param gh_proj_name The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.
-#' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"
+#' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default=NULL
 #' @param stage do you want to call [stage_assets()] to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE
 #' @param change_this A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If gh_proj_name=="all", make sure you set this to something you want to change for everything.
 #' @param clean Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to [compile_lesson()]). Default=TRUE
@@ -14,26 +14,27 @@
 #' @export
 #'
 #'
-batch_rebuild <- function(gh_proj_name,lessons_dir,stage=TRUE,change_this=NULL,clean=TRUE, complete_rebuild=FALSE){
+batch_rebuild <- function(gh_proj_name,lessons_dir=NULL,stage=TRUE,change_this=NULL,clean=TRUE, complete_rebuild=FALSE){
   timer <- FALSE
   #If Suggested tictoc package is available, time how long the rebuild takes
   if(requireNamespace("tictoc")){
     tictoc::tic()
     timer<-TRUE
   }
+  #if specific gh_proj_name not included, let user choose one
+  if (missing(gh_proj_name)) {
+    lesson_path<-pick_lesson(lessons_dir = lessons_dir,full_path = TRUE)
+    gh_proj_name<-basename(lesson_path)
+    if(is.null(lessons_dir)){
+      lessons_dir<-path_parent_dir(lesson_path)
+    }
 
-  if (missing(lessons_dir)) {
-    lessons_dir <-
-      fs::path("/Volumes", "GoogleDrive", "My Drive", "Edu", "Lessons")
   }
 
   if(!dir.exists(lessons_dir)){
     stop("Directory not found: ",lessons_dir)
   }else{
-    #if specific gh_proj_name not included, let user choose one
-    if(missing(gh_proj_name)) {
-    gh_proj_name<-pick_lesson(lessons_dir)
-    }
+
     # Get a vector of potential lesson project folders if we want to rebuild all
     if(tolower(gh_proj_name)=="all"){
       projects0<-fs::dir_ls(lessons_dir,type="directory")

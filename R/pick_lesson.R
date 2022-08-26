@@ -7,8 +7,8 @@
 #' @return the selected lesson name
 #' @export
 
-pick_lesson<- function(lessons_dir,full_path=FALSE){
-  if (missing(lessons_dir)) {
+pick_lesson<- function(lessons_dir=NULL,full_path=FALSE){
+  if (is.null(lessons_dir)) {
     gdrive_dir<-  fs::path(fs::path_home(),"Library","CloudStorage")
     if(!dir.exists(gdrive_dir)){
       warning("path not found: ",gdrive_dir)
@@ -22,7 +22,7 @@ pick_lesson<- function(lessons_dir,full_path=FALSE){
       message("Set your Google Drive for Desktop user name with access to Edu/Lessons/:")
       which_user<-as.numeric(readline("CHOICE: "))
       Sys.setenv(galacticPubs_gdrive_userdir=gdrive_accounts[which_user])
-      message("Google Drive User saved for next time: ",gdrive_accounts[which_user])
+      message("\nGoogle Drive User saved for next time: ",gdrive_accounts[which_user],"\n\n")
       gdrive_userdir<-Sys.getenv("galacticPubs_gdrive_userdir")
       #need to manage this with functions...e.g. drive_user_set and drive_user_reset()
     }

@@ -4,7 +4,7 @@
 \alias{pick_lesson}
 \title{pick_lesson}
 \usage{
-pick_lesson(lessons_dir, full_path = FALSE)
+pick_lesson(lessons_dir = NULL, full_path = FALSE)
 }
 \arguments{
 \item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /)}
