@@ -60,7 +60,6 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     stnds_out_of_date<-!inSync(fs::path(WD,"assets","_learning-plots","GP-Learning-Epaulette.png"),
                                fs::path(WD,"assets","_learning-plots","GP-Learning-Chart.png"),
                                fs::path(WD,"meta","standards.RDS"),
-                               fs::path(WD,"meta","JSON","standards.json"),
                                fs::path(WD,"meta","standards_GSheetsOnly.xlsx"),
                                newer=TRUE)
     if("Standards Alignment"%in% choices &
@@ -104,10 +103,11 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
             "."
           ),
         Footnote = "**Notes on Standards**\n\n*Standards are broken down into ***Target*** and ***Connected*** categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
-        Badge = list(url =ifelse(is.na(current_data$LearningChart[1]),NA,
-                       catalogURL(
-                         basename(current_data$LearningChart[1]), repo
-                       )))
+        Badge = list(url = ifelse(
+          is.na(current_data$LearningChart[1]),
+          NA,
+          catalogURL(basename(current_data$LearningChart[1]), repo)
+        ))
 
 
       )
@@ -158,6 +158,17 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
                  paste0(formals(learningEpaulette)$fileName, "_vert.png"))
 
     }
+
+    #always write new standards.json from standards RDS file
+    # Write JSON for GP Simple Lesson Plan -----------------------------------
+      saved_standards<-readRDS(fs::path(WD,"meta","standards.RDS"))
+      jsonlite::write_json( out,
+                      outFile,pretty=TRUE,auto_unbox = TRUE,na="null")
+
+
+
+
+
 
     if ("Teaching Materials" %in% choices) {
       if (is.na(current_data$GitHubPath)) {

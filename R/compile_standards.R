@@ -37,14 +37,24 @@ if(missing(targetSubj)){
 #Import master alignment with ALL standards from https://github.com/galacticpolymath/standardX or the supplied standardsFile
 
   if(standardsRef=="standardX"){
+    tmp<-tempfile()
+    download.file(
+        "https://raw.githubusercontent.com/galacticpolymath/standardX/gh-pages/align-to-all-subject-standards.xlsx",destfile = tmp)
     a_master <-
-      openxlsx::read.xlsx(
-        "https://raw.githubusercontent.com/galacticpolymath/standardX/gh-pages/align-to-all-subject-standards.xlsx",
+      readxl::read_excel(tmp,
         sheet = 1,
-        colNames = T
-      )
+        col_names = TRUE,
+        col_types="text"
+      ) %>% dplyr::filter(!is.na(.data$code))
+    #If you want to supply custom standards sheet for just this lesson (to supply statements and other columns that will be matched by set*code)
   } else if (standardsRef == "myFile") {
-    a_master <- openxlsx::read.xlsx(standardsFile, sheet = 2,colNames=TRUE,startRow=2)
+    a_master <-readxl::read_excel(
+      standardsFile,
+      sheet = 2,
+      col_names = TRUE,
+      skip = 1,
+      col_types = "text"
+    ) %>% dplyr::filter(!is.na(.data$code))
   } else{
     stop("standardsRef must be 'standardX' or 'myFile'")
   }
@@ -96,6 +106,9 @@ a2$how<-gsub("\u2022","-",a2$how)
 a2$how<-ifelse(!grepl("^- ",a2$how),paste0("- ",a2$how),a2$how)
 
 
+
+
+
 # #///////////////////////////
 # # Output Integrity Check 1: verify that codes have been entered for every lesson that has alignment notes
 # n_code_entries<-nrow(alignment_matrix_stacked)
@@ -124,11 +137,47 @@ a3$grouping <-
 # Match alignment to master records ---------------------------------------
 a3$code_set<-paste(a3$code,a3$set,sep="_")
 a_master$code_set<-paste(a_master$code,a_master$set,sep="_")
+
+  #if either code_set has non-unique entries, hopefully can be matched by their order...but warn user matching might not work
+duplicated_a3<-duplicated(a3$code_set)
+duplicated_a_master <- duplicated(a_master$code_set)
+some_duplicated<-sum(duplicated_a3)>0|sum(duplicated_a_master)>0
+
+if(some_duplicated){
+  warning("Some duplicated code*set values found:\n  -",paste(a3$code_set[duplicated_a3],collapse="\n  -"))
+  #try to match using unique code_set that depends on them being entered in order (problematic)
+  a3$code_set<-make.names(a3$code_set,unique=TRUE)
+  a_master$code_set<-make.names(a_master$code_set,unique=TRUE)
+  warning("Code<->Statement matching was done based on order of duplicates (i.e. must be same order in alignment and master). Check output!")
+}
 #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standardsRef)
 A<-dplyr::left_join(a3[,c("code_set","lo","lo_stmnt","target","grp","grouping","how")],a_master,by="code_set")
 #factor subjects for desired order
 A$subject<-factor(A$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 A <- A %>% dplyr::arrange(.data$subject)
+
+
+# warn if statements missing (indicates bad merge) -----------------------
+if(sum(complete.cases(A$statement))==0){
+  warning("Bad merge. No 'Statements' matched standards code for each set. Try changing 'standardsRef' in compile_standards(); currently, standardsRef = '",standardsRef,"'")
+}
+
+
+
+# Add dims if only dimensions provided ------------------------------------
+A$dim<-sapply(1:nrow(A),function(i){
+  if(is.na(A$dim[i])){
+    if(is.na(A$dimension[i])){
+      NA
+    }else{
+    #Just take capital letters of dim
+    stringr::str_extract_all(A$dimension[i],"[A-Z]*",simplify=TRUE) %>% paste0(collapse="")
+    }
+  }else{
+    A$dim[i]
+  }
+})
+
 
 
 # Add grade band to final data set ----------------------------------------
@@ -154,7 +203,6 @@ gradeL<-sapply(A$grade, function(x) {
 # Define grade bands this alignment touches ------------
 
 A$gradeBand<-sapply(gradeL,function(x) paste(x,collapse=","))%>% unlist()
-
 
 
 # Make json structured output ----------------------------------------------
@@ -207,29 +255,16 @@ for(ta_i in 1:length(unique(A$target))) {
 
 out0<-do.call(c,l_ta)
 
-
 # Prefix with component and title, and nest output in Data if structuring for web deployment
 out<-if(structureForWeb){
   list(  `__component` = "lesson-plan.standards",
                              Data=out0)
 }else{out0}
 
-# create directory if necessary & prep output filename --------------------
-dir.create(destFolder,showWarnings=FALSE,recursive=T)
-outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(fileName)),collapse=""),ext="json")
 
-
-
-# Write JSON for GP Simple Lesson Plan -----------------------------------
-jsonlite::write_json( out,
-                      outFile,pretty=TRUE,auto_unbox = TRUE,na="null")
-
-
-
-# return compiled tibble --------------------------------------------------
+# return summary tibble --------------------------------------------------
 message(rep("=",30),"\n\tSUMMARY\n",rep("=",30))
 message("\nStandards submitted:\t",nrow(a0),"\nRemoved due to issues:\t",sum(tbds)+sum(undoc),"\nSuccessfully compiled:\t",nrow(A),"\n")
-message("JSON file saved\n@ ",outFile)
 message(rep("=",30))
 
 uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",") %>% unlist() %>% unique()
@@ -312,8 +347,45 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
 
 
 # prep for LearningChart  -------------------------------------------------
+#supported sets of standards for generating learning chart
+  supported_sets <-
+    c("Common Core Math", "Common Core ELA", "NGSS", "C3")
 
-    a_combined$dimAbbrev<-c(" Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math"," Measurement, Data,\n Probability, Statistics"," Number Systems, Operations,\n Symbolic Representation"," Language, Speaking,\n Listening"," Reading"," Writing"," Cross-Cutting \n Concepts "," Disciplinary\n Core Ideas"," Science & Engineering\n Practices"," Civics, Economics,\n Geography, History"," Develop Questions,\n Plan Inquiries"," Evaluate, \n Communicate, \n Take Action ")
+  #check if standards contain an unsupported set of standards
+  which_alignment_supported <-unique_sans_na(A$set) %in% supported_sets
+  test_alignment_supported <-which_alignment_supported %>% sum() == length(which_alignment_supported) &
+    (length(which_alignment_supported) > 0)
+
+  if (!test_alignment_supported) {
+    warning(
+      "No Learning Chart created. Currently supported Standards sets:\n  -",
+      paste(supported_sets, collapse = "\n  -"),
+      "\nStandard sets found:\n  -",
+      paste(unique_sans_na(A$set),
+            collapse = "\n  -")
+    )
+    learning_chart_friendly <- FALSE
+    a_combined$dimAbbrev <- NA
+  } else{
+    learning_chart_friendly <- TRUE
+    a_combined$dimAbbrev <-
+      c(
+        " Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math",
+        " Measurement, Data,\n Probability, Statistics",
+        " Number Systems, Operations,\n Symbolic Representation",
+        " Language, Speaking,\n Listening",
+        " Reading",
+        " Writing",
+        " Cross-Cutting \n Concepts ",
+        " Disciplinary\n Core Ideas",
+        " Science & Engineering\n Practices",
+        " Civics, Economics,\n Geography, History",
+        " Develop Questions,\n Plan Inquiries",
+        " Evaluate, \n Communicate, \n Take Action "
+      )
+  }
+
+
 
 
 
@@ -326,14 +398,16 @@ toSave<- list(
               input = dplyr::as_tibble(a0),
               compiled = dplyr::as_tibble(A),
               problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
-              gradeBands= uniqueGradeBands
+              gradeBands= uniqueGradeBands,
+              list_for_json= out
               ),
             a_combined=a_combined,
             xlabels=xlabels,
             rectangles=rectangles,
-            targetSubj=targetSubj
+            targetSubj=targetSubj,
+            learning_chart_friendly=learning_chart_friendly
             )
-saveRDS(toSave,file=fs::path(WD,"meta/standards.RDS"))
+saveRDS(toSave,file=fs::path(WD,"meta","standards.RDS"))
 
 
 

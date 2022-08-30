@@ -61,26 +61,10 @@ if(!standardsFound) {
   compiledAlignment <- importedData$data
   a_combined <- importedData$a_combined
   targetSubj <- importedData$targetSubj
-  #supported sets of standards for generating learning chart
-  supported_sets <-
-    c("Common Core Math", "Common Core ELA", "NGSS", "C3")
-
-  #check if standards contain an unsupported set of standards
-  which_alignment_supported <-
-    unique_sans_na(compiledAlignment$compiled$set) %in% supported_sets
-  test_alignment_supported <-
-    which_alignment_supported %>% sum() == length(which_alignment_supported) &
-    (length(which_alignment_supported) > 0)
-
-  if (!test_alignment_supported) {
+  browser()
+  if (!importedData$learning_chart_friendly) {
     warning(
-      "No Learning Chart created. Currently supported Standards sets:\n  -",
-      paste(supported_sets, collapse = "\n  -"),
-      "\nStandard sets found:\n  -",
-      paste(
-        unique_sans_na(compiledAlignment$compiled$set),
-        collapse = "\n  -"
-      )
+      "No Learning Chart created. The currently aligned standards sets are not currently supported."
     )
     return(NULL)
 
