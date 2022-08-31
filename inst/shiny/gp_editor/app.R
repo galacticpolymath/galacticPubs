@@ -20,7 +20,6 @@ if(!"error"%in%class(pacman_test)){p_load(shiny,shinythemes,sortable)}else{
 if(is_empty(.GlobalEnv$.editor_path)){
   stop("Editor path not found. Maybe you didn't run the app using editor()?")
 }else{WD<-.GlobalEnv$.editor_path}
-browser()
 meta_path <- fs::path(WD,"meta/")
 yaml_path<-fs::path(meta_path,"front-matter.yml")
 yaml_test<-file.exists(yaml_path)
@@ -650,10 +649,9 @@ output$supporting_media<-renderUI({
       vals$current_data$LearningEpaulette_vert<-fs::path("assets","_learning-plots",paste0(formals(learningEpaulette)$fileName,"_vert.png"))
       })
 
-
       #copy image to www folder
       isolate({
-        copy_updated_files(paste0(WD,
+        copy_updated_files(fs::path(WD,
                                 c((vals$current_data$LearningEpaulette),
                                   (vals$current_data$LearningEpaulette_vert)
                                 )), img_loc)

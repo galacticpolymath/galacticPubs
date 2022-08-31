@@ -185,6 +185,7 @@ updateTeachingMatLinks<-function(gh_proj_name,
         if(nrow(dirDribble)==0){
           return(NA)
         }
+
         # Add human-readable filetype info
         dirDribble$mimeTypes<-sapply(dirDribble$drive_resource,function(x){x$mimeType})
         dirDribble$filetype<-mimeKey$human_type[match(dirDribble$mimeTypes,mimeKey$mime_type)]
@@ -439,6 +440,7 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
             #ensure title is included (if it's not in)
             dplyr::union_all(dplyr::tibble(title=character()))
           if(excelTab_i=="assess"){
+
             #preserve description field on assessment sheet & reorder
             mergedData_i <- mergedData_i %>% dplyr::union_all(dplyr::tibble(description=character())) %>%
               dplyr::select(c("filename","title","description"),"gShareLink","pdfLink")
