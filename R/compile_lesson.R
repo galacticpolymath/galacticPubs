@@ -53,6 +53,10 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     repo<-whichRepo(WD=WD)
 
 
+# Always update front-matter (in case of template updates) ----------------
+    update_fm(WD=WD)
+
+
   # Standards alignment & learning plots -----------------------------------------------------
     # test if learningEpaulette is in up-to-date with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
 

@@ -59,16 +59,25 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     }
 
     # Assign new unique_id
-    if(is_empty(saved_data$id)){
-      #count how many lessons there are currently on gp-catalog
+    if(is_empty(saved_data$UniqueID)){
+      #count how many lessons there with this id are currently on gp-catalog
       if(!exists("current_catalog")){
+        #read in if this hasn't been read into the environment
       current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
       }
-      browser()
-      next_id<-(sapply(current_catalog, function(x) as.integer(x$id)) %>% max(na.rm=T) )+1 %>% as.integer()
-      saved_data$id<-next_id
-      lesson$id<-next_id
-      message("\n************\n Lesson ID assigned: ",saved_data$id,"\n")
+
+      entries_w_this_id <- lapply(current_catalog, function(x) {
+        if (x$id == saved_data$id) {
+          dplyr::tibble(id=x$id,UniqueID=x$UniqueID,ShortTitle=x$ShortTitle,locale=x$locale)
+        } else{
+        }
+      }) %>% dplyr::bind_rows()
+      locale_count<-nrow(entries_w_this_id)+1
+      uid<-paste("lesson",saved_data$id,"locale",locale_count,sep="_")
+      #assign the values so they'll be written to drive
+      saved_data$UniqueID<-lesson$UniqueID <- uid
+
+      message("\n************\n Lesson UniqueID assigned: ",saved_data$UniqueID,"\n")
 
     }
 
