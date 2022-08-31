@@ -20,6 +20,7 @@ if(!"error"%in%class(pacman_test)){p_load(shiny,shinythemes,sortable)}else{
 if(is_empty(.GlobalEnv$.editor_path)){
   stop("Editor path not found. Maybe you didn't run the app using editor()?")
 }else{WD<-.GlobalEnv$.editor_path}
+browser()
 meta_path <- fs::path(WD,"meta/")
 yaml_path<-fs::path(meta_path,"front-matter.yml")
 yaml_test<-file.exists(yaml_path)
@@ -70,9 +71,9 @@ ui <- navbarPage(
         # div(id="box",class="info",
         #   p("Edit lesson title, overview, tags, etc. for lessons",style="font-weight:500;color:#3e0055;")
         #   ),
-        span(style = "size:0.5rem; margin-top: -5px; margin-bottom: -15px; font-family: sans-serif;
+        span(style = "size:0.4rem; margin-top: -5px; margin-bottom: -15px; font-family: sans-serif;
                       color: #5A5A5A; display: inline-block","Working Directory:",
-             actionLink("open_WD",label = span(path_parent_dir(WD),span(style="background-color:#f0f4ff;font-weight:600;",basename(WD))))),
+             actionLink("open_WD",label = span(path_parent_dir(WD),span(style="background-color:#f0f4ff;font-weight:600;margin-left:-0.4rem;",basename(WD))))),
         h3('Step 1: Enter "Front Matter" Overview Info, Teach It in 15, Etc.'),
         p(class="help-text",
             "Most text fields accept",
@@ -332,7 +333,7 @@ server <- function(input, output,session) {
 
 
 # Open local folder for WD when clicked -----------------------------------
-observeEvent(input$open_WD,system2("open",WD))
+observeEvent(input$open_WD,system2("open",paste0("'",WD,"'")))
 
 # Monitor whether there are unsaved changes -------------------------------
   observe({
