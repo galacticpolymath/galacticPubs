@@ -377,12 +377,15 @@ multimedia<-lapply(1:nrow(m),function(i){
   )
  }
 
-
 teachingMat0<-list(classroom = if (is.null(resourcesC)) {
                   } else{
                     #Add assessments to the parts list
-
-                    resourcesC[[1]]$parts<-c(resourcesC[[1]]$parts,list(a_list))
+                    if(!is.null(a_list)){
+                      for(i in 1:length(resourcesC)){
+                        resourcesC[[i]]$parts <- c(resourcesC[[i]]$parts, list(a_list))
+                      }
+                    }
+                    #return modified list
                     list(
                       resourceSummary = rsrcSumm_C,
                       gradeVariantNotes = gradeVariantNotes,
@@ -392,7 +395,12 @@ teachingMat0<-list(classroom = if (is.null(resourcesC)) {
                   remote = if (is.null(resourcesR)) {
                   } else{
                     #Add assessments to the parts list
-                    resourcesR[[1]]$parts<-c(resourcesR[[1]]$parts,list(a_list))
+                    if(!is.null(a_list)){
+                      for(i in 1:length(resourcesR)){
+                        resourcesR[[i]]$parts <- c(resourcesR[[i]]$parts, list(a_list))
+                      }
+                    }
+                    #return modified list
                     list(
                       resourceSummary = rsrcSumm_R,
                       gradeVariantNotes = gradeVariantNotes,
