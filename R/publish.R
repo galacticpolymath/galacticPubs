@@ -116,7 +116,6 @@ publish<- function(commit_msg=NULL,WD=getwd()){
 
     out_summary <- dplyr::tibble(repo=basename(WD),commit=convert_T_to_check(test_commit),push=convert_T_to_check(test_push),success=test_status,path=WD)
 
-    print(out_summary)
     return(out_summary)
 
 }

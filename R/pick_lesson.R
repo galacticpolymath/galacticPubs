@@ -40,9 +40,13 @@ pick_lesson<- function(lessons_dir=NULL,full_path=FALSE){
 
   d<-data.frame(CHOICE=1:length(projects),PROJECT=projects)
   d<-rbind(d,c(CHOICE=0,PROJECT="all"))
+
   message(capture.output(print(d,row.names=F),type="message"))
-  num<-readline("Which lesson? > ") %>% as.integer()
-  choice<-d$PROJECT[match(num,d$CHOICE)]
+  num0<-readline("Which lesson (separate multiple with ',')? > ") #%>% as.integer()
+  num1<-gsub(" ","",num0) #remove spaces
+  num2<-strsplit(num1,",",fixed=TRUE) %>% unlist() %>% as.integer() #separate multiple values and make numeric
+  choice<-sapply(num2,function(x) {d$PROJECT[match(x,d$CHOICE)]})
+
   if(full_path){
     return(fs::path(lessons_dir,choice))
 

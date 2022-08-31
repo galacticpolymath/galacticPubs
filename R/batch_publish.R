@@ -19,12 +19,12 @@ batch_publish <- function(commit_msg = NULL, gh_proj_name, lessons_dir=NULL) {
     timer <- TRUE
   }
 
-  #if specific gh_proj_name not included, let user choose one
+#if specific gh_proj_name not included, let user choose one
   if (missing(gh_proj_name)) {
     lesson_path<-pick_lesson(lessons_dir = lessons_dir,full_path = TRUE)
-    gh_proj_name<-basename(lesson_path)
+    gh_proj_name<-sapply(lesson_path,function(x) basename(x))
     if(is.null(lessons_dir)){
-      lessons_dir<-path_parent_dir(lesson_path)
+      lessons_dir<-path_parent_dir(lesson_path[1])
     }
 
   }
@@ -34,7 +34,7 @@ batch_publish <- function(commit_msg = NULL, gh_proj_name, lessons_dir=NULL) {
   }else{
 
     # Get a vector of potential lesson project folders if we want to rebuild all
-    if(tolower(gh_proj_name)=="all"){
+    if(tolower(gh_proj_name[1])=="all"){
       projects0<-fs::dir_ls(lessons_dir,type="directory")
                 #Filter out some patterns for things we don't want to not process
       projects<-projects0[which(!grepl("^.*Lessons[\\/]~",projects0)&
@@ -50,7 +50,8 @@ batch_publish <- function(commit_msg = NULL, gh_proj_name, lessons_dir=NULL) {
 
     update_list <- lapply(good_projects, function(WD) {
       message("Publishing: ", basename(WD))
-      publish(WD = WD, commit_msg = commit_msg)
+      result_i<-publish(WD = WD, commit_msg = commit_msg)
+      print(result_i)
     })
   }
 

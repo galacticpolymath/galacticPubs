@@ -163,11 +163,13 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
 
     }
 
-    #always write new standards.json from standards RDS file
-    # Write JSON for GP Simple Lesson Plan -----------------------------------
-      saved_standards<-readRDS(fs::path(WD,"meta","standards.RDS"))
+    #always write new standards.json from standards RDS file if it exists
+    compiled_standards <- fs::path(WD,"meta","standards.RDS")
+    if(file.exists(compiled_standards)){
+      saved_standards<-readRDS(compiled_standards)
       jsonlite::write_json(saved_standards$data$list_for_json,
                       fs::path(WD,"meta","JSON","standards.json"),pretty=TRUE,auto_unbox = TRUE,na="null")
+    }
 
 
     if ("Teaching Materials" %in% choices) {

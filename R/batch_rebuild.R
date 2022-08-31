@@ -24,9 +24,9 @@ batch_rebuild <- function(gh_proj_name,lessons_dir=NULL,stage=TRUE,change_this=N
   #if specific gh_proj_name not included, let user choose one
   if (missing(gh_proj_name)) {
     lesson_path<-pick_lesson(lessons_dir = lessons_dir,full_path = TRUE)
-    gh_proj_name<-basename(lesson_path)
+    gh_proj_name<-sapply(lesson_path,function(x) basename(x))
     if(is.null(lessons_dir)){
-      lessons_dir<-path_parent_dir(lesson_path)
+      lessons_dir<-path_parent_dir(lesson_path[1])
     }
 
   }
@@ -36,7 +36,7 @@ batch_rebuild <- function(gh_proj_name,lessons_dir=NULL,stage=TRUE,change_this=N
   }else{
 
     # Get a vector of potential lesson project folders if we want to rebuild all
-    if(tolower(gh_proj_name)=="all"){
+    if(tolower(gh_proj_name[1])=="all"){
       projects0<-fs::dir_ls(lessons_dir,type="directory")
                 #Filter out some patterns for things we don't want to not process
       projects<-projects0[which(!grepl("^.*Lessons[\\/]~",projects0)&
