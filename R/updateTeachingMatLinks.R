@@ -168,6 +168,7 @@ updateTeachingMatLinks<-function(gh_proj_name,
           do.call(dplyr::bind_rows,dLdata)
 
       } else if (dataCat_k == "assessments") {
+
         dirID <-
           assembledMatDribble$id[which(substr(assembledMatDribble$name, 1, 3) == substr(dataCat_k, 1, 3))]
         #if the directory is missing for this dataCat, return ()
@@ -180,6 +181,10 @@ updateTeachingMatLinks<-function(gh_proj_name,
         dirDribble <-
           dirDribble[!grepl(".txt", dirDribble$name, fixed = T), ]
 
+        #If no assessments found, return nothing
+        if(nrow(dirDribble)==0){
+          return(NA)
+        }
         # Add human-readable filetype info
         dirDribble$mimeTypes<-sapply(dirDribble$drive_resource,function(x){x$mimeType})
         dirDribble$filetype<-mimeKey$human_type[match(dirDribble$mimeTypes,mimeKey$mime_type)]
@@ -268,6 +273,7 @@ updateTeachingMatLinks<-function(gh_proj_name,
                     ""
                     }else{x}})
                 #does same thing as googledrive::drive_link(), but eh, why not
+
                 currCatFiles$link<-sapply(currCatFiles$drive_resource,function(x) x$webViewLink)
                 baseLink<-gsub("(.*\\/)[edit|view].*$","\\1",currCatFiles$link,perl=T)
 
@@ -361,8 +367,6 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
 
 
      #Read in tabs from the teaching-materials.xlsx for selected data types
-
-
     # redefine tmKey.selected to remove empty dataCat(egorie)s----------------------
     badCats<-sapply(gData0,function(x) identical(x,NA))
     badCatNames<-names(badCats)[which(badCats==TRUE)]
@@ -456,6 +460,7 @@ gData<-reshape2::melt(gData0) %>% dplyr::tibble() %>% suppressMessages()
       }else{out0<-mergedData_i}
       #remove NA rows
       out<-rmNArows(out0)
+
 
       #If title missing, try to guess from filename
       # BUT NOT FOR ASSESSMENTS!

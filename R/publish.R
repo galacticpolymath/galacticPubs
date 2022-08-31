@@ -46,7 +46,7 @@ publish<- function(commit_msg=NULL,WD=getwd()){
       lesson$FirstPublicationDate<-time_stamp
     }
 
-    # Assign new id based on what should come next in the catalog
+    # Assign new id & UniqueID based on what should come next in the catalog
     if(is_empty(saved_data$id)){
       #count how many lessons there are currently on gp-catalog
       current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
@@ -56,16 +56,7 @@ publish<- function(commit_msg=NULL,WD=getwd()){
       lesson$id<-next_id
       message("\n************\n Lesson ID assigned: ",saved_data$id,"\n")
 
-    }
-
-    # Assign new unique_id
-    if(is_empty(saved_data$UniqueID)){
-      #count how many lessons there with this id are currently on gp-catalog
-      if(!exists("current_catalog")){
-        #read in if this hasn't been read into the environment
-      current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
-      }
-
+      # Assign new unique_id
       entries_w_this_id <- lapply(current_catalog, function(x) {
         if (x$id == saved_data$id) {
           dplyr::tibble(id=x$id,UniqueID=x$UniqueID,ShortTitle=x$ShortTitle,locale=x$locale)
@@ -80,6 +71,8 @@ publish<- function(commit_msg=NULL,WD=getwd()){
       message("\n************\n Lesson UniqueID assigned: ",saved_data$UniqueID,"\n")
 
     }
+
+
 
     #Always update URL after ID has been assigned (in case manually changed)
     # if(is_empty(saved_data$URL)){
