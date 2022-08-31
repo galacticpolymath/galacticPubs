@@ -58,6 +58,20 @@ publish<- function(commit_msg=NULL,WD=getwd()){
 
     }
 
+    # Assign new unique_id
+    if(is_empty(saved_data$id)){
+      #count how many lessons there are currently on gp-catalog
+      if(!exists("current_catalog")){
+      current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
+      }
+      browser()
+      next_id<-(sapply(current_catalog, function(x) as.integer(x$id)) %>% max(na.rm=T) )+1 %>% as.integer()
+      saved_data$id<-next_id
+      lesson$id<-next_id
+      message("\n************\n Lesson ID assigned: ",saved_data$id,"\n")
+
+    }
+
     #Always update URL after ID has been assigned (in case manually changed)
     # if(is_empty(saved_data$URL)){
       lesson$URL<- saved_data$URL <- paste0("https://galacticpolymath.com/lessons/",saved_data$id)

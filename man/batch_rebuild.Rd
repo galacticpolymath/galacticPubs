@@ -16,7 +16,7 @@ batch_rebuild(
 \arguments{
 \item{gh_proj_name}{The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.}
 
-\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
+\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default=NULL}
 
 \item{stage}{do you want to call \code{\link[=stage_assets]{stage_assets()}} to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE}
 

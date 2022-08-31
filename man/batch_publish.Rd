@@ -4,14 +4,14 @@
 \alias{batch_publish}
 \title{batch_publish}
 \usage{
-batch_publish(commit_msg = NULL, shortName, lessons_dir)
+batch_publish(commit_msg = NULL, gh_proj_name, lessons_dir = NULL)
 }
 \arguments{
 \item{commit_msg}{What do you want to say about this update? Default=NULL, i.e. "automated galacticPubs::publish()"}
 
-\item{shortName}{The lesson short name(s) (i.e. the folder name(s)) for the lesson(s) you want to update and rebuild; use "all" if you want to rebuild all the lessons. If left blank, a picker will try to give you a list of options}
+\item{gh_proj_name}{The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.}
 
-\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons/assumptionsMatter_femalesSing_math"}
+\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default=NULL}
 }
 \description{
 Publish one or more lessons that have been staged in the published/ folder of a lesson directory

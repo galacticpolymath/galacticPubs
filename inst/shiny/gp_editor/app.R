@@ -506,7 +506,13 @@ output$supporting_media<-renderUI({
             ),
             selected = isolate(vals$current_data$ReadyToCompile)
           ),
-          actionButton("compile", "Save & Compile Materials", class = "compile-button")
+          radioButtons(
+            "PullStandardsInfoFrom",
+            label = "Match alignment codes to which set of standards?",
+            choices = c("myFile", "standardX"),
+            selected = isolate(vals$current_data$PullStandardsInfoFrom)
+          ),
+          actionButton("compile", "Save & Compile Lesson", class = "compile-button")
         )
         ),  #end left pane
 

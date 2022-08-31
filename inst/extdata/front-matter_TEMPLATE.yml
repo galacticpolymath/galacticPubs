@@ -1,5 +1,6 @@
 #DEFAULT VALUES FOR front-matter.
 id: ''
+UniqueID: ''
 ShortTitle: ''
 Language: 'English'
 Country: 'United States'
@@ -11,7 +12,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.3.4
+TemplateVer: 0.3.5
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
@@ -34,6 +35,7 @@ LessonEnvir: ''
 ForGrades: ''
 GradesOrYears: 'Grades'
 EstLessonTime: ''
+PullStandardsInfoFrom: 'standardX'
 LearningEpaulette: ''
 LearningEpaulette_vert: ''
 LearningEpaulette_params_heightScalar: !expr formals(learningEpaulette)$heightScalar

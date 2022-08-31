@@ -65,7 +65,7 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     if("Standards Alignment"%in% choices &
        (stnds_out_of_date | rebuild)) {
       alignment <-
-        compile_standards(WD = WD, targetSubj = current_data$TargetSubject)
+        compile_standards(WD = WD, targetSubj = current_data$TargetSubject,standardsRef = current_data$PullStandardsInfoFrom)
       if (is.na(current_data$TargetSubject)) {
         warning("Enter a Target Subject on the Edit tab and try again.")
       }
@@ -162,12 +162,8 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     #always write new standards.json from standards RDS file
     # Write JSON for GP Simple Lesson Plan -----------------------------------
       saved_standards<-readRDS(fs::path(WD,"meta","standards.RDS"))
-      jsonlite::write_json( out,
-                      outFile,pretty=TRUE,auto_unbox = TRUE,na="null")
-
-
-
-
+      jsonlite::write_json(saved_standards$data$list_for_json,
+                      fs::path(WD,"meta","JSON","standards.json"),pretty=TRUE,auto_unbox = TRUE,na="null")
 
 
     if ("Teaching Materials" %in% choices) {

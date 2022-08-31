@@ -8,7 +8,7 @@ compile_standards(
   standardsFile = "meta/standards_GSheetsOnly.xlsx",
   destFolder = "meta/JSON/",
   fileName = "standards.json",
-  standardsRef = "standardX",
+  standardsRef = "myFile",
   targetSubj = NULL,
   WD = getwd(),
   structureForWeb = TRUE
@@ -21,7 +21,7 @@ compile_standards(
 
 \item{fileName}{output file name; default= "standards.json"}
 
-\item{standardsRef}{where do you want to pull down statements and other info for the supplied standards codes? Default="standardX" (i.e. the \href{https://github.com/galacticpolymath/standardX}{standardX repository}); Options= "standardX" or "myFile" (which will use Tab 2 on the supplied XLSX workbook)}
+\item{standardsRef}{where do you want to pull down statements and other info for the supplied standards codes? Default="myFile" (i.e. Tab2 of the standards workbook.) if "standardX" is chosen, it'll pull down the latest version here: \href{https://github.com/galacticpolymath/standardX}{standardX repository})}
 
 \item{targetSubj}{which subject\code{(}s\verb{)} is \code{(}are\verb{)} the focus of the lesson? opts= "math","ela","science","social studies"}
 
@@ -30,7 +30,7 @@ compile_standards(
 \item{structureForWeb}{default=TRUE; Do you want to preface JSON output with component & nest output in Data element?}
 }
 \value{
-list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." colum). A JSON is saved to the destFolder location.
+list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 }
 \description{
 Compile alignment info from a lesson standards matrix worksheet

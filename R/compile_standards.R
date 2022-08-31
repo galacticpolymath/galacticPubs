@@ -5,16 +5,16 @@
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder, 1 level up from the working directory
 #' @param fileName output file name; default= "standards.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
-#' @param standardsRef where do you want to pull down statements and other info for the supplied standards codes? Default="standardX" (i.e. the \href{https://github.com/galacticpolymath/standardX}{standardX repository}); Options= "standardX" or "myFile" (which will use Tab 2 on the supplied XLSX workbook)
+#' @param standardsRef where do you want to pull down statements and other info for the supplied standards codes? Default="myFile" (i.e. Tab2 of the standards workbook.) if "standardX" is chosen, it'll pull down the latest version here: \href{https://github.com/galacticpolymath/standardX}{standardX repository})
 #' @param targetSubj which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param structureForWeb default=TRUE; Do you want to preface JSON output with component & nest output in Data element?
-#' @return list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." colum). A JSON is saved to the destFolder location.
+#' @return list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 #' @export
 #'
 compile_standards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
                              destFolder = "meta/JSON/" ,
                              fileName = "standards.json",
-                             standardsRef = "standardX",
+                             standardsRef = "myFile",
                              targetSubj= NULL,
                              WD= getwd(),
                              structureForWeb= TRUE) {

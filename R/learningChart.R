@@ -61,7 +61,7 @@ if(!standardsFound) {
   compiledAlignment <- importedData$data
   a_combined <- importedData$a_combined
   targetSubj <- importedData$targetSubj
-  browser()
+
   if (!importedData$learning_chart_friendly) {
     warning(
       "No Learning Chart created. The currently aligned standards sets are not currently supported."
