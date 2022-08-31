@@ -12,7 +12,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.3.5
+TemplateVer: 0.3.7
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
@@ -23,7 +23,7 @@ GitHubPath: ''
 
 PublicationStatus: Draft
 RebuildAllMaterials: no
-ReleaseDate: ''
+ReleaseDate: '2050-01-01'
 Title: ''
 Subtitle: ''
 SponsorName: ''
@@ -36,6 +36,8 @@ ForGrades: ''
 GradesOrYears: 'Grades'
 EstLessonTime: ''
 PullStandardsInfoFrom: 'standardX'
+LearningPlotCorrection: TRUE
+LearningChartFriendly: ''
 LearningEpaulette: ''
 LearningEpaulette_vert: ''
 LearningEpaulette_params_heightScalar: !expr formals(learningEpaulette)$heightScalar

@@ -5,7 +5,7 @@
 \title{learningEpaulette}
 \usage{
 learningEpaulette(
-  heightScalar = 1,
+  heightScalar = 0.5,
   epauletteHeight = 0.2,
   randomSeed = 101,
   saveFile = TRUE,

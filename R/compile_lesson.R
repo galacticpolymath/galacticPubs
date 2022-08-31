@@ -69,75 +69,83 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     if("Standards Alignment"%in% choices &
        (stnds_out_of_date | rebuild)) {
       alignment <-
-        compile_standards(WD = WD, targetSubj = current_data$TargetSubject,standardsRef = current_data$PullStandardsInfoFrom)
+        compile_standards(
+          WD = WD,
+          targetSubj = current_data$TargetSubject,
+          standardsRef = current_data$PullStandardsInfoFrom,
+          learningplot_correction = current_data$LearningPlotCorrection
+        )
       if (is.na(current_data$TargetSubject)) {
         warning("Enter a Target Subject on the Edit tab and try again.")
       }
       message("\nGenerating Learning Chart\n")
 
-      #LEARNING CHART
-      learningChart(
-        quotedTitle = current_data$Title,
-        centralText = current_data$LearningChart_params_centralText,
-        caption = current_data$LearningChart_params_caption,
-        captionN = current_data$LearningChart_params_captionN,
-        showPlot = FALSE,
-        WD = WD
-      )
 
-      #set learning chart filename from default file output on learningChart function
-      #(since this file doesn't exist in yaml yet)
-      current_data$LearningChart <-
-        fs::path("assets",
-                 "_learning-plots",
-                 paste0(formals(learningChart)$fileName, ".png"))
+    # Test if standards are compatible with learning chart --------------------
+    compiled_standards <- fs::path(WD,"meta","standards.RDS")
+    if(!file.exists(compiled_standards)){
+      stop("Standards not found at: ",compiled_standards)
+    }else{
+      saved_standards<-readRDS(compiled_standards)
+    }
+      #Only proceed to generate learningChart if compatible...
+      if (!saved_standards$learning_chart_friendly) {
+        current_data$LearningChart<-NULL
+      }else{
+        #LEARNING CHART
+        learningChart(
+          quotedTitle = current_data$Title,
+          centralText = current_data$LearningChart_params_centralText,
+          caption = current_data$LearningChart_params_caption,
+          captionN = current_data$LearningChart_params_captionN,
+          showPlot = FALSE,
+          WD = WD
+        )
 
-      #export learning chart section
-      lc <- list(
-        `__component` = "lesson-plan.learning-chart",
-        Title = "About the GP Learning Chart",
-        Description =
-          paste0(
-            "This Galactic Polymath Learning Chart illustrates the areas of knowledge covered. This lesson targets ",
-            current_data$TargetSubject,
-            ", but it helps teach national learning standards in 4 subjects: \n- [Common Core Math](http://www.corestandards.org/Math/); [Common Core ELA](http://www.corestandards.org/ELA-Literacy/); [Next Generation Science (NGSS)](https://www.nextgenscience.org/); and [College, Career, and Civic Life (C3) Social Studies Standards](https://www.socialstudies.org/standards/c3).\nIn total, there are ",
-            nrow(alignment$compiled),
-            " standards across US grade band(s): ",
-            paste0(alignment$gradeBands, collapse = ', '),
-            "."
-          ),
-        Footnote = "**Notes on Standards**\n\n*Standards are broken down into ***Target*** and ***Connected*** categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
-        Badge = list(url = ifelse(
-          is.na(current_data$LearningChart[1]),
-          NA,
-          catalogURL(basename(current_data$LearningChart[1]), repo)
-        ))
+        #set learning chart filename from default file output on learningChart function
+        #(since this file doesn't exist in yaml yet)
+        lcname<-fs::path("assets",
+                   "_learning-plots",
+                   paste0(formals(learningChart)$fileName, ".png"))
+        if(file.exists(lcname)){
+        current_data$LearningChart <-lcname
+        }
 
 
-      )
-      #write standards-header section
-      sh <- list(`__component` = "lesson-plan.section-heading",
-                 SectionTitle = "Learning Standards")
-      jsonlite::write_json(
-        sh,
-        fs::path(destFolder, "standards-header.json"),
-        pretty = TRUE,
-        auto_unbox = TRUE,
-        na = "null",
-        null = "null"
-      )
+        #export learning chart section
+        lc <- list(
+          `__component` = "lesson-plan.learning-chart",
+          Title = "About the GP Learning Chart",
+          Description =
+            paste0(
+              "This Galactic Polymath Learning Chart illustrates the areas of knowledge covered. This lesson targets ",
+              current_data$TargetSubject,
+              ", but it helps teach national learning standards in 4 subjects: \n- [Common Core Math](http://www.corestandards.org/Math/); [Common Core ELA](http://www.corestandards.org/ELA-Literacy/); [Next Generation Science (NGSS)](https://www.nextgenscience.org/); and [College, Career, and Civic Life (C3) Social Studies Standards](https://www.socialstudies.org/standards/c3).\nIn total, there are ",
+              nrow(alignment$compiled),
+              " standards across US grade band(s): ",
+              paste0(alignment$gradeBands, collapse = ', '),
+              "."
+            ),
+          Footnote = "**Notes on Standards**\n\n*Standards are broken down into ***Target*** and ***Connected*** categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
+          Badge = list(url = ifelse(
+            is.na(current_data$LearningChart[1]),
+            NA,
+            catalogURL(basename(current_data$LearningChart[1]), repo)
+          ))
 
 
-      #write learning chart section before standards section
-      jsonlite::write_json(
-        lc,
-        fs::path(destFolder, "learning-chart.json"),
-        pretty = TRUE,
-        auto_unbox = TRUE,
-        na = "null",
-        null = "null"
-      )
+        )
 
+        #write learning chart section before standards section
+        jsonlite::write_json(
+          lc,
+          fs::path(destFolder, "learning-chart.json"),
+          pretty = TRUE,
+          auto_unbox = TRUE,
+          na = "null",
+          null = "null"
+        )
+      }
 
       #####################
       #LEARNING EPAULETTE
@@ -166,6 +174,20 @@ compile_lesson <- function(choices,current_data,destFolder ,outputFileName="LESS
     #always write new standards.json from standards RDS file if it exists
     compiled_standards <- fs::path(WD,"meta","standards.RDS")
     if(file.exists(compiled_standards)){
+      #write standards-header section
+      #This header goes before learning chart, which may not always exist...
+        sh <- list(`__component` = "lesson-plan.section-heading",
+                   SectionTitle = "Learning Standards")
+        jsonlite::write_json(
+          sh,
+          fs::path(destFolder, "standards-header.json"),
+          pretty = TRUE,
+          auto_unbox = TRUE,
+          na = "null",
+          null = "null"
+        )
+
+
       saved_standards<-readRDS(compiled_standards)
       jsonlite::write_json(saved_standards$data$list_for_json,
                       fs::path(WD,"meta","JSON","standards.json"),pretty=TRUE,auto_unbox = TRUE,na="null")

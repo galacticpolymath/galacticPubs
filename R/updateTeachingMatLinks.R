@@ -34,6 +34,7 @@ updateTeachingMatLinks<-function(gh_proj_name,
     }
     #exception for pkg development environment
     if(gh_proj_name=="galacticPubs"){
+      message("galacticPubs testing envir. Pick lesson for updateTeachingMatLinks()")
       gh_proj_name<-pick_lesson()
     }
   }

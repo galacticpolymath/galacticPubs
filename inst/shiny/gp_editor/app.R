@@ -520,6 +520,8 @@ output$supporting_media<-renderUI({
             choices = c("myFile", "standardX"),
             selected = isolate(vals$current_data$PullStandardsInfoFrom)
           ),
+              checkboxInput("LearningPlotCorrection",label="Correct Learning Plot Proportions by total possible?" ,value=isolate(vals$current_data$LearningPlotCorrection)),
+              p(style="color:gray;margin-top:-5px;font-size:1rem;","Uncheck the above for custom, partial standards alignments."),
           actionButton("compile", "Save & Compile Lesson", class = "compile-button")
         )
         ),  #end left pane
@@ -563,7 +565,7 @@ output$supporting_media<-renderUI({
                 max = 500,
                 step = 1,
                 width = 110
-              ),
+              )
             ),
              actionButton("remake_ep","Update Epaulette")),
 
@@ -680,7 +682,9 @@ output$supporting_media<-renderUI({
 
   #Render Learning Chart
     observe({
-    #generate new chart image
+      #If not learningchart friendly, don't do anything
+    if(identical(TRUE,isolate(vals$current_data$LearningChartFriendly))){
+      #generate new chart image
       isolate({
         learningChart(
           WD = WD,
@@ -697,25 +701,34 @@ output$supporting_media<-renderUI({
       # vals$current_data$LearningChart<-fs::path(WD,f$destFolder,f$fileName,ext="png")
       # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
 
-      # Render the chart
-      output$chart_fig <- renderImage({
-      #copy image to www folder
-      #this call to vals is what connects it to learningChart()
-        isolate({
-        copy_updated_files(fs::path(WD, vals$current_data$LearningChart),
+      # Render the chart image if the file exists
+      lcpath<-fs::path("assets",
+                           "_learning-plots",
+                           paste0(formals(learningChart)$fileName, ".png"))
+
+      if(!file.exists(lcpath)){
+        output$chart_fig<-renderText("Standards Not Supported for Learning Chart")
+      }else{
+        output$chart_fig <- renderImage({
+          #copy image to www folder
+          #this call to vals is what connects it to learningChart()
+          vals$current_data$LearningChart <- lcpath
+          isolate({
+            copy_updated_files(fs::path(WD, vals$current_data$LearningChart),
                                img_loc)
-        })
-         #update filename
-      vals$current_data$LearningChart<-fs::path("assets","_learning-plots",paste0(formals(learningChart)$fileName,".png"))
-      #return file info to UI
-        isolate({
-          list(src = fs::path("www", basename(vals$current_data$LearningChart)),
-               alt = "Compile Standards to generate learning chart previews")
-        })
+          })
+
+
+          #return file info to UI
+          isolate({
+            list(src = fs::path("www", basename(vals$current_data$LearningChart)),
+                 alt = "Compile Standards to generate learning chart previews")
+          })
       }, deleteFile = TRUE)
+      }
 
 
-  }) %>% bindEvent(input$remake_chart,ignoreInit=T,ignoreNULL = F)
+  }}) %>% bindEvent(input$remake_chart,ignoreInit=T,ignoreNULL = F)
 
 
   #####################################

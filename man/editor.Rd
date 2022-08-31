@@ -4,7 +4,10 @@
 \alias{editor}
 \title{editor}
 \usage{
-editor()
+editor(pick = FALSE)
+}
+\arguments{
+\item{pick}{logical; do you want to pick a lesson to work on? default=F (work from the current working directory)}
 }
 \value{
 Outputs to meta/front-matter.yaml

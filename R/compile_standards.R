@@ -2,19 +2,21 @@
 #'
 #' Compile alignment info from a lesson standards matrix worksheet
 #' @param standardsFile file location of the lesson standards alignment XLSX worksheet; default: "meta/standards_GSheetsOnly.xlsx"
+#' @param learningplot_correction do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=T; this will scale proportions of subjects by the relative total proportions of standards in each subject. If FALSE, the proportions will just be raw proportions of each subject out of total standards aligned.
+#' @param standardsRef where do you want to pull down statements and other info for the supplied standards codes? Default="myFile" (i.e. Tab2 of the standards workbook.) if "standardX" is chosen, it'll pull down the latest version here: \href{https://github.com/galacticpolymath/standardX}{standardX repository})
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder, 1 level up from the working directory
 #' @param fileName output file name; default= "standards.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
-#' @param standardsRef where do you want to pull down statements and other info for the supplied standards codes? Default="myFile" (i.e. Tab2 of the standards workbook.) if "standardX" is chosen, it'll pull down the latest version here: \href{https://github.com/galacticpolymath/standardX}{standardX repository})
 #' @param targetSubj which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param structureForWeb default=TRUE; Do you want to preface JSON output with component & nest output in Data element?
 #' @return list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 #' @export
 #'
 compile_standards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
+                             learningplot_correction= TRUE,
+                             standardsRef = "myFile",
                              destFolder = "meta/JSON/" ,
                              fileName = "standards.json",
-                             standardsRef = "myFile",
                              targetSubj= NULL,
                              WD= getwd(),
                              structureForWeb= TRUE) {
@@ -239,7 +241,6 @@ for(ta_i in 1:length(unique(A$target))) {
             subcat = d_gr$subcat[1]
           )
         })#end Group lapply
-
         l_di[[di_i]] <- c(slug = d_di$dim[1],name = d_di$dimension[1],standardsGroup = list(l_gr))
       }#end dimension loop
 
@@ -281,13 +282,16 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
     #gotta combine missing rows, sort, & repeat the entries N times
     a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>% dplyr::arrange(.data$subject,.data$dimension)%>% dplyr::mutate(binary=ifelse(.data$n>0,1,0))
 
+    #### This correction is kinda problematic as we add other standards to our database!
+    #### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
+
     #Account for bias in the number of standards
     bias<-readRDS(system.file("standardCountsByDimension.rds",package="galacticPubs"))
     bias_by_subj<-bias %>% dplyr::summarise(tot_n_subj=sum(.data$n),.groups="drop")
     a_combined<-dplyr::left_join(a_combined, (bias %>% dplyr::rename("tot_n_dim"="n")),by = c("subject", "dimension") )
     a_combined<-dplyr::left_join(a_combined,bias_by_subj,by = c("subject"))
 
-    #correct the lesson's n standards by Tot possible for the subject
     #*Because there aren't an equal number of standards per dimension, (and they're not all equal),
     #*It's more intuitive to treat them as if they are all equal.
     #*So to make the correction, we'll weight the proportions by total N for subject
@@ -300,8 +304,14 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
     a_combined$subject <- factor(a_combined$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
 
 
-    #Calculate corrected proportions
-    proportions=a_combined  %>% dplyr::group_by(.data$subject)%>% dplyr::summarise(proportion=round(sum(.data$n_prop_adj),2),.groups="drop")
+    #Calculate corrected proportions if requested
+    proportions0=a_combined  %>% dplyr::group_by(.data$subject)
+    if(learningplot_correction){
+    proportions=proportions0 %>% dplyr::summarise(proportion=round(sum(.data$n_prop_adj),2),.groups="drop")
+    }else{
+      #don't use adjusted proportions if not requested
+      proportions=proportions0 %>% dplyr::summarise(proportion=round(sum(.data$n_prop),2),.groups="drop")
+    }
 
 
     xlabels<-sapply(proportions$proportion,scales::percent) %>% dplyr::as_tibble()
@@ -364,9 +374,12 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
       paste(unique_sans_na(A$set),
             collapse = "\n  -")
     )
+    #Store LearningChart Friendliness in front-matter and also save to RDS file
+    update_fm(change_this=list(LearningChartFriendly=F),WD=WD)
     learning_chart_friendly <- FALSE
     a_combined$dimAbbrev <- NA
   } else{
+    update_fm(change_this=list(LearningChartFriendly=T),WD=WD)
     learning_chart_friendly <- TRUE
     a_combined$dimAbbrev <-
       c(
@@ -418,7 +431,8 @@ return(
     compiled = dplyr::as_tibble(A),
     problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
     gradeBands= uniqueGradeBands,
-    targetSubj=targetSubj
+    targetSubj=targetSubj,
+    subject_proportions=proportions
   )
 )
 

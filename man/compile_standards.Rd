@@ -6,9 +6,10 @@
 \usage{
 compile_standards(
   standardsFile = "meta/standards_GSheetsOnly.xlsx",
+  learningplot_correction = TRUE,
+  standardsRef = "myFile",
   destFolder = "meta/JSON/",
   fileName = "standards.json",
-  standardsRef = "myFile",
   targetSubj = NULL,
   WD = getwd(),
   structureForWeb = TRUE
@@ -17,11 +18,13 @@ compile_standards(
 \arguments{
 \item{standardsFile}{file location of the lesson standards alignment XLSX worksheet; default: "meta/standards_GSheetsOnly.xlsx"}
 
+\item{learningplot_correction}{do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=T; this will scale proportions of subjects by the relative total proportions of standards in each subject. If FALSE, the proportions will just be raw proportions of each subject out of total standards aligned.}
+
+\item{standardsRef}{where do you want to pull down statements and other info for the supplied standards codes? Default="myFile" (i.e. Tab2 of the standards workbook.) if "standardX" is chosen, it'll pull down the latest version here: \href{https://github.com/galacticpolymath/standardX}{standardX repository})}
+
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder, 1 level up from the working directory}
 
 \item{fileName}{output file name; default= "standards.json"}
-
-\item{standardsRef}{where do you want to pull down statements and other info for the supplied standards codes? Default="myFile" (i.e. Tab2 of the standards workbook.) if "standardX" is chosen, it'll pull down the latest version here: \href{https://github.com/galacticpolymath/standardX}{standardX repository})}
 
 \item{targetSubj}{which subject\code{(}s\verb{)} is \code{(}are\verb{)} the focus of the lesson? opts= "math","ela","science","social studies"}
 
