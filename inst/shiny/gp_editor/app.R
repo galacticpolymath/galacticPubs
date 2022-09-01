@@ -574,7 +574,7 @@ output$supporting_media<-renderUI({
           class = "preview-chart",
           h3("Learning Chart Preview"),
           uiOutput("chart_fig_disclaimer"),
-          plotOutput("chart_fig",inline=TRUE),
+          plotOutput("chart_fig"),
             textInput(
               "LearningChart_params_caption",
               "Manual caption:",
@@ -681,8 +681,8 @@ output$supporting_media<-renderUI({
 
 
 
-  #Render Learning Chart
-  #
+
+  #Learning Chart Disclaimer Text
   output$chart_fig_disclaimer<-  renderUI({
     if(identical(TRUE, isolate(vals$current_data$LearningChartFriendly))){
 
@@ -690,6 +690,8 @@ output$supporting_media<-renderUI({
     p(style="color:#cb1f8e; font-weight:500","These Standards Not Supported for Learning Chart")
     }})
 
+
+  #Render Learning Chart
   observe({
 
     #If not learningchart friendly, don't do anything
@@ -700,7 +702,9 @@ output$supporting_media<-renderUI({
 
       #generate new chart image
       isolate({
-        lc <- learningChart(
+
+        lc <-
+          learningChart(
           WD = WD,
           showPlot = FALSE,
           caption = (input$LearningChart_params_caption),
@@ -719,7 +723,7 @@ output$supporting_media<-renderUI({
         vals$current_data$LearningChart <- lcpath
       }
       #return learning chart figure
-      output$chart_fig<-renderPlot(lc)
+      output$chart_fig<-renderPlot(grid::grid.draw(lc))
     }#end if/else
     }) %>% bindEvent(input$remake_chart,
                      ignoreInit = T,

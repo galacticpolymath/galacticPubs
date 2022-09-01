@@ -14,7 +14,7 @@
 #' @param dpi what resolution would you like the output in dots per inch? 300 by default
 #' @param showPlot plot to screen or just save to file? default=T
 #' @param ... other arguments passed to \code{\link[grDevices]{png}}
-#' @return the learning chart plot object (grid format); the file is saved to assets/GP_Learning_Chart.png by default
+#' @return the learning chart plot object (grid format); Result can be plotted with grid::grid.draw(result). The chart file is saved to assets/GP_Learning_Chart.png by default
 #' @export
 #' @importFrom rlang .data
 
@@ -503,7 +503,7 @@ if(!standardsFound) {
 
     #output to user
     if (showPlot) {
-      grid::grid.draw(G)
+     grid::grid.draw(G)
     }
 
     #tell user where file is saved
