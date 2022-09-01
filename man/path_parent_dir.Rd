@@ -6,6 +6,9 @@
 \usage{
 path_parent_dir(filepath)
 }
+\arguments{
+\item{filepath}{the file path}
+}
 \description{
 Supply a path, get the parent folder
 }

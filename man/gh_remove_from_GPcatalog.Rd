@@ -13,5 +13,5 @@ gh_remove_from_GPcatalog(gh_proj_name)
 logical; TRUE= success, FALSE= fail, NA= project not found
 }
 \description{
-Useful for when you rename a github repo of a lesson project and you have an orphaned catalog.galacticpolymath.com folder.
+Useful for when you rename a github repo of a lesson project and you have an orphaned <catalog.galacticpolymath.com> folder.
 }

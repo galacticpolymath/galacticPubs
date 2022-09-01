@@ -2,7 +2,7 @@
 #'
 #' Supply a path, get the parent folder
 #'
-#' @param filepath
+#' @param filepath the file path
 #' @export
 
 

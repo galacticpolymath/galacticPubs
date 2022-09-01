@@ -172,7 +172,7 @@ compile_lesson <-
 
 
     #If learning chart exists, always output the learning-chart.json
-    if (file.exists(fs::path(WD, current_data$LearningChart))) {
+    if (!is_empty(current_data$LearningChart)& identical(TRUE, file.exists(fs::path(WD, current_data$LearningChart)))) {
       #export learning chart section
       lc <- list(
         `__component` = "lesson-plan.learning-chart",
