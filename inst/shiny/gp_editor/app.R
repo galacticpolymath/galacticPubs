@@ -573,7 +573,8 @@ output$supporting_media<-renderUI({
         div(
           class = "preview-chart",
           h3("Learning Chart Preview"),
-          imageOutput("chart_fig",inline=TRUE),
+          uiOutput("chart_fig_disclaimer"),
+          plotOutput("chart_fig",inline=TRUE),
             textInput(
               "LearningChart_params_caption",
               "Manual caption:",
@@ -681,12 +682,25 @@ output$supporting_media<-renderUI({
 
 
   #Render Learning Chart
-    observe({
-      #If not learningchart friendly, don't do anything
-    if(identical(TRUE,isolate(vals$current_data$LearningChartFriendly))){
+  #
+  output$chart_fig_disclaimer<-  renderUI({
+    if(identical(TRUE, isolate(vals$current_data$LearningChartFriendly))){
+
+    }else{
+    p(style="color:#cb1f8e; font-weight:500","These Standards Not Supported for Learning Chart")
+    }})
+
+  observe({
+
+    #If not learningchart friendly, don't do anything
+    if (!identical(TRUE, isolate(vals$current_data$LearningChartFriendly))) {
+
+
+    } else{
+
       #generate new chart image
       isolate({
-        learningChart(
+        lc <- learningChart(
           WD = WD,
           showPlot = FALSE,
           caption = (input$LearningChart_params_caption),
@@ -696,39 +710,20 @@ output$supporting_media<-renderUI({
         )
       })#end isolate
 
-      # #this is just to trigger renderImage to update
-      # f<-formals(learningChart)
-      # vals$current_data$LearningChart<-fs::path(WD,f$destFolder,f$fileName,ext="png")
-      # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
+      # Save the chart filename if the file exists
+      lcpath <- fs::path("assets",
+                         "_learning-plots",
+                         paste0(formals(learningChart)$fileName, ".png"))
 
-      # Render the chart image if the file exists
-      lcpath<-fs::path("assets",
-                           "_learning-plots",
-                           paste0(formals(learningChart)$fileName, ".png"))
-
-      if(!file.exists(lcpath)){
-        output$chart_fig<-renderText("Standards Not Supported for Learning Chart")
-      }else{
-        output$chart_fig <- renderImage({
-          #copy image to www folder
-          #this call to vals is what connects it to learningChart()
-          vals$current_data$LearningChart <- lcpath
-          isolate({
-            copy_updated_files(fs::path(WD, vals$current_data$LearningChart),
-                               img_loc)
-          })
-
-
-          #return file info to UI
-          isolate({
-            list(src = fs::path("www", basename(vals$current_data$LearningChart)),
-                 alt = "Compile Standards to generate learning chart previews")
-          })
-      }, deleteFile = TRUE)
+      if (file.exists(fs::path(WD,lcpath))) {
+        vals$current_data$LearningChart <- lcpath
       }
-
-
-  }}) %>% bindEvent(input$remake_chart,ignoreInit=T,ignoreNULL = F)
+      #return learning chart figure
+      output$chart_fig<-renderPlot(lc)
+    }#end if/else
+    }) %>% bindEvent(input$remake_chart,
+                     ignoreInit = T,
+                     ignoreNULL = F)
 
 
   #####################################
