@@ -379,6 +379,7 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
     learning_chart_friendly <- FALSE
     a_combined$dimAbbrev <- NA
   } else{
+
     update_fm(change_this=list(LearningChartFriendly=T),WD=WD)
     learning_chart_friendly <- TRUE
     a_combined$dimAbbrev <-
@@ -432,7 +433,8 @@ return(
     problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
     gradeBands= uniqueGradeBands,
     targetSubj=targetSubj,
-    subject_proportions=proportions
+    subject_proportions=proportions,
+    learning_chart_friendly=learning_chart_friendly
   )
 )
 

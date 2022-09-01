@@ -631,8 +631,9 @@ output$supporting_media<-renderUI({
     #Save data before compiling
     vals$current_data<-prep_input(input,yaml_path,WD=WD)$current_data
     yaml::write_yaml(vals$current_data, fs::path(meta_path,"front-matter.yml"))
-    vals$current_data<-compile_lesson(choices=input$ReadyToCompile,current_data=vals$current_data,WD=WD)
-
+    vals$current_data<-compile_lesson(choices=input$ReadyToCompile,WD=WD)
+    #resave
+    yaml::write_yaml(vals$current_data, fs::path(meta_path,"front-matter.yml"))
     } ) %>% bindEvent(input$compile)
 
 
@@ -686,6 +687,8 @@ output$supporting_media<-renderUI({
   output$chart_fig_disclaimer<-  renderUI({
     if(identical(TRUE, isolate(vals$current_data$LearningChartFriendly))){
 
+    }else if(is.na(vals$current_data$LearningChartFriendly)){
+      p(style="color:#6c2d82 ; font-weight:500","Compile Standards to Make Learning Chart")
     }else{
     p(style="color:#cb1f8e; font-weight:500","These Standards Not Supported for Learning Chart")
     }})
