@@ -4,7 +4,15 @@
 \alias{gh_delete_repo}
 \title{Delete a Galactic Polymath Lesson Repo}
 \usage{
-gh_delete_repo()
+gh_delete_repo(gh_proj_name, prompt_user = TRUE)
+}
+\arguments{
+\item{gh_proj_name}{Name of the project as it is on Galactic Polymath's GitHub}
+
+\item{prompt_user}{Do you want to ask user to confirm deletion?}
+}
+\value{
+logical; TRUE if it succeeds in deleting; FALSE if not
 }
 \description{
 This expects you have git \emph{and} gh set up to work in terminal and that you have credentials to modify and delete a repository at https://github.com/galacticpolymath

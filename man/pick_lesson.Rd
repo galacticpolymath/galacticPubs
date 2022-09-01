@@ -4,12 +4,12 @@
 \alias{pick_lesson}
 \title{pick_lesson}
 \usage{
-pick_lesson(lessons_dir = NULL, full_path = FALSE)
+pick_lesson(full_path = FALSE, lessons_dir = NULL)
 }
 \arguments{
-\item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /)}
-
 \item{full_path}{do you want a full path to the chosen lesson? default= F}
+
+\item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /)}
 }
 \value{
 the selected lesson name
