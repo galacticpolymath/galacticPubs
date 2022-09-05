@@ -2,12 +2,17 @@
 % Please edit documentation in R/gh_push_forked_repo.R
 \name{gh_push_forked_repo}
 \alias{gh_push_forked_repo}
-\title{Push new "forked" project to GitHub}
+\title{Push new "forked" gh_proj_name to GitHub}
 \usage{
-gh_push_forked_repo()
+gh_push_forked_repo(gh_proj_name, WD = getwd())
+}
+\arguments{
+\item{gh_proj_name}{name of the project on github.com/galacticpolymath AND our Google Drive Edu/Lessons folder}
+
+\item{WD}{working directory (path to top level folder of the project on virtualized Google Drive for Desktop)}
 }
 \description{
-This is what you do after you've copied a cloned a lesson project in order to make a new language version. See \code{\link[=how_fork_lesson]{how_fork_lesson()}}
+This is what you do after you've copied a cloned a lesson gh_proj_name in order to make a new language version. See \code{\link[=how_fork_lesson]{how_fork_lesson()}}
 }
 \details{
 This function expects that:

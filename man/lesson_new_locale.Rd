@@ -4,10 +4,12 @@
 \alias{lesson_new_locale}
 \title{Make a new locale version of existing lesson}
 \usage{
-lesson_new_locale(gh_proj_name)
+lesson_new_locale(gh_proj_name, repair = FALSE)
 }
 \arguments{
 \item{gh_proj_name}{the name of the project as it is on GitHub and Google Drive}
+
+\item{repair}{logical; if you had failures during initial locale cloning, should we try to do the steps that failed? i.e. will skip cloning}
 }
 \value{
 summary tibble
