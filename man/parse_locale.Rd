@@ -7,14 +7,11 @@
 parse_locale(current_data)
 }
 \arguments{
-\item{current_data}{the reconciled data including yaml and input from the shiny app environment}
+\item{current_data}{the reconciled data including yaml and input from the shiny app environment; at a minimum you can pass list(Country="Whatever Country")}
 }
 \value{
 current data with locale added
 }
 \description{
 Takes the language and country chosen in the \code{\link[=editor]{editor()}} and creates a locale with a 3 digit language code and (if applicable), 2 digit country code. Only meant to run in the \code{\link[=compile_lesson]{compile_lesson()}} function.
-}
-\details{
-Not exported, so use galacticPubs:::parse_locale()
 }

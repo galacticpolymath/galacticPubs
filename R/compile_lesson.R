@@ -6,7 +6,7 @@
 #' - [compileProcedure()]
 #' - [compile_standards()]
 #' - [learningChart()] and [learningEpaulette()]
-#' - [compileAcknowledgements()]
+#' - [compileAcknowledgments()]
 #' - [compileVersions()]
 #' - [compileJSON()]
 #'

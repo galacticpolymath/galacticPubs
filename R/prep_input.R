@@ -45,7 +45,7 @@ prep_input <-function(input,
     # }
     updated<-update_fm(WD=WD,save_output = FALSE,reorder=TRUE)
 
-    Y0 <- reactiveValuesToList(input)
+    Y0 <- shiny::reactiveValuesToList(input)
 
     # figure out which are shiny operational variables in input & ignore em
     input_op_var <- lapply(1:length(Y0), function(l) {
@@ -104,7 +104,7 @@ prep_input <-function(input,
     # Add values from yaml that are not in input data (i.e. YAML fields with no GUI/Shiny inputs)
      #also create lang and locale variables from Language and Country
      #BUT, only use fields of Y2 that are in the saved file, allowing new template values to override
-    Y3<-add_missing_fields(Y2[which(names(Y2)%in%names(saved))],template=updated,reorder=TRUE)%>% galacticPubs:::parse_locale()
+    Y3<-add_missing_fields(Y2[which(names(Y2)%in%names(saved))],template=updated,reorder=TRUE)%>% parse_locale()
 
 
     #Return a list of current_data and saved_data to trigger an Save Changes? message in editor()

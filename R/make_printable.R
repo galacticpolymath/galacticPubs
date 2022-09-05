@@ -75,9 +75,9 @@ header[matching_fields]<-fm[matching_fields]
 
 # 3) Generate updated figures where necessary -----------------------------
   # Make & Save QR Code
- pdf( fs::path(img_folder,"lesson_QR.pdf"))
+ grDevices::pdf( fs::path(img_folder,"lesson_QR.pdf"))
  plot(qrcode::qr_code(fm$URL))
- dev.off()
+ grDevices::dev.off()
 
  #Update chunk graphs if necessary
     chunk_file_loc<-fs::path(WD,"assets","lesson-plan-markdown","dynamic_images")

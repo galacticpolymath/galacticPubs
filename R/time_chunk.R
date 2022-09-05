@@ -44,8 +44,8 @@ time_chunk <- function(WD=getwd()){
       #Current segment plot
       ggplot2::geom_segment(
         ggplot2::aes(
-          x = x,
-          xend = x,
+          x = .data$x,
+          xend = .data$x,
           y = 0,
           yend = .5
         ),
@@ -59,8 +59,8 @@ time_chunk <- function(WD=getwd()){
         inherit.aes = F,
         data = df_faded,
         ggplot2::aes(
-          x = x,
-          xend = x,
+          x = .data$x,
+          xend = .data$x,
           y = 0,
           yend = .15
         ),

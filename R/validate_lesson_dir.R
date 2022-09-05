@@ -4,7 +4,7 @@
 #'
 #' @param lesson_dir path (or a vector of paths) to a potential lesson directory; Make sure path starts with leading "/" If it's not relative to the current working dir.
 #' @return logical: is this a good lesson directory path or not? Will return a vector as long as lesson_dir input.
-#'
+#' @export
 
 validate_lesson_dir<-function(lesson_dir){
   #check each folder for the length of lesson_dir

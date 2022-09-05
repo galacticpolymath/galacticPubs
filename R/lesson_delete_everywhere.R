@@ -44,7 +44,7 @@ lesson_delete_everywhere <- function(gh_proj_name){
   }else{
     message("\n=======================================\n")
     print(search_results)
-    message("Are you sure you want to DELETE '",gh_proj_name,"' from ",sum_tests," locations?")
+    message("Are you sure you want to DELETE '",gh_proj_name,"' from ",sum_tests," location(s)?")
     continue<-readline("(y/n) >")
 
     if(tolower(continue)=="n"){

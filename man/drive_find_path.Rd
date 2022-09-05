@@ -14,6 +14,7 @@ Simulates Finder/File Explorer functionality by repeated calls to \code{\link[go
 }
 \seealso{
 Other Google Drive Functions: 
+\code{\link{drive_copy_missing_files}()},
 \code{\link{drive_cp_dir}()}
 }
 \concept{Google Drive Functions}

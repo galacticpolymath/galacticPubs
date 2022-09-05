@@ -19,7 +19,7 @@ pick_lesson<- function(full_path=FALSE,lessons_dir=NULL){
   d<-data.frame(PROJECT=projects,CHOICE=1:length(projects))
   d<-rbind(d,c(PROJECT="all",CHOICE=0))
 
-  message(capture.output(print(d,row.names=F),type="message"))
+  message(utils::capture.output(print(d,row.names=F),type="message"))
   num0<-readline("Which lesson? (separate multiple with ',') > ") #%>% as.integer()
   num1<-gsub(" ","",num0) #remove spaces
   num2<-strsplit(num1,",",fixed=TRUE) %>% unlist() %>% as.integer() #separate multiple values and make numeric

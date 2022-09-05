@@ -28,6 +28,7 @@ Throws an error if the new_dir_name already exists in  dest_dir.
 }
 \seealso{
 Other Google Drive Functions: 
+\code{\link{drive_copy_missing_files}()},
 \code{\link{drive_find_path}()}
 }
 \concept{Google Drive Functions}

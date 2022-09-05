@@ -225,7 +225,7 @@ YTembed<-function(link){
     })
     # #Get grade level variation notes from Procedure.xlsx
     # gradeVariantNotes<-if(is.na(procTitles$PartGradeVarNotes[1])){NA}else{
-    #   if(length(which(complete.cases(procTitles$PartGradeVarNotes)))==1){list(part=NA,partGradeVarNotes=procTitles$PartGradeVarNotes[1])}else{
+    #   if(length(which(stats::complete.cases(procTitles$PartGradeVarNotes)))==1){list(part=NA,partGradeVarNotes=procTitles$PartGradeVarNotes[1])}else{
     #     lapply(1:nrow(procTitles),function(i){list(part=procTitles$Part[i],partGradeVarNotes=procTitles$PartGradeVarNotes[i])})
     #   }
     # }

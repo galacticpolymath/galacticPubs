@@ -43,7 +43,7 @@ update_fm <- function(WD=getwd(),save_output=TRUE,reorder=TRUE,change_this=NULL)
   # If front-matter exists,  do certain routine processes -------------------
    #Add/Update the locale and lang fields with a nonexported internal function parse_locale()
    # overwrites existing lang and locale fields and returns the modified current_data list
-    new_yaml <- new_yaml %>% galacticPubs:::parse_locale()
+    new_yaml <- new_yaml %>% parse_locale()
 
   #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)
     if(is.na(new_yaml$GPCatalogPath)){

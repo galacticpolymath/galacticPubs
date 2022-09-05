@@ -48,7 +48,7 @@ batch_rebuild <- function(gh_proj_name,lessons_dir=NULL,stage=TRUE,change_this=N
 
 
     #Now validate these projects as another safeguard (using unexported function)
-    good_projects<-projects[galacticPubs:::validate_lesson_dir(projects)] %>% sort()
+    good_projects<-projects[validate_lesson_dir(projects)] %>% sort()
     if(length(good_projects)==0){stop("Invalid lesson project.")}
 
     update_list<-lapply(good_projects,function(WD){

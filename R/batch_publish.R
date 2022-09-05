@@ -45,8 +45,8 @@ batch_publish <- function(commit_msg = NULL, gh_proj_name, lessons_dir=NULL) {
     }
 
 
-    # Now validate these projects as another safeguard (using unexported function)
-    good_projects <- projects[galacticPubs:::validate_lesson_dir(projects)] %>% sort()
+    # Now validate these projects as another safeguard
+    good_projects <- projects[validate_lesson_dir(projects)] %>% sort()
 
     update_list <- lapply(good_projects, function(WD) {
       message("Publishing: ", basename(WD))

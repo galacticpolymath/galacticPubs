@@ -4,8 +4,8 @@
 #'
 
 update_ISO_codes<-function(){
-  require(pacman)
-  p_load(ISOcodes)
+  requireNamespace("pacman")
+  pacman::p_load("ISOcodes")
   country_codes<-ISOcodes::ISO_3166_1 %>% dplyr::as_tibble()
   language_codes <- ISOcodes::ISO_639_2%>% dplyr::as_tibble()
   usethis::use_data(country_codes)

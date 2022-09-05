@@ -40,7 +40,7 @@ if(missing(targetSubj)){
 
   if(standardsRef=="standardX"){
     tmp<-tempfile()
-    download.file(
+    utils::download.file(
         "https://raw.githubusercontent.com/galacticpolymath/standardX/gh-pages/align-to-all-subject-standards.xlsx",destfile = tmp)
     a_master <-
       readxl::read_excel(tmp,
@@ -160,7 +160,7 @@ A <- A %>% dplyr::arrange(.data$subject)
 
 
 # warn if statements missing (indicates bad merge) -----------------------
-if(sum(complete.cases(A$statement))==0){
+if(sum(stats::complete.cases(A$statement))==0){
   warning("Bad merge. No 'Statements' matched standards code for each set. Try changing 'standardsRef' in compile_standards(); currently, standardsRef = '",standardsRef,"'")
 }
 

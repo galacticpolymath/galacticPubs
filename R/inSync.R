@@ -32,7 +32,7 @@ inSync <- function(path1,
                              #Return just the last folder in the path of the path
                              not_found_here=fs::path_rel(names(existence)[which(!existence)], WD))
     message("\n****\nSome Path(s) Not Found:\n***")
-    message(capture.output(print(as.data.frame(bad_paths)),type="message"))
+    message(utils::capture.output(print(as.data.frame(bad_paths)),type="message"))
       out <- FALSE
 
   } else{
@@ -80,7 +80,7 @@ inSync <- function(path1,
       }
 
 
-      message(capture.output(print(as.data.frame(bad_paths)),type="message"))
+      message(utils::capture.output(print(as.data.frame(bad_paths)),type="message"))
 
     }
   }

@@ -275,7 +275,7 @@ proceed0 <-
     test_RprojRename,
     test_rename_remote,
     test_reset_remote
-  ) %>% na.omit() %>% as.vector()
+  ) %>% stats::na.omit() %>% as.vector()
 proceed <-
     eval(parse(text = paste0(as.character(proceed0), collapse = "&")))
 if(proceed){
@@ -310,9 +310,9 @@ if(proceed & test_update_fm){
   warning("*You may want manually change names. \n Create tasks by pasting the list below into a new Clickup Task.\n",
           "-------------------------------------------------------\n",
   paste0("Change '",gh_proj_name,"' to '",new_proj_name,"' in:\n",
-          " • Handout Headers\n",
-          " • Presentation Slides\n",
-          " • Client facing Roadmap and other docs\n"),
+          " \u2022 Handout Headers\n",
+          " \u2022 Presentation Slides\n",
+          " \u2022 Client facing Roadmap and other docs\n"),
           "-------------------------------------------------------\n")
 }else{
   warning("Project renaming failed somewhere for: ",gh_proj_name)

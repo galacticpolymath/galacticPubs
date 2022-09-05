@@ -64,7 +64,7 @@ check_fm <- function(WD = getwd(),
   }
 
   results00 <- c(yaml_found, locale_initialized, git_initialized)
-  results0 <- results00 %>% na.omit() %>% as.vector()
+  results0 <- results00 %>% stats::na.omit() %>% as.vector()
   results <-
     eval(parse(text = paste0(as.character(results0), collapse = "&")))
   print(dplyr::tibble(
