@@ -1,6 +1,6 @@
 #' lesson_rename
 #'
-#' Don't run this from the RStudio session of the lesson you want to rename! Does several things:
+#' Scenario where working title changes midway through project development. Don't run this from the RStudio session of the lesson you want to rename! Does several things:
 #' 1. Renames top-level folder of the lesson with "new_proj_name"
 #' 2. Finds and renames all file names to found in the project folder e.g. OldShortTitle_yadayada.* -> NewShortTitle_yadayada. This is done locally using Google Drive for Desktop virtualization of the Lessons Folder
 #' 3. Changes name of GitHub Repo at galacticpolymath/ and galacticpolymath/catalog to "new_proj_name"
@@ -12,7 +12,10 @@
 #' @param new_ShortTitle New ShortTitles to be swapped out in lesson project file names. If blank, will try to guess by ignoring terminal "_suffixes"
 #' @param gh_proj_name The unique project title of this lesson as it is named on [https://github.com/galacticpolymath](https://github.com/galacticpolymath). Not *necessarily* the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.
 #' @param curr_ShortTitle Current ShortTitle prefixed to lesson project files. If missing, will try to read this from ShortTitle in the existing front-matter.yml
-#' @param rename_proj_dir logical; Do you want to rename the top-level project folder? default= TRUE
+#' @param just_files logical; Default=FALSE; Do you want to JUST rename file prefixes, given the ShortTitle? If TRUE, this skips:
+#' - renaming top-level project folder
+#' - renaming associated GitHub project
+#' - pushing changes to GitHub
 #' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"
 #' @param only_rename_prefixes Do you want to only change project files with the ShortTitle at the beginning of the filename? (Could avoid accidental replacements if short title is a common phrase); default=TRUE
 #' @param change_this passed to [update_fm()] if you want to make any other changes to front matter. Must be a list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey book If gh_proj_name=="all", make sure you set this to something you want to change for everything.
@@ -26,7 +29,7 @@ lesson_rename <- function(new_proj_name,
                           new_ShortTitle,
                           gh_proj_name,
                           curr_ShortTitle,
-                          rename_proj_dir = TRUE,
+                          just_files = FALSE,
                           change_this = NULL,
                           lessons_dir,
                           only_rename_prefixes = TRUE,
@@ -109,11 +112,11 @@ message("\nCAREFUL!")
 message(
   paste0(
     "---------------------------------------------------------------------------\n",
-    paste0(" Make sure to SAVE and CLOSE '",gh_proj_name,"' if it's open elsewhere.\n"),
+    paste0(" Make sure to SAVE and CLOSE '",new_proj_name,"' if open elsewhere.\n"),
     "---------------------------------------------------------------------------\n",
     "\n Are you sure you want to rename:\n",
     ifelse(
-      rename_proj_dir,
+      !just_files,
       paste0(
         "-Project Folder: \n    -from '",
         gh_proj_name,
@@ -139,7 +142,7 @@ if(continue%in%c("N","n")){
 
 
 # 1. Rename top level folder & project name-------------------------------------------
-if(rename_proj_dir){
+if(!just_files){
 test_folderRename <- file.rename(from=gh_proj_dir,to = new_proj_dir)
 Rproj_file<- list.files(new_proj_dir,pattern=".Rproj",full.names = T)
 new_Rproj_file <- fs::path(new_proj_dir,new_proj_name,ext="Rproj")
@@ -148,6 +151,8 @@ test_RprojRename<- file.rename(from=Rproj_file, to=new_Rproj_file)
 if(test_folderRename & new_Rproj_file!=Rproj_file){
   message("Project Folder Renamed:\n from: ",gh_proj_dir,"\n to:   ",new_proj_dir)
 }
+}else{
+  test_folderRename<-test_RprojRename<-NA
 }
 
 # 2. Find and rename all files & subfolders found in the project folder  --------
@@ -256,6 +261,7 @@ if(newstr_is_oldstr) {
 
 #
 # # 3. Changes name of GitHub Repo at galacticpolymath/ and galactic --------
+if(!just_files){
 test_rename_remote <- catch_err(
   gh_rename_repo(
     new_proj_name = new_proj_name,
@@ -264,9 +270,13 @@ test_rename_remote <- catch_err(
     lessons_dir = lessons_dir
   )
 )
+}else{
+  test_rename_remote<-NA
+}
 
 
 # 4. Reassociate lesson folder with renamed GitHub repo --------
+if(!just_files){
 test_reset_remote <- catch_err(
   gh_reset_remote(
     new_proj_name = new_proj_name,
@@ -274,10 +284,15 @@ test_reset_remote <- catch_err(
     run_check_wd = run_check_wd
   )
 )
+}else{
+  test_reset_remote<-NA
+}
+
 
 
 # 5. Change the ShortTitle and GPCatalogPath and GitHubPath items  --------
 #only update front-matter.yml if previous steps succeeded
+
 
 # make a test of non-NA tests
 proceed0 <-
@@ -312,8 +327,9 @@ if(proceed){
 #'
 
 # 8.   Delete orphaned catalog entry if it exists -------------------------
+if(!just_files){
 test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(gh_proj_name))
-
+}else{test_cleanup_catalog<-NA}
 
 # 7.  Summarize results ---------------------------------------------------
 

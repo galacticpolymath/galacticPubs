@@ -218,7 +218,7 @@ compile_lesson <-
             "GP-Learning-Epaulette.png"
           ),
           compiled_standards_path
-        ) | rebuild)) {
+        ) | rebuild | is_empty(current_data$LearningEpaulette))) {
       #####################
       #LEARNING EPAULETTE
       message("\nGenerating Learning Epaulette\n")
