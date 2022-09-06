@@ -95,12 +95,13 @@ compile_lesson <-
     )
     if ("Standards Alignment" %in% choices &
         (stnds_out_of_date | rebuild)) {
+
       alignment <- compile_standards(
         WD = WD,
         targetSubj = current_data$TargetSubject,
         standardsRef = current_data$PullStandardsInfoFrom,
         learningplot_correction = current_data$LearningPlotCorrection
-      )
+      ) %>% catch_err()
       current_data$LearningChartFriendly <-
         alignment$learning_chart_friendly
       if (is.na(current_data$TargetSubject)) {

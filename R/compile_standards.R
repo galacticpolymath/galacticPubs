@@ -24,6 +24,11 @@ compile_standards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
 
    .=NULL #to avoid errors with dplyr syntax
 
+#############
+# IMPORTANT: Add Subjects here if you need to align new ones --------------
+   ordered_subjects<-c("Math","ELA","Science","Social Studies","Art","Sustainability","Technology")
+
+
    #if WD supplied, append it to destFolder
 if(!identical(WD,getwd())){
   destFolder<-fs::path(WD,destFolder)
@@ -154,8 +159,11 @@ if(some_duplicated){
 }
 #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standardsRef)
 A<-dplyr::left_join(a3[,c("code_set","lo","lo_stmnt","target","grp","grouping","how")],a_master,by="code_set")
+
+
 #factor subjects for desired order
-A$subject<-factor(A$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
+
+A$subject<-factor(A$subject,levels=ordered_subjects,ordered=T)
 A <- A %>% dplyr::arrange(.data$subject)
 
 
@@ -206,9 +214,13 @@ gradeL<-sapply(A$grade, function(x) {
 
 A$gradeBand<-sapply(gradeL,function(x) paste(x,collapse=","))%>% unlist()
 
+if(sum(A$target)==0){
+  warning("No standards selected as 'Target' in standards alignment worksheet")
+}
 
 # Make json structured output ----------------------------------------------
 # ta_i=su_i=se_i=di_i=NA
+
 l_ta <- list()
 for(ta_i in 1:length(unique(A$target))) {
   d_ta <- A %>% dplyr::filter(.data$target == unique(A$target)[ta_i])
@@ -253,7 +265,6 @@ for(ta_i in 1:length(unique(A$target))) {
 }#end target loop
 
 
-
 out0<-do.call(c,l_ta)
 
 # Prefix with component and title, and nest output in Data if structuring for web deployment
@@ -274,8 +285,10 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
 # Prep learningEpaulette data ---------------------------------------------
     #bring in empty matrix to merge in, in case some subjects are missing
     a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="galacticPubs"))
+
     #super important to refactor subject on the imported data to ensure order
-    a_template$subject=factor(a_template$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
+    browser()
+    a_template$subject=factor(a_template$subject,levels=ordered_subjects,ordered=T)
 
     a_summ<-A %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
 
