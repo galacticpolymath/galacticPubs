@@ -26,7 +26,11 @@ compile_standards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
 
 #############
 # IMPORTANT: Add Subjects here if you need to align new ones --------------
-   ordered_subjects<-c("Math","ELA","Science","Social Studies","Art","Sustainability","Technology")
+   ordered_subjects<-  c("Math","ELA","Science","Social Studies","Art","Sustainability","Technology")
+   #learning chart subject titles
+   ordered_subj_chart<-c("Math","ELA","Sci"    ,"SocStd",        "Art","SDGs",          "Tech")
+   #here for legacy reasons
+   ordered_subj<-      c("math","ela","science","socstudies",     "art","sdgs",         "tech")
 
 
    #if WD supplied, append it to destFolder
@@ -93,10 +97,11 @@ if(sum(tbds)>0) {
 }
 
 #undocumented alignments
-undoc<-is.na(a0$how)&is.na(a0$grp)
+browser()
+undoc<-(is.na(a0$how)&is.na(a0$grp))|sapply(a0$target,function(x) identical(x,"skip"),USE.NAMES = F)
 if(sum(undoc)>0) {
   message(
-    "\nThe following were removed because learning objective documentation was blank:\n\t\u2022",
+    "\nThe following were removed because learning objective was blank or you said 'skip':\n\t\u2022",
     paste0(a0$code[undoc], collapse = "\n\t\u2022"),
     "\n"
   )
@@ -283,11 +288,14 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
 
 
 # Prep learningEpaulette data ---------------------------------------------
-    #bring in empty matrix to merge in, in case some subjects are missing
-    a_template <-  readRDS(system.file("emptyStandardsCountForAllDims.rds",package="galacticPubs"))
+    #create an empty matrix to merge in, in case some subjects are missing
+    a_template <-  a_master %>% dplyr::select("subject","dimension") %>%
+                  dplyr::distinct() %>% dplyr::mutate(n=0) %>%
+                #Get rid of subjects not included in the alignment
+                 dplyr::filter(.data$subject %in% unique(A$subject))
 
     #super important to refactor subject on the imported data to ensure order
-    browser()
+
     a_template$subject=factor(a_template$subject,levels=ordered_subjects,ordered=T)
 
     a_summ<-A %>% dplyr::group_by(.data$subject,.data$dimension) %>% dplyr::tally()
@@ -295,12 +303,19 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
     #gotta combine missing rows, sort, & repeat the entries N times
     a_combined<-dplyr::anti_join(a_template,a_summ,by="dimension") %>% dplyr::bind_rows(a_summ) %>% dplyr::arrange(.data$subject,.data$dimension)%>% dplyr::mutate(binary=ifelse(.data$n>0,1,0))
 
+
+
     #### This correction is kinda problematic as we add other standards to our database!
     #### !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 
-
     #Account for bias in the number of standards
-    bias<-readRDS(system.file("standardCountsByDimension.rds",package="galacticPubs"))
+    bias <-
+      a_master %>%
+      dplyr::group_by(.data$subject, .data$dimension) %>%
+      dplyr::summarise(n =dplyr::n()) %>%
+      #Get rid of subjects not included in the alignment
+      dplyr::filter(.data$subject %in% unique(A$subject))
+
     bias_by_subj<-bias %>% dplyr::summarise(tot_n_subj=sum(.data$n),.groups="drop")
     a_combined<-dplyr::left_join(a_combined, (bias %>% dplyr::rename("tot_n_dim"="n")),by = c("subject", "dimension") )
     a_combined<-dplyr::left_join(a_combined,bias_by_subj,by = c("subject"))
@@ -314,7 +329,7 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
     a_combined$n_prop_adj<-a_combined$n_adj/sum(a_combined$n_adj)
 
     #Remind r that a_combined factors are ORDERED
-    a_combined$subject <- factor(a_combined$subject,levels=c("Math","ELA","Science","Social Studies"),ordered=T)
+    a_combined$subject <- factor(a_combined$subject,levels=ordered_subjects,ordered=T)
 
 
     #Calculate corrected proportions if requested
@@ -326,30 +341,40 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
       proportions=proportions0 %>% dplyr::summarise(proportion=round(sum(.data$n_prop),2),.groups="drop")
     }
 
+    #Set up vector to recode subject levels according to key (for learning chart subject abbrevs.)
+    convert_labels<-ordered_subj_chart
+    names(convert_labels)<-ordered_subjects
 
-    xlabels<-sapply(proportions$proportion,scales::percent) %>% dplyr::as_tibble()
-    xlabels$x.prop=(proportions$proportion)
-    xlabels$x=cumsum(proportions$proportion)-(proportions$proportion/2)
+    convert_labels2<-ordered_subj
+    names(convert_labels2)<-ordered_subjects
 
-
-    xlabels$subj<-c("math","ela","science","socstudies")
-    xlabels$subject<-c("Math","ELA","Sci","SocStd")
-    xlabels$lab<-paste(t(xlabels$value),t(xlabels$subject))
-    xlabels$hjust<-.5#c(0,0,1,1)
-    xlabels$fontface<-"plain"
-    xlabels$stroke<-1
-    xlabels$strokeCol<-gpColors(xlabels$subj)
-    xlabels$lightCol<-c("#fdebe8","#fef6ed","#f8f5fe","#efebf6")
-    xlabels$size<-9
-
-
-    xlabels$y<-0.6
+    xlabels <- proportions %>%
+      dplyr::rename("subject_orig" = "subject") %>%
+      dplyr::mutate(
+        value = scales::percent(.data$proportion),
+        x.prop = proportion,
+        x = (cumsum(.data$proportion) -
+               .data$proportion / 2),
+        subject = dplyr::recode(.data$subject_orig, !!!convert_labels),
+        #not sure the next one is necessary...should remove if not
+        subj = dplyr::recode(.data$subject_orig, !!!convert_labels2),
+        lab = paste0(t(.data$value), t(.data$subject)),
+        hjust = 0.5,
+        fontface = "plain",
+        stroke = 1,
+        strokeCol = gpColors(.data$subj),
+        lightCol = colorspace::lighten(strokeCol, 0.8),
+        size = 9,
+        y = 0.6
+      )
 
 
     #thickness of epaulette bar
     thickness= 0.2
 
-    rectangles<-dplyr::tibble(proportion=proportions$proportion,xmin=c(0,cumsum(proportions$proportion)[-4]),xmax=cumsum(proportions$proportion),ymin=1-thickness,ymax=1,subject=c("Math","ELA","Science","Soc. Studies")) %>% dplyr::filter(.data$proportion>0)
+    #I think learning chart can handle sustainability above...this epaulette code CANNOT...
+    rectangles<-
+      dplyr::tibble(proportion=proportions$proportion,xmin=c(0,cumsum(proportions$proportion)[-4]),xmax=cumsum(proportions$proportion),ymin=1-thickness,ymax=1,subject=c("Math","ELA","Science","Soc. Studies")) %>% dplyr::filter(.data$proportion>0)
     rectangles$subject<-factor(rectangles$subject,ordered=T,levels=c("Math","ELA","Science","Soc. Studies"))
     rectangles$border<-"transparent"
 
@@ -411,7 +436,6 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
         " Evaluate, \n Communicate, \n Take Action "
       )
   }
-
 
 
 
