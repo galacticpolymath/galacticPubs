@@ -50,6 +50,9 @@ compile_lesson <-
       rebuild <- current_data$RebuildAllMaterials
     }
 
+    message("\n#############################\n",
+            " Compiling Lesson: '",basename(WD),"\n")
+
     #clean JSON folder if asked for
     if (clean) {
       to_delete <-
@@ -87,9 +90,10 @@ compile_lesson <-
     # Standards alignment & learning plots -----------------------------------------------------
     # test if learningEpaulette is in up-to-date with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
 
-
+    compiled_standards_path <-
+        fs::path(WD, "meta", "standards.RDS")
     stnds_out_of_date <- !inSync(
-      fs::path(WD, "meta", "standards.RDS"),
+      compiled_standards_path,
       fs::path(WD, "meta", "standards_GSheetsOnly.xlsx"),
       newer = TRUE
     )
@@ -113,8 +117,6 @@ compile_lesson <-
 
     if ("Standards Alignment" %in% choices) {
       # Test if standards are compatible with learning chart --------------------
-      compiled_standards_path <-
-        fs::path(WD, "meta", "standards.RDS")
       if (!file.exists(compiled_standards_path)) {
         stop("Standards not found at: ", compiled_standards_path)
       } else{
