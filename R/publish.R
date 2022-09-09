@@ -7,118 +7,164 @@
 #'
 #' @export
 
-publish<- function(commit_msg=NULL,WD=getwd()){
-
+publish <- function(commit_msg = NULL, WD = getwd()) {
   #if not run through the editor app,
   #test that WD is in the root directory with the R Project,
   #but don't throw an error (e.g. if run from galacticPubs)
 
-  if(!grepl("shiny",getwd())&!grepl("galacticPubs",WD)){
-  check_wd(WD=WD)
+  if (!grepl("shiny", getwd()) & !grepl("galacticPubs", WD)) {
+    check_wd(WD = WD)
   }
 
 
-# check if files have been staged and are up to date ----------------------
-    published_path<-fs::path(WD,"published")
-    meta_path<-fs::path(WD,"meta")
+  # check if files have been staged and are up to date ----------------------
+  published_path <- fs::path(WD, "published")
+  meta_path <- fs::path(WD, "meta")
 
-    staged_and_up_to_date<-inSync(fs::path(published_path,"LESSON.json"),
-                                     fs::path(meta_path,"JSON","LESSON.json"),WD=WD)
+  staged_and_up_to_date <-
+    inSync(
+      fs::path(published_path, "LESSON.json"),
+      fs::path(meta_path, "JSON", "LESSON.json"),
+      WD = WD
+    )
 
-    #Stage Assets if either check fails
-    if(!staged_and_up_to_date){
-      message("**** Staging Out-Of-Sync Lesson Materials ****")
-      stage_assets(WD=WD)
-    }
-
-
-    # I need to edit both of these files to update First Publication status, etc.
-    saved_data<-safe_read_yaml(fs::path(meta_path,"front-matter.yml"))
-    lesson<-jsonlite::read_json(fs::path(published_path,"LESSON.json"),null="null")
-
-    #update publication dates, etc
-    #FirstPublicationDate is set upon first publishing; only changed manually after that
-    #Same for id (based on how many lessons currently in catalog)
-    time_stamp<-as.character(Sys.time())
-
-    if(is_empty(lesson$FirstPublicationDate)){
-      saved_data$FirstPublicationDate<-time_stamp
-      lesson$FirstPublicationDate<-time_stamp
-    }
-
-    # Assign new id & UniqueID based on what should come next in the catalog
-    if(is_empty(saved_data$id)){
-      #count how many lessons there are currently on gp-catalog
-      current_catalog <- jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
-
-      next_id<-(sapply(current_catalog, function(x) as.integer(x$id)) %>% max(na.rm=T) )+1 %>% as.integer()
-      saved_data$id<-next_id
-      lesson$id<-next_id
-      message("\n************\n Lesson ID assigned: ",saved_data$id,"\n")
-
-      # Assign new unique_id
-      entries_w_this_id <- lapply(current_catalog, function(x) {
-        if (x$id == saved_data$id) {
-          dplyr::tibble(id=x$id,UniqueID=x$UniqueID,ShortTitle=x$ShortTitle,locale=x$locale)
-        } else{
-        }
-      }) %>% dplyr::bind_rows()
-      locale_count<-nrow(entries_w_this_id)+1
-      uid<-paste("lesson",saved_data$id,"locale",locale_count,sep="_")
-      #assign the values so they'll be written to drive
-      saved_data$UniqueID<-lesson$UniqueID <- uid
-
-      message("\n************\n Lesson UniqueID assigned: ",saved_data$UniqueID,"\n")
-
-    }
+  #Stage Assets if either check fails
+  if (!staged_and_up_to_date) {
+    message("**** Staging Out-Of-Sync Lesson Materials ****")
+    stage_assets(WD = WD)
+  }
 
 
+  # I need to edit both of these files to update First Publication status, etc.
+  saved_data <-
+    safe_read_yaml(fs::path(meta_path, "front-matter.yml"))
+  lesson <-
+    jsonlite::read_json(fs::path(published_path, "LESSON.json"), null = "null")
 
-    #Always update URL after ID has been assigned (in case manually changed)
-    # if(is_empty(saved_data$URL)){
-      lesson$URL<- saved_data$URL <- paste0("https://galacticpolymath.com/lessons/",saved_data$id)
-      # }
+  #update publication dates, etc
+  #FirstPublicationDate is set upon first publishing; only changed manually after that
+  #Same for id (based on how many lessons currently in catalog)
+  time_stamp <- as.character(Sys.time())
 
+  if (is_empty(lesson$FirstPublicationDate)) {
+    saved_data$FirstPublicationDate <- time_stamp
+    lesson$FirstPublicationDate <- time_stamp
+  }
+
+  # Assign new id & UniqueID based on what should come next in the catalog
+  if (is_empty(saved_data$id)) {
+    #count how many lessons there are currently on gp-catalog
+    current_catalog <-
+      jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
+
+    next_id <-
+      (sapply(current_catalog, function(x)
+        as.integer(x$id)) %>% max(na.rm = T)) + 1 %>% as.integer()
+    saved_data$id <- next_id
+    lesson$id <- next_id
+    message("\n************\n Lesson ID assigned: ", saved_data$id, "\n")
+
+    # Assign new unique_id
+    entries_w_this_id <- lapply(current_catalog, function(x) {
+      if (x$id == saved_data$id) {
+        dplyr::tibble(
+          id = x$id,
+          UniqueID = x$UniqueID,
+          ShortTitle = x$ShortTitle,
+          locale = x$locale
+        )
+      } else{
+
+      }
+    }) %>% dplyr::bind_rows()
+    locale_count <- nrow(entries_w_this_id) + 1
+    uid <-
+      paste("lesson", saved_data$id, "locale", locale_count, sep = "_")
+    #assign the values so they'll be written to drive
+    saved_data$UniqueID <- lesson$UniqueID <- uid
+
+    message("\n************\n Lesson UniqueID assigned: ",
+            saved_data$UniqueID,
+            "\n")
+
+  }
+
+
+
+  #Always update URL after ID has been assigned (in case manually changed)
+  # if(is_empty(saved_data$URL)){
+  lesson$URL <-
+    saved_data$URL <-
+    paste0("https://galacticpolymath.com/lessons/", saved_data$id)
+  # }
+
+
+
+  #############
+  # Check for file changes
+  #
+
+  if (!is.null(commit_msg)) {
+    commit_msg <- paste("\n", commit_msg)
+  }
+
+  # add all changed files and commit
+  commit_msg_2 <-
+    paste0('\"galacticPubs::publish() [',
+           Sys.time(),
+           "] ",
+           commit_msg,
+           '\"')
+  #Add (start tracking) all new files by default
+  gert::git_add(files = ".", repo = WD)
+  test_commit <-
+    catch_err(gert::git_commit_all(message = commit_msg_2, repo = WD))
+
+  #If something has changed, save changes, recommit all and publish; otherwise abandon.
+  if (!test_commit) {
+    message("Nothing to publish")
+    test_push <- test_status <- FALSE
+  } else{
     #always update LastUpdated timestamp
-    saved_data$LastUpdated<-lesson$LastUpdated<-time_stamp
-
-
-    #############
-    # Check for file changes
-    #
-
-    if(!is.null(commit_msg)){
-      commit_msg<-paste("\n",commit_msg)
-    }
-browser()
-    # add all changed files and commit
-    commit_msg_2 <- paste0('\"galacticPubs::publish() [',Sys.time(),"] ",commit_msg,'\"')
-    #Add (start tracking) all new files by default
-    gert::git_add(files=".", repo=WD)
-    test_commit<-catch_err(gert::git_commit_all(message = commit_msg_2, repo=WD))
-
-    #If something has changed, save changes, recommit all and publish; otherwise abandon.
+    saved_data$LastUpdated <- lesson$LastUpdated <- time_stamp
     #Save time stamp changes
-    yaml::write_yaml(saved_data, fs::path(meta_path,"front-matter.yml"))
+    yaml::write_yaml(saved_data, fs::path(meta_path, "front-matter.yml"))
 
     #rewrite it before pushing to cloud
-    jsonlite::write_json(lesson,fs::path(published_path,"LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+    jsonlite::write_json(
+      lesson,
+      fs::path(published_path, "LESSON.json"),
+      pretty = TRUE,
+      auto_unbox = TRUE,
+      na = "null",
+      null = "null"
+    )
     #also update the copy in the meta folder
-    jsonlite::write_json(lesson,fs::path(meta_path,"JSON","LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+    jsonlite::write_json(
+      lesson,
+      fs::path(meta_path, "JSON", "LESSON.json"),
+      pretty = TRUE,
+      auto_unbox = TRUE,
+      na = "null",
+      null = "null"
+    )
+
+    test_push <- catch_err(gert::git_push(repo = WD))
+  }
+  # Test
+  test_status <-
+    ifelse(nrow(gert::git_status(repo = WD)) == 0, TRUE, FALSE)
 
 
+  out_summary <-
+    dplyr::tibble(
+      repo = basename(WD),
+      commit = convert_T_to_check(test_commit),
+      push = convert_T_to_check(test_push),
+      git_status = convert_T_to_check(test_status),
+      path = WD
+    )
 
-    if(test_commit){
-    test_push<-catch_err(gert::git_push(repo=WD))
-    }else{test_push<-FALSE}
-
-    # change log should be empty after push.
-    if(test_commit&test_push){
-    test_status<-ifelse(nrow(gert::git_status(repo=WD))==0,TRUE,FALSE)
-    }else{test_status<-FALSE}
-
-    out_summary <- dplyr::tibble(repo=basename(WD),commit=convert_T_to_check(test_commit),push=convert_T_to_check(test_push),success=test_status,path=WD)
-
-    return(out_summary)
+  return(out_summary)
 
 }
