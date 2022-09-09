@@ -191,7 +191,7 @@ compile_lesson <-
             paste0(saved_standards$gradeBands, collapse = ', '),
             "."
           ),
-        Footnote = "**Notes on Standards**\n\n*Standards are broken down into ***Target*** and ***Connected*** categories. Target standards are directly reinforced or taught; connected standards are not fully addressed in the lesson, but connected enough to provide a foundation for teachers to build upon.",
+        Footnote = "",
         Badge = list(url = ifelse(
           is_empty(current_data$LearningChart[1]),
           NA,
