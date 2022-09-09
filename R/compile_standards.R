@@ -38,9 +38,12 @@ if(!identical(WD,getwd())){
   destFolder<-fs::path(WD,destFolder)
   standardsFile<-fs::path(WD,standardsFile)}
 
+   #Read in front-matter
+   fm<-get_fm(WD)
+
 #If targetSubj not provided, use front-matter.yml
 if(missing(targetSubj)){
-   tempSubj<-safe_read_yaml(fs::path(WD,"meta","front-matter.yml"))$TargetSubj
+   tempSubj<-fm$TargetSubj
    if(!galacticPubs::is_empty(tempSubj)){targetSubj<-tolower(tempSubj)}
 }
 
@@ -97,7 +100,6 @@ if(sum(tbds)>0) {
 }
 
 #undocumented alignments
-browser()
 undoc<-(is.na(a0$how)&is.na(a0$grp))|sapply(a0$target,function(x) identical(x,"skip"),USE.NAMES = F)
 if(sum(undoc)>0) {
   message(
@@ -206,7 +208,7 @@ gradeL<-sapply(A$grade, function(x) {
     grades <- unlist(strsplit(x, ",", fixed = T))
     bands<-sapply(grades, function(g_i) {
       hits = unlist(sapply(gradeBandBreaks, FUN=function(brk) {
-        as.numeric(g_i) %in% brk
+        as.integer(g_i) %in% brk
       }))
       gradeBandTxt[which(hits)]
     })
@@ -252,7 +254,14 @@ for(ta_i in 1:length(unique(A$target))) {
           list(
             codes = unique(d_gr$code),
             #make sure grade is never changed to grades...
-            grades = d_gr$grade %>% unique() %>% as.character(),
+
+            grades = d_gr$grade %>% unique() %>%
+              #function to force number to be integer and ignore character e.g. "K", but always output character
+              sapply(.,function(x_i){
+                as_int<-as.integer(x_i)
+                r=ifelse(is.na(as_int),x_i,as_int)
+                as.character(r)
+                }),
             statements = unique(d_gr$statement),
             alignmentNotes = aNotes,
             subcat = d_gr$subcat[1]
@@ -272,10 +281,13 @@ for(ta_i in 1:length(unique(A$target))) {
 
 out0<-do.call(c,l_ta)
 
+
+# Create JSON-style list, but only exported as JSON by compile_lesson() --------
 # Prefix with component and title, and nest output in Data if structuring for web deployment
 out<-if(structureForWeb){
   list(  `__component` = "lesson-plan.standards",
-                             Data=out0)
+         LearningObj =  fm$LearningObj,
+         Data=out0)
 }else{out0}
 
 

@@ -50,8 +50,8 @@ compile_lesson <-
       rebuild <- current_data$RebuildAllMaterials
     }
 
-    message("\n#############################\n",
-            " Compiling Lesson: '",basename(WD),"\n")
+    message("\n############################################\n",
+            "Compiling Lesson: '",basename(WD))
 
     #clean JSON folder if asked for
     if (clean) {
@@ -100,12 +100,13 @@ compile_lesson <-
     if ("Standards Alignment" %in% choices &
         (stnds_out_of_date | rebuild)) {
 
-      alignment <- compile_standards(
+      compile_standards_output <- compile_standards(
         WD = WD,
         targetSubj = current_data$TargetSubject,
         standardsRef = current_data$PullStandardsInfoFrom,
         learningplot_correction = current_data$LearningPlotCorrection
-      ) %>% catch_err()
+      ) %>% catch_err(keep_results = T)
+      alignment <- compile_standards_output$result
       current_data$LearningChartFriendly <-
         alignment$learning_chart_friendly
       if (is.na(current_data$TargetSubject)) {
@@ -312,7 +313,6 @@ compile_lesson <-
         )$Text,
         Tags = lapply(current_data$Tags, function(x)
           list(Value = x)),
-        LearningObj = current_data$LearningObj,
         SteamEpaulette = list(url = ifelse(
           is.na(current_data$LearningEpaulette[1]),
           NA,
@@ -325,10 +325,10 @@ compile_lesson <-
           catalogURL(basename(
             current_data$LearningEpaulette_vert[1]
           ), repo)
-        ),
+        )),
         #might want to add more complex image handling later),
         Description = current_data$Description %>% fixAnchorLinks()
-        )) #allow smooth-scrolling to in-page references
+        ) #allow smooth-scrolling to in-page references
 
         #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
         mmExists <-
