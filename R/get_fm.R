@@ -4,7 +4,7 @@
 #'
 #' @param WD working directory; default=getwd()
 #' @param key which entry (or entries) do you want to import? default=NULL will import everything
-#' @example
+#' @examples
 #' get_fm()
 #' get_fm(key=c("Title","ShortTitle","locale"))
 #' @export

@@ -9,7 +9,7 @@ lesson_rename(
   new_ShortTitle,
   gh_proj_name,
   curr_ShortTitle,
-  rename_proj_dir = TRUE,
+  just_files = FALSE,
   change_this = NULL,
   lessons_dir,
   only_rename_prefixes = TRUE,
@@ -27,7 +27,12 @@ lesson_rename(
 
 \item{curr_ShortTitle}{Current ShortTitle prefixed to lesson project files. If missing, will try to read this from ShortTitle in the existing front-matter.yml}
 
-\item{rename_proj_dir}{logical; Do you want to rename the top-level project folder? default= TRUE}
+\item{just_files}{logical; Default=FALSE; Do you want to JUST rename file prefixes, given the ShortTitle? If TRUE, this skips:
+\itemize{
+\item renaming top-level project folder
+\item renaming associated GitHub project
+\item pushing changes to GitHub
+}}
 
 \item{change_this}{passed to \code{\link[=update_fm]{update_fm()}} if you want to make any other changes to front matter. Must be a list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey book If gh_proj_name=="all", make sure you set this to something you want to change for everything.}
 
@@ -42,7 +47,7 @@ lesson_rename(
 \item{force_init_capital}{do you want to force the output to start with a capital letter? default=FALSE}
 }
 \description{
-Don't run this from the RStudio session of the lesson you want to rename! Does several things:
+Scenario where working title changes midway through project development. Don't run this from the RStudio session of the lesson you want to rename! Does several things:
 \enumerate{
 \item Renames top-level folder of the lesson with "new_proj_name"
 \item Finds and renames all file names to found in the project folder e.g. OldShortTitle_yadayada.* -> NewShortTitle_yadayada. This is done locally using Google Drive for Desktop virtualization of the Lessons Folder

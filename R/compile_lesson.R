@@ -186,9 +186,9 @@ compile_lesson <-
             "This Galactic Polymath Learning Chart illustrates the areas of knowledge covered. This lesson targets ",
             current_data$TargetSubject,
             ", but it helps teach national learning standards in 4 subjects: \n- [Common Core Math](http://www.corestandards.org/Math/); [Common Core ELA](http://www.corestandards.org/ELA-Literacy/); [Next Generation Science (NGSS)](https://www.nextgenscience.org/); and [College, Career, and Civic Life (C3) Social Studies Standards](https://www.socialstudies.org/standards/c3).\nIn total, there are ",
-            nrow(saved_standards$compiled),
+            sum(saved_standards$a_combined$n,na.rm=T),
             " standards across US grade band(s): ",
-            paste0(saved_standards$gradeBands, collapse = ', '),
+            paste0(saved_standards$data$gradeBands, collapse = ', '),
             "."
           ),
         Footnote = "",

@@ -4,10 +4,12 @@
 \alias{lesson_new_locale}
 \title{Make a new locale version of existing lesson}
 \usage{
-lesson_new_locale(gh_proj_name, repair = FALSE)
+lesson_new_locale(gh_proj_name, new_proj_name = NULL, repair = FALSE)
 }
 \arguments{
 \item{gh_proj_name}{the name of the project as it is on GitHub and Google Drive}
+
+\item{new_proj_name}{the name of the new locale variant you want to create. Default=NULL will launch a locale picker app.}
 
 \item{repair}{logical; if you had failures during initial locale cloning, should we try to do the steps that failed? i.e. will skip cloning}
 }

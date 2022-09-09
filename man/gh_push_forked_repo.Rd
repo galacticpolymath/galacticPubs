@@ -4,11 +4,9 @@
 \alias{gh_push_forked_repo}
 \title{Push new "forked" gh_proj_name to GitHub}
 \usage{
-gh_push_forked_repo(gh_proj_name, WD = getwd())
+gh_push_forked_repo(WD = getwd())
 }
 \arguments{
-\item{gh_proj_name}{name of the project on github.com/galacticpolymath AND our Google Drive Edu/Lessons folder}
-
 \item{WD}{working directory (path to top level folder of the project on virtualized Google Drive for Desktop)}
 }
 \description{

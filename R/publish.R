@@ -12,7 +12,9 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   #test that WD is in the root directory with the R Project,
   #but don't throw an error (e.g. if run from galacticPubs)
 
-  if (!grepl("shiny", getwd()) & !grepl("galacticPubs", WD)) {
+  is_galacticPubs<-grepl("galacticPubs", WD)
+
+  if (!grepl("shiny", getwd()) & !is_galacticPubs) {
     check_wd(WD = WD)
   }
 
@@ -31,7 +33,8 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   #Stage Assets if either check fails
   if (!staged_and_up_to_date) {
     message("**** Staging Out-Of-Sync Lesson Materials ****")
-    stage_assets(WD = WD)
+
+    stage_assets(WD = WD) %>%catch_err()
   }
 
 
