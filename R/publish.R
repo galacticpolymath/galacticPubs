@@ -117,14 +117,17 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
            '\"')
   #Add (start tracking) all new files by default
   gert::git_add(files = ".", repo = WD)
-  test_commit <-
-    catch_err(gert::git_commit_all(message = commit_msg_2, repo = WD))
+  #If git change log is null at the beginning, should throw NA test result
+  test_status1 <-
+    ifelse(nrow(gert::git_status(repo = WD)) == 0, NA, TRUE)
 
   #If something has changed, save changes, recommit all and publish; otherwise abandon.
-  if (!test_commit) {
+  if (is.na(test_status1)) {
     message("Nothing to publish")
-    test_push <- test_status <- NA
+    test_push <- test_status2 <- test_commit <- NA
   } else{
+    test_commit <-
+      catch_err(gert::git_commit_all(message = commit_msg_2, repo = WD))
     #always update LastUpdated timestamp
     saved_data$LastUpdated <- lesson$LastUpdated <- time_stamp
     #Save time stamp changes
@@ -150,19 +153,22 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
     )
 
     test_push <- catch_err(gert::git_push(repo = WD))
+    #test to make sure git change log is now clear
+
+    test_status2 <-
+      ifelse(nrow(gert::git_status(repo = WD)) == 0, TRUE, FALSE)
   }
-  # Test
-  test_status <-
-    ifelse(nrow(gert::git_status(repo = WD)) == 0, TRUE, FALSE)
+
 
 
   out_summary <-
     dplyr::tibble(
       repo = basename(WD),
-      success= convert_T_to_check(test_commit&test_push&test_status),
+      success = convert_T_to_check(test_commit &
+                                     test_push & test_status2),
       commit = convert_T_to_check(test_commit),
       push = convert_T_to_check(test_push),
-      git_status = convert_T_to_check(test_status),
+      git_status = convert_T_to_check(test_status2),
       path = WD
     )
 
