@@ -123,7 +123,7 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   #If something has changed, save changes, recommit all and publish; otherwise abandon.
   if (!test_commit) {
     message("Nothing to publish")
-    test_push <- test_status <- FALSE
+    test_push <- test_status <- NA
   } else{
     #always update LastUpdated timestamp
     saved_data$LastUpdated <- lesson$LastUpdated <- time_stamp
@@ -159,6 +159,7 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   out_summary <-
     dplyr::tibble(
       repo = basename(WD),
+      success= convert_T_to_check(test_commit&test_push&test_status),
       commit = convert_T_to_check(test_commit),
       push = convert_T_to_check(test_push),
       git_status = convert_T_to_check(test_status),
