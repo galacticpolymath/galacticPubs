@@ -129,8 +129,7 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
     message("Nothing to publish")
     test_push <- test_status2 <- test_commit <- NA
   } else{
-    test_commit <-
-      catch_err(gert::git_commit_all(message = commit_msg_2, repo = WD))
+
     #always update LastUpdated timestamp
     saved_data$LastUpdated <- lesson$LastUpdated <- time_stamp
     #Save time stamp changes
@@ -155,11 +154,14 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
       null = "null"
     )
 
+    test_commit <-
+      catch_err(gert::git_commit_all(message = commit_msg_2, repo = WD))
+
     test_push <- catch_err(gert::git_push(repo = WD))
     #test to make sure git change log is now clear
 
     test_status2 <-
-      ifelse(nrow(gert::git_status(repo = WD)) == 0, TRUE, FALSE)
+      invisible(ifelse(nrow(gert::git_status(repo = WD)) == 0, TRUE, FALSE))
   }
 
 
@@ -167,7 +169,7 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   out_summary <-
     dplyr::tibble(
       repo = basename(WD),
-      success = convert_T_to_check(test_commit &
+      SUCCESS = convert_T_to_check(test_commit &
                                      test_push & test_status2),
       commit = convert_T_to_check(test_commit),
       push = convert_T_to_check(test_push),

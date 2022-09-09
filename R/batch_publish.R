@@ -50,25 +50,18 @@ batch_publish <- function(commit_msg = NULL, gh_proj_name=NULL, try_harder=FALSE
       output_i<-publish(WD = WD, commit_msg = commit_msg) %>% catch_err(try_harder=try_harder,keep_results = TRUE)
       print(output_i$result)
       output_i$result
-    })
+    }) %>% dplyr::bind_rows()
 
-
-    # turn off timer if it was started
-  if (timer) {
-    tictoc::toc()
-  }
 
 
   # report results
   hl <- paste0(c("\n", rep("_", 30), "\n"), collapse = "")
-  message(paste0(
-    hl,
-    paste0(
-      "Lessons published:\n - ",
-      paste0(basename(good_projects), collapse = "\n - "),
-      hl
-    )
-  ))
-
-
+  message(hl,"Lessons published:\n")
+  print(update_list)
+      message(hl)
+      # turn off timer if it was started
+  if (timer) {
+   tictoc::toc()
+  }
+ invisible(update_list)
 }
