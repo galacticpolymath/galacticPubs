@@ -21,12 +21,12 @@ publish<- function(commit_msg=NULL,WD=getwd()){
 # check if files have been staged and are up to date ----------------------
     published_path<-fs::path(WD,"published")
     meta_path<-fs::path(WD,"meta")
-    lesson_staged<-file.exists(fs::path(published_path,"LESSON.json"))
-    staged_lesson_up_to_date<-inSync(fs::path(published_path,"LESSON.json"),
+
+    staged_and_up_to_date<-inSync(fs::path(published_path,"LESSON.json"),
                                      fs::path(meta_path,"JSON","LESSON.json"),WD=WD)
 
     #Stage Assets if either check fails
-    if(!lesson_staged | !staged_lesson_up_to_date){
+    if(!staged_and_up_to_date){
       message("**** Staging Out-Of-Sync Lesson Materials ****")
       stage_assets(WD=WD)
     }
@@ -83,6 +83,21 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     saved_data$LastUpdated<-lesson$LastUpdated<-time_stamp
 
 
+    #############
+    # Check for file changes
+    #
+
+    if(!is.null(commit_msg)){
+      commit_msg<-paste("\n",commit_msg)
+    }
+browser()
+    # add all changed files and commit
+    commit_msg_2 <- paste0('\"galacticPubs::publish() [',Sys.time(),"] ",commit_msg,'\"')
+    #Add (start tracking) all new files by default
+    gert::git_add(files=".", repo=WD)
+    test_commit<-catch_err(gert::git_commit_all(message = commit_msg_2, repo=WD))
+
+    #If something has changed, save changes, recommit all and publish; otherwise abandon.
     #Save time stamp changes
     yaml::write_yaml(saved_data, fs::path(meta_path,"front-matter.yml"))
 
@@ -91,19 +106,7 @@ publish<- function(commit_msg=NULL,WD=getwd()){
     #also update the copy in the meta folder
     jsonlite::write_json(lesson,fs::path(meta_path,"JSON","LESSON.json"),pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
 
-    #############
-    # push to GitHub
-    #
 
-    if(!is.null(commit_msg)){
-      commit_msg<-paste("\n",commit_msg)
-    }
-
-    # add all changed files and commit
-    commit_msg_2 <- paste0('\"galacticPubs::publish() [',Sys.time(),"] ",commit_msg,'\"')
-    #Add all files by default
-    gert::git_add(files=".", repo=WD)
-    test_commit<-catch_err(gert::git_commit_all(message = commit_msg_2, repo=WD))
 
     if(test_commit){
     test_push<-catch_err(gert::git_push(repo=WD))
