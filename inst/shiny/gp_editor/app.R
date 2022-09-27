@@ -882,7 +882,7 @@ output$supporting_media<-renderUI({
     #we update the reactive value, which should supercede the now outdated input$LastUpdated
 
     vals$current_data<-overwrite_matching(safe_read_yaml(yaml_path),vals$current_data)
-    browser()
+
     if(pub_status$SUCCESS=="\u2713"){
       output$publishReport<-renderUI(h4(paste0("\u2713 Publication Success! ",Sys.time()) ))
     }else{
