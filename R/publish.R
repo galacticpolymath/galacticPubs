@@ -22,13 +22,20 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   # check if files have been staged and are up to date ----------------------
   published_path <- fs::path(WD, "published")
   meta_path <- fs::path(WD, "meta")
+  sm<-get_fm(WD=WD,key="SupportingMedia")
+  sm_paths<-fs::path(WD,"assets","_other-media-to-publish",sm)
+  published_sm_paths<-fs::path(published_path,sm)
 
   staged_and_up_to_date <-
     inSync(
       fs::path(published_path, "LESSON.json"),
       fs::path(meta_path, "JSON", "LESSON.json"),
       WD = WD
-    )
+    )&
+    #If there are some Supporting Media, test if they're in /published
+    ifelse(is_empty(sm), TRUE,
+           inSync(sm_paths,
+                  published_sm_paths))
 
   #Stage Assets if either check fails
   if (!staged_and_up_to_date) {

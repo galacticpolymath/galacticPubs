@@ -33,9 +33,10 @@ if(is.null(ack)){stop("Something went wrong. Check your filenames and that the a
 roles<-unique(ack$Role)
 out0<-list()
 for(i in 1:length(roles)){
-  role_i<-roles[i]
+  #Also allow {vid} shortcodes
+  role_i<-roles[i] %>% parseGPmarkdown(WD=WD) %>% expand_md_links(repo=whichRepo(WD=WD))
   ack_i<-subset(ack,ack$Role==role_i)
-  def_i<-ack_i$Role_def[1]
+  def_i<-ack_i$Role_def[1] %>% parseGPmarkdown(WD=WD) %>% expand_md_links(repo=whichRepo(WD=WD))
   #capitalize first letter if necessary
   if(!substr(def_i,1,1)%in%LETTERS){substr(def_i,1,1) <- toupper(substr(def_i,1,1))}
   #put parentheses around definition if necessary

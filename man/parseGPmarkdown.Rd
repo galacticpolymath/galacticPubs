@@ -24,7 +24,7 @@ Functions to replace custom expressions with appropriate links or text. Custom t
 }
 \seealso{
 Other markdown: 
-\code{\link{expandMDLinks}()},
+\code{\link{expand_md_links}()},
 \code{\link{fixAnchorLinks}()}
 }
 \concept{markdown}

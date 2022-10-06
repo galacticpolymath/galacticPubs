@@ -4,12 +4,14 @@
 \alias{pick_lesson}
 \title{pick_lesson}
 \usage{
-pick_lesson(full_path = FALSE, lessons_dir = NULL)
+pick_lesson(full_path = FALSE, lessons_dir = NULL, sort_az = FALSE)
 }
 \arguments{
 \item{full_path}{do you want a full path to the chosen lesson? default= F}
 
 \item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /)}
+
+\item{sort_az}{logical; sort alphabetically? default =F sorts by last modified}
 }
 \value{
 the selected lesson name

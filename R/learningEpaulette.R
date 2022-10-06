@@ -55,6 +55,7 @@ if(!standardsFound){warning("Compiled Standards not found at: ",standardsFile)
 # sysfonts::font_add_google(name="Kanit",regular.wt=400,bold.wt=600)
 # showtext::showtext_auto()
 ## PLOT Epaulette
+
 epaulette<-
   ggplot2::ggplot(rectangles)+
   ggplot2::geom_rect(ggplot2::aes_string(xmin="xmin",xmax="xmax",ymin="ymin",ymax="ymax",fill="subject"),size=1.2,show.legend = F)+

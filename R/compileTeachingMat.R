@@ -349,7 +349,8 @@ multimedia<-lapply(1:nrow(m),function(i){
     #if byLink left blank, but
     byLink=d$byLink,
     keywords=d$keywords,
-    mainLink=YTembed(d$mainLink),
+    #Change YouTube links to be embeds & turn {filename.png} links to files found in assets/_other-media-to-publish into catalog.galacticpolymath.com links
+    mainLink=YTembed(d$mainLink) %>% expand_md_links(repo=whichRepo(WD=WD)),
     vimeoLink=d$vimeoLink,
     filename=d$filename,
     otherLink=d$otherLink)

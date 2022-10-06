@@ -77,7 +77,7 @@ compile_lesson <-
     }
 
     #quell Rcheck
-    lumpItems <- whichRepo <- catalogURL <- expandMDLinks <- NULL
+    lumpItems <- whichRepo <- catalogURL <- expand_md_links <- NULL
 
     #figure out which repo we're connected to (to create full paths to catalog.galacticpolymath.com)
     repo <- whichRepo(WD = WD)
@@ -385,7 +385,7 @@ compile_lesson <-
           bonus <- list(
             `__component` = "lesson-plan.collapsible-text-section",
             SectionTitle = "Bonus Content",
-            Content = expandMDLinks(current_data$Bonus, repo) %>% fixAnchorLinks(),
+            Content = expand_md_links(current_data$Bonus, repo) %>% fixAnchorLinks(),
             #allow smooth-scrolling to in-page references
             InitiallyExpanded = TRUE
           )
@@ -405,7 +405,7 @@ compile_lesson <-
           extensions <- list(
             `__component` = "lesson-plan.collapsible-text-section",
             SectionTitle = "Extensions",
-            Content = expandMDLinks(current_data$Extensions, repo) %>% fixAnchorLinks(),
+            Content = expand_md_links(current_data$Extensions, repo) %>% fixAnchorLinks(),
             #allow smooth-scrolling to in-page references
             InitiallyExpanded = TRUE
           )
@@ -421,7 +421,7 @@ compile_lesson <-
 
         #Combine Sci Background and Lesson Connections to Research
         # markdown links to supporting materials allowed
-        # expandMDLinks takes relative links in [](x.jpg) format and makes a full path to GP catalog
+        # expand_md_links takes relative links in [](x.jpg) format and makes a full path to GP catalog
         # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
         # BACKGROUND
         if (!is_empty(current_data$Background)) {
@@ -438,7 +438,7 @@ compile_lesson <-
                   "\n#### Research Background\n",
                   current_data$Background
                 )
-              ) %>% expandMDLinks(repo = repo) %>%
+              ) %>% expand_md_links(repo = repo) %>%
                 fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
               InitiallyExpanded = TRUE
             )
@@ -460,7 +460,7 @@ compile_lesson <-
             list(
               `__component` = "lesson-plan.collapsible-text-section",
               SectionTitle = "Feedback",
-              Content = expandMDLinks(current_data$Feedback,
+              Content = expand_md_links(current_data$Feedback,
                                       repo) %>% fixAnchorLinks(),
               InitiallyExpanded = TRUE
             )
@@ -482,7 +482,7 @@ compile_lesson <-
             list(
               `__component` = "lesson-plan.collapsible-text-section",
               SectionTitle = "Credits",
-              Content = expandMDLinks(current_data$Credits,
+              Content = expand_md_links(current_data$Credits,
                                       repo) %>% fixAnchorLinks(),
               InitiallyExpanded = TRUE
             )

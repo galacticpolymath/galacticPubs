@@ -4,12 +4,12 @@
 \alias{get_fm}
 \title{Get front-matter values}
 \usage{
-get_fm(WD = getwd(), key = NULL)
+get_fm(key = NULL, WD = getwd())
 }
 \arguments{
-\item{WD}{working directory; default=getwd()}
-
 \item{key}{which entry (or entries) do you want to import? default=NULL will import everything}
+
+\item{WD}{working directory; default=getwd()}
 }
 \description{
 Imports meta/front-matter.yml value(s) to environment as a list.

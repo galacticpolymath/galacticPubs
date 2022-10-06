@@ -92,6 +92,7 @@ updateTeachingMatLinks<-function(gh_proj_name,
 
 
 # Query Google Drive to find locations ------------------------------------
+
     currLessonDir<-drive_find_path(paste0("Edu/lessons/",gh_proj_name))
     currLessonDirID<-currLessonDir$id
 

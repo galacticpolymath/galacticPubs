@@ -88,6 +88,25 @@ a0<-a0[which(a0$Code!=""),]
 names(a0)[1:11] <- c("code","statement","subject","grade","lo","lo_stmnt","set","dim","target","grp", "how")
 
 
+# Check supported subjects ------------------------------------------------
+supported_subjects<-c("ELA","Math","Science","Social Studies")
+found_subjects<-unique(a0$subject)
+#are all supported subjects found?
+check_all_supported<- sapply(supported_subjects,function(x) x%in% found_subjects)
+#are any found subjects not supported?
+unsupported <- sapply(found_subjects,function(x) !x%in% supported_subjects)
+
+if(!sum(check_all_supported)==length(supported_subjects)){
+  warning("Not fully interdisciplinary lesson. Subjects found: \n",
+  capture.output(print(check_all_supported)))
+}
+
+if(!sum(unsupported)==0){
+  warning("\nUnsupported subjects found: \n -",
+          paste0(names(unsupported[which(unsupported)]),collapse="\n -"))
+}
+
+
 # manage TBDs and flagged, undocumented alignments ------------------------
 tbds<-grepl("tbd",a0$how,ignore.case=TRUE)
 #a1 does not have records with lo_statements containing "TBD" or no entry for "how"
@@ -385,6 +404,7 @@ uniqueGradeBands<-subset(A,A$gradeBand!="NA")$gradeBand %>%stringr::str_split(",
     thickness= 0.2
 
     #I think learning chart can handle sustainability above...this epaulette code CANNOT...
+
     rectangles<-
       dplyr::tibble(proportion=proportions$proportion,xmin=c(0,cumsum(proportions$proportion)[-4]),xmax=cumsum(proportions$proportion),ymin=1-thickness,ymax=1,subject=c("Math","ELA","Science","Soc. Studies")) %>% dplyr::filter(.data$proportion>0)
     rectangles$subject<-factor(rectangles$subject,ordered=T,levels=c("Math","ELA","Science","Soc. Studies"))

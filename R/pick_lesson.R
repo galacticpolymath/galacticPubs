@@ -4,18 +4,26 @@
 #'
 #' @param full_path do you want a full path to the chosen lesson? default= F
 #' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /)
+#' @param sort_az logical; sort alphabetically? default =F sorts by last modified
 #' @return the selected lesson name
 #' @export
 
 pick_lesson <- function(full_path = FALSE,
-                        lessons_dir = NULL) {
+                        lessons_dir = NULL,
+                        sort_az=FALSE) {
   if (is.null(lessons_dir)) {
     lessons_dir <- lessons_get_path()
   }
-  projects0 <- fs::dir_ls(lessons_dir, type = "directory")
-  #Filter out some patterns for things we don't want to not process
-  projects <- projects0[which(!grepl("^.*Lessons[\\/]~", projects0) &
-                                !grepl("OLD_", projects0))] %>% basename() %>% sort()
+  projects00 <- fs::dir_ls(lessons_dir, type = "directory")
+
+  #Filter out some patterns for things we don't want to process
+  projects0 <- projects00[which(!grepl("^.*Lessons[\\/]~", projects00) &
+                                !grepl("OLD_", projects00))]
+  if(sort_az){
+    projects<- projects0 %>% basename() %>% sort()
+  }else{
+    projects<-fs::file_info(projects0) %>% dplyr::arrange(dplyr::desc(modification_time)) %>% dplyr::select("path") %>% unlist() %>% basename()
+  }
 
   d <- data.frame(PROJECT = projects, CHOICE = 1:length(projects))
   d <- rbind(d, c(PROJECT = "all", CHOICE = 0))
