@@ -1,22 +1,17 @@
 #' compile_standards
 #'
 #' Compile alignment info from a lesson standards matrix worksheet
-#' @param standardsFile file location of the lesson standards alignment XLSX worksheet; default: "meta/standards_GSheetsOnly.xlsx"
+
 #' @param learningplot_correction do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=T; this will scale proportions of subjects by the relative total proportions of standards in each subject. If FALSE, the proportions will just be raw proportions of each subject out of total standards aligned.
 #' @param standardsRef where do you want to pull down statements and other info for the supplied standards codes? Default="myFile" (i.e. Tab2 of the standards workbook.) if "standardX" is chosen, it'll pull down the latest version here: \href{https://github.com/galacticpolymath/standardX}{standardX repository})
-#' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder, 1 level up from the working directory
-#' @param fileName output file name; default= "standards.json"
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param targetSubj which subject`(`s`)` is `(`are`)` the focus of the lesson? opts= "math","ela","science","social studies"
 #' @param structureForWeb default=TRUE; Do you want to preface JSON output with component & nest output in Data element?
 #' @return list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 #' @export
 #'
-compile_standards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
-                             learningplot_correction= TRUE,
+compile_standards <- function(learningplot_correction= TRUE,
                              standardsRef = "myFile",
-                             destFolder = "meta/JSON/" ,
-                             fileName = "standards.json",
                              targetSubj= NULL,
                              WD= getwd(),
                              structureForWeb= TRUE) {
@@ -33,13 +28,12 @@ compile_standards <- function(standardsFile = "meta/standards_GSheetsOnly.xlsx",
    ordered_subj<-      c("math","ela","science","socstudies",     "art","sdgs",         "tech")
 
 
-   #if WD supplied, append it to destFolder
-if(!identical(WD,getwd())){
-  destFolder<-fs::path(WD,destFolder)
-  standardsFile<-fs::path(WD,standardsFile)}
+   #define paths
+  destFolder<-fs::path(WD,"meta","JSON")
+  standardsFile<-fs::path(WD,"meta","standards_GSheetsOnly.xlsx")
 
    #Read in front-matter
-   fm<-get_fm(WD)
+   fm<-get_fm(WD=WD)
 
 #If targetSubj not provided, use front-matter.yml
 if(missing(targetSubj)){
@@ -501,6 +495,7 @@ return(
     compiled = dplyr::as_tibble(A),
     problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
     gradeBands= uniqueGradeBands,
+    learningObj= fm$LearningObj,
     targetSubj=targetSubj,
     subject_proportions=proportions,
     learning_chart_friendly=learning_chart_friendly

@@ -533,69 +533,73 @@ output$supporting_media<-renderUI({
         width = 8,{
           #test if standards alignment ready & has already been compiled b4 trying to render images
           stndrds_saved<-file.exists(fs::path(meta_path,"standards.RDS"))
-        if("Standards Alignment" %in% isolate(vals$current_data$ReadyToCompile) & stndrds_saved){
-        tagList(
-        div(class = "preview-ep",
-            h3("Learning Epaulette Preview"),
-            fluidRow(class = "ep-container",
+
+        #Begin conditional pane
+        if ("Standards Alignment" %in% isolate(vals$current_data$ReadyToCompile) &
+            stndrds_saved) {
+          tagList(
+            div(
+              class = "preview-ep",
+              h3("Learning Epaulette Preview"),
+              fluidRow(
+                class = "ep-container",
                 div(class = "ep-horiz space-top",
                     imageOutput("epaulette_fig", inline = T)),
-                div(
-                  class = "ep-vert space-top",
-                  imageOutput("epaulette_fig_vert", inline = T)
-                  )
-                ),
-            # LEARNING EPAULETTE COMPILE PREVIEW
-            div(
-              class = "inline-fields space-top",
-              sliderInput(
-                "LearningEpaulette_params_heightScalar",
-                label = "Crop bottom of image to fit ggrepel labels",
-                value = isolate(vals$current_data$LearningEpaulette_params_heightScalar),
-                min = 0.3,
-                max = 1.8,
-                step = 0.05,
-                width=200
+                div(class = "ep-vert space-top",
+                    imageOutput("epaulette_fig_vert", inline = T))
               ),
-              numericInput(
-                "LearningEpaulette_params_randomSeed",
-                label = "Random Seed for ggrepel",
-                value = isolate(vals$current_data$LearningEpaulette_params_randomSeed),
-                min = 0,
-                max = 500,
-                step = 1,
-                width = 110
-              )
+              # LEARNING EPAULETTE COMPILE PREVIEW
+              div(
+                class = "inline-fields space-top",
+                sliderInput(
+                  "LearningEpaulette_params_heightScalar",
+                  label = "Crop bottom of image to fit ggrepel labels",
+                  value = isolate(vals$current_data$LearningEpaulette_params_heightScalar),
+                  min = 0.3,
+                  max = 1.8,
+                  step = 0.05,
+                  width = 200
+                ),
+                numericInput(
+                  "LearningEpaulette_params_randomSeed",
+                  label = "Random Seed for ggrepel",
+                  value = isolate(vals$current_data$LearningEpaulette_params_randomSeed),
+                  min = 0,
+                  max = 500,
+                  step = 1,
+                  width = 110
+                )
+              ),
+              actionButton("remake_ep", "Update Epaulette")
             ),
-             actionButton("remake_ep","Update Epaulette")),
 
-        # LEARNING CHART COMPILE PREVIEW
-        div(
-          class = "preview-chart",
-          h3("Learning Chart Preview"),
-          uiOutput("chart_fig_disclaimer"),
-          plotOutput("chart_fig"),
-            textInput(
-              "LearningChart_params_caption",
-              "Manual caption:",
-              value = isolate(vals$current_data$LearningChart_params_caption)
-            ),
-            textInput(
-              "LearningChart_params_centralText",
-              "Central Text Manual caption:",
-              value = isolate(vals$current_data$LearningChart_params_centralText)
-            ),
-            checkboxInput(
-              "LearningChart_params_captionN",
-              "Add standards count?",
-              width = 150,
-              value = isolate(vals$current_data$LearningChart_params_captionN)
-            ),
-            actionButton("remake_chart","Regenerate Chart")
+            # LEARNING CHART COMPILE PREVIEW
+            div(
+              class = "preview-chart",
+              h3("Learning Chart Preview"),
+              uiOutput("chart_fig_disclaimer"),
+              plotOutput("chart_fig"),
+              textInput(
+                "LearningChart_params_caption",
+                "Manual caption:",
+                value = isolate(vals$current_data$LearningChart_params_caption)
+              ),
+              textInput(
+                "LearningChart_params_centralText",
+                "Central Text Manual caption:",
+                value = isolate(vals$current_data$LearningChart_params_centralText)
+              ),
+              checkboxInput(
+                "LearningChart_params_captionN",
+                "Add standards count?",
+                width = 150,
+                value = isolate(vals$current_data$LearningChart_params_captionN)
+              ),
+              actionButton("remake_chart", "Regenerate Chart")
+            )
+
+
           )
-
-
-        )
           #end conditional panel
         }else{
           tagList(
@@ -685,6 +689,7 @@ output$supporting_media<-renderUI({
 
   #Learning Chart Disclaimer Text
   output$chart_fig_disclaimer<-  renderUI({
+
     if(identical(TRUE, isolate(vals$current_data$LearningChartFriendly))){
 
     }else if(is.na(vals$current_data$LearningChartFriendly)){
@@ -725,6 +730,7 @@ output$supporting_media<-renderUI({
       if (file.exists(fs::path(WD,lcpath))) {
         vals$current_data$LearningChart <- lcpath
       }
+
       #return learning chart figure
       output$chart_fig<-renderPlot(grid::grid.draw(lc))
     }#end if/else

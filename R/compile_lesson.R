@@ -50,8 +50,11 @@ compile_lesson <-
       rebuild <- current_data$RebuildAllMaterials
     }
 
-    message("\n############################################\n",
-            "Compiling Lesson: '",basename(WD))
+    message(
+      "\n############################################\n",
+      "Compiling Lesson: '",
+      basename(WD)
+    )
 
     #clean JSON folder if asked for
     if (clean) {
@@ -91,15 +94,15 @@ compile_lesson <-
     # test if learningEpaulette is in up-to-date with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
 
     compiled_standards_path <-
-        fs::path(WD, "meta", "standards.RDS")
+      fs::path(WD, "meta", "standards.RDS")
     stnds_out_of_date <- !inSync(
       compiled_standards_path,
       fs::path(WD, "meta", "standards_GSheetsOnly.xlsx"),
       newer = TRUE
     )
+
     if ("Standards Alignment" %in% choices &
         (stnds_out_of_date | rebuild)) {
-
       compile_standards_output <- compile_standards(
         WD = WD,
         targetSubj = current_data$TargetSubject,
@@ -172,57 +175,61 @@ compile_lesson <-
           current_data$LearningChart <- lcname
         }
       }
+
+
+      #If learning chart exists, always output the learning-chart.json
+      if (!is_empty(current_data$LearningChart) &
+          identical(TRUE, file.exists(fs::path(WD, current_data$LearningChart)))) {
+        #export learning chart section
+        lc <- list(
+          `__component` = "lesson-plan.learning-chart",
+          Title = "About the GP Learning Chart",
+          Description =
+            paste0(
+              "This Galactic Polymath Learning Chart illustrates the areas of knowledge covered. This lesson targets ",
+              current_data$TargetSubject,
+              ", but it helps teach national learning standards in 4 subjects: \n- [Common Core Math](http://www.corestandards.org/Math/); [Common Core ELA](http://www.corestandards.org/ELA-Literacy/); [Next Generation Science (NGSS)](https://www.nextgenscience.org/); and [College, Career, and Civic Life (C3) Social Studies Standards](https://www.socialstudies.org/standards/c3).\nIn total, there are ",
+              sum(saved_standards$a_combined$n, na.rm = T),
+              " standards across US grade band(s): ",
+              paste0(saved_standards$data$gradeBands, collapse = ', '),
+              "."
+            ),
+          Footnote = "",
+          Badge = list(url = ifelse(
+            is_empty(current_data$LearningChart[1]),
+            NA,
+            catalogURL(basename(current_data$LearningChart[1]), repo)
+          ))
+
+
+        )
+
+        #write learning chart section before standards section
+        jsonlite::write_json(
+          lc,
+          fs::path(destFolder, "learning-chart.json"),
+          pretty = TRUE,
+          auto_unbox = TRUE,
+          na = "null",
+          null = "null"
+        )
+      }
+
     }#end general standards stuff
-
-
-    #If learning chart exists, always output the learning-chart.json
-    if (!is_empty(current_data$LearningChart)& identical(TRUE, file.exists(fs::path(WD, current_data$LearningChart)))) {
-      #export learning chart section
-      lc <- list(
-        `__component` = "lesson-plan.learning-chart",
-        Title = "About the GP Learning Chart",
-        Description =
-          paste0(
-            "This Galactic Polymath Learning Chart illustrates the areas of knowledge covered. This lesson targets ",
-            current_data$TargetSubject,
-            ", but it helps teach national learning standards in 4 subjects: \n- [Common Core Math](http://www.corestandards.org/Math/); [Common Core ELA](http://www.corestandards.org/ELA-Literacy/); [Next Generation Science (NGSS)](https://www.nextgenscience.org/); and [College, Career, and Civic Life (C3) Social Studies Standards](https://www.socialstudies.org/standards/c3).\nIn total, there are ",
-            sum(saved_standards$a_combined$n,na.rm=T),
-            " standards across US grade band(s): ",
-            paste0(saved_standards$data$gradeBands, collapse = ', '),
-            "."
-          ),
-        Footnote = "",
-        Badge = list(url = ifelse(
-          is_empty(current_data$LearningChart[1]),
-          NA,
-          catalogURL(basename(current_data$LearningChart[1]), repo)
-        ))
-
-
-      )
-
-      #write learning chart section before standards section
-      jsonlite::write_json(
-        lc,
-        fs::path(destFolder, "learning-chart.json"),
-        pretty = TRUE,
-        auto_unbox = TRUE,
-        na = "null",
-        null = "null"
-      )
-    }
 
     #Remake Epaulette if out of date or missing
     if ("Standards Alignment" %in% choices &
-        (!inSync(
-          fs::path(
-            WD,
-            "assets",
-            "_learning-plots",
-            "GP-Learning-Epaulette.png"
-          ),
-          compiled_standards_path
-        ) | rebuild | is_empty(current_data$LearningEpaulette))) {
+        (
+          !inSync(
+            fs::path(
+              WD,
+              "assets",
+              "_learning-plots",
+              "GP-Learning-Epaulette.png"
+            ),
+            compiled_standards_path
+          ) | rebuild | is_empty(current_data$LearningEpaulette)
+        )) {
       #####################
       #LEARNING EPAULETTE
       message("\nGenerating Learning Epaulette\n")
@@ -232,7 +239,7 @@ compile_lesson <-
         showPlot = FALSE,
         heightScalar = current_data$LearningEpaulette_params_heightScalar,
         randomSeed = current_data$LearningEpaulette_params_randomSeed
-      )
+      ) %>% catch_err()
 
       #set learning epaulette filename from default file output on learningEpaulette function
       #(since this file doesn't exist in yaml on first run)
@@ -328,195 +335,196 @@ compile_lesson <-
         )),
         #might want to add more complex image handling later),
         Description = current_data$Description %>% fixAnchorLinks()
-        ) #allow smooth-scrolling to in-page references
+      ) #allow smooth-scrolling to in-page references
 
-        #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
-        mmExists <-
-          file.exists(fs::path(WD, "meta", "JSON", "multimedia.json"))
-        if (mmExists) {
-          mm_0 <-
-            jsonlite::read_json(fs::path(WD, "meta", "JSON", "multimedia.json"), null =
-                                  "null")
-          #if first row is completely empty, nothin' to import
-          if (!is_empty(mm_0[[1]])) {
-            #process multimedia entries a little bit
-            mm <- lapply(1:length(mm_0), function(i) {
-              #change pdf file gdrive endings from view? to preview
-              li <- mm_0[[i]]
-              #ensure that type is always lowercase
-              li$type <- tolower(li$type)
-              if (li$type == "pdf") {
-                li$mainLink <- gsub("/view?.*$", "/preview", li$mainLink)
-                #Alternatively, change /edit links, as well
-                li$mainLink <- gsub("/edit?.*$", "/preview", li$mainLink)
-              }
-              li
-            })
-          } else{
-            mm <- NULL
-          }
+      #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
+      mmExists <-
+        file.exists(fs::path(WD, "meta", "JSON", "multimedia.json"))
+      if (mmExists) {
+        mm_0 <-
+          jsonlite::read_json(fs::path(WD, "meta", "JSON", "multimedia.json"), null =
+                                "null")
+        #if first row is completely empty, nothin' to import
+        if (!is_empty(mm_0[[1]])) {
+          #process multimedia entries a little bit
+          mm <- lapply(1:length(mm_0), function(i) {
+            #change pdf file gdrive endings from view? to preview
+            li <- mm_0[[i]]
+            #ensure that type is always lowercase
+            li$type <- tolower(li$type)
+            if (li$type == "pdf") {
+              li$mainLink <- gsub("/view?.*$", "/preview", li$mainLink)
+              #Alternatively, change /edit links, as well
+              li$mainLink <-
+                gsub("/edit?.*$", "/preview", li$mainLink)
+            }
+            li
+          })
         } else{
           mm <- NULL
         }
+      } else{
+        mm <- NULL
+      }
 
-        #PREVIEW
-        preview <- list(
-          `__component` = "lesson-plan.lesson-preview",
-          SectionTitle = "Lesson Preview",
-          QuickPrep = current_data$QuickPrep %>% fixAnchorLinks(),
+      #PREVIEW
+      preview <- list(
+        `__component` = "lesson-plan.lesson-preview",
+        SectionTitle = "Lesson Preview",
+        QuickPrep = current_data$QuickPrep %>% fixAnchorLinks(),
+        #allow smooth-scrolling to in-page references
+        Multimedia = mm,
+        InitiallyExpanded = TRUE
+      )
+      #write preview json
+      jsonlite::write_json(
+        preview,
+        path = fs::path(destFolder,
+                        "preview", ext = "json"),
+        pretty = TRUE,
+        auto_unbox = TRUE,
+        na = "null",
+        null = "null"
+      )
+
+      #BONUS (optional section)
+      # markdown links to supporting materials allowed
+      if (!is_empty(current_data$Bonus)) {
+        bonus <- list(
+          `__component` = "lesson-plan.collapsible-text-section",
+          SectionTitle = "Bonus Content",
+          Content = expand_md_links(current_data$Bonus, repo) %>% fixAnchorLinks(),
           #allow smooth-scrolling to in-page references
-          Multimedia = mm,
           InitiallyExpanded = TRUE
         )
-        #write preview json
         jsonlite::write_json(
-          preview,
-          path = fs::path(destFolder,
-                          "preview", ext = "json"),
+          bonus,
+          path = fs::path(destFolder, "bonus", ext = "json"),
           pretty = TRUE,
           auto_unbox = TRUE,
           na = "null",
           null = "null"
         )
+      }
 
-        #BONUS (optional section)
-        # markdown links to supporting materials allowed
-        if (!is_empty(current_data$Bonus)) {
-          bonus <- list(
+      #EXTENSIONS (optional section)
+      # markdown links to supporting materials allowed
+      if (!is_empty(current_data$Extensions)) {
+        extensions <- list(
+          `__component` = "lesson-plan.collapsible-text-section",
+          SectionTitle = "Extensions",
+          Content = expand_md_links(current_data$Extensions, repo) %>% fixAnchorLinks(),
+          #allow smooth-scrolling to in-page references
+          InitiallyExpanded = TRUE
+        )
+        jsonlite::write_json(
+          extensions,
+          path = fs::path(destFolder, "extensions", ext = "json"),
+          pretty = TRUE,
+          auto_unbox = TRUE,
+          na = "null",
+          null = "null"
+        )
+      }
+
+      #Combine Sci Background and Lesson Connections to Research
+      # markdown links to supporting materials allowed
+      # expand_md_links takes relative links in [](x.jpg) format and makes a full path to GP catalog
+      # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
+      # BACKGROUND
+      if (!is_empty(current_data$Background)) {
+        background <-
+          list(
             `__component` = "lesson-plan.collapsible-text-section",
-            SectionTitle = "Bonus Content",
-            Content = expand_md_links(current_data$Bonus, repo) %>% fixAnchorLinks(),
-            #allow smooth-scrolling to in-page references
+            SectionTitle = "Background",
+            Content = ifelse(
+              is.na(current_data$ConnectionToResearch),
+              current_data$Background,
+              paste(
+                "#### Connection to Research\n",
+                current_data$ConnectionToResearch,
+                "\n#### Research Background\n",
+                current_data$Background
+              )
+            ) %>% expand_md_links(repo = repo) %>%
+              fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
             InitiallyExpanded = TRUE
           )
-          jsonlite::write_json(
-            bonus,
-            path = fs::path(destFolder, "bonus", ext = "json"),
-            pretty = TRUE,
-            auto_unbox = TRUE,
-            na = "null",
-            null = "null"
-          )
-        }
 
-        #EXTENSIONS (optional section)
-        # markdown links to supporting materials allowed
-        if (!is_empty(current_data$Extensions)) {
-          extensions <- list(
+        jsonlite::write_json(
+          background,
+          path = fs::path(destFolder,
+                          "background", ext = "json"),
+          pretty = TRUE,
+          auto_unbox = TRUE,
+          na = "null",
+          null = "null"
+        )
+      }
+
+      # FEEDBACK
+      if (!is_empty(current_data$Feedback)) {
+        feedback <-
+          list(
             `__component` = "lesson-plan.collapsible-text-section",
-            SectionTitle = "Extensions",
-            Content = expand_md_links(current_data$Extensions, repo) %>% fixAnchorLinks(),
-            #allow smooth-scrolling to in-page references
+            SectionTitle = "Feedback",
+            Content = expand_md_links(current_data$Feedback,
+                                      repo) %>% fixAnchorLinks(),
             InitiallyExpanded = TRUE
           )
-          jsonlite::write_json(
-            extensions,
-            path = fs::path(destFolder, "extensions", ext = "json"),
-            pretty = TRUE,
-            auto_unbox = TRUE,
-            na = "null",
-            null = "null"
-          )
-        }
 
-        #Combine Sci Background and Lesson Connections to Research
-        # markdown links to supporting materials allowed
-        # expand_md_links takes relative links in [](x.jpg) format and makes a full path to GP catalog
-        # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
-        # BACKGROUND
-        if (!is_empty(current_data$Background)) {
-          background <-
-            list(
-              `__component` = "lesson-plan.collapsible-text-section",
-              SectionTitle = "Background",
-              Content = ifelse(
-                is.na(current_data$ConnectionToResearch),
-                current_data$Background,
-                paste(
-                  "#### Connection to Research\n",
-                  current_data$ConnectionToResearch,
-                  "\n#### Research Background\n",
-                  current_data$Background
-                )
-              ) %>% expand_md_links(repo = repo) %>%
-                fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
-              InitiallyExpanded = TRUE
-            )
-
-          jsonlite::write_json(
-            background,
-            path = fs::path(destFolder,
-                            "background", ext = "json"),
-            pretty = TRUE,
-            auto_unbox = TRUE,
-            na = "null",
-            null = "null"
-          )
-        }
-
-        # FEEDBACK
-        if (!is_empty(current_data$Feedback)) {
-          feedback <-
-            list(
-              `__component` = "lesson-plan.collapsible-text-section",
-              SectionTitle = "Feedback",
-              Content = expand_md_links(current_data$Feedback,
-                                      repo) %>% fixAnchorLinks(),
-              InitiallyExpanded = TRUE
-            )
-
-          jsonlite::write_json(
-            feedback,
-            path = fs::path(destFolder,
-                            "feedback", ext = "json"),
-            pretty = TRUE,
-            auto_unbox = TRUE,
-            na = "null",
-            null = "null"
-          )
-        }
-
-        #CREDITS
-        if (!is_empty(current_data$Credits)) {
-          credits <-
-            list(
-              `__component` = "lesson-plan.collapsible-text-section",
-              SectionTitle = "Credits",
-              Content = expand_md_links(current_data$Credits,
-                                      repo) %>% fixAnchorLinks(),
-              InitiallyExpanded = TRUE
-            )
-
-          jsonlite::write_json(
-            credits,
-            path = fs::path(destFolder,
-                            "credits", ext = "json"),
-            pretty = TRUE,
-            auto_unbox = TRUE,
-            na = "null",
-            null = "null"
-          )
-        }
-
-        #always output this stuff
         jsonlite::write_json(
-          header,
+          feedback,
           path = fs::path(destFolder,
-                          "header", ext = "json"),
+                          "feedback", ext = "json"),
           pretty = TRUE,
           auto_unbox = TRUE,
           na = "null",
           null = "null"
         )
+      }
+
+      #CREDITS
+      if (!is_empty(current_data$Credits)) {
+        credits <-
+          list(
+            `__component` = "lesson-plan.collapsible-text-section",
+            SectionTitle = "Credits",
+            Content = expand_md_links(current_data$Credits,
+                                      repo) %>% fixAnchorLinks(),
+            InitiallyExpanded = TRUE
+          )
+
         jsonlite::write_json(
-          overview,
+          credits,
           path = fs::path(destFolder,
-                          "overview", ext = "json"),
+                          "credits", ext = "json"),
           pretty = TRUE,
           auto_unbox = TRUE,
           na = "null",
           null = "null"
         )
+      }
+
+      #always output this stuff
+      jsonlite::write_json(
+        header,
+        path = fs::path(destFolder,
+                        "header", ext = "json"),
+        pretty = TRUE,
+        auto_unbox = TRUE,
+        na = "null",
+        null = "null"
+      )
+      jsonlite::write_json(
+        overview,
+        path = fs::path(destFolder,
+                        "overview", ext = "json"),
+        pretty = TRUE,
+        auto_unbox = TRUE,
+        na = "null",
+        null = "null"
+      )
 
     }#End of Front Matter export
 

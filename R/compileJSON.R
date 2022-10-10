@@ -32,7 +32,6 @@ compileJSON <- function(outputFileName="LESSON.json",destFolder, WD=getwd()){
   }
 
   filenamez.df<-subset(matches,matches$found)
-
   #read in all the json pieces
   lesson_data<-lapply(filenamez.df$file,function(x){
     jsonlite::read_json(fs::path(destFolder,x),na="null",null="null")
@@ -61,7 +60,6 @@ compileJSON <- function(outputFileName="LESSON.json",destFolder, WD=getwd()){
   # Write JSON for GP Simple Lesson Plan -----------------------------------
   jsonlite::write_json(lesson,outFile,pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
 
-  # printToScreenTable<-cbind(ack[,c("Role","Name","Title")],OtherInfo="BlahBlah")
 
   # return compiled output --------------------------------------------------
   message(" ",rep("-",30),"\n Lesson successfully compiled:")
