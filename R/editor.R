@@ -2,10 +2,13 @@
 #'
 #' Start a Shiny app to edit front matter for a lesson. Accepts markdown syntax. The code is found in inst/shiny/gp_editor
 #' @param pick logical; do you want to pick a lesson to work on? default=F (work from the current working directory)
+#' @param system_browser logical
+#' - TRUE (default): open in system default web browser
+#' - FALSE: open in Rstudio browser pane
 #' @returns Outputs to meta/front-matter.yaml
 #' @export
 
-editor<-function(pick=FALSE){
+editor<-function(pick=FALSE,system_browser=TRUE){
 if (interactive()) {
   options(device.ask.default = FALSE)
   if(pick){
@@ -17,6 +20,6 @@ if (interactive()) {
   on.exit(rm(list=c(".editor_path"),envir=.GlobalEnv))
   # This next resetting working directory is necessary bc it kept getting set to the Home user directory for unknown reasons.
   on.exit(setwd(rstudioapi::getActiveProject()),add=TRUE)
-  shiny::runApp(system.file("shiny","gp_editor",package="galacticPubs"))
+  shiny::runApp(system.file("shiny","gp_editor",package="galacticPubs"),launch.browser = system_browser)
 }
 }

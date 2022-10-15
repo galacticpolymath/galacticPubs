@@ -33,10 +33,9 @@ learningChart=function(caption=NA,
                        ...){
 
 if(missing(destFolder)){
-  destFolder<-fs::path("assets","_learning-plots")
+  destFolder<-fs::path(WD, "assets","_learning-plots")
 }
-  #if WD supplied, append it to destFolder
-if(!identical(WD,getwd())){destFolder<-fs::path(WD,destFolder)}
+
 
 if(is_empty(quotedTitle)){quotedTitle<-"this lesson"}else{quotedTitle<-paste0("\"",quotedTitle,"\"")}
 #deal with missing caption and add sample size if requested

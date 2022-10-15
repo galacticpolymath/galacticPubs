@@ -306,6 +306,10 @@ server <- function(input, output,session) {
   vals$staged<-FALSE
   output$stageStatus <- renderText("")
 
+  #Stop the app if you close the window.
+  session$onSessionEnded(function() {
+        shiny::stopApp()
+      })
 
   #Finish generating all frontend items
   output$overview_text_block<-renderUI({
@@ -732,7 +736,8 @@ output$supporting_media<-renderUI({
       }
 
       #return learning chart figure
-      output$chart_fig<-renderPlot(grid::grid.draw(lc))
+
+        output$chart_fig<-renderPlot(grid::grid.draw(lc))
     }#end if/else
     }) %>% bindEvent(input$remake_chart,
                      ignoreInit = T,
