@@ -48,7 +48,7 @@ updateTeachingMatLinks<-function(gh_proj_name,
   }}
 
 # try to avoid OutOfMemoryError w/ options from https://stackoverflow.com/questions/7963393/out-of-memory-error-java-when-using-r-and-xlconnect-package
-    options(java.parameters = "-Xmx1024m")
+    # options(java.parameters = "-Xmx1024m")
 
 
   ### CONSTANTS ###

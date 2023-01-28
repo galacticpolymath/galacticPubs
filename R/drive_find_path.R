@@ -2,39 +2,56 @@
 #'
 #' Simulates Finder/File Explorer functionality by repeated calls to [googledrive::drive_find()].
 #'
-#' @param drive_path in the form "directory/subdirectory", where "My Drive" is understood to be at the root above "directory". Will match case InSeNsItIvElY. If you want to place an item on the bare "My Drive" folder, set drive_path="~" or "root".
-#'
-#'@family Google Drive Functions
+#' @param drive_path in the form "DRIVE/directory/subdirectory". DRIVE can be "~" or "my drive" to refer to your private google drive; it can also be the name of a shared drive (e.g. "GP-Misc"). Generally, case SeNsItIvE.
+#' @family Google Drive Functions
 #' @export
 
-drive_find_path <- function(drive_path){
+drive_find_path <- function(drive_path) {
+  p <- strsplit(drive_path, split = "/") %>% unlist()
 
-  p<-strsplit(drive_path,split="/") %>% unlist() %>% tolower()
-
-  results<-as.list(rep(NA,length(p)))
-  for(i in 1:length(p)) {
+  results <- as.list(rep(NA, length(p)))
+  # browser()
+  for (i in 1:length(p)) {
+    #FIRST part of path
     if (i == 1) {
-
-      if(tolower(p[i])=="root"|
-         tolower(p[i])=="my drive"|
-         tolower(p[i])=="~") {
+      #if first part of path is short hand for mydrive root, get its google ID
+      if (tolower(p[i]) == "root" |
+          tolower(p[i]) == "my drive" |
+          tolower(p[i]) == "~") {
         results[[i]] <-
-          googledrive::drive_get(id="root")
+          googledrive::drive_get(id = "root")
+        sharedDrive <- NULL
+        #otherwise get root of SharedDrive path
       } else{
         results[[i]] <-
-          googledrive::drive_find(q = paste0("name='", p[i], "' and 'root' in parents"))
+          googledrive::shared_drive_get(name = p[i])
+        sharedDrive <- p[i]
       }
-      #error handling
-      if(nrow(results[[i]])==0){stop("\nPath Not Found: 'root/",p[i],"'")}
-    } else{
-      results[[i]] <-
-        googledrive::drive_find(q = paste0("name='", p[i], "' and '", results[[i - 1]]$id, "' in parents"))
-      #error handling
-      if(nrow(results[[i]])==0){stop("\nPath Not Found: 'root/",paste0(p[1:i],collapse="/"),"'")}
 
+    #error handling
+    if (nrow(results[[i]]) == 0) {
+       warning("Make sure path starts with '~' or Shared Drive Name")
+      stop("\nPath Not Found: '", p[i], "'")
     }
-  }
 
-  #output
-  results[[length(results)]]
+  #ALL OTHER parts of path
+  } else{
+    results[[i]] <-
+      googledrive::drive_find(
+        q = paste0("name='", p[i], "' and '", results[[i - 1]]$id, "' in parents"),
+        shared_drive = sharedDrive
+      )
+    #error handling
+    if (nrow(results[[i]]) == 0) {
+      warning("Make sure path starts with '~' or Shared Drive Name")
+      stop("\nPath Not Found: '",
+           paste0(p[1:i], collapse = "/"),
+           "'")
+    }
+
+  }
+}#end loop
+
+#output
+results[[length(results)]]
 }

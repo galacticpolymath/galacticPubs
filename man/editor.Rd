@@ -4,10 +4,16 @@
 \alias{editor}
 \title{editor}
 \usage{
-editor(pick = FALSE)
+editor(pick = FALSE, system_browser = TRUE)
 }
 \arguments{
 \item{pick}{logical; do you want to pick a lesson to work on? default=F (work from the current working directory)}
+
+\item{system_browser}{logical
+\itemize{
+\item TRUE (default): open in system default web browser
+\item FALSE: open in Rstudio browser pane
+}}
 }
 \value{
 Outputs to meta/front-matter.yaml

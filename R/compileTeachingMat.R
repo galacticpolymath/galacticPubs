@@ -49,6 +49,38 @@ YTembed<-function(link){
   #read in procedure Part titles, etc
   procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble()
 
+    #read in main procedure
+  #import and make sure numbered columns are integers
+  proc<-openxlsx::read.xlsx(procedureFile,sheet="Procedure") %>%
+          dplyr::filter(.data$Step!=0) %>%
+          rmNArows() %>%
+          dplyr::tibble() %>%
+          dplyr::mutate(Part=as.integer(.data$Part),
+                        Chunk=as.integer(.data$Chunk),
+                        ChunkDur=as.integer(.data$ChunkDur),
+                        Step=as.integer(.data$Step),
+                        PartN=as.integer(.data$PartN),
+                        PartDur=as.integer(.data$PartDur))
+
+  ####
+  #Figure out lesson duration string
+  partDurations<-proc$PartDur[which(proc$PartDur!="")] %>% as.numeric()
+  lessonDur <- if(length(partDurations)==1){paste0(partDurations," min") #if just 1 part listed, do X min
+    }else{
+      #if more than 1 part, but they're all the same, combine them
+      if(length(unique(partDurations))==1){
+      paste0(length(partDurations)," x ",partDurations[1]," min")
+        }else{
+          #otherwise state each length separately
+          sapply(1:length(partDurations),function(x) {
+            paste0("Part ", x,": ",partDurations[x]," min")}) %>% paste0( collapse=", ")
+      }
+    }
+
+  lessonDur
+
+
+
   #define helper function
   catchLinkNA<-function(linkText,url){
     if(is.na(url)){list(linkText=paste0("ERROR: '",linkText,"' link missing"),url=url)}else{
@@ -378,7 +410,8 @@ multimedia<-lapply(1:nrow(m),function(i){
   )
  }
 
-teachingMat0<-list(classroom = if (is.null(resourcesC)) {
+teachingMat0<-list(lessonDur= lessonDur,
+                classroom = if (is.null(resourcesC)) {
                   } else{
                     #Add assessments to the parts list
                     if(!is.null(a_list)){

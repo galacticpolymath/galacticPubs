@@ -7,14 +7,16 @@
 drive_find_path(drive_path)
 }
 \arguments{
-\item{drive_path}{in the form "directory/subdirectory", where "My Drive" is understood to be at the root above "directory". Will match case InSeNsItIvElY. If you want to place an item on the bare "My Drive" folder, set drive_path="~" or "root".}
+\item{drive_path}{in the form "DRIVE/directory/subdirectory". DRIVE can be "~" or "my drive" to refer to your private google drive; it can also be the name of a shared drive (e.g. "GP-Misc"). Generally, case SeNsItIvE.}
 }
 \description{
 Simulates Finder/File Explorer functionality by repeated calls to \code{\link[googledrive:drive_find]{googledrive::drive_find()}}.
 }
 \seealso{
 Other Google Drive Functions: 
+\code{\link{drive_contents}()},
 \code{\link{drive_copy_missing_files}()},
-\code{\link{drive_cp_dir}()}
+\code{\link{drive_cp_dir}()},
+\code{\link{drive_open}()}
 }
 \concept{Google Drive Functions}

@@ -45,7 +45,7 @@ md_txt <- function(label,txt,required=TRUE){
 
 
 #function for swapping out missing images with placeholder text
-robust_img<-function(class,src,label){
+robust_img<-function(class,src,label,...){
   #if some function like basename is fed into src and throws an error, handle that
   src=tryCatch(src,error=function(e) {""})
   if(is.null(src)){src=""}
@@ -53,7 +53,7 @@ robust_img<-function(class,src,label){
     div(class="placeholder",
     h3(class=paste0(class),paste0(label," Missing"))
     )
-  }else{img(class=class,src=src)}
+  }else{img(class=class,src=src,...)}
 }
 
 # Function for swapping out missing text with "Missing" placeholder div

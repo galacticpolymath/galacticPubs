@@ -582,7 +582,7 @@ output$supporting_media<-renderUI({
               class = "preview-chart",
               h3("Learning Chart Preview"),
               uiOutput("chart_fig_disclaimer"),
-              plotOutput("chart_fig"),
+              plotOutput("chart_fig",width = "500px",height="300px"),
               textInput(
                 "LearningChart_params_caption",
                 "Manual caption:",

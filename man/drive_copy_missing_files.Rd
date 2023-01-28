@@ -37,7 +37,9 @@ Helps with a partial project clone (i.e. if not all files are backed up on GitHu
 }
 \seealso{
 Other Google Drive Functions: 
+\code{\link{drive_contents}()},
 \code{\link{drive_cp_dir}()},
-\code{\link{drive_find_path}()}
+\code{\link{drive_find_path}()},
+\code{\link{drive_open}()}
 }
 \concept{Google Drive Functions}
