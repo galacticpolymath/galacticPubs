@@ -22,7 +22,7 @@ drive_cp_dir<-function(new_dir_name,
   if(missing(new_dir_name)){stop("\n* Must supply new_dir_name")}
   timer <- FALSE
   # If Suggested tictoc package is available, time how long the rebuild takes
-  if (requireNamespace("tictoc")) {
+  if (require("tictoc")) {
     tictoc::tic()
     timer <- TRUE
   }
@@ -60,7 +60,9 @@ drive_cp_dir<-function(new_dir_name,
   if(!googledrive::is_folder(source_dir)){
     stop(paste0("source_dir '",source_dir$name,"' must be a folder"))
   }
-  if(!googledrive::is_folder(dest_dir)){
+
+  if(!googledrive::is_folder(dest_dir)&
+     !googledrive::is_shared_drive(dest_dir)){
     stop(paste0("dest_dir '",dest_dir$name,"' must be a folder"))
   }
 

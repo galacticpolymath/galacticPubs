@@ -31,6 +31,7 @@ Other Google Drive Functions:
 \code{\link{drive_contents}()},
 \code{\link{drive_copy_missing_files}()},
 \code{\link{drive_find_path}()},
+\code{\link{drive_new_from_template}()},
 \code{\link{drive_open}()}
 }
 \concept{Google Drive Functions}
