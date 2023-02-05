@@ -44,7 +44,8 @@ set_drive_local_credentials <- function() {
       "Library",
       "CloudStorage",
       gdrive_userdir,
-      "My Drive",
+      "Shared drives",
+      "GP-Workshop",
       "Edu",
       "Lessons"
     )
@@ -58,10 +59,10 @@ set_drive_local_credentials <- function() {
       "\nGoogle Drive For Desktop Virtualized Lessons Path set for next time: \n -",
       lessons_dir
     )
-    catalog_dir<-fs::path(fs::path_home(),"Library","CloudStorage",gdrive_userdir,"Shared drives","GP-Misc-Shared","GitHub_Meta-Projects","gp-catalog")
+    catalog_dir<-fs::path(fs::path_home(),"Library","CloudStorage",gdrive_userdir,"Shared drives","GP-Misc","GitHub_Meta-Projects","gp-catalog")
     test_catalog_dir<-file.exists(catalog_dir)
     if(!test_catalog_dir){
-      stop("Catalog not found. Make sure you have access to 'GP-Misc-Shared' Drive.\n -",catalog_dir)
+      stop("Catalog not found. Make sure you have access to 'GP-Misc' Drive.\n -",catalog_dir)
     }else{
       Sys.setenv(galacticPubs_gdrive_catalogdir = catalog_dir)
       message("\nGoogle Drive for Desktop Virtualized GP Catalog Path set for next time: \n -",catalog_dir)
