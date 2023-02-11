@@ -8,7 +8,8 @@ drive_new_from_template(
   template_path = NULL,
   dest_path = NULL,
   new_name = NULL,
-  overwrite = FALSE
+  overwrite = NA,
+  ...
 )
 }
 \arguments{
@@ -16,9 +17,11 @@ drive_new_from_template(
 
 \item{dest_path}{text string of a path where you want to file to go}
 
-\item{new_name}{text string of what you'd like to name your new file. default=NULL results in "Copy of FILENAME"; passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}}
+\item{new_name}{text string of what you'd like to name your new file. default=NULL results in "Copy of FILENAME"; passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}; you can also provide FALSE to}
 
-\item{overwrite}{default=FALSE; passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}}
+\item{overwrite}{Do you want to overwrite an existing file? default=NA means overwrite. Other options T or F are very inefficient; passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}}
+
+\item{...}{pass other arguments to Google Drive API (see \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}})}
 }
 \description{
 Create a new Galactic Polymath Google Drive file from a template
