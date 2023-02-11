@@ -47,8 +47,15 @@ Imports:
     usethis (>= 2.1.3)
 Remotes:
     galacticpolymath/galacticEdTools
-Suggests: colorspace (>= 2.0.0), rmdformats (>= 1.0.3),pacman (>= 0.5.0), tictoc (>= 1.0.1), ISOcodes (>= 2022.01.10)
+Suggests: 
+    colorspace (>= 2.0.0),
+    rmdformats (>= 1.0.3),
+    pacman (>= 0.5.0),
+    tictoc (>= 1.0.1),
+    ISOcodes (>= 2022.01.10),
+    testthat (>= 3.0.0)
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
 RoxygenNote: 7.2.3
 Depends: 
     R (>= 3.5.0)
+Config/testthat/edition: 3
