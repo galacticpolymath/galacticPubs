@@ -23,7 +23,7 @@ check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
 
   #Test that WD is a subfolder of 'Lessons'
   project<-basename(WD)
-  parent<-gsub(paste0("^.*/([^/]*)/",project,"$"),"\\1",WD)
+  parent<-path_parent_dir(WD) %>% basename()
   loc_check2<-parent=="Lessons"
   if(!loc_check2) {
     msg2 <-

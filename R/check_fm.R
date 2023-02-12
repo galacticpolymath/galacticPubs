@@ -52,7 +52,7 @@ check_fm <- function(WD = getwd(),
   if (!"gh" %in% skip) {
     git_initialized <- !is_empty(y$GitHubPath)
     if (!git_initialized) {
-      msg3 <- ("GitHubPath is currently blank in front-matter.yml.")
+      msg3 <- ("GitHubPath is currently blank in front-matter.yml. Run update_fm().")
        if (throw_error) {
         stop(msg3)
       } else{

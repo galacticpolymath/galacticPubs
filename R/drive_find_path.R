@@ -38,6 +38,8 @@ drive_find_path <- function(drive_path,
 
   if(!is.null(WD)){
   message("Resolving Gdrive for Web path for: '",gsub("\\.\\.",paste0("[ ",basename(WD)," ]"),drive_path),"'\n")
+  }else{
+    message("Resolving Gdrive for Web path for: '",drive_path,"'\n")
   }
 
   p <- strsplit(drive_path, split = "/") %>% unlist()
@@ -61,16 +63,16 @@ drive_find_path <- function(drive_path,
           #make sure a valid lesson project directory provided
 
           checkmate::assert(
-            checkmate::check_character(proj_name),
+            checkmate::check_character(drive_path),
             check_wd(WD = WD),
             combine = "and"
           )
 
           message("\nReading '",basename(WD),"' front-matter.yml: 'GdriveDirID'...")
-          browser()
+
           gID<-as.character(get_fm("GdriveDirID",WD=WD))
           checkmate::assert(
-            checkmate::check_character(proj_name)
+            checkmate::check_character(drive_path)
           )
           results[[i]] <- googledrive::drive_get(id=gID)
           sharedDrive<-"GP-Workshop"

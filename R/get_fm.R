@@ -35,6 +35,7 @@ get_fm <- function(key = NULL, WD = getwd()) {
     if (sum(!key_checks) > 0) {
       warning("\nKeys not found:\n -",
               paste0("'", key[which(!key_checks)], "'", collapse = "\n -"))
+      warning("*Try updating your front-matter with update_fm()")
     }
 
   }

@@ -17,100 +17,101 @@ update_fm <-
            save_output = TRUE,
            reorder = TRUE,
            change_this = NULL) {
-    galacticPubs_template <- safe_read_yaml(system.file("extdata",
-                                                        "front-matter_TEMPLATE.yml",
-                                                        package = "galacticPubs"))
-
     yaml_path <- fs::path(WD, "meta", "front-matter.yml")
 
-    #create empty front-matter.yml from template if file not found
-    if (!file.exists(yaml_path)) {
-      yaml::write_yaml(galacticPubs_template, yaml_path)
+    #safe_read_yaml will create yaml if it's missing
+    old_yaml <- safe_read_yaml(yaml_path)
+
+    galacticPubs_template <-
+      safe_read_yaml(yaml_path = system.file("extdata",
+                                             "front-matter_TEMPLATE.yml",
+                                             package = "galacticPubs"))
+    new_yaml <-
+      add_missing_fields(old_yaml, galacticPubs_template, reorder = reorder)
+
+    # Make manual changes if requested ----------------------------------------
+    if (!is.null(change_this)) {
+      for (i in 1:length(change_this)) {
+        element_i <- names(change_this)[i]
+        new_yaml[[element_i]] <- change_this[[i]]
+      }
+    }
+
+
+    # If front-matter exists,  do certain routine processes -------------------
+    #Add/Update the locale and lang fields with a nonexported internal function parse_locale()
+    # overwrites existing lang and locale fields and returns the modified current_data list
+    new_yaml <- new_yaml %>% parse_locale()
+
+    #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)
+    if (is.na(new_yaml$GPCatalogPath) |
+        is.na(new_yaml$GdriveDirName)) {
+      repo <- whichRepo(WD = WD)
+      new_yaml$GdriveDirName <- repo
+      new_yaml$GPCatalogPath <- catalogURL("LESSON.json", repo)
+    }
+
+    #Add Gdrive ID and URL if one is missing
+    if (is.na(new_yaml$GdriveDirID) |
+        is.na(new_yaml$GdriveDirURL)) {
+      #try to find path for the project name
       message(
-        "\n*** meta/front-matter.yml not found at ",
-        WD,
-        "\n @ New file created from galacticPubs template ver.",
-        galacticPubs_template$TemplateVer
+        "\nTrying to link local virtual lesson '",
+        new_yaml$GdriveDirName,
+        "' to its cloud Google Drive ID...\n"
       )
-      new_yaml <- galacticPubs_template
 
-      #Otherwise, update existing front-matter.yml
-    } else{
-      old_yaml <- safe_read_yaml(yaml_path)
-      new_yaml <-
-        add_missing_fields(old_yaml, galacticPubs_template, reorder = reorder)
+      proj_dribble_test <-
+        drive_find_path(paste0("GP-Workshop/Edu/Lessons/", new_yaml$GdriveDirName)) %>%
+        catch_err(keep_results = TRUE)
+      if (proj_dribble_test$success) {
+        proj_dribble <- proj_dribble_test$result
+        checkmate::assert(checkmate::check_class(proj_dribble, "dribble"),
+                          .var.name = "GdriveDirName")
 
-      # Make manual changes if requested ----------------------------------------
-      if (!is.null(change_this)) {
-        for (i in 1:length(change_this)) {
-          element_i <- names(change_this)[i]
-          new_yaml[[element_i]] <- change_this[[i]]
-        }
-      }
+        new_yaml$GdriveDirID <- proj_dribble$id
+        new_yaml$GdriveDirURL <-
+          googledrive::drive_link(proj_dribble)
 
-
-      # If front-matter exists,  do certain routine processes -------------------
-      #Add/Update the locale and lang fields with a nonexported internal function parse_locale()
-      # overwrites existing lang and locale fields and returns the modified current_data list
-      new_yaml <- new_yaml %>% parse_locale()
-
-      #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)
-      if (is.na(new_yaml$GPCatalogPath) |
-          is.na(new_yaml$GdriveDirName)) {
-        repo <- whichRepo(WD = WD)
-        new_yaml$GdriveDirName <- repo
-        new_yaml$GPCatalogPath <- catalogURL("LESSON.json", repo)
-      }
-
-      #Add Gdrive ID and URL if one is missing
-      if (is.na(new_yaml$GdriveDirID) |
-          is.na(new_yaml$GdriveDirURL)) {
-        #try to find path for the project name
-        message("\nTrying to link local virtual lesson '",new_yaml$GdriveDirName,"' to its cloud Google Drive ID)...\n")
-
-        proj_dribble_test <-
-          drive_find_path(paste0("GP-Workshop/Edu/Lessons/", new_yaml$GdriveDirName)) %>%
-          catch_err(keep_results =TRUE)
-        if (proj_dribble_test$success) {
-          proj_dribble <- proj_dribble_test$result
-          checkmate::assert(checkmate::check_class(proj_dribble, "dribble"),
-                            .var.name = "GdriveDirName")
-
-          new_yaml$GdriveDirID <- proj_dribble$id
-          new_yaml$GdriveDirURL<- googledrive::drive_link(proj_dribble)
-        }
-
-      }
-
-      #test if it's a new version
-      version_bumped <-
-        old_yaml$TemplateVer != galacticPubs_template$TemplateVer
-      if (!version_bumped) {
-        # message("\nfront-matter.yml template v.",old_yaml$TemplateVer," is up-to-date with galacticPubs v.",as.character(utils::packageVersion("galacticPubs")))
-
-        #otherwise change TemplateVer and let user know it's been upgraded
-      } else{
-        #reassign new templatever
-        new_yaml$TemplateVer <- galacticPubs_template$TemplateVer
-        message(
-          "\nfront-matter.yml template will be upgraded upon save: ",
-          old_yaml$TemplateVer,
-          "->",
-          new_yaml$TemplateVer
+        checkmate::assert(
+          checkmate::check_character(new_yaml$GdriveDirID),
+          checkmate::check_character(new_yaml$GdriveDirURL),
+          combine = "and"
         )
-      }
-
-
-
-      #save updated file if requested
-      if (save_output) {
-        #Change LastUpdated field
-        new_yaml$LastUpdated <- Sys.time() %>% as.character()
-        yaml::write_yaml(new_yaml, yaml_path)
-        message("\n@ Updated meta/front-matter.yml saved to disk.")
+        message("GdriveDirID & GdriveDirURL added to front-matter.yml")
       }
 
     }
 
-    invisible(new_yaml)
-  }
+    #test if it's a new version
+    version_bumped <-
+      old_yaml$TemplateVer != galacticPubs_template$TemplateVer
+    if (!version_bumped) {
+      # message("\nfront-matter.yml template v.",old_yaml$TemplateVer," is up-to-date with galacticPubs v.",as.character(utils::packageVersion("galacticPubs")))
+
+      #otherwise change TemplateVer and let user know it's been upgraded
+    } else{
+      #reassign new templatever
+      new_yaml$TemplateVer <- galacticPubs_template$TemplateVer
+      message(
+        "\nfront-matter.yml template will be upgraded upon save: ",
+        old_yaml$TemplateVer,
+        "->",
+        new_yaml$TemplateVer
+      )
+    }
+
+
+
+    #save updated file if requested
+    if (save_output) {
+      #Change LastUpdated field
+      new_yaml$LastUpdated <- Sys.time() %>% as.character()
+      yaml::write_yaml(new_yaml, yaml_path)
+      message("\n@ Updated meta/front-matter.yml saved to disk.")
+    }
+
+
+
+invisible(new_yaml)
+}
