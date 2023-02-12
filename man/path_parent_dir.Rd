@@ -4,11 +4,24 @@
 \alias{path_parent_dir}
 \title{Find the parent directory for a path}
 \usage{
-path_parent_dir(filepath)
+path_parent_dir(filepath, n_levels = 1, test_existence = FALSE)
 }
 \arguments{
 \item{filepath}{the file path}
+
+\item{n_levels}{how many levels do you want to go up? default=1 goes up to the parent folder level}
+
+\item{test_existence}{do you want to test whether \emph{filepath} file exists?}
 }
 \description{
 Supply a path, get the parent folder
+}
+\examples{
+path_to_file<-"Users/me/folder/subfolder/photo.png"
+(path_to_subfolder<-path_parent_dir(path_to_file))
+path_parent_dir(path_to_subfolder)
+
+#get same result from:
+path_parent_dir(path_to_file,n_levels=2)
+
 }

@@ -7,7 +7,14 @@
 #' @export
 #
 safe_read_yaml<-function(yaml_path,eval.expr=TRUE){
+  browser()
+  #see if yaml_path exists
+  yaml_exists<-checkmate::test_file_exists(yaml_path)
+  if(yaml_exists){
   y<-yaml::read_yaml(yaml_path,eval.expr=eval.expr)
+  }else{
+    init_yaml(WD=path_parent_dir(basename(yaml_path)))
+  }
 
   y2<-lapply(1:length(y), function(i){
     yi<-y[[i]]

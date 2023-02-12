@@ -66,9 +66,11 @@ update_fm <-
       if (is.na(new_yaml$GdriveDirID) |
           is.na(new_yaml$GdriveDirURL)) {
         #try to find path for the project name
+        message("\nTrying to link local virtual lesson '",new_yaml$GdriveDirName,"' to its cloud Google Drive ID)...\n")
+
         proj_dribble_test <-
-          drive_find_path(paste0("GP-Workshop/Edu/Lessons/", new_yaml$GdriveDirName)) %>% catch_err(keep_results =
-                                                                                                      TRUE)
+          drive_find_path(paste0("GP-Workshop/Edu/Lessons/", new_yaml$GdriveDirName)) %>%
+          catch_err(keep_results =TRUE)
         if (proj_dribble_test$success) {
           proj_dribble <- proj_dribble_test$result
           checkmate::assert(checkmate::check_class(proj_dribble, "dribble"),

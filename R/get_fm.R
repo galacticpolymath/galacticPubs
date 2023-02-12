@@ -19,9 +19,8 @@ get_fm <- function(key = NULL, WD = getwd()) {
     results <- y
     #otherwise check for key existence & output
   } else{
-
     key_checks <- results <- rep(NA, length(key))
-    for(i in 1:length(key)){
+    for (i in 1:length(key)) {
       key_i  <-  key[i]
       key_checks[i] <- checkmate::test_choice(key_i, KEYS)
       if (key_checks[i]) {
@@ -29,16 +28,16 @@ get_fm <- function(key = NULL, WD = getwd()) {
       }
     }
 
-    names(results)<-key
+    names(results) <- key
     #remove result items where no key found
-    results<-results[key_checks]
+    results <- results[key_checks]
 
     if (sum(!key_checks) > 0) {
       warning("\nKeys not found:\n -",
               paste0("'", key[which(!key_checks)], "'", collapse = "\n -"))
     }
-    results
-  }
 
+  }
+  results
 
 }

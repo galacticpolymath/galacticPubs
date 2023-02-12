@@ -35,8 +35,11 @@
 drive_find_path <- function(drive_path,
                             WD = NULL,
                             root = NULL) {
-  browser()
+
+  if(!is.null(WD)){
   message("Resolving Gdrive for Web path for: '",gsub("\\.\\.",paste0("[ ",basename(WD)," ]"),drive_path),"'\n")
+  }
+
   p <- strsplit(drive_path, split = "/") %>% unlist()
 
   results <- as.list(rep(NA, length(p)))
@@ -63,7 +66,13 @@ drive_find_path <- function(drive_path,
             combine = "and"
           )
 
-          results[[i]] <- googledrive::drive_get(id=as.character(get_fm("GdriveDirID",WD=WD)))
+          message("\nReading '",basename(WD),"' front-matter.yml: 'GdriveDirID'...")
+          browser()
+          gID<-as.character(get_fm("GdriveDirID",WD=WD))
+          checkmate::assert(
+            checkmate::check_character(proj_name)
+          )
+          results[[i]] <- googledrive::drive_get(id=gID)
           sharedDrive<-"GP-Workshop"
 
           }
