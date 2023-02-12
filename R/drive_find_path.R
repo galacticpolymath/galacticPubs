@@ -35,13 +35,16 @@
 drive_find_path <- function(drive_path,
                             WD = NULL,
                             root = NULL) {
-
-  if(!is.null(WD)){
-  message("Resolving Gdrive for Web path for: '",gsub("\\.\\.",paste0("[ ",basename(WD)," ]"),drive_path),"'\n")
-  }else{
-    message("Resolving Gdrive for Web path for: '",drive_path,"'\n")
+  if (!is.null(WD)) {
+    message("Resolving Gdrive for Web path for: '",
+            gsub("\\.\\.", paste0("[ ", basename(WD), " ]"), drive_path),
+            "'")
+  } else{
+    message("Resolving Gdrive for Web path for: '", drive_path, "'\n")
   }
 
+  #remove introductory "/" if one is provided
+  drive_path <- gsub("^\\/", "", drive_path)
   p <- strsplit(drive_path, split = "/") %>% unlist()
 
   results <- as.list(rep(NA, length(p)))
@@ -62,24 +65,36 @@ drive_find_path <- function(drive_path,
         if (!is.null(WD)) {
           #make sure a valid lesson project directory provided
 
+          checkmate::assert(checkmate::check_character(drive_path),
+                            check_wd(WD = WD),
+                            combine = "and")
+
+          message("\nReading '",
+                  basename(WD),
+                  "' front-matter.yml: 'GdriveDirID'...")
+
+          gID <- as.character(get_fm("GdriveDirID", WD = WD))
+          checkmate::assert(checkmate::check_character(drive_path))
+          results[[i]] <- googledrive::drive_get(id = gID)
+          sharedDrive <- "GP-Workshop"
+
+        }
+        if (!is.null(root)) {
+          #root can be an ID character string or a dribble
           checkmate::assert(
-            checkmate::check_character(drive_path),
-            check_wd(WD = WD),
-            combine = "and"
+            checkmate::check_class(root, "dribble"),
+            checkmate::check_class(root, "character")
           )
-
-          message("\nReading '",basename(WD),"' front-matter.yml: 'GdriveDirID'...")
-
-          gID<-as.character(get_fm("GdriveDirID",WD=WD))
-          checkmate::assert(
-            checkmate::check_character(drive_path)
-          )
-          results[[i]] <- googledrive::drive_get(id=gID)
-          sharedDrive<-"GP-Workshop"
-
+          #only look up root to get its shared Drive association if dribble not supplied
+          if (inherits(root, "dribble")) {
+            results[[i]] <- root
+            sharedDrive <- root$drive_resource[[1]]$driveId %>% googledrive::as_id()
+          } else{
+            results[[i]] <- googledrive::drive_get(id=root)
+            sharedDrive <- results[[i]]$drive_resource[[1]]$driveId %>% googledrive::as_id()
           }
-        #Get Google Drive ID from front matter in that directory
-        #!!!!!!!! incomplete
+        }
+
 
         #otherwise get root of SharedDrive path
       } else{
@@ -89,16 +104,24 @@ drive_find_path <- function(drive_path,
       }
 
       #error handling
-      if (nrow(results[[i]]) == 0) {
-        warning("Make sure path starts with '~' or Shared Drive Name")
+      if (identical(nrow(results[[i]]), 0)) {
+        warning(
+          "Make sure path starts with '~' or Shared Drive Name, or you supplied 'root' or 'WD' if using '..' relative path"
+        )
         stop("\nPath Not Found: '", p[i], "'")
       }
 
-      #ALL OTHER parts of path
+      #ALL OTHER parts of path (after p[[1]])
     } else{
+
+      last_result <- results[[i - 1]]
+      last_result_id <-
+        ifelse(inherits(last_result, "dribble"),
+               last_result$id,
+               last_result)
       results[[i]] <-
         googledrive::drive_find(
-          q = paste0("name='", p[i], "' and '", results[[i - 1]]$id, "' in parents"),
+          q = paste0("name='", p[i], "' and '", last_result_id , "' in parents"),
           shared_drive = sharedDrive
         )
       #error handling

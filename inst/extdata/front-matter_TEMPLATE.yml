@@ -21,6 +21,9 @@ GPCatalogPath: ''
 GitHubPath: ''
 GdriveDirName: ''
 GdriveDirID: ''
+GdriveMetaID: ''
+GdrivePublishedID: ''
+GdrivePublicID: ''
 GdriveDirURL: ''
 #!!<--- operational variables (that don't have Shiny inputs)
 

@@ -53,7 +53,9 @@ update_fm <-
 
     #Add Gdrive ID and URL if one is missing
     if (is.na(new_yaml$GdriveDirID) |
-        is.na(new_yaml$GdriveDirURL)) {
+        is.na(new_yaml$GdriveDirURL)|
+        is.na(new_yaml$GdriveMetaID)|
+        is.na(new_yaml$GdrivePublishedID)) {
       #try to find path for the project name
       message(
         "\nTrying to link local virtual lesson '",
@@ -73,9 +75,14 @@ update_fm <-
         new_yaml$GdriveDirURL <-
           googledrive::drive_link(proj_dribble)
 
+        #now look up other subfolders
+        drive_find_path(paste0("GP-Workshop/Edu/Lessons/", new_yaml$GdriveDirName))
+
         checkmate::assert(
           checkmate::check_character(new_yaml$GdriveDirID),
           checkmate::check_character(new_yaml$GdriveDirURL),
+          checkmate::check_character(new_yaml$GdriveMetaID),
+          checkmate::check_character(new_yaml$GdrivePublishedID),
           combine = "and"
         )
         message("GdriveDirID & GdriveDirURL added to front-matter.yml")
