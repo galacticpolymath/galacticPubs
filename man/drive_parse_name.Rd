@@ -4,10 +4,15 @@
 \alias{drive_parse_name}
 \title{drive_parse_name}
 \usage{
-drive_parse_name(dribble)
+drive_parse_name(dribble, set_envir = NULL)
 }
 \arguments{
 \item{dribble}{a one row dribble input (e.g. piped from \code{\link[googledrive:drive_get]{googledrive::drive_get()}}) for a single file}
+
+\item{set_envir}{set envir output manually (not from file name); partial string matching of options "classroom" and "remote"}
+}
+\value{
+a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
 }
 \description{
 Extract information from a GP lesson file, with an expected format of \emph{ShortTitle_P1_G5-9_wksht (TEACHER)}
@@ -15,3 +20,13 @@ Extract information from a GP lesson file, with an expected format of \emph{Shor
 \examples{
   drive_find_path("GP-Workshop/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
 }
+\seealso{
+Other Google Drive Functions: 
+\code{\link{drive_contents}()},
+\code{\link{drive_copy_missing_files}()},
+\code{\link{drive_cp_dir}()},
+\code{\link{drive_find_path}()},
+\code{\link{drive_new_from_template}()},
+\code{\link{drive_open}()}
+}
+\concept{Google Drive Functions}

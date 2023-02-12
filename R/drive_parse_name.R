@@ -4,11 +4,14 @@
 #'
 #'
 #' @param dribble a one row dribble input (e.g. piped from [googledrive::drive_get()]) for a single file
+#' @param set_envir set envir output manually (not from file name); partial string matching of options "classroom" and "remote"
+#' @returns a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
 #' @examples
 #'   drive_find_path("GP-Workshop/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
+#' @family Google Drive Functions
 #' @export
 
-drive_parse_name <- function(dribble) {
+drive_parse_name <- function(dribble, set_envir = NULL) {
   #Make sure a 1 row dribble
   checkmate::assert(checkmate::check_class(dribble, "dribble"))
 
@@ -17,7 +20,7 @@ drive_parse_name <- function(dribble) {
 
   #iterate over all rows in dribble provided
   lapply(1:nrow(dribble), function(i) {
-    dribble_i <- dribble[i, ]
+    dribble_i <- dribble[i,]
     nom <- dribble_i[1, 1] %>% as.character()
     nom_split <- strsplit(nom, "_", fixed = TRUE)[[1]]
     #All names must have a short title in the first location before_
@@ -80,30 +83,36 @@ drive_parse_name <- function(dribble) {
       type_names[which(type_tests)]
 
     #Guess environment
-    is_classroom <- grepl(pattern = ".*(classroom).*", x = remain)
-    is_remote <- grepl(pattern = ".*(remote).*", x = remain)
-    envir <-
-      if (!is_classroom &
-          !is_remote) {
-        NA
-      } else{
-        c("classroom", "remote")[which(c(is_classroom, is_remote))]
-      }
+    envir_names <- c("classroom", "remote")
+    if (is.null(set_envir)) {
+      is_classroom <- grepl(pattern = ".*(classroom).*", x = remain)
+      is_remote <- grepl(pattern = ".*(remote).*", x = remain)
+      envir <-
+        if (!is_classroom &
+            !is_remote) {
+          NA
+        } else{
+          envir_names[which(c(is_classroom, is_remote))]
+        }
+    } else{
+      envir <- envir_names[pmatch(set_envir,envir_names)]
+    }
 
     #Get filetype
-    fileType <- mimeKey$human_type[match(dribble_i$drive_resource[[1]]$mimeType,mimeKey$mime_type)]
+    fileType <-
+      mimeKey$human_type[match(dribble_i$drive_resource[[1]]$mimeType, mimeKey$mime_type)]
 
-      # Let user know if anything unexpected in results
-      # usually won't have environment in presentations and worksheet, so not testing
-      checkmate::assert(
-        checkmate::check_character(shortTitle, any.missing = FALSE),
-        checkmate::check_character(title, any.missing = FALSE),
-        checkmate::check_character(part, any.missing = FALSE),
-        checkmate::check_character(grades, any.missing = FALSE),
-        checkmate::check_character(itemType, any.missing = FALSE),
-        checkmate::check_character(fileType, any.missing = FALSE),
-        combine = "and"
-      ) %>% catch_err() %>% invisible() #only show warning messages for failed assertions
+    # Let user know if anything unexpected in results
+    # usually won't have environment in presentations and worksheet, so not testing
+    checkmate::assert(
+      checkmate::check_character(shortTitle, any.missing = FALSE),
+      checkmate::check_character(title, any.missing = FALSE),
+      checkmate::check_character(part, any.missing = FALSE),
+      checkmate::check_character(grades, any.missing = FALSE),
+      checkmate::check_character(itemType, any.missing = FALSE),
+      checkmate::check_character(fileType, any.missing = FALSE),
+      combine = "and"
+    ) %>% catch_err() %>% invisible() #only show warning messages for failed assertions
     #output
     dplyr::tibble(
       title = title,
@@ -112,7 +121,7 @@ drive_parse_name <- function(dribble) {
       grades = grades,
       part = part,
       itemType = itemType,
-      fileType=fileType
+      fileType = fileType
 
     )
   }) %>% dplyr::bind_rows()

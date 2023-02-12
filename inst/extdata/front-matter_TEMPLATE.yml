@@ -12,13 +12,16 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.3.8
+TemplateVer: 0.3.9
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''
 URL: ''
 GPCatalogPath: ''
 GitHubPath: ''
+GdriveDirName: ''
+GdriveDirID: ''
+GdriveDirURL: ''
 #!!<--- operational variables (that don't have Shiny inputs)
 
 PublicationStatus: Draft

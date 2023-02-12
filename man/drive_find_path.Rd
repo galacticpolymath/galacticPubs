@@ -7,7 +7,21 @@
 drive_find_path(drive_path)
 }
 \arguments{
-\item{drive_path}{in the form "DRIVE/directory/subdirectory". DRIVE can be "~" or "my drive" to refer to your private google drive; it can also be the name of a shared drive (e.g. "GP-Misc"). Generally, case SeNsItIvE.}
+\item{drive_path}{in the form "DRIVE/directory/subdirectory".
+\itemize{
+\item DRIVE can be "~" or "my drive" to refer to your private google drive
+\item Path can also be the name of a shared drive (e.g. "GP-Misc")
+\item Also supports relative paths (e.g. "../meta") if a lesson_dir is supplied (or piped from \code{\link[=pick_lesson]{pick_lesson()}})
+\item Generally, case SeNsItIvE.
+}}
+
+\item{proj_name}{will be ignored unless relative path provided ("../folder1"), where the proj_name will be substituted for "..". Must be the \strong{exact} name of a lesson directory in GP-Workshop/Edu/Lessons or use \link{pick_lesson(full_path=T)}}
+
+\item{root}{will be ignored unless relative path provided ("../folder1"), where root will be substituted for "..". Can be:
+\enumerate{
+\item a dribble or
+\item a Googledrive ID (as a string)
+}}
 }
 \description{
 Simulates Finder/File Explorer functionality by repeated calls to \code{\link[googledrive:drive_find]{googledrive::drive_find()}}.
@@ -18,6 +32,7 @@ Other Google Drive Functions:
 \code{\link{drive_copy_missing_files}()},
 \code{\link{drive_cp_dir}()},
 \code{\link{drive_new_from_template}()},
-\code{\link{drive_open}()}
+\code{\link{drive_open}()},
+\code{\link{drive_parse_name}()}
 }
 \concept{Google Drive Functions}

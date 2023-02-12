@@ -24,6 +24,7 @@ Other Google Drive Functions:
 \code{\link{drive_cp_dir}()},
 \code{\link{drive_find_path}()},
 \code{\link{drive_new_from_template}()},
-\code{\link{drive_open}()}
+\code{\link{drive_open}()},
+\code{\link{drive_parse_name}()}
 }
 \concept{Google Drive Functions}
