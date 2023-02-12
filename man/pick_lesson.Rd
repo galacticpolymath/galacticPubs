@@ -2,14 +2,17 @@
 % Please edit documentation in R/pick_lesson.R
 \name{pick_lesson}
 \alias{pick_lesson}
-\title{pick_lesson}
+\alias{lesson_pick}
+\title{pick_lesson (or lesson_pick)}
 \usage{
-pick_lesson(full_path = FALSE, lessons_dir = NULL, sort_az = FALSE)
+pick_lesson(full_path = TRUE, lessons_dir = NULL, sort_az = FALSE)
+
+lesson_pick(full_path = TRUE, lessons_dir = NULL, sort_az = FALSE)
 }
 \arguments{
-\item{full_path}{do you want a full path to the chosen lesson? default= F}
+\item{full_path}{do you want a full path to the chosen lesson? default= TRUE}
 
-\item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /)}
+\item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling \code{\link[=lessons_get_path]{lessons_get_path()}}}
 
 \item{sort_az}{logical; sort alphabetically? default =F sorts by last modified}
 }
@@ -17,5 +20,10 @@ pick_lesson(full_path = FALSE, lessons_dir = NULL, sort_az = FALSE)
 the selected lesson name
 }
 \description{
-Gives a list of lesson options for you to choose from, given the EDU/lessons path
+Interactively lets you pick from a list of published Galactic Polymath lessons and will out put a virtualized Google Drive for Desktop path
 }
+\section{Functions}{
+\itemize{
+\item \code{lesson_pick()}: 
+
+}}

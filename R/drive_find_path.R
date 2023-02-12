@@ -1,25 +1,42 @@
 #' Find folder or file along Google Drive path
 #'
-#' Simulates Finder/File Explorer functionality by repeated calls to [googledrive::drive_find()].
+#' Simulates Finder/File Explorer functionality by repeated calls to [googledrive::drive_find()]. Allows relative paths via hybrid navigation of local virtualized Google Drive for Desktop paths by going to a local lesson directory, pulling up the front-matter.yml and finding the Google ID in order to access the relative path you requested through the Drive API.
 #'
 #' @param drive_path in the form "DRIVE/directory/subdirectory".
 #' - DRIVE can be "~" or "my drive" to refer to your private google drive
 #' - Path can also be the name of a shared drive (e.g. "GP-Misc")
-#' - Also supports relative paths (e.g. "../meta") if a lesson_dir is supplied (or piped from [pick_lesson()])
+#' - Also supports relative paths (e.g. "../meta") if **WD** is supplied (this is a full "local" Google Drive for Desktop path piped from [pick_lesson()])
 #' - Generally, case SeNsItIvE.
 #' @param WD
-#' - a local virtualized path to a lesson folder where Google Drive path will be extracted from front matter. Easiest is to pass WD from [pick_lesson(full_path=TRUE)]
+#' - a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass WD from [pick_lesson()]; must use `full_path=TRUE` with pick_lesson
 #' - will be ignored unless relative path provided ("../folder1"), where **WD** will be substituted for ".."
 #' @param root NOT SUPPORTED YET will be ignored unless relative path provided ("../folder1"), where root will be substituted for "..". Can be:
 #' 1. a dribble or
 #' 2. a Googledrive ID (as a string)
 #' 3. root is passed to [googledrive::drive_get()]
+#' @examples
+#' \dontrun{
+#' #ABSOLUTE PATHS
+#' #path to a drive file on your personal Google Drive
+#' drive_find_path("~/folder_in_my_personal_drive/filename")
+#' #path to a network drive folder
+#' (p <- drive_find_path("GP-Workshop/Edu/Lessons"))
+#' #show contents of that drive folder
+#' p %>% drive_contents()
+#'
+#' #RELATIVE PATH to a particular lesson subfolder
+#' #only works if you have Google Drive for Desktop set up with permissions to GP-Workshop
+#' drive_find_path("../assets",pick_lesson(TRUE)) %>% drive_contents
+#' }
+#'
 #' @family Google Drive Functions
 #' @export
 
 drive_find_path <- function(drive_path,
                             WD = NULL,
                             root = NULL) {
+  browser()
+  message("Resolving Gdrive for Web path for: '",gsub("\\.\\.",paste0("[ ",basename(WD)," ]"),drive_path),"'\n")
   p <- strsplit(drive_path, split = "/") %>% unlist()
 
   results <- as.list(rep(NA, length(p)))

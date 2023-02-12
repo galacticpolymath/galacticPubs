@@ -1,14 +1,14 @@
-#' pick_lesson
+#' pick_lesson (or lesson_pick)
 #'
-#' Gives a list of lesson options for you to choose from, given the EDU/lessons path
+#' Interactively lets you pick from a list of published Galactic Polymath lessons and will out put a virtualized Google Drive for Desktop path
 #'
-#' @param full_path do you want a full path to the chosen lesson? default= F
-#' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /)
+#' @param full_path do you want a full path to the chosen lesson? default= TRUE
+#' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling [lessons_get_path()]
 #' @param sort_az logical; sort alphabetically? default =F sorts by last modified
 #' @return the selected lesson name
 #' @export
 
-pick_lesson <- function(full_path = FALSE,
+pick_lesson <- function(full_path = TRUE,
                         lessons_dir = NULL,
                         sort_az=FALSE) {
   if (is.null(lessons_dir)) {
@@ -48,3 +48,11 @@ pick_lesson <- function(full_path = FALSE,
 
 
 }
+
+#' lesson_pick
+#'
+#' @describeIn pick_lesson
+#'
+#' @export
+#provide alias
+lesson_pick<-pick_lesson

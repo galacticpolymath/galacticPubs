@@ -4,27 +4,47 @@
 \alias{drive_find_path}
 \title{Find folder or file along Google Drive path}
 \usage{
-drive_find_path(drive_path)
+drive_find_path(drive_path, WD = NULL, root = NULL)
 }
 \arguments{
 \item{drive_path}{in the form "DRIVE/directory/subdirectory".
 \itemize{
 \item DRIVE can be "~" or "my drive" to refer to your private google drive
 \item Path can also be the name of a shared drive (e.g. "GP-Misc")
-\item Also supports relative paths (e.g. "../meta") if a lesson_dir is supplied (or piped from \code{\link[=pick_lesson]{pick_lesson()}})
+\item Also supports relative paths (e.g. "../meta") if \strong{WD} is supplied (this is a full "local" Google Drive for Desktop path piped from \code{\link[=pick_lesson]{pick_lesson()}})
 \item Generally, case SeNsItIvE.
 }}
 
-\item{proj_name}{will be ignored unless relative path provided ("../folder1"), where the proj_name will be substituted for "..". Must be the \strong{exact} name of a lesson directory in GP-Workshop/Edu/Lessons or use \link{pick_lesson(full_path=T)}}
+\item{WD}{\itemize{
+\item a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass WD from \code{\link[=pick_lesson]{pick_lesson()}}; must use \code{full_path=TRUE} with pick_lesson
+\item will be ignored unless relative path provided ("../folder1"), where \strong{WD} will be substituted for ".."
+}}
 
-\item{root}{will be ignored unless relative path provided ("../folder1"), where root will be substituted for "..". Can be:
+\item{root}{NOT SUPPORTED YET will be ignored unless relative path provided ("../folder1"), where root will be substituted for "..". Can be:
 \enumerate{
 \item a dribble or
 \item a Googledrive ID (as a string)
+\item root is passed to \code{\link[googledrive:drive_get]{googledrive::drive_get()}}
 }}
 }
 \description{
-Simulates Finder/File Explorer functionality by repeated calls to \code{\link[googledrive:drive_find]{googledrive::drive_find()}}.
+Simulates Finder/File Explorer functionality by repeated calls to \code{\link[googledrive:drive_find]{googledrive::drive_find()}}. Allows relative paths via hybrid navigation of local virtualized Google Drive for Desktop paths by going to a local lesson directory, pulling up the front-matter.yml and finding the Google ID in order to access the relative path you requested through the Drive API.
+}
+\examples{
+\dontrun{
+#ABSOLUTE PATHS
+#path to a drive file on your personal Google Drive
+drive_find_path("~/folder_in_my_personal_drive/filename")
+#path to a network drive folder
+(p <- drive_find_path("GP-Workshop/Edu/Lessons"))
+#show contents of that drive folder
+p \%>\% drive_contents()
+
+#RELATIVE PATH to a particular lesson subfolder
+#only works if you have Google Drive for Desktop set up with permissions to GP-Workshop
+drive_find_path("../assets",pick_lesson(TRUE)) \%>\% drive_contents
+}
+
 }
 \seealso{
 Other Google Drive Functions: 
