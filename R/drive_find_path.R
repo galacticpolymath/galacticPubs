@@ -7,14 +7,19 @@
 #' - Path can also be the name of a shared drive (e.g. "GP-Misc")
 #' - Also supports relative paths (e.g. "../meta") if a lesson_dir is supplied (or piped from [pick_lesson()])
 #' - Generally, case SeNsItIvE.
-#' @param proj_name will be ignored unless relative path provided ("../folder1"), where the proj_name will be substituted for "..". Must be the **exact** name of a lesson directory in GP-Workshop/Edu/Lessons or use [pick_lesson(full_path=T)]
-#' @param root will be ignored unless relative path provided ("../folder1"), where root will be substituted for "..". Can be:
+#' @param WD
+#' - a local virtualized path to a lesson folder where Google Drive path will be extracted from front matter. Easiest is to pass WD from [pick_lesson(full_path=TRUE)]
+#' - will be ignored unless relative path provided ("../folder1"), where **WD** will be substituted for ".."
+#' @param root NOT SUPPORTED YET will be ignored unless relative path provided ("../folder1"), where root will be substituted for "..". Can be:
 #' 1. a dribble or
 #' 2. a Googledrive ID (as a string)
+#' 3. root is passed to [googledrive::drive_get()]
 #' @family Google Drive Functions
 #' @export
 
-drive_find_path <- function(drive_path) {
+drive_find_path <- function(drive_path,
+                            WD = NULL,
+                            root = NULL) {
   p <- strsplit(drive_path, split = "/") %>% unlist()
 
   results <- as.list(rep(NA, length(p)))
@@ -30,18 +35,23 @@ drive_find_path <- function(drive_path) {
           googledrive::drive_get(id = "root")
         sharedDrive <- NULL
 
-        #handle relative paths
+        #handle relative paths from a GP-Workshop/Edu/Lessons dir
       } else if (p[i] == "..") {
-        if(!is.null(proj_name)){
-        #make sure a valid lesson project directory provided
+        if (!is.null(WD)) {
+          #make sure a valid lesson project directory provided
+
           checkmate::assert(
-          checkmate::check_character(proj_name),
-          check_wd(WD=proj_name),
-          combine="and"
-        )
-        }
+            checkmate::check_character(proj_name),
+            check_wd(WD = WD),
+            combine = "and"
+          )
+
+          results[[i]] <- googledrive::drive_get(id=as.character(get_fm("GdriveDirID",WD=WD)))
+          sharedDrive<-"GP-Workshop"
+
+          }
         #Get Google Drive ID from front matter in that directory
-#!!!!!!!! incomplete
+        #!!!!!!!! incomplete
 
         #otherwise get root of SharedDrive path
       } else{
