@@ -13,16 +13,18 @@ init_lesson_meta <- function(WD=getwd(),overwrite=NA){
 
   #check_wd(WD)
   #GdriveID for lesson templates (must have access to '/GP-Workshop/Templates_BE_CAREFUL/lesson-meta-templates/')
-  dest_gID<-get_fm("GdriveMetaID",WD=WD) %>% unlist
+  fm<-get_fm(WD=WD)
+  dest_gID<-fm$GdriveMetaID %>% unlist
 
   checkmate::assert(
     checkmate::check_class(dest_gID,"character")
   )
 
   meta_template_files<-googledrive::drive_get(id=googledrive::as_id("1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me")) %>% drive_contents
-  drive_new_from_template(meta_template_files,googledrive::as_id(dest_gID),overwrite=overwrite)
+  out<-drive_new_from_template(meta_template_files,googledrive::as_id(dest_gID),overwrite=overwrite)
   # drive_new_from_template(template_path = "1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me",dest_path = dest_gID)
-
+  message("These files copied to: '[",fm$GdriveDirName,"]/meta'")
+  out
 
 }
 
