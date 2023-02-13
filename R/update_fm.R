@@ -76,7 +76,10 @@ update_fm <-
           googledrive::drive_link(proj_dribble)
 
         #now look up other subfolders
-        drive_find_path(paste0("GP-Workshop/Edu/Lessons/", new_yaml$GdriveDirName))
+        gMetaID<-drive_find_path("../meta", root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
+        new_yaml$GdriveMetaID<-gMetaID$result$id
+        gPublishedID<-drive_find_path("../published", root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
+        new_yaml$GdrivePublishedID<-gPublishedID$result$id
 
         checkmate::assert(
           checkmate::check_character(new_yaml$GdriveDirID),
@@ -85,7 +88,7 @@ update_fm <-
           checkmate::check_character(new_yaml$GdrivePublishedID),
           combine = "and"
         )
-        message("GdriveDirID & GdriveDirURL added to front-matter.yml")
+        message("GdriveDirID, GdriveDirURL, GdriveMetaID, & GdrivePublishedID added to front-matter.yml")
       }
 
     }
