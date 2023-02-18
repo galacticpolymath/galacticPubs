@@ -1,17 +1,28 @@
-#' drive_parse_name
+#' drive_get_info
 #'
-#' Extract information from a GP lesson file, with an expected format of *ShortTitle_P1_G5-9_wksht (TEACHER)*
+#' Extract galacticPubs-relevant information from a GP lesson file, with an expected format of *ShortTitle_P1_G5-9_wksht (TEACHER)*
 #'
+#' Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match DriveLinks fields, though they cannot be populated automatically.
 #'
 #' @param dribble a one row dribble input (e.g. piped from [googledrive::drive_get()]) for a single file
 #' @param set_envir set envir output manually (not from file name); partial string matching of options "classroom" and "remote"
+#' @param set_grades set grade bands manually (not from file name); passed as a string (e.g. "5-9")
+#' @param validate logical; do you want to throw an error if any of the following are missing? default= FALSE
+#' - shortTitle
+#' - title
+#' - part
+#' - grades
+#' - itemType
+#' - fileType
+#'
 #' @returns a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
 #' @examples
 #'   drive_find_path("GP-Workshop/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
+#'
 #' @family Google Drive Functions
 #' @export
 
-drive_parse_name <- function(dribble, set_envir = NULL) {
+drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=FALSE) {
   #Make sure a 1 row dribble
   checkmate::assert(checkmate::check_class(dribble, "dribble"))
 
@@ -19,13 +30,13 @@ drive_parse_name <- function(dribble, set_envir = NULL) {
   mimeKey <- googledrive::drive_mime_type(googledrive::expose())
 
   #iterate over all rows in dribble provided
-  lapply(1:nrow(dribble), function(i) {
+  out<-lapply(1:nrow(dribble), function(i) {
     dribble_i <- dribble[i,]
     nom <- dribble_i[1, 1] %>% as.character()
     nom_split <- strsplit(nom, "_", fixed = TRUE)[[1]]
     #All names must have a short title in the first location before_
     shortTitle <- nom_split[1] %>% gsub(" ", "", .)
-    title = string_parseCamel(shortTitle) %>% catch_err(keep_results = TRUE) %>% .$result
+    short_title = string_parseCamel(shortTitle) %>% catch_err(keep_results = TRUE) %>% .$result
     #Most will have a part in the 2nd place (that starts with "P").
     #Will just supply the number if a P is found in this spot, OR there is no - here indicating grade range; otherwise NA
     part = ifelse(
@@ -58,7 +69,11 @@ drive_parse_name <- function(dribble, set_envir = NULL) {
                collapse = "")
       grade_str <- substr(grade_str, 1, delim_loc - 1)
     }
-    #finally, get grade band by stripping out grade prefix
+
+    if(!is_empty(set_grades)){
+      grade_str<-set_grades
+    }
+    #try to get grade band by stripping out grade prefix (also, if provided, in case somebody gives it "G5-9", just want "5-9" for conformity)
     grades <-
       gsub("[a-zA-Z]*(\\d.*)",
            "\\1",
@@ -68,25 +83,30 @@ drive_parse_name <- function(dribble, set_envir = NULL) {
 
     #Guess at document type
     remain <- tolower(remaining_str)
-    #common types
-    is_wksht <- grepl(pattern = ".*(wo?r?kshe?e?t).*", x = remain)
-    is_handout <- grepl(pattern = ".*(handout).*", x = remain)
-    is_presentation <-
-      grepl(pattern = ".*(prese?n?t?a?t?i?o?n?).*", x = remain)
-    is_cards <- grepl(pattern = ".*(card).*", x = remain)
 
-    type_tests <- c(is_wksht, is_handout, is_presentation, is_cards)
-    type_names <- c("worksheet", "handout", "presentation", "card")
-    itemType = if (sum(type_tests) == 0)
+    #common types
+    # searching the whole nom, not just remain
+    is_wksht <- grepl(pattern = ".*(wo?r?kshe?e?t).*", x = tolower(nom))
+    is_handout <- grepl(pattern = ".*(handout).*", x = tolower(nom))
+    is_presentation <-
+      grepl(pattern = ".*(prese?n?t?a?t?i?o?n?).*", x = tolower(nom))
+    is_cards <- grepl(pattern = ".*(card).*", x = tolower(nom))
+    is_table <- grepl(pattern = ".*(table).*", x = tolower(nom))
+
+    type_tests <- c(is_wksht, is_handout, is_presentation, is_cards,is_table)
+    type_names <- c("worksheet", "handout", "presentation", "card","table")
+
+    itemType = if (sum(type_tests) == 0){
       NA
-    else
-      type_names[which(type_tests)]
+    }else{
+      paste0(type_names[which(type_tests)],collapse="/ ") #collapses multiple types if somebody puts say "Table 3 Handout" to "table/handout"
+    }
 
     #Guess environment
     envir_names <- c("classroom", "remote")
     if (is.null(set_envir)) {
-      is_classroom <- grepl(pattern = ".*(classroom).*", x = remain)
-      is_remote <- grepl(pattern = ".*(remote).*", x = remain)
+      is_classroom <- grepl(pattern = envir_names[1], x = remain)
+      is_remote <- grepl(pattern = envir_names[2], x = remain)
       envir <-
         if (!is_classroom &
             !is_remote) {
@@ -98,33 +118,62 @@ drive_parse_name <- function(dribble, set_envir = NULL) {
       envir <- envir_names[pmatch(set_envir,envir_names)]
     }
 
+    #Guess Student vs Teacher
+    SvT_names<-c("student","teacher")
+    is_student<-grepl(pattern=SvT_names[1],x = remain)
+    is_teacher<-grepl(pattern=SvT_names[2],x = remain)
+    SvT<-
+      if(!is_student& !is_teacher){
+        NA
+        }else{SvT_names[which(c(is_student,is_teacher))]}
+
+
     #Get filetype
     fileType <-
       mimeKey$human_type[match(dribble_i$drive_resource[[1]]$mimeType, mimeKey$mime_type)]
 
     # Let user know if anything unexpected in results
     # usually won't have environment in presentations and worksheet, so not testing
+    if(validate){
     checkmate::assert(
       checkmate::check_character(shortTitle, any.missing = FALSE),
-      checkmate::check_character(title, any.missing = FALSE),
+      checkmate::check_character(short_title, any.missing = FALSE),
       checkmate::check_character(part, any.missing = FALSE),
       checkmate::check_character(grades, any.missing = FALSE),
       checkmate::check_character(itemType, any.missing = FALSE),
       checkmate::check_character(fileType, any.missing = FALSE),
+       checkmate::check_character(SvT, any.missing = FALSE),
       combine = "and"
-    ) %>% catch_err() %>% invisible() #only show warning messages for failed assertions
-    #output
+    ) %>% invisible() #only show warning messages for failed assertions
+    }
+
+    #Get Link
+    link<-googledrive::drive_link(dribble)
+    checkmate::assert_character(link,any.missing=F)
+
+    #Get Mod Date
+    modTime<-dribble$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
+    checkmate::assert_posixct(modTime,any.missing = FALSE)
+      #output
     dplyr::tibble(
-      title = title,
       shortTitle = shortTitle,
+      short_title = short_title,
+      title=NA,
+      filename=nom,
+      itemType = itemType,
+      fileType = fileType,
       envir = envir,
       grades = grades,
       part = part,
-      itemType = itemType,
-      fileType = fileType
+      SvT= SvT,
+      description=NA,
+      workshopLink = link,
+      modTime= modTime
 
     )
+
   }) %>% dplyr::bind_rows()
 
+  out
 
 }

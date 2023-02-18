@@ -2,6 +2,8 @@
 #'
 #' Imports meta/front-matter.yml value(s) to environment as a list.
 #'
+#' If you ask for only one key, output will be a vector, rather than a list
+#'
 #' @param key which entry (or entries) do you want to import? default=NULL will import everything
 #' @param WD working directory; default=getwd()
 #' @examples
@@ -39,6 +41,9 @@ get_fm <- function(key = NULL, WD = getwd()) {
     }
 
   }
-  results
-
+  if (length(results) == 1) {
+    unlist(results)
+  } else{
+    results
+  }
 }

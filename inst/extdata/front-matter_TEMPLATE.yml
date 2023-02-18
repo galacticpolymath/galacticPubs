@@ -8,11 +8,12 @@ DefaultLanguage: 'English'
 DefaultCountry: 'United States'
 
 #!!---> operational variables (that don't have Shiny inputs
+MediumTitle: '' # Format: Title + _Subj_ + _Gx-y_+ (Locale)
 lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.3.9
+TemplateVer: 0.4.0
 galacticPubsVer: ''
 FirstPublicationDate: ''
 LastUpdated: ''

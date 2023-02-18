@@ -5,12 +5,14 @@
 \alias{lesson_init_meta}
 \title{init_lesson_meta()}
 \usage{
-init_lesson_meta(WD = getwd())
+init_lesson_meta(WD = getwd(), overwrite = NA)
 
-lesson_init_meta(WD = getwd())
+lesson_init_meta(WD = getwd(), overwrite = NA)
 }
 \arguments{
 \item{WD}{the working directory for the virtualized lesson path; default=getwd() if you're working in the lesson's .Rproj. Otherwise use \code{\link[=pick_lesson]{pick_lesson()}}}
+
+\item{overwrite}{passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}; default=NA will add "(1)" to avoid duplicates; TRUE will trash existing file before copying}
 }
 \description{
 Add galacticPubs Google Workspace working documents to a given lesson's \emph{/meta} folder. You \emph{must have access to GP-Workshop shared drive}.
@@ -29,8 +31,10 @@ Other Google Drive Functions:
 \code{\link{drive_copy_missing_files}()},
 \code{\link{drive_cp_dir}()},
 \code{\link{drive_find_path}()},
+\code{\link{drive_get_info}()},
+\code{\link{drive_inSync}()},
 \code{\link{drive_new_from_template}()},
 \code{\link{drive_open}()},
-\code{\link{drive_parse_name}()}
+\code{\link{update_drive_links}()}
 }
 \concept{Google Drive Functions}

@@ -7,7 +7,7 @@
 drive_new_from_template(
   template_path = NULL,
   dest_path = NULL,
-  new_name = NULL,
+  new_name = FALSE,
   overwrite = NA,
   ...
 )
@@ -35,8 +35,10 @@ Other Google Drive Functions:
 \code{\link{drive_copy_missing_files}()},
 \code{\link{drive_cp_dir}()},
 \code{\link{drive_find_path}()},
+\code{\link{drive_get_info}()},
+\code{\link{drive_inSync}()},
 \code{\link{drive_open}()},
-\code{\link{drive_parse_name}()},
-\code{\link{init_lesson_meta}()}
+\code{\link{init_lesson_meta}()},
+\code{\link{update_drive_links}()}
 }
 \concept{Google Drive Functions}

@@ -10,7 +10,8 @@
 #'
 check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
   #test that WD is in the root directory with the R Project
-  loc_check<-list.files(WD,pattern="\\.Rproj") %>% length() ==1
+  files<-list.files(WD)
+  loc_check<-(stringr::str_detect(files,"\\.Rproj") %>% sum() )==1
   if(!loc_check) {
     msg <-
       "No .Rproj file found. Make sure you're in the right WD (working directory)\n"
@@ -34,14 +35,28 @@ check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
       warning(msg2)
     }
   }
-  test_result <- loc_check&loc_check2
+
+  #Test if contains teaching-mat
+  loc_check3<-(stringr::str_detect(files,"teaching-materials") %>% sum)==1
+  if(!loc_check3) {
+    msg3 <-
+      ("Lesson folder 'teaching-materials' not found.\n")
+    if (throw_error) {
+      stop(msg3)
+    } else{
+      warning(msg3)
+    }
+  }
+
+  test_result <- loc_check&loc_check2&loc_check3
   if(simple_out){
   test_result
   }else{
     list(
     test_result=test_result,
     parent_folder_name=parent,
-    project_folder_name=project
+    project_folder_name=project,
+    teaching_materials_found=loc_check3
     )
   }
 

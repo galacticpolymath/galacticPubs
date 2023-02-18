@@ -4,10 +4,12 @@
 \alias{drive_contents}
 \title{drive_contents}
 \usage{
-drive_contents(drib)
+drive_contents(dribble, recursive = FALSE)
 }
 \arguments{
-\item{drib}{a Google drive dribble of a folder (usually the output of \code{\link[=drive_find_path]{drive_find_path()}})}
+\item{dribble}{a Google drive dribble of a folder (usually the output of \code{\link[=drive_find_path]{drive_find_path()}})}
+
+\item{recursive}{default=FALSE; doesn't really work super well...passed to \code{\link[googledrive:drive_ls]{googledrive::drive_ls()}}.}
 }
 \value{
 a dribble showing the contents of the desired folder
@@ -23,9 +25,11 @@ Other Google Drive Functions:
 \code{\link{drive_copy_missing_files}()},
 \code{\link{drive_cp_dir}()},
 \code{\link{drive_find_path}()},
+\code{\link{drive_get_info}()},
+\code{\link{drive_inSync}()},
 \code{\link{drive_new_from_template}()},
 \code{\link{drive_open}()},
-\code{\link{drive_parse_name}()},
-\code{\link{init_lesson_meta}()}
+\code{\link{init_lesson_meta}()},
+\code{\link{update_drive_links}()}
 }
 \concept{Google Drive Functions}

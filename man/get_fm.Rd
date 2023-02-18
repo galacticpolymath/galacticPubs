@@ -14,6 +14,9 @@ get_fm(key = NULL, WD = getwd())
 \description{
 Imports meta/front-matter.yml value(s) to environment as a list.
 }
+\details{
+If you ask for only one key, output will be a vector, rather than a list
+}
 \examples{
 get_fm()
 get_fm(key=c("Title","ShortTitle","locale"))

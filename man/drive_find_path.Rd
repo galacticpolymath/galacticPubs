@@ -7,12 +7,14 @@
 drive_find_path(drive_path, WD = NULL, root = NULL)
 }
 \arguments{
-\item{drive_path}{in the form "DRIVE/directory/subdirectory".
+\item{drive_path}{If you provide a dribble, it gets passed right back out. Otherwise, you can give a character string in the form "DRIVE/directory/subdirectory".
 \itemize{
 \item DRIVE can be "~" or "my drive" to refer to your private google drive
 \item Path can also be the name of a shared drive (e.g. "GP-Misc")
-\item Also supports relative paths (e.g. "../meta") if \strong{WD} is supplied (this is a full "local" Google Drive for Desktop path piped from \code{\link[=pick_lesson]{pick_lesson()}})
-\item Generally, case SeNsItIvE.
+\item Also supports relative paths (e.g. "../meta"), as long as \strong{WD} or \strong{root}. If \strong{WD} is supplied (this is a full "local" Google Drive for Desktop path piped from \code{\link[=pick_lesson]{pick_lesson()}}). If \strong{root} supplied, it will use that as the parent for getting relative paths.
+\item Relative pathing can be significantly faster because each hierarchical call to GDrive API to resolve a folder costs about a second.
+\item You can also pass an ID as a text string if you know that already
+\item Generally, case SeNsItIvE...but results may vary
 }}
 
 \item{WD}{\itemize{
@@ -36,13 +38,13 @@ Simulates Finder/File Explorer functionality by repeated calls to \code{\link[go
 #path to a drive file on your personal Google Drive
 drive_find_path("~/folder_in_my_personal_drive/filename")
 #path to a network drive folder
-(p <- drive_find_path("GP-Workshop/Edu/Lessons"))
+(p <- drive_find_path("GP-Workshop/Edu/Lessons/geneticrescue_sci"))
 #show contents of that drive folder
 p \%>\% drive_contents()
 
 #RELATIVE PATH to a particular lesson subfolder
 #only works if you have Google Drive for Desktop set up with permissions to GP-Workshop
-drive_find_path("../assets",pick_lesson(TRUE)) \%>\% drive_contents
+drive_find_path("../assets",pick_lesson()) \%>\% drive_contents
 }
 
 }
@@ -51,9 +53,11 @@ Other Google Drive Functions:
 \code{\link{drive_contents}()},
 \code{\link{drive_copy_missing_files}()},
 \code{\link{drive_cp_dir}()},
+\code{\link{drive_get_info}()},
+\code{\link{drive_inSync}()},
 \code{\link{drive_new_from_template}()},
 \code{\link{drive_open}()},
-\code{\link{drive_parse_name}()},
-\code{\link{init_lesson_meta}()}
+\code{\link{init_lesson_meta}()},
+\code{\link{update_drive_links}()}
 }
 \concept{Google Drive Functions}
