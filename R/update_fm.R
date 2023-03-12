@@ -42,7 +42,7 @@ update_fm <-
     #Add/Update the locale and lang fields with a nonexported internal function parse_locale()
     # overwrites existing lang and locale fields and returns the modified current_data list
     new_yaml <- new_yaml %>% parse_locale()
-    # overwrite MediumTitle used for sensible folder naming in GalacticPolymath network drive
+    # overwrite MediumTitle used for sensible folder naming in public-facing GalacticPolymath network drive
     new_yaml$MediumTitle<-paste0(paste0("'",new_yaml$Title,"'"),
                                  ifelse(is_empty(new_yaml$TargetSubject),"",paste0("_",new_yaml$TargetSubject,"_")),
                                  ifelse(is_empty(new_yaml$ForGrades),"",paste0(new_yaml$ForGrades," ")),
@@ -54,6 +54,7 @@ update_fm <-
     if (is.na(new_yaml$GPCatalogPath) |
         is.na(new_yaml$GdriveDirName)) {
       repo <- whichRepo(WD = WD)
+      browser()
       new_yaml$GdriveDirName <- repo
       new_yaml$GPCatalogPath <- catalogURL("LESSON.json", repo)
     }

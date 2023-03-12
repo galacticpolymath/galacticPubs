@@ -15,6 +15,13 @@ whichRepo<-function(WD,fullPath=FALSE){
     WD<-rstudioapi::getActiveProject()
   }
   origin<-system(paste0("cd '",WD,"' && git remote -v"),intern=TRUE)[1]
+
+  #check that origin is sensible before proceeding
+  checkmate::assert(
+    checkmate::check_character(origin,"character", null.ok=FALSE,any.missing = FALSE),
+    .var.name = "git remote URL"
+  )
+
   repo<-ifelse(fullPath,gsub(".*(git@github.com:.[^ ]*).*$","\\1",origin),gsub("^.*/(.*)\\.git.*$","\\1", origin))
   if(is.na(repo)) {
     warning(

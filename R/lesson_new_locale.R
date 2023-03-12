@@ -20,7 +20,7 @@ lesson_new_locale <-
     lessons_dir <- lessons_get_path()
 
     if (missing(gh_proj_name)) {
-      gh_proj_name <- pick_lesson()
+      gh_proj_name <- pick_lesson(full_path = FALSE)
     }
 
     if (!is.null(new_proj_name) & repair) {
