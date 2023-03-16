@@ -27,17 +27,40 @@ hard_left_join <-
            by,
            as_char = FALSE,
            df1_cols_to_keep = NULL) {
+    #There's a problem reconciling files if all rows of "by" column aren't unique
     if (missing(by)) {
       stop("Specify 'by' column for matching df1 and df2")
     }
-    #There's a problem reconciling files if all rows of "by" column aren't unique
 
-    if (is_empty(df2)) {
-      final <- df2[, names(df1)]
-    }else if(is_empty(df1)){
-    final<-df1
+     df1 <- dplyr::as_tibble(df1)
+      df2 <- dplyr::as_tibble(df2)
 
-    }else{
+      #make output as_character if requested
+      if (as_char) {
+        #annoying AF syntax with across and everything
+        df1 <- df1 %>%
+          dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
+        df2 <- df2 %>%
+          dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
+      }
+
+    # Trifurcation of output logic (dealing with empty df1, df2, or coalescing them)
+    if (is_empty(df1)) {
+      blankdf <-
+        matrix(rep(NA, nrow(df2) * ncol(df1)),
+               ncol = ncol(df1),
+               dimnames = list(NULL, names(df1))) %>% dplyr::as_tibble()
+
+
+
+      ixn <- intersect(names(df1), names(df2))
+      blankdf[, ixn] <- df2[, ixn]
+      final <- blankdf
+    } else if (is_empty(df2)) {
+      final <- df1
+
+    #logic for coalescing df1 and df2
+    } else{
       df1_dups <- duplicated(df1[, by])
       df2_dups <- duplicated(df2[, by])
       if (sum(df1_dups) > 0) {
@@ -54,26 +77,18 @@ hard_left_join <-
         ))
       }
 
-      df1_0 <- df1
-      df2_0 <- df2
-      if (as_char) {
-        #annoying AF syntax with across and everything
-        df1 <-
-          df1_0 %>% dplyr::as_tibble(df1) %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
-        df2 <-
-          df2_0 %>% dplyr::as_tibble(df2) %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
-      }
-      df1 <- dplyr::as_tibble(df1)
-      df2 <- dplyr::as_tibble(df2)
+
 
       #intersecting (non-id) columns
       ixn <- intersect(names(df1), names(df2))
       ixn <- ixn[!ixn %in% by]
 
-      df2_index_in_df1 <- match(unlist(df2[, by]), unlist(df1[, by]))
+      df2_index_in_df1 <-
+        match(unlist(df2[, by]), unlist(df1[, by]))
 
       #output should be in the format of df1
       df3 <- df1
+
       #do the replacement
       if (length(unique_sans_na(df2_index_in_df1)) > 0) {
         df3[unique_sans_na(df2_index_in_df1), ixn] <-
@@ -88,10 +103,14 @@ hard_left_join <-
       if (is.null(df1_cols_to_keep)) {
         final <- semifinal
       } else{
-        final <- hard_left_join(semifinal, df1[, c(by, df1_cols_to_keep)], by = by)
+        final <-
+          hard_left_join(semifinal, df1[, c(by, df1_cols_to_keep)], by = by)
       }
 
     }
 
+
+
     final
+
   }

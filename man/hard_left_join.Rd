@@ -32,5 +32,7 @@ If df2 contains rows not matched in df1, they will get added to the result. Note
 hard_left_join(df1,df2,by="id")
 #df2 values overwrite matching columns; df1 columns not found in df2 are ignored
 
+
 hard_left_join(df1,df2,by="id",df1_cols_to_keep="b")
+#here df1 values for the b column are kept in output
 }

@@ -11,10 +11,12 @@
 #' 6. Save 'meta/teach-it.gsheet'
 #'
 #' @param WD a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass WD from [pick_lesson()]; must use `full_path=TRUE` with pick_lesson
+#' @param rebuild if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.googlesheet; default= NULL
 #' @export
 #' @family Google Drive Functions
 
-update_drive_links <- function(WD = getwd()) {
+update_drive_links <- function(WD = getwd(),
+                               rebuild=NULL) {
   checkmate::assert(checkmate::check_character(drive_path),
                     check_wd(WD = WD,throw_error = FALSE),
                     combine = "and")
@@ -38,7 +40,7 @@ update_drive_links <- function(WD = getwd()) {
   )
 
   #Get teaching-materials drive content
-  browser()
+
   teach_dir <-
     drive_find_path("../teaching-materials", root = gID)
 
@@ -100,12 +102,12 @@ update_drive_links <- function(WD = getwd()) {
       #Now gather info from Part subdirectories
       if (nrow(dir_i_subfolders) > 0) {
         dir_i_subfolders_info <-
-          lapply(1:nrow(dir_i_subfolders), function(ii)
+          lapply(1:nrow(dir_i_subfolders), function(ii){
             update_drive_links_partHelper(
               dribble = dir_i_subfolders[ii,],
               set_grades = dir_i_info$grades,
               set_envir = envir_type
-            )) %>% dplyr::bind_rows()
+          )}) %>% dplyr::bind_rows()
       } else{
         dir_i_subfolders_info <- NULL
       }
@@ -135,19 +137,35 @@ update_drive_links <- function(WD = getwd()) {
 
   teach_mat_gsheet_modTime<-teach_it_drib$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
 
-  timediff<-teach_mat_gsheet_modTime-last_teach_mat_change
+  timediff<-teach_mat_gsheet_modTime-last_teach_mat_change_time
   test_in_sync<-timediff>0
-  if(test_in_sync){
+  if(test_in_sync&!identical(TRUE,rebuild)){ #rebuild overrides an in_sync check
     message("Teaching-material seems to be up-to-date.")
   }else{
+    if(!test_in_sync){
     message("Teaching-materials.gsheet is older than '",last_teach_mat_change_item,"' by ",round(timediff,2)," ",attr(timediff,"units"))
+    }
     message("Updating teaching-materials.gsheet...")
 
 
 # Now handle reading and updating teaching-mat.gsheet ---------------------
+    teachmat_in<-googlesheets4::read_sheet(teach_it_drib,sheet="DriveLinks",skip = 1) %>% dplyr::mutate(f_g_e=paste(filename,grades,envir))
+    inferred_teachmat <- inferred_teachmat%>% dplyr::mutate(f_g_e=paste(filename,grades,envir))
+    browser()
+    teachmat_out<-hard_left_join(teachmat_in,
+                                 inferred_teachmat,
+                                 by="f_g_e",
+                                 df1_cols_to_keep=c("title","description"),
+                                 as_char=TRUE) %>%
+      dplyr::arrange("envir", "grades","part","filename") %>%
+      dplyr::select(-"f_g_e",-dplyr::starts_with("..."))
 
-    teachmat_in<-googlesheets4::read_sheet(teach_it_drib,sheet="DriveLinks",skip = 1)
-    teachmat_out<-hard_left_join(teachmat_in, inferred_teachmat,by="filename")
+    #If StudioLink wasn't found, flag as trashed
+
+    #Write new data to DriveLinks tab
+    skip_rows<-2
+    ss_range<-paste0("A",1+skip_rows,":",LETTERS[ncol(teachmat_out)],skip_rows+nrow(teachmat_out))
+    ss_write_success<-googlesheets4::range_write(teach_it_drib,sheet="DriveLinks",data=teachmat_out,range =ss_range,reformat = FALSE,col_names=FALSE ) %>% catch_err()
 
     }
 }

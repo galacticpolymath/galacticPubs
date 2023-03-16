@@ -4,7 +4,7 @@
 #'
 #' Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match DriveLinks fields, though they cannot be populated automatically.
 #'
-#' @param dribble a one row dribble input (e.g. piped from [googledrive::drive_get()]) for a single file
+#' @param dribble a dribble input (e.g. piped from [googledrive::drive_get()]) for a single file
 #' @param set_envir set envir output manually (not from file name); partial string matching of options "classroom" and "remote"
 #' @param set_grades set grade bands manually (not from file name); passed as a string (e.g. "5-9")
 #' @param validate logical; do you want to throw an error if any of the following are missing? default= FALSE
@@ -23,7 +23,7 @@
 #' @export
 
 drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=FALSE) {
-  #Make sure a 1 row dribble
+  #Make sure a dribble
   checkmate::assert(checkmate::check_class(dribble, "dribble"))
 
   #useful later for figuring out filetypes of dribble listings
@@ -96,7 +96,7 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     type_tests <- c(is_wksht, is_handout, is_presentation, is_cards,is_table)
     type_names <- c("worksheet", "handout", "presentation", "card","table")
 
-    itemType = if (sum(type_tests) == 0){
+    itemType <- if (sum(type_tests) == 0){
       NA
     }else{
       paste0(type_names[which(type_tests)],collapse="/ ") #collapses multiple types if somebody puts say "Table 3 Handout" to "table/handout"
@@ -142,13 +142,13 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
       checkmate::check_character(grades, any.missing = FALSE),
       checkmate::check_character(itemType, any.missing = FALSE),
       checkmate::check_character(fileType, any.missing = FALSE),
-       checkmate::check_character(SvT, any.missing = FALSE),
+       checkmate::check_character(SvT, any.missing = TRUE),
       combine = "and"
     ) %>% invisible() #only show warning messages for failed assertions
     }
 
     #Get Link
-    link<-googledrive::drive_link(dribble)
+    link<-googledrive::drive_link(dribble_i)
     checkmate::assert_character(link,any.missing=F)
 
     #Get Mod Date
@@ -167,7 +167,7 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
       part = part,
       SvT= SvT,
       description=NA,
-      workshopLink = link,
+      studioLink = link,
       modTime= modTime
 
     )
