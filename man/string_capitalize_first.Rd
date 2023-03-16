@@ -14,6 +14,7 @@ Does what it says
 }
 \seealso{
 Other simple text string manipulation functions: 
+\code{\link{paste_valid}()},
 \code{\link{string_parseCamel}()}
 }
 \concept{simple text string manipulation functions}

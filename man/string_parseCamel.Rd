@@ -22,6 +22,7 @@ This function takes a string e.g. "HelloWorld" and returns a regex expression "H
 }
 \seealso{
 Other simple text string manipulation functions: 
+\code{\link{paste_valid}()},
 \code{\link{string_capitalize_first}()}
 }
 \concept{regex functions}

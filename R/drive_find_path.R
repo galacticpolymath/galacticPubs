@@ -49,11 +49,11 @@ drive_find_path <- function(drive_path,
     drive_path
   } else{
     if (!is.null(WD)) {
-      message("Resolving Gdrive for Web path for: '",
+      message("Resolving Gdrive Web path for: '",
               gsub("\\.\\.", paste0("[ ", basename(WD), " ]"), drive_path),
               "'")
     } else{
-      message("Resolving Gdrive for Web path for: '", drive_path, "'\n")
+      message("Resolving Gdrive Web path for: '", drive_path, "'\n")
     }
 
     #remove introductory "/" if one is provided

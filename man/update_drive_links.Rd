@@ -14,11 +14,11 @@ update_drive_links(
 \arguments{
 \item{WD}{a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass WD from \code{\link[=pick_lesson]{pick_lesson()}}; must use \code{full_path=TRUE} with pick_lesson}
 
-\item{rebuild}{if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.googlesheet; default= NULL}
+\item{rebuild}{if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL}
 
 \item{rm_missing}{logical; do you want to automatically remove records that are missing (and for which no studioLink was found during crawl of Google Drive folder?); default= TRUE; if FALSE, the link will be left blank}
 
-\item{clean}{logical; do you want to ignore all info on the teaching-materials.gsheet and only import inferred info from crawled google drive project files? default=FALSE}
+\item{clean}{logical; do you want to ignore all info on the teach-it.gsheet and only import inferred info from crawled google drive project files? default=FALSE}
 }
 \description{
 Searches lesson's google drive folder to populate the 'DriveLinks' tab of the lesson's 'meta/teach-it.gsheet' file.
