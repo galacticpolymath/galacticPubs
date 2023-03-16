@@ -7,9 +7,12 @@
 drive_inSync(path1, path2)
 }
 \arguments{
-\item{path1}{path to file of interest (e.g. that is created from the other paths, for newer=T logic); paths can be provided as}
+\item{path1}{path to file of interest (e.g. that we expect to be newer than path 1, e.g. if it is created from the other paths)
+\itemize{
+\item paths are resolved by \code{\link[=drive_find_path]{drive_find_path()}}
+}}
 
-\item{path2}{path to reference file (expected to be at least slightly older, if newer=T). Path 2 can also be}
+\item{path2}{path to reference file (expected to be at least slightly older than path 1)}
 }
 \value{
 logical; TRUE if path2>=path1 in age, within one second; otherwise FALSE

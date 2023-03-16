@@ -37,7 +37,9 @@ check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
   }
 
   #Test if contains teaching-mat
-  loc_check3<-(stringr::str_detect(files,"teaching-materials") %>% sum)==1
+  meta_files<-list.files(fs::path(WD,"meta"))
+  teachmat_count<-stringr::str_detect(meta_files,"teaching-materials.gsheet") %>% sum
+  loc_check3<-teachmat_count>0
   if(!loc_check3) {
     msg3 <-
       ("Lesson folder 'teaching-materials' not found.\n")
@@ -46,6 +48,9 @@ check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
     } else{
       warning(msg3)
     }
+  }
+  if(teachmat_count>1){
+    stop("Duplicate 'teaching-materials' gsheets found. Like Highlander, there can only be one!")
   }
 
   test_result <- loc_check&loc_check2&loc_check3

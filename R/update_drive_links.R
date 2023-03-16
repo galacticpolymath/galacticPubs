@@ -16,27 +16,31 @@
 
 update_drive_links <- function(WD = getwd()) {
   checkmate::assert(checkmate::check_character(drive_path),
-                    check_wd(WD = WD),
+                    check_wd(WD = WD,throw_error = FALSE),
                     combine = "and")
 
   gID <- get_fm("GdriveDirID", WD = WD)
+  meta_id<-get_fm("GdriveMetaID",WD=tempwd)
   proj <- get_fm("GdriveDirName", WD = WD)
   med_title <- get_fm("MediumTitle", WD = WD)
 
 
   checkmate::assert(
     checkmate::check_character(gID, any.missing = FALSE),
+    checkmate::check_character(meta_id, any.missing = FALSE),
     checkmate::check_character(proj, any.missing = FALSE),
     checkmate::check_character(proj_title, any.missing = FALSE),
     checkmate::check_class(gID, "character"),
+    checkmate::check_class(meta_id, "character"),
     checkmate::check_class(proj, "character"),
     checkmate::check_class(med_title, "character"),
     combine = "and"
   )
 
   #Get teaching-materials drive content
+  browser()
   teach_dir <-
-    drive_find_path("../teaching-materials", root = googledrive::as_id(gID))
+    drive_find_path("../teaching-materials", root = gID)
 
   #regex for folder prefixes we want to use (filter out things like "scraps")
   good_prefixes <- "remote|classroom|assess"
@@ -113,7 +117,37 @@ update_drive_links <- function(WD = getwd()) {
     }) %>% dplyr::bind_rows()
 
   #Now combine it all for output
-  dplyr::bind_rows(teach_dir_info,
+  inferred_teachmat<-dplyr::bind_rows(teach_dir_info,
                    variant_info) %>% dplyr::select(-"shortTitle", -"short_title")
 
+  #most recent modTime
+  last_teach_mat_change_time<-max(inferred_teachmat$modTime)
+  last_teach_mat_change_item<-inferred_teachmat$filename[which.max(inferred_teachmat$modTime)]
+
+
+# Check if the teaching-materials.gsheet up to date -----------------------
+  meta_id <- get_fm("GdriveMetaID", WD = WD)
+  checkmate::assert_character(meta_id, any.missing = FALSE)
+
+  teach_it_drib <- drive_find_path("../teach-it", root = meta_id)
+  #make sure the teach-it dribble is valid
+  checkmate::assert_data_frame(teach_it_drib, nrows = 1)
+
+  teach_mat_gsheet_modTime<-teach_it_drib$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
+
+  timediff<-teach_mat_gsheet_modTime-last_teach_mat_change
+  test_in_sync<-timediff>0
+  if(test_in_sync){
+    message("Teaching-material seems to be up-to-date.")
+  }else{
+    message("Teaching-materials.gsheet is older than '",last_teach_mat_change_item,"' by ",round(timediff,2)," ",attr(timediff,"units"))
+    message("Updating teaching-materials.gsheet...")
+
+
+# Now handle reading and updating teaching-mat.gsheet ---------------------
+
+    teachmat_in<-googlesheets4::read_sheet(teach_it_drib,sheet="DriveLinks",skip = 1)
+    teachmat_out<-hard_left_join(teachmat_in, inferred_teachmat,by="filename")
+
+    }
 }

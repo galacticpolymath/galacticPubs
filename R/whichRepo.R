@@ -18,7 +18,7 @@ whichRepo<-function(WD,fullPath=FALSE){
 
   #check that origin is sensible before proceeding
   checkmate::assert(
-    checkmate::check_character(origin,"character", null.ok=FALSE,any.missing = FALSE),
+    checkmate::check_character(origin, null.ok=FALSE,any.missing = FALSE),
     .var.name = "git remote URL"
   )
 

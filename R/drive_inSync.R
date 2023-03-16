@@ -10,10 +10,12 @@
 #' @family Google Drive Functions
 
 drive_inSync<-function (path1, path2){
-
+  if(!googledrive::is_dribble(path1)){
   p1<-drive_find_path(path1)
+  }else{p1<-path1}
+  if(!googledrive::is_dribble(path2)){
   p2<-drive_find_path(path2)
-
+}else{p2 <- path2}
 
   checkmate::assert_class(p1,"dribble",.var.name = "path1",null.ok = FALSE)
   checkmate::assert_class(p2,"dribble",.var.name = "path2",null.ok=FALSE)

@@ -54,8 +54,10 @@ update_fm <-
     if (is.na(new_yaml$GPCatalogPath) |
         is.na(new_yaml$GdriveDirName)) {
       repo <- whichRepo(WD = WD)
-      browser()
-      new_yaml$GdriveDirName <- repo
+
+      checkmate::assert_character(repo,any.missing=FALSE)
+
+      new_yaml$GdriveDirName <- basename(WD)
       new_yaml$GPCatalogPath <- catalogURL("LESSON.json", repo)
     }
 

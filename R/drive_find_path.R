@@ -38,6 +38,12 @@ drive_find_path <- function(drive_path,
                             WD = NULL,
                             root = NULL) {
   is_drib <- googledrive::is_dribble(drive_path)
+
+  if(!is.null(root) & !grepl(pattern = "^\\.\\.",drive_path)){
+  warning("When you supply 'root', you need to add '../' to the beginning of a path to indicate that it's a relative path.")
+
+  }
+
   if (is_drib) {
     #just passes through a dribble if it's already been resolved
     drive_path
@@ -109,7 +115,10 @@ drive_find_path <- function(drive_path,
                 sharedDrive <-
                   root$drive_resource[[1]]$driveId %>% googledrive::as_id()
               } else{
-                results[[i]] <- googledrive::drive_get(id = root)
+                root_drib<- googledrive::drive_get(id = googledrive::as_id(root))
+                checkmate::assert_class(root_drib,"dribble",.var.name = "root gdrive location")
+
+                results[[i]] <-root_drib
                 sharedDrive <-
                   results[[i]]$drive_resource[[1]]$driveId %>% googledrive::as_id()
               }
