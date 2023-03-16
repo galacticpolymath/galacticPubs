@@ -32,7 +32,7 @@ drive_new_from_template <-
         from_path <- googledrive::drive_get(id = template_path)
       } else{
         from_path <-
-          drive_find_path(template_path) %>% catch_err(keep_results = TRUE) %>% .result
+          drive_find_path(template_path) %>% catch_err(keep_results = TRUE) %>% .data$result
       }
       #don't need to do anything if it's already a dribble
     }else{from_path<-template_path}
@@ -43,7 +43,7 @@ drive_new_from_template <-
       to_path <- googledrive::drive_get(id = dest_path)
     } else{
       to_path <-
-        drive_find_path(dest_path) %>% catch_err(keep_results = TRUE) %>% .result
+        drive_find_path(dest_path) %>% catch_err(keep_results = TRUE) %>% .data$result
     }
 
     #if False supplied for new_name, use same name as from_path (no copy of...nonsense)

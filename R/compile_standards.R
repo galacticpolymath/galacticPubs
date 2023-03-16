@@ -92,7 +92,7 @@ unsupported <- sapply(found_subjects,function(x) !x%in% supported_subjects)
 
 if(!sum(check_all_supported)==length(supported_subjects)){
   warning("Not fully interdisciplinary lesson. Subjects found: \n",
-  capture.output(print(check_all_supported)))
+  utils::capture.output(print(check_all_supported)))
 }
 
 if(!sum(unsupported)==0){

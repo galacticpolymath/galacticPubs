@@ -27,8 +27,5 @@ updateTeachingMatLinks(
 \item{returnWorkbook}{Logical; if T, returns the list which was written to linksFile}
 }
 \description{
-Adds/updates Google Drive share links to the requested tabs in teaching-materials.xlsx. If a file is found on Google Drive, it will add it to the appropriate tab, with a timestamp in updateNotes. If a listed google drive link doesn't match a found, an updateNote will be added "trashed?"
-}
-\details{
-Just a note that I'm using 2 libraries to handle XLSX files. Not ideal, but the imported data from openxlsx::read.xlsx is nicer than XLConnect::readWorksheetFromFile, but the editing of data from a complex spreadsheet is MUCH better in XLConnect.
+Function is deprecated. Use \code{\link[=update_drive_links]{update_drive_links()}}
 }

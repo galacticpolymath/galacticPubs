@@ -12,17 +12,23 @@
 #'
 #' @param WD a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass WD from [pick_lesson()]; must use `full_path=TRUE` with pick_lesson
 #' @param rebuild if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.googlesheet; default= NULL
+#' @param rm_missing logical; do you want to automatically remove records that are missing (and for which no studioLink was found during crawl of Google Drive folder?); default= TRUE; if FALSE, the link will be left blank
+#' @param clean logical; do you want to ignore all info on the teaching-materials.gsheet and only import inferred info from crawled google drive project files? default=FALSE
 #' @export
 #' @family Google Drive Functions
 
 update_drive_links <- function(WD = getwd(),
-                               rebuild=NULL) {
-  checkmate::assert(checkmate::check_character(drive_path),
-                    check_wd(WD = WD,throw_error = FALSE),
-                    combine = "and")
+                               rebuild = NULL,
+                               rm_missing = TRUE,
+                               clean = FALSE) {
+  checkmate::assert(
+    checkmate::check_character(drive_path),
+    check_wd(WD = WD, throw_error = FALSE),
+    combine = "and"
+  )
 
   gID <- get_fm("GdriveDirID", WD = WD)
-  meta_id<-get_fm("GdriveMetaID",WD=tempwd)
+  meta_id <- get_fm("GdriveMetaID", WD = tempwd)
   proj <- get_fm("GdriveDirName", WD = WD)
   med_title <- get_fm("MediumTitle", WD = WD)
 
@@ -67,7 +73,7 @@ update_drive_links <- function(WD = getwd(),
           "]\n")
   variant_info <-
     pbapply::pblapply(1:nrow(teach_dir_ls), function(i) {
-      dir_i <- teach_dir_ls[i, ]
+      dir_i <- teach_dir_ls[i,]
       print(dir_i$name)
       envir_type <-
         gsub("([^_ -]*)[_ -]?.*", "\\1", dir_i$name) #extract (first part of name before "_,-, or [space]")
@@ -102,12 +108,13 @@ update_drive_links <- function(WD = getwd(),
       #Now gather info from Part subdirectories
       if (nrow(dir_i_subfolders) > 0) {
         dir_i_subfolders_info <-
-          lapply(1:nrow(dir_i_subfolders), function(ii){
+          lapply(1:nrow(dir_i_subfolders), function(ii) {
             update_drive_links_partHelper(
-              dribble = dir_i_subfolders[ii,],
+              dribble = dir_i_subfolders[ii, ],
               set_grades = dir_i_info$grades,
               set_envir = envir_type
-          )}) %>% dplyr::bind_rows()
+            )
+          }) %>% dplyr::bind_rows()
       } else{
         dir_i_subfolders_info <- NULL
       }
@@ -119,15 +126,39 @@ update_drive_links <- function(WD = getwd(),
     }) %>% dplyr::bind_rows()
 
   #Now combine it all for output
-  inferred_teachmat<-dplyr::bind_rows(teach_dir_info,
-                   variant_info) %>% dplyr::select(-"shortTitle", -"short_title")
+  inferred_teachmat <- dplyr::bind_rows(teach_dir_info,
+                                        variant_info) %>% dplyr::select(-"shortTitle",-"short_title")
+  #Format directory filenames to stand out from files
+  #with ../dir/ formatting
+  hier_dots <-
+    sapply(inferred_teachmat$itemType, function(x)
+      switch(
+        x,
+        "lessonDir" = "/",
+        "variantDir" = "../",
+        "assessDir" = "../",
+        ""
+      )) %>% unlist()
+
+  inferred_teachmat$filename <-
+    sapply(1:length(hier_dots), function(i) {
+      if (!inferred_teachmat$fileType[i] == "folder")
+      {
+        inferred_teachmat$filename[i]
+      } else{
+        paste0(hier_dots[i], inferred_teachmat$filename[i], "/")
+      }
+    }) %>% unlist()
+
+
 
   #most recent modTime
-  last_teach_mat_change_time<-max(inferred_teachmat$modTime)
-  last_teach_mat_change_item<-inferred_teachmat$filename[which.max(inferred_teachmat$modTime)]
+  last_teach_mat_change_time <- max(inferred_teachmat$modTime)
+  last_teach_mat_change_item <-
+    inferred_teachmat$filename[which.max(inferred_teachmat$modTime)]
 
 
-# Check if the teaching-materials.gsheet up to date -----------------------
+  # Check if the teaching-materials.gsheet up to date -----------------------
   meta_id <- get_fm("GdriveMetaID", WD = WD)
   checkmate::assert_character(meta_id, any.missing = FALSE)
 
@@ -135,37 +166,156 @@ update_drive_links <- function(WD = getwd(),
   #make sure the teach-it dribble is valid
   checkmate::assert_data_frame(teach_it_drib, nrows = 1)
 
-  teach_mat_gsheet_modTime<-teach_it_drib$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
+  teach_mat_gsheet_modTime <-
+    teach_it_drib$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
 
-  timediff<-teach_mat_gsheet_modTime-last_teach_mat_change_time
-  test_in_sync<-timediff>0
-  if(test_in_sync&!identical(TRUE,rebuild)){ #rebuild overrides an in_sync check
+  timediff <- teach_mat_gsheet_modTime - last_teach_mat_change_time
+  test_in_sync <- timediff > 0
+  if (test_in_sync &
+      !identical(TRUE, rebuild)) {
+    #rebuild overrides an in_sync check
     message("Teaching-material seems to be up-to-date.")
-  }else{
-    if(!test_in_sync){
-    message("Teaching-materials.gsheet is older than '",last_teach_mat_change_item,"' by ",round(timediff,2)," ",attr(timediff,"units"))
+  } else{
+    if (!test_in_sync) {
+      message(
+        "Teaching-materials.gsheet is older than '",
+        last_teach_mat_change_item,
+        "' by ",
+        round(timediff, 2),
+        " ",
+        attr(timediff, "units")
+      )
     }
     message("Updating teaching-materials.gsheet...")
 
+    #add f_g_e as a temporary more distinctive id variable to account
+    #for redundant names
+    teachmat_in0 <-
+      googlesheets4::read_sheet(teach_it_drib, sheet = "DriveLinks", skip = 1)
 
-# Now handle reading and updating teaching-mat.gsheet ---------------------
-    teachmat_in<-googlesheets4::read_sheet(teach_it_drib,sheet="DriveLinks",skip = 1) %>% dplyr::mutate(f_g_e=paste(filename,grades,envir))
-    inferred_teachmat <- inferred_teachmat%>% dplyr::mutate(f_g_e=paste(filename,grades,envir))
-    browser()
-    teachmat_out<-hard_left_join(teachmat_in,
-                                 inferred_teachmat,
-                                 by="f_g_e",
-                                 df1_cols_to_keep=c("title","description"),
-                                 as_char=TRUE) %>%
-      dplyr::arrange("envir", "grades","part","filename") %>%
-      dplyr::select(-"f_g_e",-dplyr::starts_with("..."))
 
-    #If StudioLink wasn't found, flag as trashed
+    # Begin logic for clean parameter (merge or overwrite .gsheet?-----------------
+    if (clean) {
+      #Assign the inferred data for output if clean==T
+      #Do hard_left_join on empty teachmat_in0 to keep .gsheet structure,
+      #but none of the data; sort
+      test_teachmat_out <-
+        hard_left_join(teachmat_in0[-(1:nrow(teachmat_in0)), ],
+                       inferred_teachmat,
+                       by =
+                         "filename",
+                       as_char = TRUE) %>%
+        #just adding this var for compatibility with downstream code
+        dplyr::mutate(f_g_e = paste(.data$filename, .data$grades, .data$envir, sep =
+                                      "---")) %>%
+        dplyr::arrange(.data$envir, .data$grades, .data$part, .data$fileType) %>%
+        catch_err(keep_results = TRUE)
+
+
+      # For !clean, handle reading in, merging and updating teaching-mat.gsheet ----
+    } else{
+      teachmat_in <- teachmat_in0 %>%
+        dplyr::mutate(f_g_e = paste(.data$filename, .data$grades, .data$envir, sep = "---"))
+      inferred_teachmat2 <-
+        inferred_teachmat %>% dplyr::mutate(f_g_e = paste(.data$filename, .data$grades, .data$envir, sep =
+                                                            "---"))
+
+      test_teachmat_out <- hard_left_join(
+        teachmat_in,
+        inferred_teachmat2,
+        by = "f_g_e",
+        df1_cols_to_keep = c("title", "description"),
+        as_char = TRUE
+      ) %>%
+        dplyr::arrange(.data$envir, .data$grades, .data$part, .data$fileType) %>% catch_err(keep_results =
+                                                                                              TRUE)
+    }#End differential logic for clean parameter
+
+    if (!test_teachmat_out$success) {
+      warning("Failed to merge inferred Gdrive file info with teaching-materials.gsheet")
+      teachmat_out <- NULL
+      ss_write_success <- FALSE
+    } else{
+      teachmat_out <- test_teachmat_out$result
+    }
+
+
+    # Logic following successful merge of teaching-materials.gsheet & inferred ----
+    if (!is.null(teachmat_out)) {
+      #If StudioLink wasn't found, flag as trashed
+      missing_links <- which(is.na(teachmat_out$studioLink))
+      if (length(missing_links) > 0) {
+        msng <- teachmat_out$f_g_e[missing_links]
+        warning("No studioLink found for:\n  -",
+                paste0(msng, collapse = "\n  -"))
+
+        # Remove records with missing links ----------------------------------
+        if (rm_missing) {
+          teachmat_out <-
+            teachmat_out %>% dplyr::filter(!is.na(.data$studioLink))
+          warning("Records with missing studioLink were removed")
+        } else{
+          warning(
+            "Manually remove records with missing studioLinks or rerun updata_drive-links() with rm_missing=T"
+          )
+        }
+      }
+
+      #Remove temporary id variable & put lesson folder at top
+      teachmat_out <- teachmat_out %>%
+        dplyr::select(-"f_g_e", -dplyr::starts_with("...")) %>%
+        dplyr::arrange(!.data$itemType == "lessonDir")
+
+    }#End !is.null(teachmat_out) logic for formatting merged teachmat_out
+
+
 
     #Write new data to DriveLinks tab
-    skip_rows<-2
-    ss_range<-paste0("A",1+skip_rows,":",LETTERS[ncol(teachmat_out)],skip_rows+nrow(teachmat_out))
-    ss_write_success<-googlesheets4::range_write(teach_it_drib,sheet="DriveLinks",data=teachmat_out,range =ss_range,reformat = FALSE,col_names=FALSE ) %>% catch_err()
+    skip_rows <- 2
+    #delete 500 rows of data
+    clear_range <- paste0("A",
+                          1 + skip_rows,
+                          ":",
+                          LETTERS[ncol(teachmat_out)],
+                          skip_rows + 500)
 
+    write_range <-
+      paste0("A",
+             1 + skip_rows,
+             ":",
+             LETTERS[ncol(teachmat_out)],
+             skip_rows + nrow(teachmat_out))
+
+
+    #Test success of clearing gsheet before writing new data
+    ss_clear_success <-
+      googlesheets4::range_clear(teach_it_drib,
+                                 sheet = "DriveLinks",
+                                 range = clear_range) %>% catch_err()
+    if (!ss_clear_success) {
+      warning("teaching-materials.gsheet not cleared successfully")
     }
+
+
+    # #test success of writing gsheet -----------------------------------------
+    ss_write_success <-
+      googlesheets4::range_write(
+        teach_it_drib,
+        sheet = "DriveLinks",
+        data = teachmat_out,
+        range = write_range,
+        reformat = FALSE,
+        col_names = FALSE
+      ) %>% catch_err()
+
+
+    if (ss_write_success) {
+      message("teach-it.gsheet!'DriveLinks' updated successfully!\n")
+      TRUE
+    } else{
+      warning("Something went wrong while saving teaching-materials.gsheet!'DriveLinks'")
+      FALSE
+    }
+
+  }
 }
