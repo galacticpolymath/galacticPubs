@@ -45,7 +45,7 @@ set_drive_local_credentials <- function() {
       "CloudStorage",
       gdrive_userdir,
       "Shared drives",
-      "GP-Workshop",
+      "GP-Studio",
       "Edu",
       "Lessons"
     )

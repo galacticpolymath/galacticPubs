@@ -22,5 +22,5 @@ silently returns updated front-matter.yml object as a list
 Checks for new galacticPubs front-matter_TEMPLATE.yml. If found, it will add new fields,  return the updated object, and write to drive (meta/front-matter.yml) if requested.
 }
 \details{
-If meta/front-matter.yml not found, it is created from the template. Will also combine language and country info to create locale, and add GPCatalogPath if those fields are blank. Attempts to find the lesson on Google Drive in GP-Workshop and add GdriveDirID if missing.
+If meta/front-matter.yml not found, it is created from the template. Will also combine language and country info to create locale, and add GPCatalogPath if those fields are blank. Attempts to find the lesson on Google Drive in GP-Studio and add GdriveDirID if missing.
 }

@@ -15,7 +15,7 @@ lesson_init_meta(WD = getwd(), overwrite = NA)
 \item{overwrite}{passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}; default=NA will add "(1)" to avoid duplicates; TRUE will trash existing file before copying}
 }
 \description{
-Add galacticPubs Google Workspace working documents to a given lesson's \emph{/meta} folder. You \emph{must have access to GP-Workshop shared drive}.
+Add galacticPubs Google Workspace working documents to a given lesson's \emph{/meta} folder. You \emph{must have access to GP-Studio shared drive}.
 }
 \details{
 WD is used for hybrid file path navigation using virtualized paths on Google Drive for desktop to reach the Edu/Lessons/meta/front-matter.yml for the project of interest. Then, using \code{\link[=get_fm]{get_fm()}} to lookup the GoogleDrive ID for the cloud version of this folder, files will then be copied from the template folder to this project folder using the google web API. All of this is necessary because Google Drive for Desktop doesn't allow copying of Google Documents.

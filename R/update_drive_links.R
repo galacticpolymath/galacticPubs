@@ -2,7 +2,7 @@
 #'
 #' Searches lesson's google drive folder to populate the 'DriveLinks' tab of the lesson's 'meta/teach-it.gsheet' file.
 #'
-#' It's a hybrid lookup system that requires Google Drive for Desktop to be setup with permission to GP-Workshop shared drive and a web connection. Steps:
+#' It's a hybrid lookup system that requires Google Drive for Desktop to be setup with permission to GP-Studio shared drive and a web connection. Steps:
 #' 1. Find WD working directory corresponding to the chosen lesson
 #' 2. Access the cloud version of the project folder by finding the 'GdriveDirID' in meta/front-matter.yml.
 #' 3. Search through web folders, compiling information from folder and naming structure in 'teaching-materials' folder.

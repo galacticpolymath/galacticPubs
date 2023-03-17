@@ -17,7 +17,7 @@
 #'
 #' @returns a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
 #' @examples
-#'   drive_find_path("GP-Workshop/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
+#'   drive_find_path("GP-Studio/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
 #'
 #' @family Google Drive Functions
 #' @export

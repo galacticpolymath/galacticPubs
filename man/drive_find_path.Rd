@@ -38,12 +38,12 @@ Simulates Finder/File Explorer functionality by repeated calls to \code{\link[go
 #path to a drive file on your personal Google Drive
 drive_find_path("~/folder_in_my_personal_drive/filename")
 #path to a network drive folder
-(p <- drive_find_path("GP-Workshop/Edu/Lessons/geneticrescue_sci"))
+(p <- drive_find_path("GP-Studio/Edu/Lessons/geneticrescue_sci"))
 #show contents of that drive folder
 p \%>\% drive_contents()
 
 #RELATIVE PATH to a particular lesson subfolder
-#only works if you have Google Drive for Desktop set up with permissions to GP-Workshop
+#only works if you have Google Drive for Desktop set up with permissions to GP-Studio
 drive_find_path("../assets",pick_lesson()) \%>\% drive_contents
 }
 

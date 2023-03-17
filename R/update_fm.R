@@ -2,7 +2,7 @@
 #'
 #' Checks for new galacticPubs front-matter_TEMPLATE.yml. If found, it will add new fields,  return the updated object, and write to drive (meta/front-matter.yml) if requested.
 #'
-#' If meta/front-matter.yml not found, it is created from the template. Will also combine language and country info to create locale, and add GPCatalogPath if those fields are blank. Attempts to find the lesson on Google Drive in GP-Workshop and add GdriveDirID if missing.
+#' If meta/front-matter.yml not found, it is created from the template. Will also combine language and country info to create locale, and add GPCatalogPath if those fields are blank. Attempts to find the lesson on Google Drive in GP-Studio and add GdriveDirID if missing.
 #'
 #' @param WD Working drive; default=getwd()
 #' @param save_output do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE
@@ -74,7 +74,7 @@ update_fm <-
       )
 
       proj_dribble_test <-
-        drive_find_path(paste0("GP-Workshop/Edu/Lessons/", new_yaml$GdriveDirName)) %>%
+        drive_find_path(paste0("GP-Studio/Edu/Lessons/", new_yaml$GdriveDirName)) %>%
         catch_err(keep_results = TRUE)
       if (proj_dribble_test$success) {
         proj_dribble <- proj_dribble_test$result

@@ -24,7 +24,7 @@ update_drive_links(
 Searches lesson's google drive folder to populate the 'DriveLinks' tab of the lesson's 'meta/teach-it.gsheet' file.
 }
 \details{
-It's a hybrid lookup system that requires Google Drive for Desktop to be setup with permission to GP-Workshop shared drive and a web connection. Steps:
+It's a hybrid lookup system that requires Google Drive for Desktop to be setup with permission to GP-Studio shared drive and a web connection. Steps:
 \enumerate{
 \item Find WD working directory corresponding to the chosen lesson
 \item Access the cloud version of the project folder by finding the 'GdriveDirID' in meta/front-matter.yml.

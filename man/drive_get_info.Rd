@@ -33,7 +33,7 @@ Extract galacticPubs-relevant information from a GP lesson file, with an expecte
 Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match DriveLinks fields, though they cannot be populated automatically.
 }
 \examples{
-  drive_find_path("GP-Workshop/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
+  drive_find_path("GP-Studio/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
 
 }
 \seealso{

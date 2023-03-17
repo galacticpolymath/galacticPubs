@@ -22,12 +22,12 @@
 #' #path to a drive file on your personal Google Drive
 #' drive_find_path("~/folder_in_my_personal_drive/filename")
 #' #path to a network drive folder
-#' (p <- drive_find_path("GP-Workshop/Edu/Lessons/geneticrescue_sci"))
+#' (p <- drive_find_path("GP-Studio/Edu/Lessons/geneticrescue_sci"))
 #' #show contents of that drive folder
 #' p %>% drive_contents()
 #'
 #' #RELATIVE PATH to a particular lesson subfolder
-#' #only works if you have Google Drive for Desktop set up with permissions to GP-Workshop
+#' #only works if you have Google Drive for Desktop set up with permissions to GP-Studio
 #' drive_find_path("../assets",pick_lesson()) %>% drive_contents
 #' }
 #'
@@ -84,7 +84,7 @@ drive_find_path <- function(drive_path,
               googledrive::drive_get(id = "root")
             sharedDrive <- NULL
 
-            #handle relative paths from a GP-Workshop/Edu/Lessons dir
+            #handle relative paths from a GP-Studio/Edu/Lessons dir
           } else if (p[i] == "..") {
             if (!is.null(WD)) {
               #make sure a valid lesson project directory provided
@@ -100,7 +100,7 @@ drive_find_path <- function(drive_path,
               gID <- as.character(get_fm("GdriveDirID", WD = WD))
               checkmate::assert(checkmate::check_character(drive_path))
               results[[i]] <- googledrive::drive_get(id = gID)
-              sharedDrive <- "GP-Workshop"
+              sharedDrive <- "GP-Studio"
 
             }
             if (!is.null(root)) {
