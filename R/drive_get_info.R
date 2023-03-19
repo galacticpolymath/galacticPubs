@@ -147,8 +147,8 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     ) %>% invisible() #only show warning messages for failed assertions
     }
 
-    #Get Link
-    link<-googledrive::drive_link(dribble_i)
+    #Get Link (removing the edit? or view? part)
+    link<-googledrive::drive_link(dribble_i) %>% gsub("(.*)/edit?.*$","\\1",.) %>% gsub("(.*)/view?.*$","\\1",.)
     checkmate::assert_character(link,any.missing=F)
 
     #Get Mod Date

@@ -21,6 +21,7 @@ update_drive_links <- function(WD = getwd(),
                                rebuild = NULL,
                                rm_missing = TRUE,
                                clean = FALSE) {
+
   checkmate::assert(
     checkmate::check_character(drive_path),
     check_wd(WD = WD, throw_error = FALSE),
@@ -28,7 +29,7 @@ update_drive_links <- function(WD = getwd(),
   )
 
   gID <- get_fm("GdriveDirID", WD = WD)
-  meta_id <- get_fm("GdriveMetaID", WD = tempwd)
+  meta_id <- get_fm("GdriveMetaID", WD = WD)
   proj <- get_fm("GdriveDirName", WD = WD)
   med_title <- get_fm("MediumTitle", WD = WD)
 
@@ -173,6 +174,8 @@ update_drive_links <- function(WD = getwd(),
 
   timediff <- teach_it_gsheet_modTime - last_teach_it_change_time
   test_in_sync <- timediff > 0
+
+
   if (test_in_sync &
       !identical(TRUE, rebuild)) {
     #rebuild overrides an in_sync check
@@ -229,6 +232,12 @@ update_drive_links <- function(WD = getwd(),
         as_char = TRUE
       )  %>% catch_err(keep_results =
                          TRUE)
+
+      #NA-out studioLinks not found in inferred_teach_it2 (b/c these files don't exist, but the join will retain them b/c they're found in teach_it_in (i.e. on teach-it.gsheet))
+      missingLinks<-which(is.na(match(test_teach_it_out$result$studioLink,inferred_teach_it2$studioLink)))
+      if(length(missingLinks)>0){
+        test_teach_it_out$result$studioLink[missingLinks]<-NA
+      }
     }#End differential logic for clean parameter
 
     if (!test_teach_it_out$success) {
@@ -283,7 +292,7 @@ update_drive_links <- function(WD = getwd(),
     dupLinks <- duplicated(teach_it_out$studioLink)
     if (sum(dupLinks) > 0) {
       warning(
-        "Some duplicate studioLinks found in teach-it.gsheet for '",
+        "Duplicate studioLinks found (delete one entry) in teach-it.gsheet for '",
         proj,
         "': \n  -",
         paste0(teach_it_out$filename[dupLinks], collapse = "\n  -")

@@ -65,7 +65,8 @@ update_fm <-
     if (is.na(new_yaml$GdriveDirID) |
         is.na(new_yaml$GdriveDirURL)|
         is.na(new_yaml$GdriveMetaID)|
-        is.na(new_yaml$GdrivePublishedID)) {
+        is.na(new_yaml$GdrivePublishedID)|
+        is.na(new_yaml$GdriveTeachItID)) {
       #try to find path for the project name
       message(
         "\nTrying to link local virtual lesson '",
@@ -88,17 +89,20 @@ update_fm <-
         #now look up other subfolders
         gMetaID<-drive_find_path("../meta", root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
         new_yaml$GdriveMetaID<-gMetaID$result$id
+        gTeachItID<-drive_find_path("../teach-it", root=new_yaml$GdriveMetaID) %>% catch_err(keep_results=T)
+        new_yaml$GdriveTeachItID<-gTeachItID$result$id
         gPublishedID<-drive_find_path("../published", root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
         new_yaml$GdrivePublishedID<-gPublishedID$result$id
 
         checkmate::assert(
-          checkmate::check_character(new_yaml$GdriveDirID),
-          checkmate::check_character(new_yaml$GdriveDirURL),
-          checkmate::check_character(new_yaml$GdriveMetaID),
-          checkmate::check_character(new_yaml$GdrivePublishedID),
+          checkmate::check_character(new_yaml$GdriveDirID,any.missing=FALSE),
+          checkmate::check_character(new_yaml$GdriveDirURL,any.missing=FALSE),
+          checkmate::check_character(new_yaml$GdriveMetaID,any.missing=FALSE),
+          checkmate::check_character(new_yaml$GdriveTeachItID,any.missing=FALSE),
+          checkmate::check_character(new_yaml$GdrivePublishedID,any.missing=FALSE),
           combine = "and"
         )
-        message("GdriveDirID, GdriveDirURL, GdriveMetaID, & GdrivePublishedID added to front-matter.yml")
+        message("GdriveDirID, GdriveDirURL, GdriveMetaID, GdriveTeachItID & GdrivePublishedID added to front-matter.yml")
       }
 
     }

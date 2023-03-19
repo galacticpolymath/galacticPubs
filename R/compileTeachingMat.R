@@ -1,7 +1,7 @@
 #' compileTeachingMat
 #'
 #' Compile Teaching Materials data from teaching-materials.xlsx
-#' @param LessonEnvir what versions of this lesson are available? options: "Classroom" and "Remote"
+#' @param envirs what versions of this lesson are available? options: "Classroom" and "Remote"
 #' @param linksFile file location of the lesson teaching-materials XLSX worksheet.
 #' @param procedureFile file location of the lesson procedure XLSX worksheet
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
@@ -12,7 +12,7 @@
 #' @importFrom rlang .data
 #' @export
 #'
-compileTeachingMat <- function(LessonEnvir= c("Classroom"),
+compileTeachingMat <- function(envirs= c("Classroom"),
                                linksFile = "meta/teaching-materials.xlsx",
                                procedureFile = "meta/procedure_GSheetsOnly.xlsx",
                                destFolder = "meta/JSON/" ,
@@ -47,7 +47,7 @@ YTembed<-function(link){
 
   linksAssess<-openxlsx::read.xlsx(linksFile,sheet="assess",startRow=2)%>% dplyr::tibble()
   #read in procedure Part titles, etc
-  procTitles<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble()
+  pinfo<-openxlsx::read.xlsx(procedureFile,sheet="NamesAndNotes")%>% dplyr::tibble()
 
     #read in main procedure
   #import and make sure numbered columns are integers
@@ -92,17 +92,17 @@ YTembed<-function(link){
 
 # Get grade level variation notes from Procedure.xlsx ---------------------
     gradeVariantNotes <-
-      if (is.na(procTitles$PartGradeVarNotes[1])) {
+      if (is.na(pinfo$PartGradeVarNotes[1])) {
 
       } else{
-        if (length(which(stats::complete.cases(procTitles$PartGradeVarNotes))) ==
+        if (length(which(stats::complete.cases(pinfo$PartGradeVarNotes))) ==
             1) {
           list(part = NA,
-               partGradeVarNotes = procTitles$PartGradeVarNotes[1])
+               partGradeVarNotes = pinfo$PartGradeVarNotes[1])
         } else{
-          lapply(1:nrow(procTitles), function(i) {
-            list(part = procTitles$Part[i],
-                 partGradeVarNotes = procTitles$PartGradeVarNotes[i])
+          lapply(1:nrow(pinfo), function(i) {
+            list(part = pinfo$Part[i],
+                 partGradeVarNotes = pinfo$PartGradeVarNotes[i])
           })
         }
       }
@@ -112,7 +112,7 @@ YTembed<-function(link){
 # CLASSROOM ---------------------------------------------------------------
 
   # Get resource summary from teaching-materials.xlsx
-  if (!"Classroom" %in% LessonEnvir) {
+  if (!"Classroom" %in% envirs) {
     resourcesC <- {
     }
   } else{
@@ -146,7 +146,7 @@ YTembed<-function(link){
 
     #Build classroom resources list
     resourcesC <- lapply(coveredGrades, function(currGradeBand) {
-      gradePrefix = paste0(substr(current_data$GradesOrYears,1,1), currGradeBand)
+      gradePrefix = paste0(substr(fm$GradesOrYears,1,1), currGradeBand)
       currDownloadClass <-
         linksD %>% dplyr::filter(.data$envir == "classroom")
       currDownloadAll <-
@@ -154,10 +154,10 @@ YTembed<-function(link){
                                               .data$part == "all") %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1) %>% unlist() %>% as.vector()
 
       #aggregate data for all parts
-      parts <- lapply(1:length(procTitles$PartTitle), function(part_i) {
-        part <- procTitles$Part[part_i]
-        title <- procTitles$PartTitle[part_i]
-        preface <- procTitles$PartPreface[part_i]
+      parts <- lapply(1:length(pinfo$PartTitle), function(part_i) {
+        part <- pinfo$Part[part_i]
+        title <- pinfo$PartTitle[part_i]
+        preface <- pinfo$PartPreface[part_i]
         currPresentations <-
           subset(linksC,
                  linksC$part == part_i & linksC$grades == currGradeBand)
@@ -210,7 +210,7 @@ YTembed<-function(link){
 
       #return list for the classroom lapply
       list(
-        grades = paste0(current_data$GradesOrYears," ", currGradeBand),
+        grades = paste0(fm$GradesOrYears," ", currGradeBand),
         gradePrefix = gradePrefix,
         links = list(
           linkText = ifelse(
@@ -235,7 +235,7 @@ YTembed<-function(link){
 # REMOTE ---------------------------------------------------------------
 
   # Get resource summary from teaching-materials.xlsx
-  if (!"Remote" %in% LessonEnvir) {
+  if (!"Remote" %in% envirs) {
     resourcesR <- {
     }
   } else{
@@ -256,9 +256,9 @@ YTembed<-function(link){
       itemBundle
     })
     # #Get grade level variation notes from Procedure.xlsx
-    # gradeVariantNotes<-if(is.na(procTitles$PartGradeVarNotes[1])){NA}else{
-    #   if(length(which(stats::complete.cases(procTitles$PartGradeVarNotes)))==1){list(part=NA,partGradeVarNotes=procTitles$PartGradeVarNotes[1])}else{
-    #     lapply(1:nrow(procTitles),function(i){list(part=procTitles$Part[i],partGradeVarNotes=procTitles$PartGradeVarNotes[i])})
+    # gradeVariantNotes<-if(is.na(pinfo$PartGradeVarNotes[1])){NA}else{
+    #   if(length(which(stats::complete.cases(pinfo$PartGradeVarNotes)))==1){list(part=NA,partGradeVarNotes=pinfo$PartGradeVarNotes[1])}else{
+    #     lapply(1:nrow(pinfo),function(i){list(part=pinfo$Part[i],partGradeVarNotes=pinfo$PartGradeVarNotes[i])})
     #   }
     # }
 
@@ -275,10 +275,10 @@ YTembed<-function(link){
       # currDownloadAll<-currDownloadRemote %>% dplyr::filter(.data$grades==currGradeBand.R&.data$part=="all") %>% dplyr::select(.data$gDriveLink) %>% dplyr::slice(1)%>% unlist() %>% as.vector()
 
       #aggregate data for all parts
-      parts <- lapply(1:length(procTitles$Part), function(part_i) {
-        part <- procTitles$Part[part_i]
-        title <- procTitles$PartTitle[part_i]
-        preface <- procTitles$PartPreface[part_i]
+      parts <- lapply(1:length(pinfo$Part), function(part_i) {
+        part <- pinfo$Part[part_i]
+        title <- pinfo$PartTitle[part_i]
+        preface <- pinfo$PartPreface[part_i]
         currPresentations <-
           subset(linksR,
                  linksR$part == part_i & linksR$grades == currGradeBand.R)
@@ -345,9 +345,9 @@ YTembed<-function(link){
       })#end parts lapply
 
       #return list for the classroom lapply
-      gradePrefix = paste0(substr(current_data$GradesOrYears,1,1), currGradeBand.R)
+      gradePrefix = paste0(substr(fm$GradesOrYears,1,1), currGradeBand.R)
       list(
-        grades = paste0(current_data$GradesOrYears," ", currGradeBand.R),
+        grades = paste0(fm$GradesOrYears," ", currGradeBand.R),
         gradePrefix = gradePrefix,
         # links=list(
         #        linkText=paste0("Download ",gradePrefix," Materials for All Parts"),
