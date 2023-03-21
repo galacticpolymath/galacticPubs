@@ -24,7 +24,7 @@ Logical test for all the different versions of empty values, i.e.:
 }
 }
 \details{
-Works on values, vectors, or a flat list.
+Works on values, vectors, or a flat list. For vector and list inputs output will be a single T or F, not a vector of T/F values.
 }
 \examples{
 is_empty("")

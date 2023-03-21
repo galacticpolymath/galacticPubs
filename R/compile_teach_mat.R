@@ -10,7 +10,6 @@
 
 compile_teach_mat <- function(WD = getwd(),
                               teach_it_drib = NULL) {
-
   . = NULL #to avoid errors with dplyr syntax
   #Get front matter from the project working directory
   fm <- get_fm(WD = WD)
@@ -22,13 +21,16 @@ compile_teach_mat <- function(WD = getwd(),
   }
   #check that teach_it_drib has 1 row and is a data frame
   checkmate::assert_data_frame(teach_it_drib, nrows = 1)
+
   tlinks0 <-
     googlesheets4::read_sheet(
       teach_it_drib,
       sheet = "DriveLinks",
       skip = 1,
-      col_types = "c"
+      col_types = "c",
+
     )
+
   mlinks <-
     googlesheets4::read_sheet(
       teach_it_drib,
@@ -36,6 +38,7 @@ compile_teach_mat <- function(WD = getwd(),
       skip = 1,
       col_types = "c"
     )
+
   pinfo <-
     googlesheets4::read_sheet(
       teach_it_drib,
@@ -44,9 +47,11 @@ compile_teach_mat <- function(WD = getwd(),
       col_types = "c"
     )
 
+
   #bring in procedure
   proc <-
-    googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip = 1) %>%
+    googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip =
+                                1) %>%
     dplyr::filter(.data$Step != 0) %>%
     dplyr::mutate(
       Part = as.integer(.data$Part),
@@ -60,7 +65,7 @@ compile_teach_mat <- function(WD = getwd(),
   # Check and Validate Data Import--------------------------------------------------
   checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!DriveLinks")
   checkmate::assert_data_frame(mlinks, min.rows = 0, .var.name = "teach-it.gsheet!Multimedia")#multimedia might be 0 rows
-  checkmate::assert_data_frame(pinfo, min.rows = 1, .var.name = "teach-it.gsheet!DriveLinks")
+  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!DriveLinks")
   checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!DriveLinks")
 
   # Check for template text (uninitialized data) ----------------------------
@@ -129,31 +134,31 @@ compile_teach_mat <- function(WD = getwd(),
         }
       }
 
-    # Get grade level variation notes from Procedure.xlsx ---------------------
-    gradeVariantNotes <-
-      if (!pinfo_titles_initialized |
-          is.na(pinfo$PartGradeVarNotes[1])) {
-        NULL
-      } else{
-        if (length(which(stats::complete.cases(pinfo$PartGradeVarNotes))) ==
-            1) {
-          list(part = NA,
-               partGradeVarNotes = pinfo$PartGradeVarNotes[1])
-        } else{
-          lapply(1:nrow(pinfo), function(i) {
-            list(
-              part = pinfo$Part[i],
-              partGradeVarNotes = pinfo$PartGradeVarNotes[i]
-            )
-          })
-        }
-      }
+    # # Get grade level variation notes from Procedure.xlsx ---------------------
+    # gradeVariantNotes <-
+    #   if (!pinfo_titles_initialized |
+    #       is.na(pinfo$PartGradeVarNotes[1])) {
+    #     NULL
+    #   } else{
+    #     if (length(which(stats::complete.cases(pinfo$PartGradeVarNotes))) ==
+    #         1) {
+    #       list(part = NA,
+    #            partGradeVarNotes = pinfo$PartGradeVarNotes[1])
+    #     } else{
+    #       lapply(1:nrow(pinfo), function(i) {
+    #         list(
+    #           part = pinfo$Part[i],
+    #           partGradeVarNotes = pinfo$PartGradeVarNotes[i]
+    #         )
+    #       })
+    #     }
+    #   }
   } else{
     lessonDur <- NULL
-    #Output vector of nulls for each part
-    gradeVariantNotes <-
-      1:nparts %>% purrr::map(\(i) list(part = as.numeric(i), partGradeVarNotes =
-                                          NULL))
+    # #Output vector of nulls for each part
+    # gradeVariantNotes <-
+    #   1:nparts %>% purrr::map(\(i) list(part = as.numeric(i), partGradeVarNotes =
+    #                                       NULL))
   }
 
 
@@ -161,23 +166,93 @@ compile_teach_mat <- function(WD = getwd(),
 
 
   #Add part title and preface to proc tlinks info for convenience
-  tlinks <-
-    dplyr::left_join(tlinks0, pinfo[, 1:4], by = c("part" = "Part"))
+  if (pinfo_titles_initialized) {
+    tlinks <-
+      dplyr::left_join(tlinks0, pinfo[, 1:4], by = c("part" = "Part"))
+  } else{
+    tlinks <-
+      tlinks0 %>% dplyr::mutate(
+        Part = NA,
+        PartTitle = NA,
+        PartPreface = NA,
+        PartGradeVarNotes = NA
+      )
+  }
 
-  Data <- zget_rsrcs(tlinks)
-
-
-  Data
+  #Get item links for each environment*gradeBand
+  teach_mat_data <- zget_envir(tlinks, fm = fm)
+  Data <- c(lessonDur = lessonDur,
+            teach_mat_data)
   browser()
 
+  # Multimedia --------------------------------------------------------------
+  # Outputs to separate multimedia JSON
+  # if "by" is left blank, add Galactic Polymath by default
+  if (!mlinks_initialized) {
+    multimedia <- list(NULL)
+  } else{
+    m <- mlinks
+    m$by <-
+      ifelse(is.na(m$by), "Galactic Polymath", m$by)
+    #if byLink is blank, but by is galactic polymath, add our Youtube channel
+    m$byLink <-
+      ifelse(
+        is.na(m$byLink) &
+          !is.na(m$by),
+        "https://www.youtube.com/channel/UCfyBNvN3CH4uWmwOCQVhmhg/featured",
+        m$byLink
+      )
 
+    multimedia <- lapply(1:nrow(m), function(i) {
+      d <- m[i,]
+      list(
+        order = d$order,
+        type = d$type,
+        title = d$title,
+        description = d$description,
+        lessonRelevance = d$lessonRelevance,
+        by = d$by,
+        #if byLink left blank, but
+        byLink = d$byLink,
+        #Change YouTube links to be embeds & turn {filename.png} links to files found in assets/_other-media-to-publish into catalog.galacticpolymath.com links
+        mainLink = zYTembed(d$mainLink) %>%
+          expand_md_links(repo = whichRepo(WD = WD)),
+        otherLink = d$otherLink
+      )
+    })
+  }
 
   #Compile Procedure if it's been documented
   if (!proc_initialized) {
     warning("Seems you haven't documented procedure at `teach-it.gsheet!Procedure` for `")
-    proc_data <- NULL
+    proc_data <- list(NULL)
   } else{
     proc_data <- compileProcedure()
   }
 
+
+  # structure final output --------------------------------------------------
+  out <-
+    list(`__component` = "teaching-resources.teaching-resources",
+         SectionTitle = "Teaching Materials",
+         Data = Data)
+
+
+  # write JSON outputs ------------------------------------------------------
+
+  destFolder <- fs::path(WD, "meta", "JSON")
+  outFile <-
+    fs::path(destFolder, "teaching-materials", ext = "json")
+
+  save_json(out, outFile)
+  save_json(multimedia, fs::path(destFolder, "multimedia", ext = "json"))
+  # return compiled output --------------------------------------------------
+  message(" ", rep("-", 30))
+  message(" Teaching Material Compiled:")
+  # print(printToScreenTable)
+  message(" JSON file saved\n @ ", outFile, "\n")
+  message(" JSON file saved\n @ ",
+          fs::path(destFolder, "multimedia.json"),
+          "\n")
+  message(" ", rep("-", 30))
 }

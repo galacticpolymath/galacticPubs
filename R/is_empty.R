@@ -8,7 +8,7 @@
 #' - list()
 #' - length(x)==0
 #'
-#' Works on values, vectors, or a flat list.
+#' Works on values, vectors, or a flat list. For vector and list inputs output will be a single T or F, not a vector of T/F values.
 #'
 #' @examples
 #' is_empty("")
@@ -23,6 +23,7 @@
 is_empty <- function(x) {
   if(length(x)==0){
     nulls<-TRUE
+    #for single item vector entries
   if(length(x)==1){
           #True if 1 condition met
   nulls <-identical(x, NULL) |
@@ -34,6 +35,7 @@ is_empty <- function(x) {
           length(x) == 0
 
   }
+    #for testing a vector or list of items for emptiness
   }else{
     nulls <- sapply(1:length(x), function(i) {
           identical(x[[i]], NULL) |
