@@ -24,7 +24,6 @@ update_drive_links <- function(WD = getwd(),
                                clean = FALSE,
                                ignore = ".txt$") {
   checkmate::assert(
-    checkmate::check_character(drive_path),
     check_wd(WD = WD, throw_error = FALSE),
     combine = "and"
   )
@@ -39,7 +38,7 @@ update_drive_links <- function(WD = getwd(),
     checkmate::check_character(gID, any.missing = FALSE),
     checkmate::check_character(meta_id, any.missing = FALSE),
     checkmate::check_character(proj, any.missing = FALSE),
-    checkmate::check_character(proj_title, any.missing = FALSE),
+    checkmate::check_character(med_title, any.missing = FALSE),
     checkmate::check_class(gID, "character"),
     checkmate::check_class(meta_id, "character"),
     checkmate::check_class(proj, "character"),

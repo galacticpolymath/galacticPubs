@@ -38,11 +38,12 @@ check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
 
   #Test if contains teaching-mat
   meta_files<-list.files(fs::path(WD,"meta"))
-  teachmat_count<-stringr::str_detect(meta_files,"teaching-materials.gsheet") %>% sum
+  teachmat_count<-stringr::str_detect(meta_files,"teach-it.gsheet") %>% sum
+
   loc_check3<-teachmat_count>0
   if(!loc_check3) {
     msg3 <-
-      ("Lesson folder 'teaching-materials' not found.\n")
+      ("'meta/teach-it.gsheet' not found.\n")
     if (throw_error) {
       stop(msg3)
     } else{

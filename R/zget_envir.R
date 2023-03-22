@@ -83,6 +83,7 @@ zget_grade_var_notes <- \(df){
 #'
 zget_grade_bands <- \(df, fm, assess) {
   coveredGrades <- unique_sans_na(df$grades)
+
   grade_yr_term <- fm$GradesOrYears
   out <- coveredGrades %>%
     purrr::set_names() %>%

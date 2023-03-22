@@ -262,7 +262,7 @@ compile_lesson <-
         warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
       } else{
         update_drive_links(WD = WD)
-        compileTeachingMat(WD = WD)
+        compile_teach_mat(WD = WD)
       }
 
     }
