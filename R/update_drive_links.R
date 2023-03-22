@@ -14,14 +14,15 @@
 #' @param rebuild if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL
 #' @param rm_missing logical; do you want to automatically remove records that are missing (and for which no studioLink was found during crawl of Google Drive folder?); default= TRUE; if FALSE, the link will be left blank
 #' @param clean logical; do you want to ignore all info on the teach-it.gsheet and only import inferred info from crawled google drive project files? THIS WILL OVERWRITE MANUALLY ENTERED TITLES; default=FALSE
+#' @param ignore regex expression to remove certain filetypes (e.g. txt files); default= ".txt$"
 #' @export
 #' @family Google Drive Functions
 
 update_drive_links <- function(WD = getwd(),
                                rebuild = NULL,
                                rm_missing = TRUE,
-                               clean = FALSE) {
-
+                               clean = FALSE,
+                               ignore = ".txt$") {
   checkmate::assert(
     checkmate::check_character(drive_path),
     check_wd(WD = WD, throw_error = FALSE),
@@ -68,13 +69,14 @@ update_drive_links <- function(WD = getwd(),
                                                      "lessonDir")
 
 
-  #Go through each subdirectory and aggregate info
+
+  # Go through each subdirectory and aggregate info -------------------------
   message("Gathering info from Gdrive file structure of lesson: [",
           proj,
           "]\n")
   variant_info <-
     pbapply::pblapply(1:nrow(teach_dir_ls), function(i) {
-      dir_i <- teach_dir_ls[i, ]
+      dir_i <- teach_dir_ls[i,]
       print(dir_i$name)
       envir_type <-
         gsub("([^_ -]*)[_ -]?.*", "\\1", dir_i$name) #extract (first part of name before "_,-, or [space]")
@@ -91,9 +93,11 @@ update_drive_links <- function(WD = getwd(),
       #Go into Part subfolders if they exist
       dir_i_ls <- dir_i %>% drive_contents()
 
+      #get subfolder list, ignore scrap(s) folders
       dir_i_subfolders <-
         dir_i_ls %>% dplyr::filter(googledrive::is_folder(dir_i_ls) &
                                      !startsWith(tolower(name), "scrap"))
+      #get all files
       dir_i_files <-
         dir_i_ls %>% dplyr::filter(!googledrive::is_folder(dir_i_ls))
 
@@ -101,17 +105,20 @@ update_drive_links <- function(WD = getwd(),
         checkmate::test_data_frame(dir_i_files, all.missing = FALSE)
       #get info for files if there's no subdirectory
       if (test_dir_i_files) {
-        dir_i_files_info <- dir_i_files %>% drive_get_info
+        dir_i_files_info <-
+          dir_i_files %>% drive_get_info(set_envir = dir_i_info$envir)
       } else{
         dir_i_files_info <- NULL
       }
 
-      #Now gather info from Part subdirectories
+
+      # Now gather info from Part subdirectories --------------------------------
+
       if (nrow(dir_i_subfolders) > 0) {
         dir_i_subfolders_info <-
           lapply(1:nrow(dir_i_subfolders), function(ii) {
             update_drive_links_partHelper(
-              dribble = dir_i_subfolders[ii,],
+              dribble = dir_i_subfolders[ii, ],
               set_grades = dir_i_info$grades,
               set_envir = envir_type
             )
@@ -126,9 +133,14 @@ update_drive_links <- function(WD = getwd(),
                                      dir_i_subfolders_info)
     }) %>% dplyr::bind_rows()
 
-  #Now combine it all for output
+
+  # Now combine it all for output -------------------------------------------
+
   inferred_teach_it <- dplyr::bind_rows(teach_dir_info,
-                                        variant_info) %>% dplyr::select(-"shortTitle", -"short_title")
+                                        variant_info) %>%
+    dplyr::select(-"shortTitle", -"short_title") %>%
+    #filter out ignoredinfo
+    dplyr::filter(!grepl(ignore, .data$filename))
   #Format directory filenames to stand out from files
   #with ../dir/ formatting
   hier_dots <-
@@ -141,6 +153,7 @@ update_drive_links <- function(WD = getwd(),
         ""
       )) %>% unlist()
 
+  #rename directory filenames with hierdots notation "../folder/"
   inferred_teach_it$filename <-
     sapply(1:length(hier_dots), function(i) {
       if (!inferred_teach_it$fileType[i] == "folder")
@@ -205,7 +218,7 @@ update_drive_links <- function(WD = getwd(),
       #Do hard_left_join on empty teach_it_in0 to keep .gsheet structure,
       #but none of the data; sort
       test_teach_it_out <-
-        hard_left_join(teach_it_in0[-(1:nrow(teach_it_in0)),],
+        hard_left_join(teach_it_in0[-(1:nrow(teach_it_in0)), ],
                        inferred_teach_it,
                        by =
                          "filename",
@@ -234,9 +247,15 @@ update_drive_links <- function(WD = getwd(),
                          TRUE)
 
       #NA-out studioLinks not found in inferred_teach_it2 (b/c these files don't exist, but the join will retain them b/c they're found in teach_it_in (i.e. on teach-it.gsheet))
-      missingLinks<-which(is.na(match(test_teach_it_out$result$studioLink,inferred_teach_it2$studioLink)))
-      if(length(missingLinks)>0){
-        test_teach_it_out$result$studioLink[missingLinks]<-NA
+      missingLinks <-
+        which(is.na(
+          match(
+            test_teach_it_out$result$studioLink,
+            inferred_teach_it2$studioLink
+          )
+        ))
+      if (length(missingLinks) > 0) {
+        test_teach_it_out$result$studioLink[missingLinks] <- NA
       }
     }#End differential logic for clean parameter
 
@@ -273,15 +292,16 @@ update_drive_links <- function(WD = getwd(),
 
       # Remove temporary id variable,arrange, & put lesson folder at top --------
       teach_it_out <- teach_it_out %>%
-        dplyr::select(-"f_g_e",-dplyr::starts_with("...")) %>%
+        dplyr::select(-"f_g_e", -dplyr::starts_with("...")) %>%
         dplyr::arrange(
+          !.data$itemType == "lessonDir",
           .data$envir,
           .data$grades,
-          .data$itemType != "variantDir", #put variantDir link above all the parts
+          .data$itemType != "variantDir",
+          #put variantDir link above all the parts
           .data$part,
           .data$fileType
-        ) %>%
-        dplyr::arrange(!.data$itemType == "lessonDir")
+        )
 
     }#End !is.null(teach_it_out) logic for formatting merged teach_it_out
 
@@ -301,38 +321,51 @@ update_drive_links <- function(WD = getwd(),
 
 
 
-# Guess titles for files with title=NA ------------------------------------
+    # Guess titles for files with title=NA ------------------------------------
 
-blank_titles<-which(is.na(teach_it_out$title)&teach_it_out$fileType!="folder")
-if(length(blank_titles)>0){
-  message("Guessing missing titles...")
-  teach_it_out$title[blank_titles] <-
-    sapply(blank_titles,function(i){
-    d_i<-teach_it_out[i,]
-    paste_valid(d_i$SvT, d_i$itemType, paste0("(Part ", d_i$part,")")) %>%
-      stringr::str_to_title()
-  }) %>% unlist()
-}
+    blank_titles <-
+      which(is.na(teach_it_out$title) & teach_it_out$fileType != "folder")
+    if (length(blank_titles) > 0) {
+      message("Guessing missing titles...")
+      teach_it_out$title[blank_titles] <-
+        sapply(blank_titles, function(i) {
+          d_i <- teach_it_out[i, ]
+          test_valid_inferred_info<-sum(!is_empty(d_i$SvT),!is_empty(d_i$itemType),!is_empty(d_i$part))>1
+          #Only guess title if we have at least 2 bits of inferred info; otherwise put filename as title
+          if(test_valid_inferred_info){
+          paste_valid(d_i$SvT, d_i$itemType, ifelse(is_empty(d_i$part), "", paste0("(Part ", d_i$part, ")"))) %>%
+            stringr::str_to_title()
+          }else{
+            d_i$filename
+          }
+        }) %>% unlist()
+    }
 
 
-# Add default descriptions ------------------------------------------------
-blank_descr<-which(is.na(teach_it_out$description)&teach_it_out$fileType!="folder")
-if(length(blank_descr)>0){
-  message("Guessing missing descriptions...")
-  teach_it_out$description[blank_descr] <-
-    sapply(blank_descr,function(ii){
-      itemSvT<-paste_valid(teach_it_out$itemType[ii],teach_it_out$SvT[ii],collapse="-")
-      #Default instructions for each type of item
-      switch(itemSvT,
-             "worksheet-teacher"="Print 1 Copy",
-             "worksheet-student"="Print 1 per Student",
-             "handout/ table"="Print Classroom Set",
-             "handout/ table student"="Print Classroom Set",
-             "handout student"="Print Classroom Set or 1 per Student",
-             "presentation"="Need: WiFi, Computer, Projector, Sound",
-             "")
-    }) %>% unlist()
-}
+    # Add default descriptions ------------------------------------------------
+    blank_descr <-
+      which(is.na(teach_it_out$description) &
+              teach_it_out$fileType != "folder")
+    if (length(blank_descr) > 0) {
+      message("Guessing missing descriptions...")
+      teach_it_out$description[blank_descr] <-
+        sapply(blank_descr, function(ii) {
+          itemSvT <-
+            paste_valid(teach_it_out$itemType[ii], teach_it_out$SvT[ii], collapse =
+                          "-")
+          #Default instructions for each type of item
+          switch(
+            itemSvT,
+            "worksheet-teacher" = "Print 1 Copy",
+            "worksheet-student" = "Print 1 per Student",
+            "handout/ table" = "Print Classroom Set",
+            "handout/ table student" = "Print Classroom Set",
+            "handout student" = "Print Classroom Set or 1 per Student",
+            "presentation" = "Need: WiFi, Computer, Projector, Sound",
+            ""
+          )
+        }) %>% unlist()
+    }
 
     # Write new data to DriveLinks tab ----------------------------------------
     skip_rows <- 2

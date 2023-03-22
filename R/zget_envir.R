@@ -228,7 +228,7 @@ zget_items <- \(df, fm) {
         cust_url
       )
 
-    drive_share_txt <- "Copy/Edit in Google Docs"
+    drive_share_txt <- paste_valid("Copy/Edit in Google Docs",disclaimer)
     #output for this part
     list(
       itemTitle = df_item_i$title,

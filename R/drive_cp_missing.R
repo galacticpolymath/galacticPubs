@@ -105,7 +105,7 @@ drive_copy_missing_files <- function(from_dir,
       message("\n SOURCE------>", from_dir$name)
       message(" DESTINATION<-", to_dir$name)
       message(
-        "\n\n drive_copy_missing_files(): \n **Do you want to fill in ",
+        "\n\n drive_cp_missing(): \n **Do you want to fill in ",
         nrow(to_copy),
         " missing\\POTENTIALLY INCOMPLETE item(s)?**\n"
       )
@@ -175,11 +175,11 @@ drive_copy_missing_files <- function(from_dir,
 
               #If the current folder already exists, recursively fill in with this function
               if (xi$name %in% dest_dir_existing_folders$name) {
-                message("\ndrive_copy_missing_files(): checking for missing files in folder: ",
+                message("\ndrive_cp_missing): checking for missing files in folder: ",
                         xi$name)
 
                 test_cp_i <-
-                  drive_copy_missing_files(
+                  drive_cp_missing(
                     to_dir = dest_dir_contents %>% dplyr::filter(.data$name == xi$name),
                     from_dir = xi,
                     prompt_user = FALSE
@@ -253,7 +253,7 @@ drive_copy_missing_files <- function(from_dir,
     NAs<-sum(is.na(copylog$success))
     failures<-sum(!copylog$success,na.rm=T)
     message("\n=====================================\n",
-            "drive_copy_missing_files() SUMMARY",
+            "drive_cp_missing() SUMMARY",
             "\n=====================================\n",
             "SUCCEEDED?: ",failures==0,
             "\n-------------------------------------",
@@ -264,7 +264,7 @@ drive_copy_missing_files <- function(from_dir,
     )
   }
     if (prompt_user&nrow(copylog)==1&is.na(copylog$success[1])) {
-      message("\ndrive_copy_missing_files(): No missing files found.\n")
+      message("\ndrive_cp_missing): No missing files found.\n")
     }
 
   #return dribble of new folder

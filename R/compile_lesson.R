@@ -261,7 +261,7 @@ compile_lesson <-
       if (is.na(current_data$GitHubPath)) {
         warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
       } else{
-        updateTeachingMatLinks(WD = WD)
+        update_drive_links(WD = WD)
         compileTeachingMat(WD = WD)
       }
 

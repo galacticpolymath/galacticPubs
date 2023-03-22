@@ -18,7 +18,7 @@ update_drive_links(
 
 \item{rm_missing}{logical; do you want to automatically remove records that are missing (and for which no studioLink was found during crawl of Google Drive folder?); default= TRUE; if FALSE, the link will be left blank}
 
-\item{clean}{logical; do you want to ignore all info on the teach-it.gsheet and only import inferred info from crawled google drive project files? default=FALSE}
+\item{clean}{logical; do you want to ignore all info on the teach-it.gsheet and only import inferred info from crawled google drive project files? THIS WILL OVERWRITE MANUALLY ENTERED TITLES; default=FALSE}
 }
 \description{
 Searches lesson's google drive folder to populate the 'DriveLinks' tab of the lesson's 'meta/teach-it.gsheet' file.

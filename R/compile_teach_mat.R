@@ -183,7 +183,7 @@ compile_teach_mat <- function(WD = getwd(),
   teach_mat_data <- zget_envir(tlinks, fm = fm)
   Data <- c(lessonDur = lessonDur,
             teach_mat_data)
-  browser()
+
 
   # Multimedia --------------------------------------------------------------
   # Outputs to separate multimedia JSON
