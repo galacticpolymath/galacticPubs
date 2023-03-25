@@ -63,7 +63,7 @@ zget_envir <- \(df, fm) {
 zget_grade_var_notes <- \(df){
   parts<-unique_sans_na(df$part)
   purrr::map(parts,\(i){
-  df_i <- df %>% dplyr::filter(part==i) %>% dplyr::slice(n=1)
+  df_i <- df %>% dplyr::filter(part==i) %>% dplyr::slice(1)
   list(
     part=df_i$part,
     partGradeVarNotes=df_i$PartGradeVarNotes
@@ -144,10 +144,20 @@ zget_parts <- \(df, fm) {
     purrr::map(., \(part_i) {
       #Get info for the subfolder
       df_part_i <- df %>% dplyr::filter(part == part_i)
+
+      #parse tags
+      part_i_tags0 <- df_part_i$ActTags[1]
+      if(is_empty(part_i_tags0)) {
+        part_i_tags<-NULL
+      } else{
+        part_i_tags<-stringr::str_split(part_i_tags0, ",") %>% unlist() %>% stringr::str_trim()
+      }
+
       #output for this part
       list(
         part = part_i,
         title = df_part_i$PartTitle[1],
+        tags= list(part_i_tags),
         preface = df_part_i$PartPreface[1],
         itemList = zget_items(df_part_i, fm = fm)
       )

@@ -23,8 +23,8 @@ browser()
   published_path <- fs::path(WD, "published")
   meta_path <- fs::path(WD, "meta")
   sm<-get_fm(WD=WD,key="SupportingMedia")
-  sm_paths<-fs::path(WD,"assets","_other-media-to-publish",sm)
-  published_sm_paths<-fs::path(published_path,sm)
+  sm_paths<-fs::path(WD,sm)
+  published_sm_paths<-fs::path(published_path,basename(sm))
 
   staged_and_up_to_date <-
     inSync(

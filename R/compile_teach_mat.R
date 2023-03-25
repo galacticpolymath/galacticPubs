@@ -47,6 +47,14 @@ compile_teach_mat <- function(WD = getwd(),
       col_types = "c"
     )
 
+  pext <-
+    googlesheets4::read_sheet(
+      teach_it_drib,
+      sheet = "PartExt",
+      skip = 1,
+      col_types = "c"
+    )
+
 
   #bring in procedure
   proc <-
@@ -66,6 +74,7 @@ compile_teach_mat <- function(WD = getwd(),
   checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!DriveLinks")
   checkmate::assert_data_frame(mlinks, min.rows = 0, .var.name = "teach-it.gsheet!Multimedia")#multimedia might be 0 rows
   checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!DriveLinks")
+  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!DriveLinks")
   checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!DriveLinks")
 
   # Check for template text (uninitialized data) ----------------------------
@@ -75,6 +84,7 @@ compile_teach_mat <- function(WD = getwd(),
     !grepl("^Lesson description", pinfo$LessonPreface[1])
   proc_initialized <-
     !grepl("^\\*\\*\\*\\*\\*", proc$ChunkTitle[1]) #FALSE if ***** found in 1st ChunkTitle
+  pext_initialized <- nrow(pext)>0
   mlinks_initialized <- nrow(mlinks) > 0
 
   if (!pinfo_titles_initialized) {
@@ -168,7 +178,7 @@ compile_teach_mat <- function(WD = getwd(),
   #Add part title and preface to proc tlinks info for convenience
   if (pinfo_titles_initialized) {
     tlinks <-
-      dplyr::left_join(tlinks0, pinfo[, 1:4], by = c("part" = "Part"))
+      dplyr::left_join(tlinks0, pinfo[, 1:5], by = c("part" = "Part"))
   } else{
     tlinks <-
       tlinks0 %>% dplyr::mutate(
