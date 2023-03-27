@@ -16,6 +16,8 @@
 #' 1. a dribble or
 #' 2. a Googledrive ID (as a string)
 #' 3. drive_root is passed to [googledrive::drive_get()]
+#' @param exact_match logical; Do you want an exact match for the file name of the path? (only applies to the final FILENAME part of the path; i.e  'folder/folder/FILENAME_w_different_suffix'); default=TRUE
+#' @param single_result logical; do you want to force a single result (i.e. throw an error if there is more than one match)?; default=TRUE
 #' @examples
 #' \dontrun{
 #' #ABSOLUTE PATHS
@@ -36,20 +38,27 @@
 
 drive_find_path <- function(drive_path,
                             WD = NULL,
-                            drive_root = NULL) {
+                            drive_root = NULL,
+                            exact_match = TRUE,
+                            single_result = TRUE) {
   is_drib <- googledrive::is_dribble(drive_path)
-
-  if(!is.null(drive_root) & !grepl(pattern = "^\\.\\.",drive_path)){
-  warning("When you supply 'drive_root', you need to add '../' to the beginning of a path to indicate that it's a relative path.")
-
-  }
 
   if (is_drib) {
     #just passes through a dribble if it's already been resolved
-    drive_path
+    out <- drive_path
   } else{
+    if (!is.null(drive_root) &
+        !grepl(pattern = "^\\.\\.", drive_path)) {
+      warning(
+        "When you supply 'drive_root', you need to add '../' to the beginning of a path to indicate that it's a relative path."
+      )
+
+    }
+
     if (!is.null(WD)) {
-      if(WD=="?"){WD <- pick_lesson()}
+      if (WD == "?") {
+        WD <- pick_lesson()
+      }
       message("Resolving Gdrive Web path for: '",
               gsub("\\.\\.", paste0("[ ", basename(WD), " ]"), drive_path),
               "'")
@@ -90,9 +99,8 @@ drive_find_path <- function(drive_path,
             if (!is.null(WD)) {
               #make sure a valid lesson project directory provided
 
-              checkmate::assert(checkmate::check_character(drive_path),
-                                check_wd(WD = WD),
-                                combine = "and")
+              checkmate::assert_character(drive_path, all.missing = FALSE)
+              check_wd(WD = WD, throw_error = FALSE)
 
               message("\nReading '",
                       basename(WD),
@@ -116,10 +124,11 @@ drive_find_path <- function(drive_path,
                 sharedDrive <-
                   drive_root$drive_resource[[1]]$driveId %>% googledrive::as_id()
               } else{
-                drive_root_drib<- googledrive::drive_get(id = googledrive::as_id(drive_root))
-                checkmate::assert_class(drive_root_drib,"dribble",.var.name = "drive_root gdrive location")
+                drive_root_drib <-
+                  googledrive::drive_get(id = googledrive::as_id(drive_root))
+                checkmate::assert_class(drive_root_drib, "dribble", .var.name = "drive_root gdrive location")
 
-                results[[i]] <-drive_root_drib
+                results[[i]] <- drive_root_drib
                 sharedDrive <-
                   results[[i]]$drive_resource[[1]]$driveId %>% googledrive::as_id()
               }
@@ -143,14 +152,22 @@ drive_find_path <- function(drive_path,
 
           #ALL OTHER parts of path (after p[[1]])
         } else{
-          last_result <- results[[i - 1]]
-          last_result_id <-
-            ifelse(inherits(last_result, "dribble"),
-                   last_result$id,
-                   last_result)
+          prev_result <- results[[i - 1]]
+          prev_result_id <-
+            ifelse(inherits(prev_result, "dribble"),
+                   prev_result$id,
+                   prev_result)
+
+          # allow for 'contains' instead of 'equals' name matching for *last* path term only
+          if (i == length(p) & !exact_match) {
+            qtoggle <-  "name contains '"
+          } else{
+            qtoggle <-  "name= '"
+          }
+
           results[[i]] <-
             googledrive::drive_find(
-              q = paste0("name='", p[i], "' and '", last_result_id , "' in parents"),
+              q = paste0(qtoggle, p[i], "' and '", prev_result_id , "' in parents"),
               shared_drive = sharedDrive
             )
           #error handling
@@ -164,8 +181,21 @@ drive_find_path <- function(drive_path,
         }
       }#end loop
 
-      #output
-      results[[length(results)]]
+
     }
-  }
+
+    #output
+    out <- results[[length(results)]] %>% dplyr::bind_rows()
+
+    #if we've looked
+    if (single_result & nrow(out) > 1) {
+      print(out)
+      out
+      stop("More than one match found. Delete duplicate file or specify 'single_result=F'")
+
+    }
+  }#end !is_drib logic
+
+  out
+
 }
