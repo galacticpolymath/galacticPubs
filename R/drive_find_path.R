@@ -76,7 +76,7 @@ drive_find_path <- function(drive_path,
       nchar(drive_path) %in% c(33, 44)
 
     if (is_ID) {
-      googledrive::drive_get(id = googledrive::as_id(drive_path))
+      results <- googledrive::drive_get(id = googledrive::as_id(drive_path)) %>% list()#to list for downstream compatibility
     } else{
       #otherwise proceed splitting and resolving the path
       p <- strsplit(drive_path, split = "/") %>% unlist()

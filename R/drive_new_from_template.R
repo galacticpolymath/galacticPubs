@@ -75,7 +75,7 @@ drive_new_from_template <-
         #Define case where a character is provided
         checkmate::assert_character(new_name, all.missing = FALSE)
         #if we need to recycle the new_name, we can only do that w/ new_name_gsub to avoid duplicating names
-        if (length(new_name) != length(template_path) &
+        if (length(new_name) != nrow(from_path) &
             is.null(new_name_gsub)) {
           stop("You can only specify new names for multiple files with new_names_gsub")
         }
@@ -89,9 +89,17 @@ drive_new_from_template <-
         stop("Must provide names for things to be swapped. See ?drive_new_from_template")
       }
 
+      #recycle new name substitution rules if only 1 provided
+      if(length(new_name_gsub)==1 & length(new_name_gsub)<nrow(from_path)){
+        new_name_gsub<-rep(new_name_gsub,nrow(from_path))
+      }
+
+      #assign vector of new names based on substitution rules
       new_name <- purrr::map(1:nrow(from_path), \(i) {
-        gsub(names(new_name_gsub)[i], new_name_gsub, from_path$name[i])
+        gsub(names(new_name_gsub)[i], new_name_gsub[i], from_path$name[i])
       }) %>% unlist
+
+
     }
 
     # Maintain file extensions if not provided in new file names --------------
@@ -100,15 +108,15 @@ drive_new_from_template <-
         grepl("\\.[^\\.]{2,3}", new_name[i])
       }) %>% unlist
 
-    #Add original file extension if it wasn't provided
+    #Add original file extension if it wasn't provided & is needed
     if (sum(new_has_ext) < length(new_name)) {
       new_name <- purrr::map(1:length(new_name), \(i) {
         if (new_has_ext[i]) {
           new_name[i]
         } else{
-          paste0(new_name[i],
-                 ".",
-                 from_path$drive_resource[[1]]$fileExtension[i])
+          paste_valid(new_name[i],
+                 from_path$drive_resource[[1]]$fileExtension[i],
+                  collapse=".")
         }
       }) %>% unlist
     }

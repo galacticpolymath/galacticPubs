@@ -23,7 +23,7 @@ init_lesson_meta <- function(WD=getwd(),overwrite=NA){
   )
 
   meta_template_files<-googledrive::drive_get(id=googledrive::as_id("1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me")) %>% drive_contents
-  out<-drive_new_from_template(meta_template_files,googledrive::as_id(dest_gID),overwrite=overwrite)
+  out<-drive_new_from_template(meta_template_files,dest_gID,overwrite=overwrite,new_name_gsub = c("TEMPLATE"=fm$ShortTitle))
   # drive_new_from_template(template_path = "1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me",dest_path = dest_gID)
   message("These files copied to: '[",fm$GdriveDirName,"]/meta'")
   out
