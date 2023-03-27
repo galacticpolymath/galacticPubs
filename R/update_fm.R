@@ -17,6 +17,9 @@ update_fm <-
            save_output = TRUE,
            reorder = TRUE,
            change_this = NULL) {
+
+    if(WD=="?"){WD <- pick_lesson()}
+
     yaml_path <- fs::path(WD, "meta", "front-matter.yml")
 
     #safe_read_yaml will create yaml if it's missing

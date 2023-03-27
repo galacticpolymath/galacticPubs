@@ -26,9 +26,9 @@ zget_items(df, fm)
 \item{assess}{tibble of assessment info passed from \code{\link[=zget_envir]{zget_envir()}}}
 }
 \description{
-Internal helpers for \code{\link[=compile_teach_mat]{compile_teach_mat()}}. Used to pull out highly structured hierarchical JSON from the teach-it.gsheet
+Internal helpers for \code{\link[=compile_teach_it]{compile_teach_it()}}. Used to pull out highly structured hierarchical JSON from the teach-it.gsheet
 
-Helper function for \code{\link[=compile_teach_mat]{compile_teach_mat()}} that extracts different kinds of share links for the webpage. For example, makes preview links for google presentations and PDF download links for other documents
+Helper function for \code{\link[=compile_teach_it]{compile_teach_it()}} that extracts different kinds of share links for the webpage. For example, makes preview links for google presentations and PDF download links for other documents
 }
 \details{
 Not intended for use outside functions.

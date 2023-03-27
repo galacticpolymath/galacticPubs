@@ -5,7 +5,7 @@
 #' If you ask for only one key, output will be a vector, rather than a list
 #'
 #' @param key which entry (or entries) do you want to import? default=NULL will import everything
-#' @param WD working directory; default=getwd()
+#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]
 #' @examples
 #' get_fm()
 #' get_fm(key=c("Title","ShortTitle","locale"))
@@ -13,6 +13,7 @@
 #' @export
 
 get_fm <- function(key = NULL, WD = getwd()) {
+  if(WD=="?"){WD <- pick_lesson()}
   y <- safe_read_yaml(fs::path(WD, "meta", "front-matter.yml"))
   KEYS <- names(y)
 

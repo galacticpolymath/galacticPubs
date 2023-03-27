@@ -9,7 +9,7 @@ drive_get_info(dribble, set_envir = NULL, set_grades = NULL, validate = FALSE)
 \arguments{
 \item{dribble}{a dribble input (e.g. piped from \code{\link[googledrive:drive_get]{googledrive::drive_get()}}) for a single file}
 
-\item{set_envir}{set envir output manually (not from file name); partial string matching of options "classroom" and "remote"}
+\item{set_envir}{set envir output manually (not from file name); partial string matching of options "classroom", "remote", "assessments"}
 
 \item{set_grades}{set grade bands manually (not from file name); passed as a string (e.g. "5-9")}
 

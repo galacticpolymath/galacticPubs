@@ -2,7 +2,7 @@
 #'
 #' Checks for existence of front-matter.yml in the meta/ subfolder of supplied working directory. Then, validates that certain expected parameters are set
 #'
-#' @param WD working directory; default= getwd()
+#' @param WD working directory; default= getwd(); if "?" supplied, will invoke [pick_lesson()]
 #' @param skip a character vector of items you want to skip validation for. default=NULL.
 #' Options:
 #' - locale: Check for existence of locale entry in front-matter.yml
@@ -15,6 +15,7 @@ check_fm <- function(WD = getwd(),
                        skip = NULL,
                        throw_error = TRUE) {
 
+  if(WD=="?"){WD <- pick_lesson()}
   yaml_path <- fs::path(WD, "meta", "front-matter.yml")
   yaml_found <- file.exists(yaml_path)
 

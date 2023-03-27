@@ -10,7 +10,7 @@
 #' 5. Merge results with manually entered titles and such in 'meta/teach-it.gsheet DriveLinks tab'
 #' 6. Save 'meta/teach-it.gsheet'
 #'
-#' @param WD a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass WD from [pick_lesson()]; must use `full_path=TRUE` with pick_lesson
+#' @param WD a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" which will invoke [pick_lesson()]
 #' @param rebuild if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL
 #' @param rm_missing logical; do you want to automatically remove records that are missing (and for which no studioLink was found during crawl of Google Drive folder?); default= TRUE; if FALSE, the link will be left blank
 #' @param clean logical; do you want to ignore all info on the teach-it.gsheet and only import inferred info from crawled google drive project files? THIS WILL OVERWRITE MANUALLY ENTERED TITLES; default=FALSE
@@ -23,6 +23,9 @@ update_drive_links <- function(WD = getwd(),
                                rm_missing = TRUE,
                                clean = FALSE,
                                ignore = ".txt$") {
+
+  if(WD=="?"){WD <- pick_lesson()}
+
   checkmate::assert(
     check_wd(WD = WD, throw_error = FALSE),
     combine = "and"

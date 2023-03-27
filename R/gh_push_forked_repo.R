@@ -12,6 +12,7 @@
 #'
 
 gh_push_forked_repo<-function(WD=getwd()) {
+  if(WD=="?"){WD <- pick_lesson()}
   #test if this gh_proj_name is in the lessons directory, otherwise throw error
   test_wd<-check_wd(simple_out = FALSE,WD = WD)
   wdpath<-paste0("'",fs::as_fs_path((WD)),"'")

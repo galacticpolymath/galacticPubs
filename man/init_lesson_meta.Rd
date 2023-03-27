@@ -10,7 +10,7 @@ init_lesson_meta(WD = getwd(), overwrite = NA)
 lesson_init_meta(WD = getwd(), overwrite = NA)
 }
 \arguments{
-\item{WD}{the working directory for the virtualized lesson path; default=getwd() if you're working in the lesson's .Rproj. Otherwise use \code{\link[=pick_lesson]{pick_lesson()}}}
+\item{WD}{the working directory for the virtualized lesson path; default=getwd() if you're working in the lesson's .Rproj. If "?" is supplied, it will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 
 \item{overwrite}{passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}; default=NA will add "(1)" to avoid duplicates; TRUE will trash existing file before copying}
 }

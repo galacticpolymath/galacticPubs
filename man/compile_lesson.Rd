@@ -23,7 +23,7 @@ compile_lesson(
 
 \item{outputFileName}{output file name; default= "processedProcedure.json"}
 
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 
 \item{clean}{delete all JSON files in meta/ and start over? default=TRUE}
 

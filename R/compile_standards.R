@@ -19,6 +19,8 @@ compile_standards <- function(learningplot_correction= TRUE,
 
    .=NULL #to avoid errors with dplyr syntax
 
+  if(WD=="?"){WD <- pick_lesson()}
+
 #############
 # IMPORTANT: Add Subjects here if you need to align new ones --------------
    ordered_subjects<-  c("Math","ELA","Science","Social Studies","Art","Sustainability","Technology")

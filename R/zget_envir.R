@@ -1,6 +1,6 @@
 #' zget_envir()
 #'
-#' Internal helpers for [compile_teach_mat()]. Used to pull out highly structured hierarchical JSON from the teach-it.gsheet
+#' Internal helpers for [compile_teach_it()]. Used to pull out highly structured hierarchical JSON from the teach-it.gsheet
 #'
 #' Not intended for use outside functions.
 #'
@@ -176,7 +176,7 @@ zget_parts <- \(df, fm) {
 
 #' zget_items
 #'
-#' Helper function for [compile_teach_mat()] that extracts different kinds of share links for the webpage. For example, makes preview links for google presentations and PDF download links for other documents
+#' Helper function for [compile_teach_it()] that extracts different kinds of share links for the webpage. For example, makes preview links for google presentations and PDF download links for other documents
 #'
 #' @describeIn zget_envir
 #'
@@ -266,7 +266,7 @@ zget_items <- \(df, fm) {
 
 #' zYTembed
 #'
-#' Internal helpers for [compile_teach_mat()]. Get YT embed code from any Youtube link
+#' Internal helpers for [compile_teach_it()]. Get YT embed code from any Youtube link
 #'
 #' @param link a YouTube link
 #'
@@ -281,7 +281,7 @@ zYTembed <- function(link) {
 
 #' zcatchLinkNA
 #'
-#' Internal helpers for [compile_teach_mat()]. Change linktext if URL is empty.
+#' Internal helpers for [compile_teach_it()]. Change linktext if URL is empty.
 #'
 #' @export
 #' @family Internal helper functions

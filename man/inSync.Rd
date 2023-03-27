@@ -17,7 +17,7 @@ inSync(path1, path2, newer = TRUE, ..., verbose = FALSE, WD = getwd())
 
 \item{verbose}{print out table with information? default=FALSE}
 
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 }
 \value{
 T if timestamps match, F if they don't or if path 1 is missing

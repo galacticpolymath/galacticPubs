@@ -4,12 +4,14 @@
 #'
 #' WD is used for hybrid file path navigation using virtualized paths on Google Drive for desktop to reach the Edu/Lessons/meta/front-matter.yml for the project of interest. Then, using [get_fm()] to lookup the GoogleDrive ID for the cloud version of this folder, files will then be copied from the template folder to this project folder using the google web API. All of this is necessary because Google Drive for Desktop doesn't allow copying of Google Documents.
 #'
-#' @param WD the working directory for the virtualized lesson path; default=getwd() if you're working in the lesson's .Rproj. Otherwise use [pick_lesson()]
+#' @param WD the working directory for the virtualized lesson path; default=getwd() if you're working in the lesson's .Rproj. If "?" is supplied, it will invoke [pick_lesson()]
 #' @param overwrite passed to [googledrive::drive_cp()]; default=NA will add "(1)" to avoid duplicates; TRUE will trash existing file before copying
 #' @family Google Drive Functions
 #' @export
 
 init_lesson_meta <- function(WD=getwd(),overwrite=NA){
+
+  if(WD=="?"){WD <- pick_lesson()}
 
   #check_wd(WD)
   #GdriveID for lesson templates (must have access to '/GP-Studio/Templates_BE_CAREFUL/lesson-meta-templates/')

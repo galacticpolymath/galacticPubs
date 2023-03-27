@@ -14,5 +14,5 @@ join_rmd(dir, WD = getwd(), filename = "lesson_plan.Rmd")
 \item{filename}{name of resulting merged RMD; default<-"lesson_plan.Rmd"}
 }
 \description{
-Combines rmd files in the given directory; specifically, take the header.yml, concatenate with other Rmd files in the directory, in alphabetical order
+Helper for \code{\link[=make_printable]{make_printable()}} Combines rmd files in the given directory; specifically, take the header.yml, concatenate with other Rmd files in the directory, in alphabetical order
 }

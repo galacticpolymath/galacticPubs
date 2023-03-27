@@ -9,7 +9,7 @@ get_fm(key = NULL, WD = getwd())
 \arguments{
 \item{key}{which entry (or entries) do you want to import? default=NULL will import everything}
 
-\item{WD}{working directory; default=getwd()}
+\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 }
 \description{
 Imports meta/front-matter.yml value(s) to environment as a list.

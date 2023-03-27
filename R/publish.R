@@ -8,6 +8,8 @@
 #' @export
 
 publish <- function(commit_msg = NULL, WD = getwd()) {
+  if(WD=="?"){WD <- pick_lesson()}
+
   #if not run through the editor app,
   #test that WD is in the root directory with the R Project,
   #but don't throw an error (e.g. if run from galacticPubs)

@@ -7,7 +7,7 @@
 #' @param newer logical; is path1 expected to be newer than (i.e. derived from) other paths? default=T. If newer=F, will test if path1 is older than all other paths.
 #' @param ... path to other reference files to compare modified date to path1; separated by commas
 #' @param verbose print out table with information? default=FALSE
-#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke [pick_lesson()]
 #'
 #' @returns T if timestamps match, F if they don't or if path 1 is missing
 #' @export
@@ -19,6 +19,7 @@ inSync <- function(path1,
                    verbose = FALSE,
                    WD = getwd()
 ) {
+if(WD=="?"){WD <- pick_lesson()}
 
   pathz <- c(path1, path2,...)
   if(is_empty(path2)){

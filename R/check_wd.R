@@ -9,6 +9,7 @@
 #' @export
 #'
 check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
+  if(WD=="?"){WD <- pick_lesson()}
   #test that WD is in the root directory with the R Project
   files<-list.files(WD)
   loc_check<-(stringr::str_detect(files,"\\.Rproj") %>% sum() )==1

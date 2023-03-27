@@ -12,6 +12,8 @@ time_chunk <- function(WD=getwd()){
   dir.create(dest_folder,recursive=T)
   }
 
+  if(WD=="?"){WD <- pick_lesson()}
+
   #Test if json procedure exists
   json_proc_path<-fs::path(WD,"meta","JSON","procedure.json")
   if(!file.exists(json_proc_path)){

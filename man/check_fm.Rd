@@ -7,7 +7,7 @@
 check_fm(WD = getwd(), skip = NULL, throw_error = TRUE)
 }
 \arguments{
-\item{WD}{working directory; default= getwd()}
+\item{WD}{working directory; default= getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 
 \item{skip}{a character vector of items you want to skip validation for. default=NULL.
 Options:

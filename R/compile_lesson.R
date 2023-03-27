@@ -16,7 +16,7 @@
 #' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
-#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke [pick_lesson()]
 #' @param clean delete all JSON files in meta/ and start over? default=TRUE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
 #' @return current_data; also the lesson JSON is saved to `meta/JSON/LESSON.json`
@@ -31,6 +31,9 @@ compile_lesson <-
            WD = getwd(),
            clean = TRUE,
            rebuild = NULL) {
+
+    if(WD=="?"){WD <- pick_lesson()}
+
     if (missing(current_data)) {
       current_data <-
         safe_read_yaml(fs::path(WD, "meta", "front-matter.yml"))
@@ -262,7 +265,7 @@ compile_lesson <-
         warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
       } else{
         update_drive_links(WD = WD)
-        compile_teach_mat(WD = WD)
+        compile_teach_it(WD = WD)
       }
 
     }

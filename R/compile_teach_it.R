@@ -1,15 +1,18 @@
-#' compile_teach_mat
+#' compile_teach_it
 #'
-#' Compile Teaching Materials from teach-it.gsheet
+#' Compile Teaching Materials from a project's 'teach-it.gsheet'
 #'
-#' @param WD is working directory of the project; easiest way to supply a different lesson is with WD=[pick_lesson()]; default is WD=getwd()
+#' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [pick_lesson()]; default is WD=getwd()
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 #' @importFrom rlang .data
 #' @export
 
-compile_teach_mat <- function(WD = getwd(),
+compile_teach_it <- function(WD = getwd(),
                               teach_it_drib = NULL) {
+
+  if(WD=="?"){WD <- pick_lesson()}
+
   . = NULL #to avoid errors with dplyr syntax
   #Get front matter from the project working directory
   fm <- get_fm(WD = WD)

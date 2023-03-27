@@ -1,6 +1,6 @@
 #' join_rmd
 #'
-#' Combines rmd files in the given directory; specifically, take the header.yml, concatenate with other Rmd files in the directory, in alphabetical order
+#' Helper for [make_printable()] Combines rmd files in the given directory; specifically, take the header.yml, concatenate with other Rmd files in the directory, in alphabetical order
 #'
 #' @param dir relative path to the directory
 #' @param WD working directory; default= getwd()

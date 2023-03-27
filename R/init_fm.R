@@ -7,6 +7,7 @@
 #' @export
 
 init_fm<- function(WD=getwd()){
+  if(WD=="?"){WD <- pick_lesson()}
   test_check_fm<-suppressWarnings(check_fm(WD=WD,skip=c("gh","locale"),throw_error=FALSE))
   fm_path<-fs::path(WD,"meta","front-matter.yml")
   if(!test_check_fm){
