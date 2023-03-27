@@ -5,17 +5,17 @@
 #' @param drive_path If you provide a dribble, it gets passed right back out. Otherwise, you can give a character string in the form "DRIVE/directory/subdirectory".
 #' - DRIVE can be "~" or "my drive" to refer to your private google drive
 #' - Path can also be the name of a shared drive (e.g. "GP-Misc")
-#' - Also supports relative paths (e.g. "../meta"), as long as **WD** or **root**. If **WD** is supplied (this is a full "local" Google Drive for Desktop path piped from [pick_lesson()]). If **root** supplied, it will use that as the parent for getting relative paths.
+#' - Also supports relative paths (e.g. "../meta"), as long as **WD** or **web_root**. If **WD** is supplied (this is a full "local" Google Drive for Desktop path piped from [pick_lesson()]). If **web_root** supplied, it will use that as the parent for getting relative paths.
 #'  - Relative pathing can be significantly faster because each hierarchical call to GDrive API to resolve a folder costs about a second.
 #' - You can also pass an ID as a text string if you know that already
 #' - Generally, case SeNsItIvE...but results may vary
 #' @param WD
-#' - a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass WD from [pick_lesson()]; must use `full_path=TRUE` with pick_lesson
+#' - a **local** virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" whcih will invoke [pick_lesson()]; must use `full_path=TRUE` with pick_lesson
 #' - will be ignored unless relative path provided ("../folder1"), where **WD** will be substituted for ".."
-#' @param root NOT SUPPORTED YET will be ignored unless relative path provided ("../folder1"), where root will be substituted for "..". Can be:
+#' @param web_root A Google drive path reference (not a local or virtualized path). Will be ignored unless relative path provided ("../folder1"), where web_root will be substituted for "..". Can be:
 #' 1. a dribble or
 #' 2. a Googledrive ID (as a string)
-#' 3. root is passed to [googledrive::drive_get()]
+#' 3. web_root is passed to [googledrive::drive_get()]
 #' @examples
 #' \dontrun{
 #' #ABSOLUTE PATHS
@@ -36,11 +36,11 @@
 
 drive_find_path <- function(drive_path,
                             WD = NULL,
-                            root = NULL) {
+                            web_root = NULL) {
   is_drib <- googledrive::is_dribble(drive_path)
 
-  if(!is.null(root) & !grepl(pattern = "^\\.\\.",drive_path)){
-  warning("When you supply 'root', you need to add '../' to the beginning of a path to indicate that it's a relative path.")
+  if(!is.null(web_root) & !grepl(pattern = "^\\.\\.",drive_path)){
+  warning("When you supply 'web_root', you need to add '../' to the beginning of a path to indicate that it's a relative path.")
 
   }
 
@@ -49,6 +49,7 @@ drive_find_path <- function(drive_path,
     drive_path
   } else{
     if (!is.null(WD)) {
+      if(WD=="?"){WD <- pick_lesson()}
       message("Resolving Gdrive Web path for: '",
               gsub("\\.\\.", paste0("[ ", basename(WD), " ]"), drive_path),
               "'")
@@ -76,12 +77,12 @@ drive_find_path <- function(drive_path,
       for (i in 1:length(p)) {
         #FIRST part of path
         if (i == 1) {
-          #if first part of path is short hand for mydrive root, get its google ID
-          if (tolower(p[i]) == "root" |
+          #if first part of path is short hand for mydrive web_root, get its google ID
+          if (tolower(p[i]) == "web_root" |
               tolower(p[i]) == "my drive" |
               tolower(p[i]) == "~") {
             results[[i]] <-
-              googledrive::drive_get(id = "root")
+              googledrive::drive_get(id = "web_root")
             sharedDrive <- NULL
 
             #handle relative paths from a GP-Studio/Edu/Lessons dir
@@ -103,29 +104,29 @@ drive_find_path <- function(drive_path,
               sharedDrive <- "GP-Studio"
 
             }
-            if (!is.null(root)) {
-              #root can be an ID character string or a dribble
+            if (!is.null(web_root)) {
+              #web_root can be an ID character string or a dribble
               checkmate::assert(
-                checkmate::check_class(root, "dribble"),
-                checkmate::check_class(root, "character")
+                checkmate::check_class(web_root, "dribble"),
+                checkmate::check_class(web_root, "character")
               )
-              #only look up root to get its shared Drive association if dribble not supplied
-              if (inherits(root, "dribble")) {
-                results[[i]] <- root
+              #only look up web_root to get its shared Drive association if dribble not supplied
+              if (inherits(web_root, "dribble")) {
+                results[[i]] <- web_root
                 sharedDrive <-
-                  root$drive_resource[[1]]$driveId %>% googledrive::as_id()
+                  web_root$drive_resource[[1]]$driveId %>% googledrive::as_id()
               } else{
-                root_drib<- googledrive::drive_get(id = googledrive::as_id(root))
-                checkmate::assert_class(root_drib,"dribble",.var.name = "root gdrive location")
+                web_root_drib<- googledrive::drive_get(id = googledrive::as_id(web_root))
+                checkmate::assert_class(web_root_drib,"dribble",.var.name = "web_root gdrive location")
 
-                results[[i]] <-root_drib
+                results[[i]] <-web_root_drib
                 sharedDrive <-
                   results[[i]]$drive_resource[[1]]$driveId %>% googledrive::as_id()
               }
             }
 
 
-            #otherwise get root of SharedDrive path
+            #otherwise get web_root of SharedDrive path
           } else{
             results[[i]] <-
               googledrive::shared_drive_get(name = p[i])
@@ -135,7 +136,7 @@ drive_find_path <- function(drive_path,
           #error handling
           if (identical(nrow(results[[i]]), 0)) {
             warning(
-              "Make sure path starts with '~' or Shared Drive Name, or you supplied 'root' or 'WD' if using '..' relative path"
+              "Make sure path starts with '~' or Shared Drive Name, or you supplied 'web_root' or 'WD' if using '..' relative path"
             )
             stop("\nPath Not Found: '", p[i], "'")
           }
