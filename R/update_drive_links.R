@@ -52,7 +52,7 @@ update_drive_links <- function(WD = getwd(),
   #Get teaching-materials drive content
 
   teach_dir <-
-    drive_find_path("../teaching-materials", root = gID)
+    drive_find_path("../teaching-materials", drive_root = gID)
 
   #regex for folder prefixes we want to use (filter out things like "scraps")
   good_prefixes <- "remote|classroom|assess"
@@ -180,7 +180,7 @@ update_drive_links <- function(WD = getwd(),
 
   # teach-it.gsheet dribble (not the actual file, but a pointer)
   teach_it_drib <-
-    drive_find_path("../teach-it", root = meta_id)
+    drive_find_path("../teach-it", drive_root = meta_id)
   #make sure the teaching-materials dribble is valid
   checkmate::assert_data_frame(teach_it_drib, nrows = 1)
 

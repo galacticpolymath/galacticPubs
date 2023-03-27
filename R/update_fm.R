@@ -90,11 +90,11 @@ update_fm <-
           googledrive::drive_link(proj_dribble)
 
         #now look up other subfolders
-        gMetaID<-drive_find_path("../meta", root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
+        gMetaID<-drive_find_path("../meta", drive_root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
         new_yaml$GdriveMetaID<-gMetaID$result$id
-        gTeachItID<-drive_find_path("../teach-it", root=new_yaml$GdriveMetaID) %>% catch_err(keep_results=T)
+        gTeachItID<-drive_find_path("../teach-it", drive_root=new_yaml$GdriveMetaID) %>% catch_err(keep_results=T)
         new_yaml$GdriveTeachItID<-gTeachItID$result$id
-        gPublishedID<-drive_find_path("../published", root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
+        gPublishedID<-drive_find_path("../published", drive_root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
         new_yaml$GdrivePublishedID<-gPublishedID$result$id
 
         checkmate::assert(

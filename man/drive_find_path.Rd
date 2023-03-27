@@ -4,14 +4,14 @@
 \alias{drive_find_path}
 \title{Find folder or file along Google Drive path}
 \usage{
-drive_find_path(drive_path, WD = NULL, web_root = NULL)
+drive_find_path(drive_path, WD = NULL, drive_root = NULL)
 }
 \arguments{
 \item{drive_path}{If you provide a dribble, it gets passed right back out. Otherwise, you can give a character string in the form "DRIVE/directory/subdirectory".
 \itemize{
 \item DRIVE can be "~" or "my drive" to refer to your private google drive
 \item Path can also be the name of a shared drive (e.g. "GP-Misc")
-\item Also supports relative paths (e.g. "../meta"), as long as \strong{WD} or \strong{web_root}. If \strong{WD} is supplied (this is a full "local" Google Drive for Desktop path piped from \code{\link[=pick_lesson]{pick_lesson()}}). If \strong{web_root} supplied, it will use that as the parent for getting relative paths.
+\item Also supports relative paths (e.g. "../meta"), as long as \strong{WD} or \strong{drive_root}. If \strong{WD} is supplied (this is a full "local" Google Drive for Desktop path piped from \code{\link[=pick_lesson]{pick_lesson()}}). If \strong{drive_root} supplied, it will use that as the parent for getting relative paths.
 \item Relative pathing can be significantly faster because each hierarchical call to GDrive API to resolve a folder costs about a second.
 \item You can also pass an ID as a text string if you know that already
 \item Generally, case SeNsItIvE...but results may vary
@@ -22,11 +22,11 @@ drive_find_path(drive_path, WD = NULL, web_root = NULL)
 \item will be ignored unless relative path provided ("../folder1"), where \strong{WD} will be substituted for ".."
 }}
 
-\item{web_root}{A Google drive path reference (not a local or virtualized path). Will be ignored unless relative path provided ("../folder1"), where web_root will be substituted for "..". Can be:
+\item{drive_root}{A Google drive path reference (not a local or virtualized path). Will be ignored unless relative path provided ("../folder1"), where drive_root will be substituted for "..". Can be:
 \enumerate{
 \item a dribble or
 \item a Googledrive ID (as a string)
-\item web_root is passed to \code{\link[googledrive:drive_get]{googledrive::drive_get()}}
+\item drive_root is passed to \code{\link[googledrive:drive_get]{googledrive::drive_get()}}
 }}
 }
 \description{

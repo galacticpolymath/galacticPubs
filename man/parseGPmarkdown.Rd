@@ -5,14 +5,17 @@
 \alias{parseGPmarkdown}
 \title{parseGPmarkdown}
 \usage{
-parseGPmarkdown(x, linksFile = "meta/teaching-materials.xlsx", WD = NULL)
+parseGPmarkdown(x, mlinks = NULL, WD = NULL)
 }
 \arguments{
 \item{x}{a text string to parse}
 
-\item{linksFile}{file location of the lesson teaching-materials XLSX worksheet. This is used for our custom
+\item{mlinks}{a tibble read in from the 'multimedia' tab of the 'teach-it.gsheet'. Default=NULL will trigger import of this data, using the front-matter in the provided \strong{WD}.
+\itemize{
+\item This data is used to expand our custom
 markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
-that has order=1}
+that has order=1
+}}
 
 \item{WD}{working directory; default=NULL}
 }
