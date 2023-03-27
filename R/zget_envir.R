@@ -62,6 +62,11 @@ zget_envir <- \(df, fm) {
 #'
 zget_grade_var_notes <- \(df){
   parts<-unique_sans_na(df$part)
+  grade_var_notes_initialized <- !grepl("^Overall",df$PartGradeVarNotes[1])
+  if(!grade_var_notes_initialized){
+   df$PartGradeVarNotes<-NA #Effectively delete the placeholder text that was found
+  }
+  #output data (whether empty or not)
   purrr::map(parts,\(i){
   df_i <- df %>% dplyr::filter(part==i) %>% dplyr::slice(1)
   list(
@@ -86,7 +91,7 @@ zget_grade_bands <- \(df, fm, assess) {
 
   grade_yr_term <- fm$GradesOrYears
   out <- coveredGrades %>%
-    purrr::set_names() %>%
+    # purrr::set_names() %>% #Want array items to be unnamed for this
     #map across all grade band variants
     purrr::map(., \(grade_band_i) {
       #Get info for the subfolder
