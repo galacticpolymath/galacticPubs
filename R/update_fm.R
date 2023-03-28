@@ -78,11 +78,11 @@ update_fm <-
     }
 
     #Add Gdrive ID and URL if one is missing
-    if (is.na(new_yaml$GdriveDirID) |
-        is.na(new_yaml$GdriveDirURL) |
-        is.na(new_yaml$GdriveMetaID) |
-        is.na(new_yaml$GdrivePublishedID) |
-        is.na(new_yaml$GdriveTeachItID) |
+    if (is_empty(new_yaml$GdriveDirID) |
+        is_empty(new_yaml$GdriveDirURL) |
+        is_empty(new_yaml$GdriveMetaID) |
+        is_empty(new_yaml$GdrivePublishedID) |
+        is_empty(new_yaml$GdriveTeachItID) |
         drive_reconnect) {
       #try to find path for the project name
       message(

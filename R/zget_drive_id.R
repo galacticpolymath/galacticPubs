@@ -8,6 +8,7 @@
 #' @param drive_path passed to [drive_find_path()]; default=NULL
 #' @param exact_match passed to [drive_find_path()]; default=TRUE
 #' @param fm_key name of the front-matter key you're trying to fill; mainly used in error messaging.
+#' @param missing_val what to return if key not matched. default=NA
 #' @export
 
 zget_drive_id <-
@@ -15,7 +16,8 @@ zget_drive_id <-
     drive_path,
     drive_root = NULL,
     exact_match = TRUE,
-    fm_key = NULL
+    fm_key = NULL,
+    missing_val=NA
   ) {
     #try to resolve the path, catching errors, and enforcing only one result
     drib_test <-
@@ -26,9 +28,10 @@ zget_drive_id <-
       if (!is.null(fm_key)) {
         warning("Front-Matter key not created for: ", fm_key)
       }
-      out <- NULL
+      out <- missing_val
     } else{
-      out <- drib_test$result
+      out <- drib_test$result$id
     }
+
     out
   }
