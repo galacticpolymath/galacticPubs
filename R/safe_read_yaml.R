@@ -5,11 +5,13 @@
 #' @param yaml_path full path to the front-matter.yml file (usually in format '/users/lotsaSubfolders/WorkingDirectory/meta/front-matter.yml')
 #' @param WD alternate way to specify location. e.g. use "?" to invoke [pick_lesson()]
 #' @param eval.expr boolean; do you want to evaluate expression in yaml prepended with '!expr '? Default=TRUE
+#' @param checkWD do you want to run [check_wd()] which will produce warning messages if working directory assumptions aren't met?; default= TRUE
 #' @export
 #
 safe_read_yaml <- function(yaml_path,
                            WD = NULL,
-                           eval.expr = TRUE) {
+                           eval.expr = TRUE,
+                           checkWD =TRUE) {
   if (!is.null(WD) & !is.null(yaml_path)) {
     stop("Only supply 'yaml_path' OR 'WD', not both.")
   }
@@ -25,7 +27,9 @@ safe_read_yaml <- function(yaml_path,
   }
 
   #validate that WD is ok
+  if(checkWD){
   check_wd(WD = WD, throw_error = F)
+  }
 
   #define yaml_path if only WD provided
   if (is.null(yaml_path)) {

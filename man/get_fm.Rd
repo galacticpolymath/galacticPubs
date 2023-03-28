@@ -4,12 +4,14 @@
 \alias{get_fm}
 \title{Get front-matter values}
 \usage{
-get_fm(key = NULL, WD = getwd())
+get_fm(key = NULL, WD = getwd(), checkWD = TRUE)
 }
 \arguments{
-\item{key}{which entry (or entries) do you want to import? default=NULL will import everything}
+\item{key}{which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'}
 
 \item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
+
+\item{checkWD}{passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}; default=TRUE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory}
 }
 \description{
 Imports meta/front-matter.yml value(s) to environment as a list.
@@ -21,4 +23,6 @@ If you ask for only one key, output will be a vector, rather than a list
 get_fm()
 get_fm(key=c("Title","ShortTitle","locale"))
 get_fm(key="Title",WD=pick_lesson())
+#partial matching for all front-matter entries starting with 'gdrive' (case insensitive)
+get_fm("gdrive","?")
 }

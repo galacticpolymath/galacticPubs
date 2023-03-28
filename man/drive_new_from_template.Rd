@@ -8,16 +8,28 @@ drive_new_from_template(
   template_path = NULL,
   dest_path = NULL,
   new_name = FALSE,
+  new_name_gsub = NULL,
+  exact_match = TRUE,
+  WD = NULL,
+  drive_root = NULL,
   overwrite = NA,
   ...
 )
 }
 \arguments{
-\item{template_path}{text string of a path to a template to pass to \code{\link[=drive_find_path]{drive_find_path()}}}
+\item{template_path}{i.e. the FROM path; a text string of a path to a template to pass to \code{\link[=drive_find_path]{drive_find_path()}}}
 
-\item{dest_path}{text string of a path where you want to file to go}
+\item{dest_path}{i.e. the TO path; text string of a path where you want to file to go}
 
-\item{new_name}{text string of what you'd like to name your new file. default=FALSE maintains the original name; NULL results in "Copy of FILENAME"; passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}}
+\item{new_name}{text string(s) of what you'd like to name your new file. default=FALSE maintains the original name; NULL results in "Copy of FILENAME"; passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}; If a single name is provided, it will be recycled}
+
+\item{new_name_gsub}{alternate name specification (don't specify new_name if specifying new_name_gsub); default= NULL}
+
+\item{exact_match}{passed to \code{\link[=drive_find_path]{drive_find_path()}}}
+
+\item{WD}{passed to \code{\link[=drive_find_path]{drive_find_path()}}}
+
+\item{drive_root}{passed to \code{\link[=drive_find_path]{drive_find_path()}}}
 
 \item{overwrite}{Do you want to overwrite an existing file? default=NA means overwrite. Other options T or F are very inefficient; passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}}
 

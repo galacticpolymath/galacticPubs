@@ -4,7 +4,13 @@
 \alias{drive_find_path}
 \title{Find folder or file along Google Drive path}
 \usage{
-drive_find_path(drive_path, WD = NULL, drive_root = NULL)
+drive_find_path(
+  drive_path,
+  WD = NULL,
+  drive_root = NULL,
+  exact_match = TRUE,
+  single_result = TRUE
+)
 }
 \arguments{
 \item{drive_path}{If you provide a dribble, it gets passed right back out. Otherwise, you can give a character string in the form "DRIVE/directory/subdirectory".
@@ -28,6 +34,10 @@ drive_find_path(drive_path, WD = NULL, drive_root = NULL)
 \item a Googledrive ID (as a string)
 \item drive_root is passed to \code{\link[googledrive:drive_get]{googledrive::drive_get()}}
 }}
+
+\item{exact_match}{logical; Do you want an exact match for the file name of the path? (only applies to the final FILENAME part of the path; i.e  'folder/folder/FILENAME_w_different_suffix'); default=TRUE}
+
+\item{single_result}{logical; do you want to force a single result (i.e. throw an error if there is more than one match)?; default=TRUE}
 }
 \description{
 Simulates Finder/File Explorer functionality by repeated calls to \code{\link[googledrive:drive_find]{googledrive::drive_find()}}. Allows relative paths via hybrid navigation of local virtualized Google Drive for Desktop paths by going to a local lesson directory, pulling up the front-matter.yml and finding the Google ID in order to access the relative path you requested through the Drive API.

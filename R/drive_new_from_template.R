@@ -31,29 +31,6 @@ drive_new_from_template <-
       stop("Must supply a template and destination path to pass to drive_find_path")
     }
 
-    # if (!inherits(template_path, "dribble")) {
-    #   #if a drive ID supplied, wrapped in as_id(), we need to get it, so everything is a dribble going forward
-    #   #we need to know the name of the file to prevent "copy of filename" naming behavior
-    #   is_template_drive_id <-
-    #     checkmate::check_class(template_path, "drive_id")
-    #   if (is_template_drive_id) {
-    #     from_path <- googledrive::drive_get(id = template_path)
-    #   } else{
-    #     from_path <-
-    #       drive_find_path(template_path) %>% catch_err(keep_results = TRUE) %>% .data$result
-    #   }
-    #   #don't need to do anything if it's already a dribble
-    # }else{from_path<-template_path}
-    # #from here template_path should always be a dribble of at least one row
-    #
-    # is_dest_drive_id <- checkmate::check_class(dest_path, "drive_id")
-    # if (is_dest_drive_id) {
-    #   to_path <- googledrive::drive_get(id = dest_path)
-    # } else{
-    #   to_path <-
-    #     drive_find_path(dest_path) %>% catch_err(keep_results = TRUE) %>% .data$result
-    # }
-
 
     # Pass both paths through drive_find_path ---------------------------------
     from_path <-
@@ -62,8 +39,8 @@ drive_new_from_template <-
       drive_find_path(dest_path, WD = WD, drive_root = drive_root,exact_match=exact_match)
 
 
-    #if False supplied for new_name, use same name as from_path (no copy of...nonsense)
-    if (!is.null(new_name)) {
+    #if False supplied for new_name & gsub string not provided, use same name as from_path (no copy of...nonsense)
+    if (!is.null(new_name) & is.null(new_name_gsub)) {
       # enforce old name with no prefix if user supplied new_name=F
       if (identical(new_name, FALSE)) {
         new_name <- from_path$name

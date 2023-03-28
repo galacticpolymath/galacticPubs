@@ -16,12 +16,11 @@ init_lesson_meta <- function(WD = getwd(), overwrite = NA) {
 
   #check_wd(WD)
   #GdriveID for lesson templates (must have access to '/GP-Studio/Templates_BE_CAREFUL/lesson-meta-templates/')
-  fm <- get_fm(WD = WD)
 
-  GdriveDirName <- get_fm("GdriveDirName", WD = WD)
+  GdriveDirName <- get_fm("GdriveDirName", WD = WD, checkWD=TRUE) #just check the WD once to avoid duplicating warnings
 
-  dest_gID <- get_fm("GdriveMetaID", WD = WD)
-  ShortTitle <- get_fm("ShortTitle",WD=WD)
+  dest_gID <- get_fm("GdriveMetaID", WD = WD, checkWD=FALSE)
+  ShortTitle <- get_fm("ShortTitle",WD=WD, checkWD=FALSE)
 
   checkmate::assert(
     checkmate::check_class(dest_gID, "character", null.ok = FALSE),
@@ -37,10 +36,11 @@ init_lesson_meta <- function(WD = getwd(), overwrite = NA) {
       meta_template_files,
       dest_gID,
       overwrite = overwrite,
-      new_name_gsub = c("TEMPLATE" = ShortTitle)
+       #unname necessary to avoid annoying concat.enation of varNames
+      new_name_gsub = c("TEMPLATE" = unname(ShortTitle))
     )
   # drive_new_from_template(template_path = "1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me",dest_path = dest_gID)
-  message("These files copied to: '[", fm$GdriveDirName, "]/meta'")
+  message("These files copied to: '[", GdriveDirName, "]/meta'")
   out
 
 }

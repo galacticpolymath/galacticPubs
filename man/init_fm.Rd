@@ -10,7 +10,7 @@ init_fm(WD = getwd())
 \item{WD}{the working directory of the lesson project; default=getwd()}
 }
 \value{
-path to front-matter & a message if a new front-matter.yml file is created
+logical of success; T= exists or created; F= not found and not created
 }
 \description{
 Will run \code{\link[=check_fm]{check_fm()}} and if meta/front-matter.yml not found, it will create this file from the galacticPubs template.

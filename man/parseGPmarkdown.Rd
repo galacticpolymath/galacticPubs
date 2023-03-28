@@ -5,10 +5,12 @@
 \alias{parseGPmarkdown}
 \title{parseGPmarkdown}
 \usage{
-parseGPmarkdown(x, mlinks = NULL, WD = NULL)
+parseGPmarkdown(x, WD = NULL, mlinks = NULL)
 }
 \arguments{
 \item{x}{a text string to parse}
+
+\item{WD}{working directory; default=NULL}
 
 \item{mlinks}{a tibble read in from the 'multimedia' tab of the 'teach-it.gsheet'. Default=NULL will trigger import of this data, using the front-matter in the provided \strong{WD}.
 \itemize{
@@ -16,8 +18,6 @@ parseGPmarkdown(x, mlinks = NULL, WD = NULL)
 markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 that has order=1
 }}
-
-\item{WD}{working directory; default=NULL}
 }
 \value{
 formatted replacement text

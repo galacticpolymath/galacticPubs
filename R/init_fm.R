@@ -3,7 +3,7 @@
 #' Will run [check_fm()] and if meta/front-matter.yml not found, it will create this file from the galacticPubs template.
 #'
 #' @param WD the working directory of the lesson project; default=getwd()
-#' @returns path to front-matter & a message if a new front-matter.yml file is created
+#' @returns logical of success; T= exists or created; F= not found and not created
 #' @export
 
 init_fm <- function(WD = getwd()) {
@@ -18,10 +18,14 @@ init_fm <- function(WD = getwd()) {
     ))
   fm_path <- fs::path(WD, "meta", "front-matter.yml")
   if (!test_check_fm) {
+    message("\nFront matter not found. Trying to create it...")
     #use the front matter template supplied with galacticPubs as a starting point
     y <-
-      safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
-                                   "galacticPubs"))
+      safe_read_yaml(
+        system.file("extdata", "front-matter_TEMPLATE.yml", package =
+                      "galacticPubs"),
+        checkWD = FALSE
+      )
 
     # Guess some fm values ----------------------------------------------------
     ShortTitle <- gsub("(^\\w*?)_.*", "\\1", basename(WD))
@@ -39,14 +43,22 @@ init_fm <- function(WD = getwd()) {
       message("Success! 'front-matter.yml' created from template \n @",
               fm_path,
               "\n")
-      message("Run update_fm() to fill in missing fields (like Gdrive*IDs).")
+      message("Now running update_fm() to fill in missing fields (like Gdrive*IDs)...")
+      update_fm(WD=WD)
+      success<-TRUE
 
     } else{
       warning("'front-matter.yml' creation from template FAILED \n @",
               fm_path,
               "\n")
+      success<-FALSE
     }
 
+  }else{
+    message("front-matter.yml already found \n @",
+              fm_path,
+              "\n")
+    success<-TRUE
   }
-  return(fm_path)
+  return(success)
 }
