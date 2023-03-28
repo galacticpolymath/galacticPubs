@@ -49,8 +49,10 @@ update_fm <-
     # overwrites existing lang and locale fields and returns the modified current_data list
     new_yaml <- new_yaml %>% parse_locale()
     # overwrite MediumTitle used for sensible folder naming in public-facing GalacticPolymath network drive
-    new_yaml$MediumTitle <- paste0(
-      paste0("'", new_yaml$Title, "'"),
+    # Format: 'Title of Lesson'_Sci_G5-9 (en-US)
+
+    new_yaml$MediumTitle <- paste_valid(
+      paste0("'",ifelse(is_empty(new_yaml$Title),new_yaml$ShortTitle,new_yaml$Title),"'"),
       ifelse(
         is_empty(new_yaml$TargetSubject),
         "",
@@ -61,9 +63,11 @@ update_fm <-
         "",
         paste0(new_yaml$ForGrades, " ")
       ),
+      paste0(
       "(",
       new_yaml$locale,
       ")"
+      )
     )
 
     #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)

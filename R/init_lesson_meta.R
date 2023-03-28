@@ -21,7 +21,7 @@ init_lesson_meta <- function(WD = getwd(), overwrite = NA) {
   GdriveDirName <- get_fm("GdriveDirName", WD = WD)
 
   dest_gID <- get_fm("GdriveMetaID", WD = WD)
-  shortTitle <- get_fm("ShortTitle",WD=WD)
+  ShortTitle <- get_fm("ShortTitle",WD=WD)
 
   checkmate::assert(
     checkmate::check_class(dest_gID, "character", null.ok = FALSE),

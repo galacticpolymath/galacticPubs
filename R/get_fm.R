@@ -4,13 +4,13 @@
 #'
 #' If you ask for only one key, output will be a vector, rather than a list
 #'
-#' @param key which entry (or entries) do you want to import? default=NULL will import everything; Supports partial, case-insensitive matching for a single key if prefixed with '~'
+#' @param key which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'
 #' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]
 #' @examples
 #' get_fm()
 #' get_fm(key=c("Title","ShortTitle","locale"))
 #' get_fm(key="Title",WD=pick_lesson())
-#' #partial matching
+#' #partial matching for all front-matter entries starting with 'gdrive' (case insensitive)
 #' get_fm("gdrive","?")
 #' @export
 
@@ -18,7 +18,11 @@ get_fm <- function(key = NULL, WD = getwd()) {
   if (WD == "?") {
     WD <- pick_lesson()
   }
-  y <- safe_read_yaml(fs::path(WD, "meta", "front-matter.yml"))
+
+  #Check existence of yaml
+  yaml_path <- fs::path(WD, "meta", "front-matter.yml")
+
+  y <- safe_read_yaml(yaml_path)
   KEYS <- names(y)
 
   #output whole front-matter if no key specifically requested
