@@ -20,10 +20,7 @@ get_fm <- function(key = NULL, WD = getwd(), checkWD=TRUE) {
     WD <- pick_lesson()
   }
 
-  #Check existence of yaml
-  yaml_path <- fs::path(WD, "meta", "front-matter.yml")
-
-  y <- safe_read_yaml(yaml_path,checkWD=checkWD)
+  y <- safe_read_yaml(WD=WD,checkWD=checkWD)
   KEYS <- names(y)
 
   #output whole front-matter if no key specifically requested

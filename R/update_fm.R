@@ -9,7 +9,7 @@
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
 #' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when [compile_lesson()] is run and change the Language and locale.
 #' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=F
-#' @return silently returns updated front-matter.yml object as a list
+#' @return returns logical of success
 #' @export
 #'
 
@@ -31,7 +31,8 @@ update_fm <-
     galacticPubs_template <-
       safe_read_yaml(yaml_path = system.file("extdata",
                                              "front-matter_TEMPLATE.yml",
-                                             package = "galacticPubs"))
+                                             package = "galacticPubs"),
+                     checkWD = FALSE)
     new_yaml <-
       add_missing_fields(old_yaml, galacticPubs_template, reorder = reorder)
 
@@ -115,23 +116,25 @@ update_fm <-
             fm_key = "GdriveMetaID"
           )
 
-        #Get Gdrive ID for the meta/teach-it.gsheet
+        #find gID for meta/teach-it_ShortTitle.gsheet
         #This needs a flexible match b/c the file will be named with lesson _ShortTitle suffix
         new_yaml$GdriveTeachItID <-
           zget_drive_id(
-            drive_path = "../teach-it",
+            drive_path = paste_valid("../teach-it",new_yaml$ShortTitle,collapse="_"),
             drive_root = new_yaml$GdriveMetaID,
             exact_match = FALSE,
             fm_key = "GdriveTeachItID"
           )
 
+        #find gID for meta/standards_ShortTitle.gsheet
         new_yaml$GdriveStandardsID <-  zget_drive_id(
-          drive_path = "../standards",
+          drive_path = paste_valid("../standards",new_yaml$ShortTitle,collapse="_"),
           drive_root = new_yaml$GdriveMetaID,
           exact_match = FALSE,
           fm_key = "GdriveStandardsID"
         )
 
+        #Find gID for /published folder
         new_yaml$GdrivePublishedID <- zget_drive_id(
           drive_path = "../published",
           drive_root =  new_yaml$GdriveDirID,
@@ -190,11 +193,21 @@ update_fm <-
     if (save_output) {
       #Change LastUpdated field
       new_yaml$LastUpdated <- Sys.time() %>% as.character()
-      yaml::write_yaml(new_yaml, yaml_path)
-      message("\n@ Updated meta/front-matter.yml saved to disk.")
+      test_write <- yaml::write_yaml(new_yaml, yaml_path) %>% catch_err()
+
+      if(test_write){
+        success <- TRUE
+        message("\n@ Updated meta/front-matter.yml saved to disk.")
+      }else{
+        warning("\n meta/front-matter.yml failed to save")
+        success <- FALSE
+      }
+    }else{
+      #assume successful if it makes it here, until I write a better validity test
+      success <- TRUE
     }
 
 
 
-    invisible(new_yaml)
+    success
   }

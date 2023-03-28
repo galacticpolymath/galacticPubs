@@ -18,6 +18,7 @@
 #' 3. drive_root is passed to [googledrive::drive_get()]
 #' @param exact_match logical; Do you want an exact match for the file name of the path? (only applies to the final FILENAME part of the path; i.e  'folder/folder/FILENAME_w_different_suffix'); default=TRUE
 #' @param single_result logical; do you want to force a single result (i.e. throw an error if there is more than one match)?; default=TRUE
+#' @param checkWD  do you want to run [check_wd()]? default=TRUE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory
 #' @examples
 #' \dontrun{
 #' #ABSOLUTE PATHS
@@ -40,7 +41,8 @@ drive_find_path <- function(drive_path,
                             WD = NULL,
                             drive_root = NULL,
                             exact_match = TRUE,
-                            single_result = TRUE) {
+                            single_result = TRUE,
+                            checkWD= TRUE) {
   is_drib <- googledrive::is_dribble(drive_path)
 
   if (is_drib) {
@@ -82,7 +84,7 @@ drive_find_path <- function(drive_path,
       p <- strsplit(drive_path, split = "/") %>% unlist()
 
       results <- as.list(rep(NA, length(p)))
-      # browser()
+
       for (i in 1:length(p)) {
         #FIRST part of path
         if (i == 1) {
@@ -100,13 +102,15 @@ drive_find_path <- function(drive_path,
               #make sure a valid lesson project directory provided
 
               checkmate::assert_character(drive_path, all.missing = FALSE)
+              if(checkWD){
               check_wd(WD = WD, throw_error = FALSE)
+              }
 
               message("\nReading '",
                       basename(WD),
                       "' front-matter.yml: 'GdriveDirID'...")
 
-              gID <- as.character(get_fm("GdriveDirID", WD = WD))
+              gID <- as.character(get_fm("GdriveDirID", WD = WD,checkWD = FALSE))
               checkmate::assert(checkmate::check_character(drive_path))
               results[[i]] <- googledrive::drive_get(id = gID)
               sharedDrive <- "GP-Studio"

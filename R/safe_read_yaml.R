@@ -8,10 +8,10 @@
 #' @param checkWD do you want to run [check_wd()] which will produce warning messages if working directory assumptions aren't met?; default= TRUE
 #' @export
 #
-safe_read_yaml <- function(yaml_path,
+safe_read_yaml <- function(yaml_path=NULL,
                            WD = NULL,
                            eval.expr = TRUE,
-                           checkWD =TRUE) {
+                           checkWD = TRUE) {
   if (!is.null(WD) & !is.null(yaml_path)) {
     stop("Only supply 'yaml_path' OR 'WD', not both.")
   }
@@ -27,8 +27,8 @@ safe_read_yaml <- function(yaml_path,
   }
 
   #validate that WD is ok
-  if(checkWD){
-  check_wd(WD = WD, throw_error = F)
+  if (checkWD) {
+    check_wd(WD = WD, throw_error = F)
   }
 
   #define yaml_path if only WD provided
@@ -42,7 +42,12 @@ safe_read_yaml <- function(yaml_path,
   # Create YAML from template if it doesn't exist ---------------------------
 
   if (!yaml_exists) {
-    init_fm(WD = WD)
+    test_init <- init_fm(WD = WD)
+    if(test_init){
+      message("\nSUCCESS: front-matter.yml initialized and updated\n")
+    }else{
+      warning("\nSomething seems to have gone wrong wiht initializing and updating front-matter.yml\n")
+    }
   }
 
   # read in the front-matter ------------------------------------------------

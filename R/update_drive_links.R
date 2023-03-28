@@ -175,14 +175,16 @@ update_drive_links <- function(WD = getwd(),
 
 
   # Check if the teach-it.gsheet up to date -----------------------
-  meta_id <- get_fm("GdriveMetaID", WD = WD)
-  checkmate::assert_character(meta_id, any.missing = FALSE)
+  # meta_id <- get_fm("GdriveMetaID", WD = WD)
+  # checkmate::assert_character(meta_id, any.missing = FALSE)
 
   # teach-it.gsheet dribble (not the actual file, but a pointer)
+  teach_id <- get_fm("GdriveTeachItID",WD=WD)
+  checkmate::assert_character(teach_id,all.missing=FALSE)
   teach_it_drib <-
-    drive_find_path("../teach-it", drive_root = meta_id)
+    drive_find_path(teach_id)
   #make sure the teaching-materials dribble is valid
-  checkmate::assert_data_frame(teach_it_drib, nrows = 1)
+  checkmate::assert_data_frame(teach_it_drib, nrows = 1,.var.name = "meta/teach-it.gsheet object")
 
   teach_it_gsheet_modTime <-
     teach_it_drib$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()

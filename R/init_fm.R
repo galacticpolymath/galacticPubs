@@ -40,25 +40,26 @@ init_fm <- function(WD = getwd()) {
 
     test_y <- checkmate::test_file_exists(fm_path)
     if (test_y) {
-      message("Success! 'front-matter.yml' created from template \n @",
+      message("\nSuccess! 'front-matter.yml' created from template \n @",
               fm_path,
               "\n")
-      message("Now running update_fm() to fill in missing fields (like Gdrive*IDs)...")
-      update_fm(WD=WD)
-      success<-TRUE
+      message("Now running update_fm() to fill in missing fields (like GdriveDirName)...")
+      #suppress expected warnings from missing teach-it.gsheet & other missing items at this stage
+      success <- update_fm(WD = WD) %>% base::suppressWarnings()
+
 
     } else{
       warning("'front-matter.yml' creation from template FAILED \n @",
               fm_path,
               "\n")
-      success<-FALSE
+      success <- FALSE
     }
 
-  }else{
+  } else{
     message("front-matter.yml already found \n @",
-              fm_path,
-              "\n")
-    success<-TRUE
+            fm_path,
+            "\n")
+    success <- TRUE
   }
   return(success)
 }

@@ -21,16 +21,17 @@ zget_drive_id <-
   ) {
     #try to resolve the path, catching errors, and enforcing only one result
     drib_test <-
-      drive_find_path(drive_path = drive_path, drive_root = drive_root, single_result = TRUE) %>%
+      drive_find_path(drive_path = drive_path, drive_root = drive_root, single_result = TRUE, checkWD=FALSE,exact_match=exact_match) %>%
       catch_err(keep_results = T)
 
     if (!drib_test$success) {
+      #If
       if (!is.null(fm_key)) {
-        warning("Front-Matter key not created for: ", fm_key)
+        message("Unable to update front-matter value for: ", fm_key)
       }
       out <- missing_val
     } else{
-      out <- drib_test$result$id
+      out <- drib_test$result$id %>% as.character()
     }
 
     out
