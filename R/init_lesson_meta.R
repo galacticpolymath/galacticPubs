@@ -9,23 +9,38 @@
 #' @family Google Drive Functions
 #' @export
 
-init_lesson_meta <- function(WD=getwd(),overwrite=NA){
-
-  if(WD=="?"){WD <- pick_lesson()}
+init_lesson_meta <- function(WD = getwd(), overwrite = NA) {
+  if (WD == "?") {
+    WD <- pick_lesson()
+  }
 
   #check_wd(WD)
   #GdriveID for lesson templates (must have access to '/GP-Studio/Templates_BE_CAREFUL/lesson-meta-templates/')
-  fm<-get_fm(WD=WD)
-  dest_gID<-fm$GdriveMetaID %>% unlist
+  fm <- get_fm(WD = WD)
+
+  GdriveDirName <- get_fm("GdriveDirName", WD = WD)
+
+  dest_gID <- get_fm("GdriveMetaID", WD = WD)
+  shortTitle <- get_fm("ShortTitle",WD=WD)
 
   checkmate::assert(
-    checkmate::check_class(dest_gID,"character")
+    checkmate::check_class(dest_gID, "character", null.ok = FALSE),
+    checkmate::check_class(GdriveDirName, "character", null.ok = FALSE),
+    checkmate::check_class(shortTitle, "character", null.ok = FALSE)
   )
 
-  meta_template_files<-googledrive::drive_get(id=googledrive::as_id("1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me")) %>% drive_contents
-  out<-drive_new_from_template(meta_template_files,dest_gID,overwrite=overwrite,new_name_gsub = c("TEMPLATE"=fm$ShortTitle))
+  meta_template_files <-
+    googledrive::drive_get(id = googledrive::as_id("1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me")) %>% drive_contents
+
+  out <-
+    drive_new_from_template(
+      meta_template_files,
+      dest_gID,
+      overwrite = overwrite,
+      new_name_gsub = c("TEMPLATE" = ShortTitle)
+    )
   # drive_new_from_template(template_path = "1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me",dest_path = dest_gID)
-  message("These files copied to: '[",fm$GdriveDirName,"]/meta'")
+  message("These files copied to: '[", fm$GdriveDirName, "]/meta'")
   out
 
 }

@@ -63,7 +63,7 @@ compileProcedure <- function(procedureFile = "meta/procedure_GSheetsOnly.xlsx",
 
   #####
   #Parse all the text columns to expand {vidN} notation into full video links
-  proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")]<-apply(proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")],2,function(x) galacticPubs::parseGPmarkdown(x,linksFile=linksFile))
+  proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")]<-apply(proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")],2,function(x) parseGPmarkdown(x,linksFile=linksFile))
 
   ####
   #Parse vocab shorthand into reasonably formatted markdown with bullets

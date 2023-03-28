@@ -20,8 +20,14 @@ zget_procedure <- \(proc,
      })
    }
 
+  #store original data for safekeeping
+  proc0<-proc
+  browser()
+
   #####
   #Parse all the text columns to expand {vidN} notation into full video links
   proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")]<-apply(proc[,c("StepQuickDescription","StepDetails","VariantNotes","TeachingTips")],2,function(x) parseGPmarkdown(x,mlinks=mlinks))
+
+
 
 }

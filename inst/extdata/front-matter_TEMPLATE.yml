@@ -8,15 +8,15 @@ DefaultLanguage: 'English'
 DefaultCountry: 'United States'
 
 #!!---> operational variables (that don't have Shiny inputs
+LastUpdated: ''
 MediumTitle: '' # Format: Title + _Subj_ + _Gx-y_+ (Locale)
 lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.4.1
+TemplateVer: 0.4.2
 galacticPubsVer: ''
 FirstPublicationDate: ''
-LastUpdated: ''
 URL: ''
 GPCatalogPath: ''
 GitHubPath: ''
@@ -24,6 +24,7 @@ GdriveDirName: ''
 GdriveDirID: ''
 GdriveMetaID: ''
 GdriveTeachItID: ''
+GdriveStandardsID: ''
 GdrivePublishedID: ''
 GdrivePublicID: ''
 GdriveDirURL: ''

@@ -8,6 +8,7 @@
 #' @param save_output do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
 #' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when [compile_lesson()] is run and change the Language and locale.
+#' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=F
 #' @return silently returns updated front-matter.yml object as a list
 #' @export
 #'
@@ -16,9 +17,11 @@ update_fm <-
   function(WD = getwd(),
            save_output = TRUE,
            reorder = TRUE,
-           change_this = NULL) {
-
-    if(WD=="?"){WD <- pick_lesson()}
+           change_this = NULL,
+           drive_reconnect=FALSE) {
+    if (WD == "?") {
+      WD <- pick_lesson()
+    }
 
     yaml_path <- fs::path(WD, "meta", "front-matter.yml")
 
@@ -46,19 +49,29 @@ update_fm <-
     # overwrites existing lang and locale fields and returns the modified current_data list
     new_yaml <- new_yaml %>% parse_locale()
     # overwrite MediumTitle used for sensible folder naming in public-facing GalacticPolymath network drive
-    new_yaml$MediumTitle<-paste0(paste0("'",new_yaml$Title,"'"),
-                                 ifelse(is_empty(new_yaml$TargetSubject),"",paste0("_",new_yaml$TargetSubject,"_")),
-                                 ifelse(is_empty(new_yaml$ForGrades),"",paste0(new_yaml$ForGrades," ")),
-                                 "(",
-                                 new_yaml$locale,
-                                 ")")
+    new_yaml$MediumTitle <- paste0(
+      paste0("'", new_yaml$Title, "'"),
+      ifelse(
+        is_empty(new_yaml$TargetSubject),
+        "",
+        paste0("_", new_yaml$TargetSubject, "_")
+      ),
+      ifelse(
+        is_empty(new_yaml$ForGrades),
+        "",
+        paste0(new_yaml$ForGrades, " ")
+      ),
+      "(",
+      new_yaml$locale,
+      ")"
+    )
 
     #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)
     if (is.na(new_yaml$GPCatalogPath) |
         is.na(new_yaml$GdriveDirName)) {
       repo <- whichRepo(WD = WD)
 
-      checkmate::assert_character(repo,any.missing=FALSE)
+      checkmate::assert_character(repo, any.missing = FALSE)
 
       new_yaml$GdriveDirName <- basename(WD)
       new_yaml$GPCatalogPath <- catalogURL("LESSON.json", repo)
@@ -66,15 +79,16 @@ update_fm <-
 
     #Add Gdrive ID and URL if one is missing
     if (is.na(new_yaml$GdriveDirID) |
-        is.na(new_yaml$GdriveDirURL)|
-        is.na(new_yaml$GdriveMetaID)|
-        is.na(new_yaml$GdrivePublishedID)|
-        is.na(new_yaml$GdriveTeachItID)) {
+        is.na(new_yaml$GdriveDirURL) |
+        is.na(new_yaml$GdriveMetaID) |
+        is.na(new_yaml$GdrivePublishedID) |
+        is.na(new_yaml$GdriveTeachItID) |
+        drive_reconnect) {
       #try to find path for the project name
       message(
         "\nTrying to link local virtual lesson '",
         new_yaml$GdriveDirName,
-        "' to its cloud Google Drive ID...\n"
+        "' to its cloud Google Drive IDs...\n"
       )
 
       proj_dribble_test <-
@@ -89,23 +103,61 @@ update_fm <-
         new_yaml$GdriveDirURL <-
           googledrive::drive_link(proj_dribble)
 
-        #now look up other subfolders
-        gMetaID<-drive_find_path("../meta", drive_root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
-        new_yaml$GdriveMetaID<-gMetaID$result$id
-        gTeachItID<-drive_find_path("../teach-it", drive_root=new_yaml$GdriveMetaID) %>% catch_err(keep_results=T)
-        new_yaml$GdriveTeachItID<-gTeachItID$result$id
-        gPublishedID<-drive_find_path("../published", drive_root=new_yaml$GdriveDirID) %>% catch_err(keep_results=T)
-        new_yaml$GdrivePublishedID<-gPublishedID$result$id
+        #Get GDrive ID for the meta/ folder
+        new_yaml$GdriveMetaID <-
+          zget_drive_id(
+            drive_path = "../meta",
+            drive_root = new_yaml$GdriveDirID,
+            fm_key = "GdriveMetaID"
+          )
 
-        checkmate::assert(
-          checkmate::check_character(new_yaml$GdriveDirID,any.missing=FALSE),
-          checkmate::check_character(new_yaml$GdriveDirURL,any.missing=FALSE),
-          checkmate::check_character(new_yaml$GdriveMetaID,any.missing=FALSE),
-          checkmate::check_character(new_yaml$GdriveTeachItID,any.missing=FALSE),
-          checkmate::check_character(new_yaml$GdrivePublishedID,any.missing=FALSE),
-          combine = "and"
+        #Get Gdrive ID for the meta/teach-it.gsheet
+        #This needs a flexible match b/c the file will be named with lesson _ShortTitle suffix
+        new_yaml$GdriveTeachItID <-
+          zget_drive_id(
+            drive_path = "../teach-it",
+            drive_root = new_yaml$GdriveMetaID,
+            exact_match = FALSE,
+            fm_key = "GdriveTeachItID"
+          )
+
+        new_yaml$GdriveStandardsID <-  zget_drive_id(
+          drive_path = "../standards",
+          drive_root = new_yaml$GdriveMetaID,
+          exact_match = FALSE,
+          fm_key = "GdriveStandardsID"
         )
-        message("GdriveDirID, GdriveDirURL, GdriveMetaID, GdriveTeachItID & GdrivePublishedID added to front-matter.yml")
+
+        new_yaml$GdrivePublishedID <- zget_drive_id(
+          drive_path = "../published",
+          drive_root =  new_yaml$GdriveDirID,
+          exact_match = FALSE,
+          fm_key = "GdrivePublishedID"
+        )
+
+        #Test successful outputs
+        t_gdir_id <-
+          checkmate::test_character(new_yaml$GdriveDirID, any.missing = FALSE)
+        t_gdir_url <-
+          checkmate::test_character(new_yaml$GdriveDirURL, any.missing = FALSE)
+        t_gmeta_id <-
+          checkmate::test_character(new_yaml$GdriveMetaID, any.missing =
+                                      FALSE)
+        t_gteachit_id <-
+          checkmate::test_character(new_yaml$GdriveTeachItID, any.missing =
+                                      FALSE)
+        t_gstand_id <-
+          checkmate::test_character(new_yaml$GdriveStandardsID, any.missing =
+                                      FALSE)
+        t_published_id <-
+          checkmate::test_character(new_yaml$GdrivePublishedID, any.missing =
+                                      FALSE)
+
+        gdrive_summ<-dplyr::tibble(success=convert_T_to_check(c(t_gdir_id,t_gdir_url,t_gmeta_id,t_gteachit_id,t_gstand_id,t_published_id)),item=c("GdriveDirID", "GdriveDirURL", "GdriveMetaID", "GdriveTeachItID","GdriveStandardsID", "GdrivePublishedID"))
+        message(
+          "Summary of front-matter.yml 'Gdrive*' key additions for [",new_yaml$ShortTitle,"]:")
+
+        print(gdrive_summ)
       }
 
     }
@@ -140,5 +192,5 @@ update_fm <-
 
 
 
-invisible(new_yaml)
-}
+    invisible(new_yaml)
+  }

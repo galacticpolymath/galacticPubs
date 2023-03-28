@@ -192,10 +192,32 @@ compile_teach_it <- function(WD = getwd(),
       )
   }
 
+
+# Extract majority of Teach-It data ---------------------------------------
   #Get item links for each environment*gradeBand
   teach_mat_data <- zget_envir(tlinks, fm = fm)
+  if(!proc_initialized){
+    #should change 'parts' to something more like procedure
+    #output NULL structure paralleling real data
+    parts<-purrr::map(1:nparts,\(i){
+      list(partNum=i,
+           partTitle=NULL,
+           partDur=NULL,
+           partPreface=NULL,
+           chunks=NULL,
+           partExtension=NULL
+      )
+    })
+    vocab<-NULL
+  }else{
+  proc_data<-zget_procedure(proc=proc,pext=pext,pinfo=pinfo)
+  parts<-proc_data$parts
+  vocab <- proc_data$vocab
+  }
+
   Data <- c(lessonDur = lessonDur,
-            teach_mat_data)
+            teach_mat_data,
+            parts=list(parts))
 
 
   # Multimedia --------------------------------------------------------------
