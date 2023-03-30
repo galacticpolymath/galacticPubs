@@ -4,7 +4,7 @@
 \alias{safe_read_yaml}
 \title{safe_read_yaml}
 \usage{
-safe_read_yaml(yaml_path, WD = NULL, eval.expr = TRUE, checkWD = TRUE)
+safe_read_yaml(yaml_path = NULL, WD = NULL, eval.expr = TRUE, checkWD = TRUE)
 }
 \arguments{
 \item{yaml_path}{full path to the front-matter.yml file (usually in format '/users/lotsaSubfolders/WorkingDirectory/meta/front-matter.yml')}

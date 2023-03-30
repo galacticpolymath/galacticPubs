@@ -24,7 +24,7 @@ update_fm(
 \item{drive_reconnect}{logical; do you want to re-look-up all \verb{Gdrive*} keys? (might be useful if old files have been replaced instead of updated and \verb{Gdrive*} keys point to a trashed file); default=F}
 }
 \value{
-silently returns updated front-matter.yml object as a list
+returns logical of success
 }
 \description{
 Checks for new galacticPubs front-matter_TEMPLATE.yml. If found, it will add new fields,  return the updated object, and write to drive (meta/front-matter.yml) if requested.

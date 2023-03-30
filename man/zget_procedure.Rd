@@ -4,7 +4,7 @@
 \alias{zget_procedure}
 \title{zget_procedure}
 \usage{
-zget_procedure(proc, pext, pinfo)
+zget_procedure(proc, pext, pinfo, mlinks)
 }
 \arguments{
 \item{proc}{the procedure file that has already been read in from the teach-it.gsheet, i.e. via \code{\link[=compile_teach_it]{compile_teach_it()}}}
@@ -12,6 +12,8 @@ zget_procedure(proc, pext, pinfo)
 \item{pext}{the extension info read from the teach-it.gsheet}
 
 \item{pinfo}{the part info read in from the teach-it.gsheet}
+
+\item{mlinks}{multimedia info read in from the teach-it.gsheet}
 }
 \value{
 a list of: the procedure chunks and Part-Extension links for each part and a compiled vocab dataframe

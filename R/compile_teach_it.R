@@ -9,9 +9,10 @@
 #' @export
 
 compile_teach_it <- function(WD = getwd(),
-                              teach_it_drib = NULL) {
-
-  if(WD=="?"){WD <- pick_lesson()}
+                             teach_it_drib = NULL) {
+  if (WD == "?") {
+    WD <- pick_lesson()
+  }
 
   . = NULL #to avoid errors with dplyr syntax
   #Get front matter from the project working directory
@@ -87,7 +88,7 @@ compile_teach_it <- function(WD = getwd(),
     !grepl("^Lesson description", pinfo$LessonPreface[1])
   proc_initialized <-
     !grepl("^\\*\\*\\*\\*\\*", proc$ChunkTitle[1]) #FALSE if ***** found in 1st ChunkTitle
-  pext_initialized <- nrow(pext)>0
+  pext_initialized <- nrow(pext) > 0
   mlinks_initialized <- nrow(mlinks) > 0
 
   if (!pinfo_titles_initialized) {
@@ -129,50 +130,6 @@ compile_teach_it <- function(WD = getwd(),
   nparts <-
     max(1, max(tlinks0$part, na.rm = TRUE), na.rm = TRUE) #how many parts are there in teaching mat? (1 by default)
 
-  if (proc_initialized) {
-    partDurations <-
-      proc$PartDur[which(proc$PartDur != "")] %>% as.numeric()
-    lessonDur <-
-      if (length(partDurations) == 1) {
-        paste0(partDurations, " min") #if just 1 part listed, do X min
-      } else{
-        #if more than 1 part, but they're all the same, combine them
-        if (length(unique(partDurations)) == 1) {
-          paste0(length(partDurations), " x ", partDurations[1], " min")
-        } else{
-          #otherwise state each length separately
-          sapply(1:length(partDurations), function(x) {
-            paste0("Part ", x, ": ", partDurations[x], " min")
-          }) %>% paste0(collapse = ", ")
-        }
-      }
-
-    # # Get grade level variation notes from Procedure.xlsx ---------------------
-    # gradeVariantNotes <-
-    #   if (!pinfo_titles_initialized |
-    #       is.na(pinfo$PartGradeVarNotes[1])) {
-    #     NULL
-    #   } else{
-    #     if (length(which(stats::complete.cases(pinfo$PartGradeVarNotes))) ==
-    #         1) {
-    #       list(part = NA,
-    #            partGradeVarNotes = pinfo$PartGradeVarNotes[1])
-    #     } else{
-    #       lapply(1:nrow(pinfo), function(i) {
-    #         list(
-    #           part = pinfo$Part[i],
-    #           partGradeVarNotes = pinfo$PartGradeVarNotes[i]
-    #         )
-    #       })
-    #     }
-    #   }
-  } else{
-    lessonDur <- NULL
-    # #Output vector of nulls for each part
-    # gradeVariantNotes <-
-    #   1:nparts %>% purrr::map(\(i) list(part = as.numeric(i), partGradeVarNotes =
-    #                                       NULL))
-  }
 
 
   # Build Classroom Resources List------------------------------------------------
@@ -182,42 +139,68 @@ compile_teach_it <- function(WD = getwd(),
   if (pinfo_titles_initialized) {
     tlinks <-
       dplyr::left_join(tlinks0, pinfo[, 1:5], by = c("part" = "Part"))
+
   } else{
     tlinks <-
       tlinks0 %>% dplyr::mutate(
         Part = NA,
         PartTitle = NA,
         PartPreface = NA,
-        PartGradeVarNotes = NA
+        PartGradeVarNotes = NA,
+        ActTags = NA
       )
   }
 
 
-# Extract majority of Teach-It data ---------------------------------------
+  # Extract majority of Teach-It data ---------------------------------------
   #Get item links for each environment*gradeBand
   teach_mat_data <- zget_envir(tlinks, fm = fm)
-  if(!proc_initialized){
+  if (!proc_initialized) {
     #should change 'parts' to something more like procedure
     #output NULL structure paralleling real data
-    parts<-purrr::map(1:nparts,\(i){
-      list(partNum=i,
-           partTitle=NULL,
-           partDur=NULL,
-           partPreface=NULL,
-           chunks=NULL,
-           partExtension=NULL
+    parts <- purrr::map(1:nparts, \(i) {
+      list(
+        partNum = i,
+        partTitle = NULL,
+        partDur = NULL,
+        partPreface = NULL,
+        chunks = NULL,
+        partExtension = NULL
       )
     })
-    vocab<-NULL
-  }else{
-  proc_data<-zget_procedure(proc=proc,pext=pext,pinfo=pinfo)
-  parts<-proc_data$parts
-  vocab <- proc_data$vocab
+    vocab <- NULL
+  } else{
+    proc_data <-
+      zget_procedure(
+        proc = proc,
+        pext = pext,
+        pinfo = pinfo,
+        mlinks = mlinks
+      )
+
+    #output gathered vocab as csv
+    if (nrow(proc_data$vocab) > 0) {
+      vocab_outfile <-
+        fs::path(WD, "assets", "_other-media-to-publish", "vocab.csv")
+      vocab_saved <-
+        write.csv(x = proc_data$vocab, file = vocab_outfile,row.names = FALSE) %>% catch_err()
+      if (vocab_saved) {
+        message("\nVocab gathered from procedure and saved to ",
+                vocab_outfile,
+                "\n")
+      } else{
+        warning("Vocab was gathered from procedure, but failed to save")
+      }
+    }
+
   }
 
-  Data <- c(lessonDur = lessonDur,
-            teach_mat_data,
-            parts=list(parts))
+  Data <- c(
+    lessonDur = proc_data$lessonDur,
+    teach_mat_data,
+    parts = list(proc_data$parts),
+    gatheredVocab = list(proc_data$vocab)
+  )
 
 
   # Multimedia --------------------------------------------------------------
@@ -239,7 +222,7 @@ compile_teach_it <- function(WD = getwd(),
       )
 
     multimedia <- lapply(1:nrow(m), function(i) {
-      d <- m[i,]
+      d <- m[i, ]
       list(
         order = d$order,
         type = d$type,
@@ -260,9 +243,6 @@ compile_teach_it <- function(WD = getwd(),
   #Compile Procedure if it's been documented
   if (!proc_initialized) {
     warning("Seems you haven't documented procedure at `teach-it.gsheet!Procedure` for `")
-    proc_data <- list(NULL)
-  } else{
-    proc_data <- compileProcedure()
   }
 
 

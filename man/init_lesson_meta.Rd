@@ -14,6 +14,9 @@ lesson_init_meta(WD = getwd(), overwrite = NA)
 
 \item{overwrite}{passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}; default=NA will add "(1)" to avoid duplicates; TRUE will trash existing file before copying}
 }
+\value{
+logical of success; T=template gsheets copied to meta/ and front-matter updated with \code{\link[=update_fm]{update_fm()}}
+}
 \description{
 Add galacticPubs Google Workspace working documents to a given lesson's \emph{/meta} folder. You \emph{must have access to GP-Studio shared drive}.
 }

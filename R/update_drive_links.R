@@ -32,9 +32,9 @@ update_drive_links <- function(WD = getwd(),
   )
 
   gID <- get_fm("GdriveDirID", WD = WD)
-  meta_id <- get_fm("GdriveMetaID", WD = WD)
-  proj <- get_fm("GdriveDirName", WD = WD)
-  med_title <- get_fm("MediumTitle", WD = WD)
+  meta_id <- get_fm("GdriveMetaID", WD = WD,checkWD = F)#only need to check_wd once
+  proj <- get_fm("GdriveDirName", WD = WD,checkWD = F)
+  med_title <- get_fm("MediumTitle", WD = WD,checkWD = F)
 
 
   checkmate::assert(
@@ -186,34 +186,35 @@ update_drive_links <- function(WD = getwd(),
   #make sure the teaching-materials dribble is valid
   checkmate::assert_data_frame(teach_it_drib, nrows = 1,.var.name = "meta/teach-it.gsheet object")
 
-  teach_it_gsheet_modTime <-
-    teach_it_drib$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
+  # teach_it_gsheet_modTime <-
+  #   teach_it_drib$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
+  #
+  # timediff <- teach_it_gsheet_modTime - last_teach_it_change_time
+  # test_in_sync <- timediff > 0
 
-  timediff <- teach_it_gsheet_modTime - last_teach_it_change_time
-  test_in_sync <- timediff > 0
-
-
-  if (test_in_sync &
-      !identical(TRUE, rebuild)) {
-    #rebuild overrides an in_sync check
-    message("Teaching-material seems to be up-to-date.")
-  } else{
-    if (!test_in_sync) {
-      message(
-        "teach-it.gsheet is older than '",
-        last_teach_it_change_item,
-        "' by ",
-        round(timediff, 2),
-        " ",
-        attr(timediff, "units")
-      )
-    }
-    message("Updating teach-it.gsheet...")
+#this was stupid...doesn't actually save time, just adds irritation
+  # if (test_in_sync &
+  #     !identical(TRUE, rebuild)) {
+  #   #rebuild overrides an in_sync check
+  #   message("Teaching-material seems to be up-to-date.")
+  # } else{
+  #   if (!test_in_sync) {
+  #     message(
+  #       "teach-it.gsheet is older than '",
+  #       last_teach_it_change_item,
+  #       "' by ",
+  #       round(timediff, 2),
+  #       " ",
+  #       attr(timediff, "units")
+  #     )
+  #   }
+  #   message("Updating teach-it.gsheet...")
 
     #add f_g_e as a temporary more distinctive id variable to account
     #for redundant names
+
     teach_it_in0 <-
-      googlesheets4::read_sheet(teach_it_drib, sheet = "DriveLinks", skip = 1)
+      googlesheets4::read_sheet(teach_it_drib$id, sheet = "DriveLinks", skip = 1)
 
 
     # Begin logic for clean parameter (merge or overwrite .gsheet?-----------------
@@ -390,7 +391,7 @@ update_drive_links <- function(WD = getwd(),
 
     #Test success of clearing gsheet before writing new data
     ss_clear_success <-
-      googlesheets4::range_clear(teach_it_drib,
+      googlesheets4::range_clear(teach_it_drib$id,
                                  sheet = "DriveLinks",
                                  range = clear_range) %>% catch_err()
     if (!ss_clear_success) {
@@ -401,7 +402,7 @@ update_drive_links <- function(WD = getwd(),
     # #test success of writing gsheet -----------------------------------------
     ss_write_success <-
       googlesheets4::range_write(
-        teach_it_drib,
+        teach_it_drib$id,
         sheet = "DriveLinks",
         data = teach_it_out,
         range = write_range,
@@ -418,5 +419,5 @@ update_drive_links <- function(WD = getwd(),
       FALSE
     }
 
-  }
+
 }
