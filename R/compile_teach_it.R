@@ -64,7 +64,6 @@ compile_teach_it <- function(WD = getwd(),
   proc <-
     googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip =
                                 1) %>%
-    dplyr::filter(.data$Step != 0) %>%
     dplyr::mutate(
       Part = as.integer(.data$Part),
       Chunk = as.integer(.data$Chunk),
@@ -98,7 +97,7 @@ compile_teach_it <- function(WD = getwd(),
       "`"
     )
     #Delete filler text
-    pinfo[1:nrow(pinfo), 2:4] <- NA
+    pinfo[1:nrow(pinfo), 1:5] <- NA
   }
   if (!pinfo_preface_initialized) {
     warning(
@@ -107,7 +106,7 @@ compile_teach_it <- function(WD = getwd(),
       "`"
     )
     #Delete filler text
-    pinfo[1:nrow(pinfo), 6] <- NA
+    pinfo[1:nrow(pinfo), "LessonPreface"] <- NA
   }
   if (!proc_initialized) {
     warning(
