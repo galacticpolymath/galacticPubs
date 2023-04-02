@@ -39,17 +39,25 @@ parseGPmarkdown <- function(x, WD = NULL,mlinks = NULL ) {
   vidLinks <-
     mlinks %>% dplyr::filter(tolower(.data$type) == "video")
 
+
   #extract all video GP markdown syntax captures (e.g. "{vid1}")
   vidCaptures <- stringr::str_extract_all(x, "\\{[Vv]id[^\\{]*\\}")
-  uniqueVidCaptures <- unique(unlist(vidCaptures))
+  uniqueVidCaptures <- unique_sans_na(unlist(vidCaptures))
+
+  if(length(uniqueVidCaptures)>0){
   #create a key for video markdown replacements
   vidReplacements <- sapply(uniqueVidCaptures, function(refs) {
     #extract number
     vidN <-
       stringr::str_extract_all(refs, "\\d*") %>% unlist() %>%  paste0(collapse =
                                                                         "")
+
+    #extract number from codes
+    codeN <-
+      stringr::str_extract(vidLinks$code, "[^\\d]*(\\d*)",group=1)
+
     #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
-    index <- match(vidN, vidLinks$order, nomatch = 999)
+    index <- match(vidN, codeN, nomatch = 999)
     if (index != 999 & !is.na(index)) {
       URL <- vidLinks$mainLink[index]
       title <- vidLinks$title[index]
@@ -68,11 +76,18 @@ parseGPmarkdown <- function(x, WD = NULL,mlinks = NULL ) {
     stringr::str_replace_all(x, "\\{[Vv]id[^\\{]*\\}", function(x) {
       vidReplacements[match(x, names(vidReplacements))]
     })
+  }else{
+    vidReplaced <- x
+  }
 
-  #Now lets swap out more general {item} tags
+
+# Now lets swap out more general {itemX} tags ------------------------------
   itemCaptures <-
     stringr::str_extract_all(vidReplaced, "\\{item[^\\{]*\\}")
-  uniqueItemCaptures <- unique(unlist(itemCaptures))
+  uniqueItemCaptures <- unique_sans_na(unlist(itemCaptures))
+
+
+  if(length(uniqueItemCaptures)>0){
   #create a key for item markdown replacements
   itemReplacements <- sapply(uniqueItemCaptures, function(refs) {
     #extract number
@@ -80,7 +95,7 @@ parseGPmarkdown <- function(x, WD = NULL,mlinks = NULL ) {
       stringr::str_extract_all(refs, "\\d*") %>% unlist() %>%  paste0(collapse =
                                                                         "")
     #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
-    index <- match(itemN, mlinks$order, nomatch = 999)
+    index <- match(itemN, codeN, nomatch = 999)
     if (index != 999 & !is.na(index)) {
       type <- mlinks$type[index] %>% tolower()
       URL <- mlinks$mainLink[index]
@@ -108,6 +123,9 @@ parseGPmarkdown <- function(x, WD = NULL,mlinks = NULL ) {
     stringr::str_replace_all(vidReplaced, "\\{item[^\\{]*\\}", function(x) {
       itemReplacements[match(x, names(itemReplacements))]
     })
+}else{
+  final <- vidReplaced
+}
 
   return(final)
 }

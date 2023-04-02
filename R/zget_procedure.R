@@ -29,6 +29,7 @@ zget_procedure <- \(proc,
   proc0 <- proc
 
 
+# Expand markdown notation {vid1} -----------------------------------------
   #####
   #Parse all the text columns to expand {vidN} notation into full video links (including for Prep notes)
   proc[, c("StepQuickDescription",
@@ -44,6 +45,14 @@ zget_procedure <- \(proc,
 #Differentiate tibbles with and without prep info for later
 proc_w_prep <- proc
 proc <- proc %>% dplyr::filter(.data$Step!=0)
+
+#Expand markdown for PartExt section
+pext[,c("Description","Link")] <- apply(pext[,c("Description","Link")],2,\(x){
+  parseGPmarkdown(x,mlinks=mlinks)
+})
+
+
+
 
   # Handle Vocab ------------------------------------------------------------
   #Consolidate for separate export (remove duplicates and separate vocab into a nice data frame)
@@ -166,6 +175,34 @@ proc <- proc %>% dplyr::filter(.data$Step!=0)
       )
     }) %>% list()
 
+
+# Extract relevant pext ("Going Further") links ---------------------------
+
+    pext_df_i <- pext %>% dplyr::filter(Part==i) %>% dplyr::arrange(.data$Order)
+
+    #Remove []() markdown links to get bare links in case somebody used shorthand to grab the YouTube link
+    pext_df_i$Link <- ifelse(
+      grepl("\\[", pext_df_i$Link),#only do gsub if [ notation found in link
+      gsub(pattern = "[^\\(]*\\(?([^\\)]*)\\)?$", replacement = "\\1", pext_df_i$Link),
+      pext_df_i$Link
+    )
+      # stringr::str_extract(pext_df_i$Link,pattern = ".*\\(?([^\\)]*)\\)?$")
+
+    #Make NA row to avoid errors
+    if(nrow(pext_df_i)==0){
+      pext_df_i[1,] <- NA
+    }
+
+    partExt <-purrr::map(1:nrow(pext_df_i),\(j){
+      list(
+      item=j,
+      itemTitle=pext_df_i$ItemTitle[j] ,
+      itemDescription=pext_df_i$Description[j],
+      itemLink=pext_df_i$Link[j]
+      )
+      })
+
+
     #output data for this part
     c(
       partNum = partNum,
@@ -173,7 +210,8 @@ proc <- proc %>% dplyr::filter(.data$Step!=0)
       partDur = partDur,
       partPreface = partPreface,
       partPrep = list(partPrep),
-      chunks = chunks
+      chunks = chunks,
+      partExt = list(partExt)
     )
 
   })

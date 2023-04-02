@@ -57,7 +57,11 @@ compile_teach_it <- function(WD = getwd(),
       sheet = "PartExt",
       skip = 1,
       col_types = "c"
-    )
+    ) %>% dplyr::filter(`REF(Is_initiatialized)`==TRUE&!is.na(.data$ItemTitle)) %>%
+    dplyr::select("Part","Order","ItemTitle","Description","Link")
+
+
+
 
 
   #bring in procedure
@@ -76,9 +80,10 @@ compile_teach_it <- function(WD = getwd(),
   # Check and Validate Data Import--------------------------------------------------
   checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!DriveLinks")
   checkmate::assert_data_frame(mlinks, min.rows = 0, .var.name = "teach-it.gsheet!Multimedia")#multimedia might be 0 rows
-  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!DriveLinks")
-  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!DriveLinks")
-  checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!DriveLinks")
+  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!PartTitles")
+  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!PartTitles")
+  checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!Procedure")
+  checkmate::assert_data_frame(pext, min.rows = 0, .var.name = "teach-it.gsheet!PartExt")
 
   # Check for template text (uninitialized data) ----------------------------
   pinfo_titles_initialized <-
@@ -87,8 +92,16 @@ compile_teach_it <- function(WD = getwd(),
     !grepl("^Lesson description", pinfo$LessonPreface[1])
   proc_initialized <-
     !grepl("^\\*\\*\\*\\*\\*", proc$ChunkTitle[1]) #FALSE if ***** found in 1st ChunkTitle
-  pext_initialized <- nrow(pext) > 0
+  pext_initialized <- !grepl("^URL", pext$Link[1])
   mlinks_initialized <- nrow(mlinks) > 0
+
+
+# Report uninitialized data -----------------------------------------------
+
+  if(!pext_initialized){
+    pext<-pext[0,]
+    message("No valid items found on PartExt tab of `teach-it.gsheet`.")
+  }
 
   if (!pinfo_titles_initialized) {
     warning(
@@ -139,6 +152,7 @@ compile_teach_it <- function(WD = getwd(),
     tlinks <-
       dplyr::left_join(tlinks0, pinfo[, 1:5], by = c("part" = "Part"))
 
+
   } else{
     tlinks <-
       tlinks0 %>% dplyr::mutate(
@@ -151,11 +165,12 @@ compile_teach_it <- function(WD = getwd(),
   }
 
 
+
   # Extract majority of Teach-It data ---------------------------------------
   #Get item links for each environment*gradeBand
   teach_mat_data <- zget_envir(tlinks, fm = fm)
   if (!proc_initialized) {
-    #should change 'parts' to something more like procedure
+    #should change 'parts' to something more like 'procedure'
     #output NULL structure paralleling real data
     parts <- purrr::map(1:nparts, \(i) {
       list(
