@@ -57,18 +57,19 @@ update_fm <-
       ifelse(
         is_empty(new_yaml$TargetSubject),
         "",
-        paste0("_", new_yaml$TargetSubject, "_")
+        paste0(" |", new_yaml$TargetSubject, "| ")
       ),
       ifelse(
         is_empty(new_yaml$ForGrades),
         "",
-        paste0(new_yaml$ForGrades, " ")
+        paste0(substr(new_yaml$GradesOrYears,1,1), new_yaml$ForGrades, " ")
       ),
       paste0(
       "(",
       new_yaml$locale,
       ")"
-      )
+      ),
+      collapse=""
     )
 
     #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)

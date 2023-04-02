@@ -355,7 +355,7 @@ compile_lesson <-
             li <- mm_0[[i]]
             #ensure that type is always lowercase
             li$type <- tolower(li$type)
-            if (li$type == "pdf") {
+            if (identical(li$type, "pdf")) {
               li$mainLink <- gsub("/view?.*$", "/preview", li$mainLink)
               #Alternatively, change /edit links, as well
               li$mainLink <-
@@ -532,11 +532,11 @@ compile_lesson <-
     }#End of Front Matter export
 
 
-
-    # Procedures --------------------------------------------------------------
-    if ("Procedure" %in% choices) {
-      compileProcedure(WD = WD)
-    }
+#
+#     # Procedures --------------------------------------------------------------
+#     if ("Procedure" %in% choices) {
+#       compileProcedure(WD = WD)
+#     }
 
 
 

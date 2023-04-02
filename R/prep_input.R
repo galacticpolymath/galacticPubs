@@ -43,7 +43,13 @@ prep_input <-function(input,
     # if(!identical(old_template_ver,new_template_ver)){
     #   saved$TemplateVer<-new_template_ver
     # }
-    updated<-update_fm(WD=WD,save_output = FALSE,reorder=TRUE)
+    test_updated<-update_fm(WD=WD,save_output = FALSE,reorder=TRUE)
+    if(test_updated){
+      fm <- get_fm(WD=WD)
+      fm_names <- fm %>% names
+    }else{
+      warning("update_fm() failed for some reason in prep_input() for WD=",WD)
+    }
 
     Y0 <- shiny::reactiveValuesToList(input)
 
@@ -64,9 +70,10 @@ prep_input <-function(input,
     Y<- sapply(Y0B,function(x){if(is.null(x)){""}else{x}} ,simplify = F)
 
     # operational variables in yaml we don't expect to be in input (everything from lang to the last thing before PublicationStatus, but keeping ShortTitle (2), which is important)
-    yaml_op_var<-names(updated)[c(1,(which(names(updated)=="lang")+1):(which(names(updated)=="PublicationStatus")-1))]
 
-    template_fields0<-names(updated)
+    yaml_op_var<-fm_names[c(1,(which(fm_names=="lang")+1):(which(fm_names=="PublicationStatus")-1))]
+
+    template_fields0<-fm_names
     #template_fields sans operational variables
     template_fields<-template_fields0[!template_fields0%in%yaml_op_var]
     ######
@@ -104,7 +111,7 @@ prep_input <-function(input,
     # Add values from yaml that are not in input data (i.e. YAML fields with no GUI/Shiny inputs)
      #also create lang and locale variables from Language and Country
      #BUT, only use fields of Y2 that are in the saved file, allowing new template values to override
-    Y3<-add_missing_fields(Y2[which(names(Y2)%in%names(saved))],template=updated,reorder=TRUE)%>% parse_locale()
+    Y3<-add_missing_fields(Y2[which(names(Y2)%in%names(saved))],template=fm,reorder=TRUE)%>% parse_locale()
 
 
     #Return a list of current_data and saved_data to trigger an Save Changes? message in editor()
