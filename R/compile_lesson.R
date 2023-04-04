@@ -31,8 +31,9 @@ compile_lesson <-
            WD = getwd(),
            clean = TRUE,
            rebuild = NULL) {
-
-    if(WD=="?"){WD <- pick_lesson()}
+    if (WD == "?") {
+      WD <- pick_lesson()
+    }
 
     if (missing(current_data)) {
       current_data <-
@@ -344,31 +345,14 @@ compile_lesson <-
       mmExists <-
         file.exists(fs::path(WD, "meta", "JSON", "multimedia.json"))
       if (mmExists) {
-        mm_0 <-
+        mm <-
           jsonlite::read_json(fs::path(WD, "meta", "JSON", "multimedia.json"), null =
                                 "null")
-        #if first row is completely empty, nothin' to import
-        if (!is_empty(mm_0[[1]])) {
-          #process multimedia entries a little bit
-          mm <- lapply(1:length(mm_0), function(i) {
-            #change pdf file gdrive endings from view? to preview
-            li <- mm_0[[i]]
-            #ensure that type is always lowercase
-            li$type <- tolower(li$type)
-            if (identical(li$type, "pdf")) {
-              li$mainLink <- gsub("/view?.*$", "/preview", li$mainLink)
-              #Alternatively, change /edit links, as well
-              li$mainLink <-
-                gsub("/edit?.*$", "/preview", li$mainLink)
-            }
-            li
-          })
-        } else{
-          mm <- NULL
-        }
       } else{
         mm <- NULL
+        message("No multimedia found.")
       }
+
 
       #PREVIEW
       preview <- list(
@@ -532,11 +516,11 @@ compile_lesson <-
     }#End of Front Matter export
 
 
-#
-#     # Procedures --------------------------------------------------------------
-#     if ("Procedure" %in% choices) {
-#       compileProcedure(WD = WD)
-#     }
+    #
+    #     # Procedures --------------------------------------------------------------
+    #     if ("Procedure" %in% choices) {
+    #       compileProcedure(WD = WD)
+    #     }
 
 
 
@@ -556,9 +540,6 @@ compile_lesson <-
 
     if ("Printable Lesson" %in% choices) {
       make_printable(WD = WD, rebuild = rebuild)
-
-
-
 
     }
 

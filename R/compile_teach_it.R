@@ -40,8 +40,10 @@ compile_teach_it <- function(WD = getwd(),
       teach_it_drib,
       sheet = "Multimedia",
       skip = 1,
-      col_types = "c"
-    )
+      col_types = "c",
+
+    ) %>% dplyr::filter(!is.na(.data$code)) %>%
+    dplyr::select(1:11)
 
   pinfo <-
     googlesheets4::read_sheet(
@@ -68,6 +70,7 @@ compile_teach_it <- function(WD = getwd(),
   proc <-
     googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip =
                                 1) %>%
+    dplyr::select(1:.data$PartDur) %>%
     dplyr::mutate(
       Part = as.integer(.data$Part),
       Chunk = as.integer(.data$Chunk),

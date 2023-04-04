@@ -125,6 +125,7 @@ zget_grade_bands <- \(df, fm, assess) {
       )
 
     })
+
   out
 
 
@@ -141,10 +142,9 @@ zget_parts <- \(df, fm) {
   parts <- unique_sans_na(df$part)
   if (length(parts) == 0) {
     #make it resilient if there's only 1 implied part
-    df$part <- "1"
+    parts <- "1"
   }
   out <- parts %>%
-    purrr::set_names() %>%
     #map across all parts
     purrr::map(., \(part_i) {
       #Get info for the subfolder
@@ -169,6 +169,7 @@ zget_parts <- \(df, fm) {
 
 
     })
+
   out
 
 

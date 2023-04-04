@@ -19,7 +19,7 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   if (!grepl("shiny", getwd()) & !is_galacticPubs) {
     check_wd(WD = WD)
   }
-browser()
+
 
   # check if files have been staged and are up to date ----------------------
   published_path <- fs::path(WD, "published")
