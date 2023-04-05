@@ -688,8 +688,9 @@ compile_standards <- function(WD = getwd(),
 
     saveFile <- fs::path(WD, "meta", "standards.RDS")
     message("Saving standards info to '",saveFile,"'")
-
     saveRDS(toSave, file = saveFile)
+
+    save_json()
 
     problem_entries <- dplyr::as_tibble(a0[(tbds + undoc) > 0, ])
     #need to build better checks than this

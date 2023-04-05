@@ -3,7 +3,7 @@
 #' Simulates Finder/File Explorer functionality by repeated calls to [googledrive::drive_find()]. Allows relative paths via hybrid navigation of local virtualized Google Drive for Desktop paths by going to a local lesson directory, pulling up the front-matter.yml and finding the Google ID in order to access the relative path you requested through the Drive API.
 #'
 #' @param drive_path If you provide a dribble, it gets passed right back out. Otherwise, you can give a character string in the form "DRIVE/directory/subdirectory".
-#' - DRIVE can be "~" or "my drive" to refer to your private google drive
+#' - DRIVE can be "~" or "my drive" to refer to your private google drive (e.g. "~/Folder1/file.png")
 #' - Path can also be the name of a shared drive (e.g. "GP-Misc")
 #' - Also supports relative paths (e.g. "../meta"), as long as **WD** or **drive_root**. If **WD** is supplied (this is a full "local" Google Drive for Desktop path piped from [pick_lesson()]). If **drive_root** supplied, it will use that as the parent for getting relative paths.
 #'  - Relative pathing can be significantly faster because each hierarchical call to GDrive API to resolve a folder costs about a second.
@@ -44,6 +44,7 @@ drive_find_path <- function(drive_path,
                             single_result = TRUE,
                             checkWD= TRUE) {
   is_drib <- googledrive::is_dribble(drive_path)
+
 
   if (is_drib) {
     #just passes through a dribble if it's already been resolved
@@ -91,9 +92,9 @@ drive_find_path <- function(drive_path,
           #if first part of path is short hand for mydrive drive_root, get its google ID
           if (tolower(p[i]) == "drive_root" |
               tolower(p[i]) == "my drive" |
-              tolower(p[i]) == "~") {
+              p[i] == "~") {
             results[[i]] <-
-              googledrive::drive_get(id = "drive_root")
+              googledrive::drive_get(path = "~/")
             sharedDrive <- NULL
 
             #handle relative paths from a GP-Studio/Edu/Lessons dir

@@ -37,7 +37,7 @@ compile_lesson <-
 
     if (missing(current_data)) {
       current_data <-
-        safe_read_yaml(fs::path(WD, "meta", "front-matter.yml"))
+       get_fm(WD=WD)
     }
     if (missing(choices)) {
       choices <- current_data$ReadyToCompile
@@ -95,13 +95,17 @@ compile_lesson <-
 
 
     # Standards alignment & learning plots -----------------------------------------------------
-    # test if learningEpaulette is in up-to-date with the standards_GSheetsOnly.xlsx file, or if any of these files is missing.
+    # test if learningEpaulette is up-to-date with the 'standards_ShortTitle.gsheet' file, or if any of these files is missing.
 
     compiled_standards_path <-
       fs::path(WD, "meta", "standards.RDS")
+
+    compiled_standards_json_path <-
+      fs::path(WD, "meta","json",  "standards.json")
+
     stnds_out_of_date <- !inSync(
       compiled_standards_path,
-      fs::path(WD, "meta", "standards_GSheetsOnly.xlsx"),
+      fs::path(WD, "meta", paste0("teach-it_",current_data$ShortTitle,".gsheet")),
       newer = TRUE
     )
 
@@ -110,7 +114,6 @@ compile_lesson <-
       compile_standards_output <- compile_standards(
         WD = WD,
         targetSubj = current_data$TargetSubject,
-        standardsRef = current_data$PullStandardsInfoFrom,
         learningplot_correction = current_data$LearningPlotCorrection
       ) %>% catch_err(keep_results = T)
       alignment <- compile_standards_output$result
