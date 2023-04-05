@@ -16,7 +16,7 @@ drive_find_path(
 \arguments{
 \item{drive_path}{If you provide a dribble, it gets passed right back out. Otherwise, you can give a character string in the form "DRIVE/directory/subdirectory".
 \itemize{
-\item DRIVE can be "~" or "my drive" to refer to your private google drive
+\item DRIVE can be "~" or "my drive" to refer to your private google drive (e.g. "~/Folder1/file.png")
 \item Path can also be the name of a shared drive (e.g. "GP-Misc")
 \item Also supports relative paths (e.g. "../meta"), as long as \strong{WD} or \strong{drive_root}. If \strong{WD} is supplied (this is a full "local" Google Drive for Desktop path piped from \code{\link[=pick_lesson]{pick_lesson()}}). If \strong{drive_root} supplied, it will use that as the parent for getting relative paths.
 \item Relative pathing can be significantly faster because each hierarchical call to GDrive API to resolve a folder costs about a second.

@@ -169,7 +169,7 @@ lesson_new_locale <-
             test_copy_missing <- test_renaming <- test_push <- NA
           } else {
             #only go on if front-matter updated
-            test_copy_missing <- drive_cp_missing(
+            test_copy_missing <- drive_copy_missing_files(
               from_dir = fs::path(lessons_get_path(), gh_proj_name),
               to_dir = fs::path(lessons_get_path(), new_proj_name),
               try_harder = TRUE

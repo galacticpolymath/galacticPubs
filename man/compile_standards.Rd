@@ -5,27 +5,26 @@
 \title{compile_standards}
 \usage{
 compile_standards(
-  learningplot_correction = TRUE,
-  standardsRef = "myFile",
-  targetSubj = NULL,
   WD = getwd(),
+  learningplot_correction = TRUE,
+  targetSubj = NULL,
   structureForWeb = TRUE
 )
 }
 \arguments{
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); If you put "?", it will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
+
 \item{learningplot_correction}{do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=T; this will scale proportions of subjects by the relative total proportions of standards in each subject. If FALSE, the proportions will just be raw proportions of each subject out of total standards aligned.}
 
-\item{standardsRef}{where do you want to pull down statements and other info for the supplied standards codes? Default="myFile" (i.e. Tab2 of the standards workbook.) if "standardX" is chosen, it'll pull down the latest version here: \href{https://github.com/galacticpolymath/standardX}{standardX repository})}
-
-\item{targetSubj}{which subject\code{(}s\verb{)} is \code{(}are\verb{)} the focus of the lesson? opts= "math","ela","science","social studies"}
-
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
-
-\item{structureForWeb}{default=TRUE; Do you want to preface JSON output with component & nest output in Data element?}
+\item{targetSubj}{which subject(s) are the focus of the lesson? opts= "math","ela","science","social studies"; default=NULL}
 }
 \value{
-list of the compiled standards data with 3 objects: $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
+list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 }
 \description{
-Compile alignment info from a lesson standards matrix worksheet
+Does the following:
+\enumerate{
+\item Compile alignment info from the \code{standards_*.gsheet} in the project's \verb{meta/} folder
+\item Output standards.RDS file with the alignment info (this will be read in by \code{\link[=learningEpaulette]{learningEpaulette()}} and \code{\link[=learningChart]{learningChart()}})
+}
 }
