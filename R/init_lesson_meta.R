@@ -15,6 +15,7 @@ init_lesson_meta <- function(WD = getwd(), overwrite = NA) {
     WD <- pick_lesson()
   }
 
+#To Do: Make this check for file existence and handle overwrites using local/virtualized paths (for extreme efficiency)
 
   #GdriveID for lesson templates (must have access to '/GP-Studio/Templates_BE_CAREFUL/lesson-meta-templates/')
 
