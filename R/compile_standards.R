@@ -295,6 +295,7 @@ compile_standards <- function(WD = getwd(),
     }
 
     #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standardsRef)
+    #Remove "Part from a_master to avoid conflicts with changes made in tab 4.Finalize"
     A <-
       dplyr::left_join(a3[, c("code_set",
                               "lo",
@@ -302,7 +303,8 @@ compile_standards <- function(WD = getwd(),
                               "target",
                               "grp",
                               "grouping",
-                              "how")], a_master, by = "code_set")
+                              "how",
+                              "part")], a_master[-which(tolower(names(a_master))=="part")], by = "code_set")
 
 
     #factor subjects for desired order
@@ -407,6 +409,9 @@ compile_standards <- function(WD = getwd(),
 
               #Get parts assignments for this standard
               uniq_parts <- strsplit(unique(d_gr$part),split=",") %>% unlist() %>% trimws() %>% unique() %>% sort()
+              if(d_gr$code=="SL.6.2"){
+
+              }
               list(
                 parts = as.list(uniq_parts),
                 codes = unique(d_gr$code),

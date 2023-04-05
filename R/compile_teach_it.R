@@ -175,7 +175,9 @@ compile_teach_it <- function(WD = getwd(),
   if (!proc_initialized) {
     #should change 'parts' to something more like 'procedure'
     #output NULL structure paralleling real data
-    parts <- purrr::map(1:nparts, \(i) {
+    proc_data <- list()
+    proc_data$lesson_dur <- NULL
+    proc_data$parts <- purrr::map(1:nparts, \(i) {
       list(
         partNum = i,
         partTitle = NULL,
@@ -185,7 +187,7 @@ compile_teach_it <- function(WD = getwd(),
         partExtension = NULL
       )
     })
-    vocab <- NULL
+    proc_data$vocab <- NULL
   } else{
     proc_data <-
       zget_procedure(
@@ -196,7 +198,7 @@ compile_teach_it <- function(WD = getwd(),
       )
 
     #output gathered vocab as csv
-    if (nrow(proc_data$vocab) > 0) {
+    if (!is.null(proc_data$vocab)) {
       vocab_outfile <-
         fs::path(WD, "assets", "_other-media-to-publish", "vocab.csv")
       vocab_saved <-

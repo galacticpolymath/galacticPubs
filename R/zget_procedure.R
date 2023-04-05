@@ -29,7 +29,7 @@ zget_procedure <- \(proc,
   proc0 <- proc
 
 
-# Expand markdown notation {vid1} -----------------------------------------
+  # Expand markdown notation {vid1} -----------------------------------------
   #####
   #Parse all the text columns to expand {vidN} notation into full video links (including for Prep notes)
   proc[, c("StepQuickDescription",
@@ -42,32 +42,41 @@ zget_procedure <- \(proc,
                    "TeachingTips")], 2, function(x)
                      parseGPmarkdown(x, mlinks = mlinks))
 
-#Differentiate tibbles with and without prep info for later
-proc_w_prep <- proc
-proc <- proc %>% dplyr::filter(.data$Step!=0)
+  #Differentiate tibbles with and without prep info for later
+  proc_w_prep <- proc
+  proc <- proc %>% dplyr::filter(.data$Step != 0)
 
-#Expand markdown for PartExt section
-pext[,c("Description","Link")] <- apply(pext[,c("Description","Link")],2,\(x){
-  parseGPmarkdown(x,mlinks=mlinks)
-})
+  #Expand markdown for PartExt section
+  pext[, c("Description", "Link")] <-
+    apply(pext[, c("Description", "Link")], 2, \(x) {
+      parseGPmarkdown(x, mlinks = mlinks)
+    })
 
 
 
 
   # Handle Vocab ------------------------------------------------------------
-  #Consolidate for separate export (remove duplicates and separate vocab into a nice data frame)
-  vocab_vec <-
-    proc %>% dplyr::filter(!is.na(.data$Vocab)) %>% dplyr::pull("Vocab")
-  vocab_df <- vocab_vec %>% purrr::map(., \(x_i) {
-    dplyr::tibble(x = strsplit(x_i, split = "\n")[[1]])
-  }) %>% dplyr::bind_rows() %>% tidyr::separate_wider_delim(
-    cols = 1,
-    delim = stringr::regex(" *= *"),
-    names = c("term", "definition")
-  ) %>% dplyr::distinct(.data$term, .keep_all = T)#remove repeated definitions, in case repeated in procedure
+  if (grepl("TermX", proc$Vocab[1])) {
+    proc$Vocab <- NA
+    vocab_df <- NULL
+    message("Uninitialized Vocab data skipped.")
+  } else{
+    #Consolidate for separate export (remove duplicates and separate vocab into a nice data frame)
+    vocab_vec <-
+      proc %>% dplyr::filter(!is.na(.data$Vocab)) %>% dplyr::pull("Vocab")
 
-  #Parse vocab for Procedure section (change shorthand into reasonably formatted markdown with bullets)
-  proc$Vocab <- formatVocab(proc$Vocab)
+    vocab_df <- vocab_vec %>% purrr::map(., \(x_i) {
+      dplyr::tibble(x = strsplit(x_i, split = "\n")[[1]])
+    }) %>% dplyr::bind_rows() %>% tidyr::separate_wider_delim(
+      cols = 1,
+      delim = stringr::regex(" *= *"),
+      names = c("term", "definition")
+    ) %>% dplyr::distinct(.data$term, .keep_all = T)#remove repeated definitions, in case repeated in procedure
+
+    #Parse vocab for Procedure section (change shorthand into reasonably formatted markdown with bullets)
+    proc$Vocab <- formatVocab(proc$Vocab)
+  }
+
 
 
 
@@ -122,7 +131,7 @@ pext[,c("Description","Link")] <- apply(pext[,c("Description","Link")],2,\(x){
     pinfo$PartGradeVarNotes[!is.na(pinfo$PartGradeVarNotes)]
 
 
-# Output data for each part -----------------------------------------------
+  # Output data for each part -----------------------------------------------
 
   out$parts <- lapply(1:nparts, function(i) {
     partNum <- i
@@ -131,29 +140,32 @@ pext[,c("Description","Link")] <- apply(pext[,c("Description","Link")],2,\(x){
     partPreface <- ifelse(length(pprefs) < i, NA, pprefs[i])
 
     proc_df_i <- subset(proc, proc$Part == i)
-    prep_row <- subset(proc_w_prep, proc_w_prep$Part==i & proc_w_prep$Step == 0)
-    #If prep missing for part i, fill in NA, to populate list for output
+    prep_row <-
+      subset(proc_w_prep, proc_w_prep$Part == i & proc_w_prep$Step == 0)
+    #If prep missing for part i, nullify it
     if (nrow(prep_row) == 0) {
-      prep_row[1, ] <- NA
-    }
-    #Set default Title if missing
-    if(!is.na(prep_row$StepQuickDescription)&is.na(prep_row$StepTitle)){
-      prep_row$StepTitle <- "Prep"
-    }
+      partPrep <- NULL
+    } else{
+      #Set default Title if missing
+      if (!is.na(prep_row$StepQuickDescription) &
+          is.na(prep_row$StepTitle)) {
+        prep_row$StepTitle <- "Prep"
+      }
 
-    #Extract prep info for part i
-    partPrep <- list(
-      PrepTitle = prep_row$StepTitle,
-      PrepDur = prep_row$ChunkDur,
-      PrepQuickDescription = prep_row$StepQuickDescription,
-      PrepDetails = prep_row$StepDetails,
-      PrepVariantNotes = prep_row$VariantNotes,
-      PrepTeachingTips = prep_row$TeachingTips
-    )
+      #Extract prep info for part i
+      partPrep <- list(
+        PrepTitle = prep_row$StepTitle,
+        PrepDur = prep_row$ChunkDur,
+        PrepQuickDescription = prep_row$StepQuickDescription,
+        PrepDetails = prep_row$StepDetails,
+        PrepVariantNotes = prep_row$VariantNotes,
+        PrepTeachingTips = prep_row$TeachingTips
+      )
+    }
 
     #Get chunk info for this part
     chunks <- lapply(unique(proc_df_i$Chunk), function(chunk_i) {
-      d <- subset(proc, proc$Part == i & proc$Chunk == chunk_i )
+      d <- subset(proc, proc$Part == i & proc$Chunk == chunk_i)
       chunkTitle <- d$ChunkTitle[1]
       chunkStart <- d$ChunkStart[1]
       chunkDur <- d$ChunkDur[1]
@@ -176,32 +188,38 @@ pext[,c("Description","Link")] <- apply(pext[,c("Description","Link")],2,\(x){
     }) %>% list()
 
 
-# Extract relevant pext ("Going Further") links ---------------------------
+    # Extract relevant pext ("Going Further") links ---------------------------
 
-    pext_df_i <- pext %>% dplyr::filter(Part==i) %>% dplyr::arrange(.data$Order)
+    pext_df_i <-
+      pext %>% dplyr::filter(Part == i) %>% dplyr::arrange(.data$Order)
 
     #Remove []() markdown links to get bare links in case somebody used shorthand to grab the YouTube link
     pext_df_i$Link <- ifelse(
-      grepl("\\[", pext_df_i$Link),#only do gsub if [ notation found in link
-      gsub(pattern = "[^\\(]*\\(?([^\\)]*)\\)?$", replacement = "\\1", pext_df_i$Link),
+      grepl("\\[", pext_df_i$Link),
+      #only do gsub if [ notation found in link
+      gsub(
+        pattern = "[^\\(]*\\(?([^\\)]*)\\)?$",
+        replacement = "\\1",
+        pext_df_i$Link
+      ),
       pext_df_i$Link
     )
-      # stringr::str_extract(pext_df_i$Link,pattern = ".*\\(?([^\\)]*)\\)?$")
+    # stringr::str_extract(pext_df_i$Link,pattern = ".*\\(?([^\\)]*)\\)?$")
 
     #Make NA row to avoid errors
-    if(nrow(pext_df_i)==0){
-      pext_df_i[1,] <- NA
-    }
-
-    partExt <-purrr::map(1:nrow(pext_df_i),\(j){
-      list(
-      item=j,
-      itemTitle=pext_df_i$ItemTitle[j] ,
-      itemDescription=pext_df_i$Description[j],
-      itemLink=pext_df_i$Link[j]
-      )
+    if (nrow(pext_df_i) == 0) {
+      partExt <- NULL
+    } else{
+      partExt <- purrr::map(1:nrow(pext_df_i), \(j) {
+        list(
+          item = j,
+          itemTitle = pext_df_i$ItemTitle[j] ,
+          itemDescription = pext_df_i$Description[j],
+          itemLink = pext_df_i$Link[j]
+        )
       })
 
+    }
 
     #output data for this part
     c(
