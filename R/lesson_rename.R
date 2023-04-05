@@ -9,16 +9,15 @@
 #'
 #' Assumes that you have Google Drive for Desktop set up with access to Lessons/ folder; github and gh CLI set up with proper permissions with GP GitHub. Will ignore case to account for different user behaviors.
 #' @param new_proj_name The new name you want to give the selected project
+#' @param WD a virtualized path to the lesson you want to rename. Easiest to specify "?" which will invoke [pick_lesson()]. MUST be the same as the lesson project is named on [https://github.com/galacticpolymath](https://github.com/galacticpolymath).
 #' @param new_ShortTitle New ShortTitles to be swapped out in lesson project file names. If blank, will try to guess by ignoring terminal "_suffixes"
-#' @param gh_proj_name The unique project title of this lesson as it is named on [https://github.com/galacticpolymath](https://github.com/galacticpolymath). Not *necessarily* the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.
 #' @param curr_ShortTitle Current ShortTitle prefixed to lesson project files. If missing, will try to read this from ShortTitle in the existing front-matter.yml
 #' @param just_files logical; Default=FALSE; Do you want to JUST rename file prefixes, given the ShortTitle? If TRUE, this skips:
 #' - renaming top-level project folder
 #' - renaming associated GitHub project
 #' - pushing changes to GitHub
-#' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"
 #' @param only_rename_prefixes Do you want to only change project files with the ShortTitle at the beginning of the filename? (Could avoid accidental replacements if short title is a common phrase); default=TRUE
-#' @param change_this passed to [update_fm()] if you want to make any other changes to front matter. Must be a list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey book If gh_proj_name=="all", make sure you set this to something you want to change for everything.
+#' @param change_this passed to [update_fm()] if you want to make any other changes to front matter. Must be a list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey book If WD=="all", make sure you set this to something you want to change for everything.
 #' @param preserve_spaces if some files have a space in the 'Short Title', do you want to preserve this? default=FALSE
 #' @param run_check_wd logical; do you want to run [check_wd()]? Basically looks for files and folders you expect in a valid lesson project. default=TRUE
 #' @param force_init_capital do you want to force the output to start with a capital letter? default=FALSE
@@ -26,12 +25,11 @@
 #'
 
 lesson_rename <- function(new_proj_name,
+                          WD,
                           new_ShortTitle,
-                          gh_proj_name,
                           curr_ShortTitle,
                           just_files = FALSE,
                           change_this = NULL,
-                          lessons_dir,
                           only_rename_prefixes = TRUE,
                           preserve_spaces = FALSE,
                           run_check_wd = TRUE,
@@ -40,27 +38,20 @@ lesson_rename <- function(new_proj_name,
 
 # 0.  Checks and validation -----------------------------------------------
   if(missing(new_proj_name)){stop("You must supply new_proj_name.")}
-  if (missing(lessons_dir)) {
-    lessons_dir <-
-      lessons_get_path()
+
+
+  if (WD == "?") {
+    WD <- pick_lesson()
   }
 
-  #if specific gh_proj_name not included, let user choose one
-  if (missing(gh_proj_name)) {
-    gh_proj_dir <- pick_lesson(lessons_dir, full_path = TRUE)
-    gh_proj_name<- basename(gh_proj_dir)
-  }else{
-    gh_proj_dir<- fs::path(lessons_dir,gh_proj_name)
-  }
-
-  #double check that gh_proj_dir looks like a valid lesson directory
+  #double check that WD looks like a valid lesson directory
   if(run_check_wd) {
-    test_check_wd <- check_wd(WD = gh_proj_dir)
+    test_check_wd <- check_wd(WD = WD)
   }else{test_check_wd<-NA}
 
 
   #make sure we're not running this from the R project we want to change
-  in_volatile_dir<-getwd()==gh_proj_dir
+  in_volatile_dir<-getwd()==WD
     if(in_volatile_dir){
     stop("You seem to be in the project you want to modify. You need to run lesson_rename() from a different RStudio project.")
   }
@@ -70,11 +61,9 @@ lesson_rename <- function(new_proj_name,
     stop("change_this parameter must be a list. See ?update_fm() for help.")
   }
 
-  #check that yaml exists, create one if necessary, and store path
-  fm_path<-init_fm(WD = gh_proj_dir)
 
   #read in yaml
-  y<-safe_read_yaml(fm_path)
+  y<-get_fm(WD=WD)
 
 
 
@@ -82,7 +71,7 @@ lesson_rename <- function(new_proj_name,
   short_title_pat<-"(?<![|_] )([^|_]*?)_[^_]*?$"
   if(missing(new_ShortTitle)){
     # IGNORED_|ExtractedString_IGNORED
-    new_ShortTitle<-gsub(short_title_pat,"\\1",new_proj_name,perl=TRUE)
+    new_ShortTitle<-y$ShortTitle
     message("Guessing new_ShortTitle from front-matter.yml: '",new_ShortTitle,"'")
   }
 
@@ -92,7 +81,7 @@ lesson_rename <- function(new_proj_name,
     new_proj_name <- string_capitalize_first(new_proj_name)
   }
   #Define project directory now we've settled on new_proj_name
-  new_proj_dir<-fs::path(lessons_dir,new_proj_name)
+  new_proj_dir<-fs::path(path_parent_dir(WD),new_proj_name)
 
   if(missing(curr_ShortTitle)){
     curr_ShortTitle<-y$ShortTitle
@@ -112,14 +101,14 @@ message("\nCAREFUL!")
 message(
   paste0(
     "---------------------------------------------------------------------------\n",
-    paste0(" Make sure to SAVE and CLOSE '",new_proj_name,"' if open elsewhere.\n"),
+    paste0(" Make sure to SAVE and CLOSE '",curr_proj_name,"' if open elsewhere.\n"),
     "---------------------------------------------------------------------------\n",
     "\n Are you sure you want to rename:\n",
     ifelse(
       !just_files,
       paste0(
         "-Project Folder: \n    -from '",
-        gh_proj_name,
+        basename(WD),
         "' to '",
         new_proj_name,
         "\n"
@@ -140,16 +129,16 @@ if(continue%in%c("N","n")){
   stop("Renaming Canceled")
 }
 
-
+browser()
 # 1. Rename top level folder & project name-------------------------------------------
 if(!just_files){
-test_folderRename <- file.rename(from=gh_proj_dir,to = new_proj_dir)
+test_folderRename <- file.rename(from=WD,to = new_proj_dir)
 Rproj_file<- list.files(new_proj_dir,pattern=".Rproj",full.names = T)
 new_Rproj_file <- fs::path(new_proj_dir,new_proj_name,ext="Rproj")
 #Keep full (new) project name in the Rproject file
 test_RprojRename<- file.rename(from=Rproj_file, to=new_Rproj_file)
 if(test_folderRename & new_Rproj_file!=Rproj_file){
-  message("Project Folder Renamed:\n from: ",gh_proj_dir,"\n to:   ",new_proj_dir)
+  message("Project Folder Renamed:\n from: ",WD,"\n to:   ",new_proj_dir)
 }
 }else{
   test_folderRename<-test_RprojRename<-NA
@@ -263,11 +252,12 @@ if(newstr_is_oldstr) {
 # # 3. Changes name of GitHub Repo at galacticpolymath/ and galactic --------
 if(!just_files){
 test_rename_remote <- catch_err(
+  #Need to rewire this function to work by just taking the WD parameter and scrapping the gh_proj_name
   gh_rename_repo(
     new_proj_name = new_proj_name,
-    gh_proj_name = gh_proj_name,
+    gh_proj_name = basename(WD),
     prompt_user = FALSE,
-    lessons_dir = lessons_dir
+    lessons_dir = lessons_get_path()
   )
 )
 }else{
@@ -328,7 +318,7 @@ if(proceed){
 
 # 8.   Delete orphaned catalog entry if it exists -------------------------
 if(!just_files){
-test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(gh_proj_name))
+test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(WD))
 }else{test_cleanup_catalog<-NA}
 
 # 7.  Summarize results ---------------------------------------------------
@@ -337,7 +327,7 @@ if(proceed & test_update_fm){
   message("Project successfully renamed to: ",new_proj_name)
   warning("*You may want manually change names. \n Create tasks by pasting the list below into a new Clickup Task.\n",
           "-------------------------------------------------------\n",
-  paste0("Change '",gh_proj_name,"' to '",new_proj_name,"' in:\n",
+  paste0("Change '",basename(WD),"' to '",new_proj_name,"' in:\n",
           " \u2022 Handout Headers\n",
           " \u2022 Presentation Slides\n",
           " \u2022 Client facing Roadmap and other docs\n"),
