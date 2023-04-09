@@ -53,10 +53,13 @@ safe_read_yaml <- function(yaml_path=NULL,
   # read in the front-matter ------------------------------------------------
 
   y <- yaml::read_yaml(yaml_path, eval.expr = eval.expr)
+
+
   #Standardize empty values to NA
+
   y2 <- lapply(1:length(y), function(i) {
     yi <- y[[i]]
-    if (is_empty(yi)) {
+    if (is_empty(yi,names_meaningful=TRUE)) {
       yi <- NA
     } else{
       yi

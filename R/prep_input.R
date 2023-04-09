@@ -17,12 +17,12 @@ prep_input <-function(input,
     #read in existing front-matter.yml if it exists (just to be sure we're up to date)
     #If this is the user's first time editing, they will have read in y at the top, but not written yet
   if (file.exists(yaml_path)) {
-    saved <- safe_read_yaml(yaml_path)
+    saved <- safe_read_yaml(yaml_path,checkWD = FALSE)
   } else{
     #use the front matter template supplied with galacticPubs as a starting point
     saved <-
       safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
-                                   "galacticPubs"))
+                                   "galacticPubs"),checkWD = FALSE)
   }
     # ####
     # #update lesson yaml, according to template (add missing fields)
@@ -50,21 +50,44 @@ prep_input <-function(input,
     }else{
       warning("update_fm() failed for some reason in prep_input() for WD=",WD)
     }
+    #Y00 is original environmental data
+    Y00 <- shiny::reactiveValuesToList(input)
 
-    Y0 <- shiny::reactiveValuesToList(input)
+    #Process and overwrite "-hot" hands-on-table data
+
+    hot_names <- names(Y00)[sapply(names(Y00),\(x) grepl("-hot",x)) %>% unlist() %>% which()]
+    #Extract -handsontable data and add to Y0; -hot objects will be removed in next step
+    Y0 <- Y00
+    if(!is_empty(hot_names)){
+      for(i in 1:length(hot_names)){
+        fm_key <- gsub("-hot","",hot_names[i])
+        Y0[[fm_key]] <- rhandsontable::hot_to_r(Y0[[hot_names[i]]])
+      }
+    }
+
 
     # figure out which are shiny operational variables in input & ignore em
-    input_op_var <- lapply(1:length(Y0), function(l) {
-      #check if "shiny" somewhere in a class name for each list item
-      if (sum(grepl("shiny", class(Y0[[l]]))) > 0) {
-        #add manual inputs to ignore
-        manual_inputs_to_ignore<-c("commit_msg")
-        c(names(Y0)[l],manual_inputs_to_ignore)
-      } else{
-      }
+    #add manual inputs to ignore (will catch any names containing these strings)
+    ignore_pattern<-c("commit_msg","-hot")
+
+    input_op_var <- lapply(1:length(Y0), function(i) {
+      name_i <- names(Y0)[[i]]
+      #check if "shiny" somewhere in a class name(s) for each list item
+      is_shiny_class <- sum(grepl("shiny", class(Y0[[i]]))) > 0
+      #check if name i matches ignore pattern(s)
+      has_ignore_pattern <- sum(sapply(ignore_pattern,\(x){grepl(x, name_i)
+        })) >0
+
+      if (is_shiny_class |
+          has_ignore_pattern){
+        name_i
+      }else{
+
+          }
     }) %>% unlist()
 
     #make nonreactive list of everything except our "Operational" input items
+    #Includes *-hot values that needed to be converted into normal dataframes
     Y0B <- Y0[!names(Y0) %in% input_op_var]
     #Remove Nulls! They cause many problems when we output to character & get character(0)
     Y<- sapply(Y0B,function(x){if(is.null(x)){""}else{x}} ,simplify = F)
@@ -112,6 +135,8 @@ prep_input <-function(input,
      #also create lang and locale variables from Language and Country
      #BUT, only use fields of Y2 that are in the saved file, allowing new template values to override
     Y3<-add_missing_fields(Y2[which(names(Y2)%in%names(saved))],template=fm,reorder=TRUE)%>% parse_locale()
+
+
 
 
     #Return a list of current_data and saved_data to trigger an Save Changes? message in editor()

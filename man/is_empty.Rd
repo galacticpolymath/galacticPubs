@@ -4,10 +4,12 @@
 \alias{is_empty}
 \title{is_empty}
 \usage{
-is_empty(x)
+is_empty(x, ignore_na_df = FALSE)
 }
 \arguments{
 \item{x}{any value or vector}
+
+\item{ignore_na_df}{logical, if T, when an empty data frame is supplied for \emph{x}, it will return FALSE. Useful if you consider having column information in a tibble not "empty"; default= FALSE}
 }
 \value{
 TRUE (if empty) or FALSE (if not empty)

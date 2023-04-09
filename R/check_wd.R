@@ -10,6 +10,10 @@
 #'
 check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
   if(WD=="?"){WD <- pick_lesson()}
+
+  if(basename(WD)=="galacticPubs"){
+    message("galacticPubs environment: ignoring check_wd() call")
+  }else{
   #test that WD is in the root directory with the R Project
   files<-list.files(WD)
   loc_check<-(stringr::str_detect(files,"\\.Rproj") %>% sum() )==1
@@ -66,5 +70,5 @@ check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
     teaching_materials_found=loc_check3
     )
   }
-
+}#end galacticPubs exception
 }

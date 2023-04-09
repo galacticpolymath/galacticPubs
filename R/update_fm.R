@@ -23,10 +23,13 @@ update_fm <-
       WD <- pick_lesson()
     }
 
+    #In galacticPubs dev mode, don't do certain things
+    is_gPubs <- basename(WD)=="galacticPubs"
+
     yaml_path <- fs::path(WD, "meta", "front-matter.yml")
 
     #safe_read_yaml will create yaml if it's missing
-    old_yaml <- safe_read_yaml(yaml_path)
+    old_yaml <- safe_read_yaml(yaml_path,checkWD = ifelse(is_gPubs,FALSE, TRUE))
 
     galacticPubs_template <-
       safe_read_yaml(yaml_path = system.file("extdata",
@@ -38,6 +41,7 @@ update_fm <-
 
     # Make manual changes if requested ----------------------------------------
     if (!is.null(change_this)) {
+
       for (i in 1:length(change_this)) {
         element_i <- names(change_this)[i]
         new_yaml[[element_i]] <- change_this[[i]]
@@ -84,12 +88,13 @@ update_fm <-
     }
 
     #Add Gdrive ID and URL if one is missing
-    if (is_empty(new_yaml$GdriveDirID) |
+    if ((is_empty(new_yaml$GdriveDirID) |
         is_empty(new_yaml$GdriveDirURL) |
         is_empty(new_yaml$GdriveMetaID) |
         is_empty(new_yaml$GdrivePublishedID) |
         is_empty(new_yaml$GdriveTeachItID) |
-        drive_reconnect) {
+        drive_reconnect) &
+        !is_gPubs){
       #try to find path for the project name
       message(
         "\nTrying to link local virtual lesson '",
