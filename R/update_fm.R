@@ -6,6 +6,7 @@
 #'
 #' @param WD Working drive; default=getwd()
 #' @param save_output do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE
+#' @param return_fm logical; if TRUE, returns the the updated front-matter; if FALSE (default), returns TRUE/FALSE of success
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
 #' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when [compile_lesson()] is run and change the Language and locale.
 #' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=F
@@ -16,6 +17,7 @@
 update_fm <-
   function(WD = getwd(),
            save_output = TRUE,
+           return_fm = FALSE,
            reorder = TRUE,
            change_this = NULL,
            drive_reconnect=FALSE) {
@@ -214,6 +216,9 @@ update_fm <-
     }
 
 
-
+  if(return_fm){
+   new_yaml
+  }else{
     success
+  }
   }

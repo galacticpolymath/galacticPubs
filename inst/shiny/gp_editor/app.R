@@ -362,6 +362,14 @@ ui <- navbarPage(
     h3("Acknowledgments"),
     ediTable(id = "Acknowledgments"),
     hr(class = "blhr"),
+    div(class = "spacer"),
+
+    hr(class = "blhr"),
+    div(class = "spacer"),
+    #Acknowledgments
+    h3("Version Info"),
+    ediTable(id = "Versions"),
+    hr(class = "blhr"),
     div(class = "spacer")
   ),
   #End Setup Panel
@@ -657,14 +665,14 @@ server <- function(input, output, session) {
   #initialize values
   #define initial reactive values for ediTable
   ack_data <- reactiveVal(y$Acknowledgments)
-
+  versions_data <- reactiveVal(y$Versions)
 
 
   #id must match ediTable id in UI section and the key in front-matter.yml (i.e. an item in get_fm())
   #This step prevents trying to load this before data is available
 
   ediTable_server(id = "Acknowledgments", rd = ack_data)
-
+  ediTable_server(id = "Versions", rd = versions_data)
 
 
 

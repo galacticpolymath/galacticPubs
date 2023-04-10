@@ -18,14 +18,21 @@ add_missing_fields<-function(list_obj, template,reorder=FALSE) {
       names(l) <- NA
     }
     #which template names are missing from list
+
     missing <-
       match(names(t), names(l)) %>% is.na() %>% which()
     names(t)[missing]
     new <- l
     if (sum(missing) > 0) {
       for (i in missing) {
+        #put at front if it's the first in the template
         if (i == 1) {
           new <- c(t[i], new)
+          #put it at the end if it's at the end of the template
+        }else if(i==length(t)){
+          new <- c(new,t[i])
+
+          #otherwise put it in the middle of the vector
         } else{
           new <- c(new[1:(min(i - 1,length(new)-1))], t[i], new[min(length(new),i):length(new)])
         }
@@ -46,6 +53,7 @@ add_missing_fields<-function(list_obj, template,reorder=FALSE) {
 
   #Reorder new with preference for template order, but preserving new additions
   #(suprisingly hard)
+
   if(reorder) {
     A<-names(template)
     B<-names(L2)

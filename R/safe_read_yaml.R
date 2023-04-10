@@ -55,16 +55,36 @@ safe_read_yaml <- function(yaml_path=NULL,
   y <- yaml::read_yaml(yaml_path, eval.expr = eval.expr)
 
 
-  #Standardize empty values to NA
+  #Function to standardize empty values to NA for all items in a list
+  standardize_na <- function(x){
+    out <- lapply(1:length(x), function(i) {
+    if(is.list(x)){
+    xi <- x[[i]]
+    }else{
+      xi <- x[i]
+    }
 
-  y2 <- lapply(1:length(y), function(i) {
-    yi <- y[[i]]
-    if (is_empty(yi,names_meaningful=TRUE)) {
-      yi <- NA
+    #run recursively to clean up sub-lists and vectors
+    if(length(xi)>1){
+      unlist_after=!is.list(xi)
+      xi <- standardize_na(xi)
+      if(unlist_after){
+        xi <- xi %>% unlist()
+      }
+    }
+
+    if (is_empty(xi,names_meaningful=TRUE)) {
+      xi <- NA
     } else{
-      yi
+      xi
     }
   })
-  names(y2) <- names(y)
-  y2
+  names(out) <- names(x)
+  out
+  }
+
+  #standardize first level data
+y2 <- standardize_na(y)
+
+
 }

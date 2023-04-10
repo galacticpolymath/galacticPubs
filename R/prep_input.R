@@ -43,9 +43,10 @@ prep_input <-function(input,
     # if(!identical(old_template_ver,new_template_ver)){
     #   saved$TemplateVer<-new_template_ver
     # }
-    test_updated<-update_fm(WD=WD,save_output = FALSE,reorder=TRUE)
-    if(test_updated){
-      fm <- get_fm(WD=WD)
+    test_updated<-update_fm(WD=WD,save_output = FALSE,return_fm = TRUE, reorder=TRUE) %>% catch_err(keep_results=TRUE)
+
+    if(test_updated$success){
+      fm <- test_updated$result
       fm_names <- fm %>% names
     }else{
       warning("update_fm() failed for some reason in prep_input() for WD=",WD)

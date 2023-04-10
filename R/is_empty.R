@@ -43,6 +43,7 @@ is_empty <- function(x, names_meaningful = FALSE) {
       identical(x, "") |
       identical(is.na(x), TRUE) |
       identical(x, "NA") |
+      identical(x, ".na.character") |
       identical(x, "\n") |
       identical(x, list()) |
       length(x) == 0
@@ -75,6 +76,7 @@ is_empty <- function(x, names_meaningful = FALSE) {
             identical(x_i, "") |
             identical(is.na(x_i), TRUE) |
             identical(x_i, "NA") |
+            identical(x_i, ".na.character") |
             identical(x_i, "\n") |
             identical(x_i, list()) |
             is_empty_df
