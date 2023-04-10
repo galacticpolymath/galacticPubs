@@ -25,9 +25,11 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   published_path <- fs::path(WD, "published")
   meta_path <- fs::path(WD, "meta")
   sm<-get_fm(WD=WD,key="SupportingMedia")
+
+  if(is_empty(sm)){
   sm_paths<-fs::path(WD,sm)
   published_sm_paths<-fs::path(published_path,basename(sm))
-
+}
   staged_and_up_to_date <-
     inSync(
       fs::path(published_path, "LESSON.json"),
@@ -68,10 +70,12 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
     #count how many lessons there are currently on gp-catalog
     current_catalog <-
       jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
+    #exclude 999 special test case
+    current_max_id <- purrr::map(current_catalog, \(x) {
+      dplyr::tibble(id = as.integer(x$id))
+    }) %>% dplyr::bind_rows() %>% dplyr::filter(.data$id != 999) %>% max()
 
-    next_id <-
-      (sapply(current_catalog, function(x)
-        as.integer(x$id)) %>% max(na.rm = T)) + 1 %>% as.integer()
+    next_id <-  (current_max_id %>% max(na.rm = T)) + 1 %>% as.integer()
     saved_data$id <- next_id
     lesson$id <- next_id
     message("\n************\n Lesson ID assigned: ", saved_data$id, "\n")
@@ -90,6 +94,8 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
       }
     }) %>% dplyr::bind_rows()
     locale_count <- nrow(entries_w_this_id) + 1
+
+    #unique local id
     uid <-
       paste("lesson", saved_data$id, "locale", locale_count, sep = "_")
     #assign the values so they'll be written to drive
@@ -104,11 +110,10 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
 
 
   #Always update URL after ID has been assigned (in case manually changed)
-  # if(is_empty(saved_data$URL)){
   lesson$URL <-
     saved_data$URL <-
     paste0("https://galacticpolymath.com/lessons/", saved_data$id)
-  # }
+
 
 
 
@@ -145,23 +150,14 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
     yaml::write_yaml(saved_data, fs::path(meta_path, "front-matter.yml"))
 
     #rewrite it before pushing to cloud
-    jsonlite::write_json(
-      lesson,
-      fs::path(published_path, "LESSON.json"),
-      pretty = TRUE,
-      auto_unbox = TRUE,
-      na = "null",
-      null = "null"
-    )
+    save_json(out = lesson,
+              filename = fs::path(published_path, "LESSON.json")
+              )
     #also update the copy in the meta folder
-    jsonlite::write_json(
-      lesson,
-      fs::path(meta_path, "JSON", "LESSON.json"),
-      pretty = TRUE,
-      auto_unbox = TRUE,
-      na = "null",
-      null = "null"
-    )
+    save_json(out = lesson,
+              filename = fs::path(meta_path, "JSON", "LESSON.json")
+              )
+
 
     test_commit <-
       catch_err(gert::git_commit_all(message = commit_msg_2, repo = WD))
