@@ -64,20 +64,20 @@ safe_read_yaml <- function(yaml_path=NULL,
       xi <- x[i]
     }
 
-    #run recursively to clean up sub-lists and vectors
-    if(length(xi)>1){
-      unlist_after=!is.list(xi)
-      xi <- standardize_na(xi)
-      if(unlist_after){
-        xi <- xi %>% unlist()
-      }
-    }
-
-    if (is_empty(xi,names_meaningful=TRUE)) {
-      xi <- NA
-    } else{
-      xi
-    }
+    # #run recursively to clean up sub-lists and vectors
+    # if(length(xi)>1){
+    #   unlist_after=!is.list(xi)
+    #   xi <- standardize_na(xi)
+    #   if(unlist_after){
+    #     xi <- xi %>% unlist()
+    #   }
+    # }
+    # #Length>1 necessary to keep long NAs
+    # if (is_empty(xi,names_meaningful=TRUE)  ) {
+    #   xi <- rep(NA,length(xi))
+    # } else{
+    #   xi
+    # }
   })
   names(out) <- names(x)
   out
@@ -85,6 +85,7 @@ safe_read_yaml <- function(yaml_path=NULL,
 
   #standardize first level data
 y2 <- standardize_na(y)
+
 
 
 }

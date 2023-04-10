@@ -549,6 +549,7 @@ server <- function(input, output, session) {
       template_upgraded <-
         data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
       if (count_outOfDate > 0) {
+
         if (template_upgraded) {
           vals$yaml_update_txt <- paste0(
             "Save & Upgrade template:\n",

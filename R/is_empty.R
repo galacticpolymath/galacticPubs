@@ -56,7 +56,8 @@ is_empty <- function(x, names_meaningful = FALSE) {
       #for data frame, just keep x and it will apply logic to the whole object
       if (is.data.frame(x)) {
         x_i <- x
-        x2 <- x_i[complete.cases(x_i[1:ncol(x_i)]),]
+        #Filter out rows with ALL NA
+        x2 <- x_i %>% dplyr::filter(rowMeans(is.na(.)) < 1)
 
         is_empty_df <- nrow(x2) == 0
       } else{

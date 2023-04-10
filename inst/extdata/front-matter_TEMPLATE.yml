@@ -88,20 +88,27 @@ ReadyToCompile:
 - Front Matter
 Acknowledgments:
   Role:
-  - NA
+  - ''
   Role_def:
-  - NA
+  - ''
   Name:
-  - NA
+  - ''
   Title:
-  - NA
+  - ''
   Affiliation:
-  - NA
+  - ''
   Location:
-  - NA
+  - ''
   Link:
-  - NA
-  NewCol:
-  - NA
-  NewCol2:
-  - NA
+  - ''
+Versions:
+  ver_num:
+  - ''
+  date:
+  - ''
+  ver_summary:
+  - ''
+  ver_notes:
+  - ''
+  ver_acknowledgments:
+  - ''
