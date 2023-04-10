@@ -302,6 +302,7 @@ if(proceed){
       list(
         ShortTitle = new_ShortTitle,
         GPCatalogPath = paste0("https://catalog.galacticpolymath.com/lessons/",new_proj_name,"/LESSON.json"),
+        GdriveDirName = new_proj_name,
         GitHubPath = paste0("git@github.com:galacticpolymath/", new_proj_name, ".git"),
         LastUpdated = Sys.time()
       ))

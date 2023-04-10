@@ -85,12 +85,12 @@ update_fm <-
 
       checkmate::assert_character(repo, any.missing = FALSE)
 
-      new_yaml$GdriveDirName <- basename(WD)
       new_yaml$GPCatalogPath <- catalogURL("LESSON.json", repo)
     }
 
     #Add Gdrive ID and URL if one is missing
-    if ((is_empty(new_yaml$GdriveDirID) |
+    if ((is_empty(new_yaml$GdriveDirName) |
+        is_empty(new_yaml$GdriveDirID) |
         is_empty(new_yaml$GdriveDirURL) |
         is_empty(new_yaml$GdriveMetaID) |
         is_empty(new_yaml$GdrivePublishedID) |
@@ -103,6 +103,8 @@ update_fm <-
         new_yaml$GdriveDirName,
         "' to its cloud Google Drive IDs...\n"
       )
+
+      new_yaml$GdriveDirName <- basename(WD)
 
       proj_dribble_test <-
         drive_find_path(paste0("GP-Studio/Edu/Lessons/", new_yaml$GdriveDirName)) %>%
