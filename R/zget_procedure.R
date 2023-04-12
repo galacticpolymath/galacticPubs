@@ -56,7 +56,7 @@ zget_procedure <- \(proc,
 
 
   # Handle Vocab ------------------------------------------------------------
-  if (grepl("TermX", proc$Vocab[1])) {
+  if (grepl("TermX", proc$Vocab[1])|grepl("TermX", proc$Vocab[2])) {
     proc$Vocab <- NA
     vocab_df <- NULL
     message("Uninitialized Vocab data skipped.")

@@ -94,7 +94,7 @@ compile_teach_it <- function(WD = getwd(),
   pinfo_preface_initialized <-
     !grepl("^Lesson description", pinfo$LessonPreface[1])
   proc_initialized <-
-    !grepl("^\\*\\*\\*\\*\\*", proc$ChunkTitle[1]) #FALSE if ***** found in 1st ChunkTitle
+    !grepl("^\\*", proc$ChunkTitle[1])|!grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
   pext_initialized <- !grepl("^URL", pext$Link[1])
   mlinks_initialized <- nrow(mlinks) > 0
 
@@ -172,6 +172,7 @@ compile_teach_it <- function(WD = getwd(),
   # Extract majority of Teach-It data ---------------------------------------
   #Get item links for each environment*gradeBand
   teach_mat_data <- zget_envir(tlinks, fm = fm)
+
   if (!proc_initialized) {
     #should change 'parts' to something more like 'procedure'
     #output NULL structure paralleling real data
@@ -242,6 +243,12 @@ compile_teach_it <- function(WD = getwd(),
 
     multimedia <- lapply(1:nrow(m), function(i) {
       d <- m[i, ]
+
+      mainLink <- zYTembed(d$mainLink) %>%
+          expand_md_links(repo = whichRepo(WD = WD))
+      #if a drive file is supplied, change /edit?... to /preview
+      mainLink <- gsub("/edit?.*$","/preview",mainLink)
+
       list(
         order = d$order,
         type = d$type,
@@ -252,8 +259,7 @@ compile_teach_it <- function(WD = getwd(),
         #if byLink left blank, but
         byLink = d$byLink,
         #Change YouTube links to be embeds & turn {filename.png} links to files found in assets/_other-media-to-publish into catalog.galacticpolymath.com links
-        mainLink = zYTembed(d$mainLink) %>%
-          expand_md_links(repo = whichRepo(WD = WD)),
+        mainLink = mainLink,
         otherLink = d$otherLink
       )
     })

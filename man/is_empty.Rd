@@ -4,15 +4,17 @@
 \alias{is_empty}
 \title{is_empty}
 \usage{
-is_empty(x, ignore_na_df = FALSE)
+is_empty(x, names_meaningful = FALSE)
 }
 \arguments{
 \item{x}{any value or vector}
 
-\item{ignore_na_df}{logical, if T, when an empty data frame is supplied for \emph{x}, it will return FALSE. Useful if you consider having column information in a tibble not "empty"; default= FALSE}
+\item{names_meaningful}{logical, if T, when an empty data frame or list is supplied for \emph{x} that is all NA, but has names, it will return FALSE. default= FALSE}
 }
 \value{
 TRUE (if empty) or FALSE (if not empty)
+
+logical T=Empty, F=Not empty
 }
 \description{
 Logical test for all the different versions of empty values, i.e.:
@@ -34,4 +36,15 @@ is_empty(3)
 is_empty(c("",NA,NULL))
 is_empty(list(a="",b=NA,c=NULL))
 is_empty(list(a="",b=NA,c="nonempty cell"))
+
+b <- dplyr::tibble(ImportantColumn=NA,ImportantColumn2=NA)
+is_empty(b)
+#Here, if we care about column names and don't consider this
+#empty, we should return FALSE
+is_empty(b, names_meaningful=TRUE)
+
+is_empty(list(a=NA,b=b,c=list(),d=NULL))
+is_empty(list(a=NA,b=b,c=list(),d=NULL), names_meaningful=TRUE)
+
+#
 }

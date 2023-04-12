@@ -26,7 +26,7 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   meta_path <- fs::path(WD, "meta")
   sm<-get_fm(WD=WD,key="SupportingMedia")
 
-  if(is_empty(sm)){
+  if(!is_empty(sm)){
   sm_paths<-fs::path(WD,sm)
   published_sm_paths<-fs::path(published_path,basename(sm))
 }

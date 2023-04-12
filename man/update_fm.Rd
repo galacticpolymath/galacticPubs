@@ -7,6 +7,7 @@
 update_fm(
   WD = getwd(),
   save_output = TRUE,
+  return_fm = FALSE,
   reorder = TRUE,
   change_this = NULL,
   drive_reconnect = FALSE
@@ -16,6 +17,8 @@ update_fm(
 \item{WD}{Working drive; default=getwd()}
 
 \item{save_output}{do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE}
+
+\item{return_fm}{logical; if TRUE, returns the the updated front-matter; if FALSE (default), returns TRUE/FALSE of success}
 
 \item{reorder}{do you want to reorder the resulting list, based on template order? default=TRUE}
 
