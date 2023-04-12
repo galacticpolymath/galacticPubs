@@ -2,23 +2,33 @@
 #'
 #' Interactively lets you pick from a list of published Galactic Polymath lessons and will out put a virtualized Google Drive for Desktop path
 #'
+#' @param shared_drive which shared drive do you want to find the lessons in? default= "s" Options:
+#' - "s" = GP-Studio (draft working directory, many users with access)
+#' - "l" = GP-Live (private, admin only)
+#' - "gp"= GalacticPolymath (public-facing read-only)
 #' @param full_path do you want a full path to the chosen lesson? default= TRUE
 #' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling [lessons_get_path()]
 #' @param sort_az logical; sort alphabetically? default =F sorts by last modified
 #' @return the selected lesson name
 #' @export
 
-pick_lesson <- function(full_path = TRUE,
+pick_lesson <- function(shared_drive = "s",
+                        full_path = TRUE,
                         lessons_dir = NULL,
                         sort_az=FALSE) {
   if (is.null(lessons_dir)) {
-    lessons_dir <- lessons_get_path()
+    lessons_dir <- lessons_get_path(shared_drive=shared_drive)
   }
   projects00 <- fs::dir_ls(lessons_dir, type = "directory")
 
   #Filter out some patterns for things we don't want to process
+  #mainly for GP-Studio
+  if(shared_drive!="gp"){
   projects0 <- projects00[which(!grepl("^.*Lessons[\\/]~", projects00) &
                                 !grepl("OLD_", projects00))]
+  }else{projects0 <- projects00}
+
+
   if(sort_az){
     projects<- projects0 %>% basename() %>% sort()
   }else{

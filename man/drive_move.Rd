@@ -4,12 +4,23 @@
 \alias{drive_move}
 \title{drive_move}
 \usage{
-drive_move(from, to, drop_shortcut = FALSE, prompt_user = TRUE)
+drive_move(
+  from,
+  to,
+  name = NULL,
+  shortcut_name = NULL,
+  drop_shortcut = FALSE,
+  prompt_user = TRUE
+)
 }
 \arguments{
 \item{from}{source item; a path fed into \code{\link[=drive_find_path]{drive_find_path()}}}
 
 \item{to}{new location; a path fed into \code{\link[=drive_find_path]{drive_find_path()}}; either target path or parent directory should exist}
+
+\item{name}{new name after move— passed to \code{\link[googledrive:drive_mv]{googledrive::drive_mv()}}; default =NULL}
+
+\item{shortcut_name}{basis of the shortcut name. e.g. if "teaching-materials" supplied, the shortcut will be called "teaching-materials \link{Shortcut}"; default=NULL means it will be the name derived from the original 'from' path + "\link{Shortcut}"}
 
 \item{drop_shortcut}{logical; if TRUE, will drop a shortcut to the moved file in the parent of the from directory; default=FALSE}
 

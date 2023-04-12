@@ -4,7 +4,15 @@
 \alias{lessons_get_path}
 \title{Get path to Edu/Lessons folder containing GP projects}
 \usage{
-lessons_get_path()
+lessons_get_path(shared_drive = "s")
+}
+\arguments{
+\item{shared_drive}{which shared drive do you want to find the lessons in? default= "s" Options:
+\itemize{
+\item "s" = GP-Studio (draft working directory, many users with access)
+\item "l" = GP-Live (private, admin only)
+\item "gp"= GalacticPolymath (public-facing read-only)
+}}
 }
 \description{
 Retrieves an environmental variable set with \code{\link[=set_drive_local_credentials]{set_drive_local_credentials()}}

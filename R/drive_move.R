@@ -4,15 +4,21 @@
 #'
 #' @param from source item; a path fed into [drive_find_path()]
 #' @param to new location; a path fed into [drive_find_path()]; either target path or parent directory should exist
+#' @param name new name after move— passed to [googledrive::drive_mv()]; default =NULL
+#' @param shortcut_name basis of the shortcut name. e.g. if "teaching-materials" supplied, the shortcut will be called "teaching-materials [Shortcut]"; default=NULL means it will be the name derived from the original 'from' path + "[Shortcut]"
 #' @param drop_shortcut logical; if TRUE, will drop a shortcut to the moved file in the parent of the from directory; default=FALSE
 #' @param prompt_user logical; adds a confirmation step before moving something; default = TRUE
 #' @export
 #' @returns tibble of success, to and from paths and IDs
 
-drive_move <- \(from,
-                to,
-                drop_shortcut = FALSE,
-                prompt_user = TRUE) {
+drive_move <- \(
+  from,
+  to,
+  name = NULL,
+  shortcut_name = NULL,
+  drop_shortcut = FALSE,
+  prompt_user = TRUE
+) {
   # Resolve source and destination ------------------------------------------
   from_is_drib <- googledrive::is_dribble(from)
   to_is_drib <- googledrive::is_dribble(to)
@@ -27,7 +33,7 @@ drive_move <- \(from,
   }
 
   from_parent_drib <-
-      googledrive::drive_get(from_drib$drive_resource[[1]]$parents %>% unlist() %>% googledrive::as_id())
+    googledrive::drive_get(from_drib$drive_resource[[1]]$parents %>% unlist() %>% googledrive::as_id())
   from_parent_is_drib <-
     googledrive::is_dribble(from_parent_drib)
 
@@ -57,7 +63,7 @@ drive_move <- \(from,
   )
   #Prompt user logic
   if (prompt_user) {
-    message("\n-------------------\n   drive_move(): \n **Sure you want to make this move?")
+    message("-------------------\n   drive_move(): \n **Sure you want to make this move?")
     message("\n SOURCE------>", from, " i.e. '", from_drib$name, " '")
     message(" DESTINATION<-", to, " i.e. '", to_drib$name, " '")
     continue <- readline("(y/n) > ")
@@ -67,28 +73,40 @@ drive_move <- \(from,
   if (continue != "y") {
     warning("Move CANCELED")
     test_move <- test_shortcut <- NA
-    # Make the move -----------------------------------------------------------
+
   } else{
+    # Define shortcut name before move in case it gets renamed during  --------
+
+
+    #target extension
+    name_ext <-
+      stringr::str_extract_all(from_drib$name, "\\.([^\\.]{2,3})$") %>% unlist()
+    #remove extension
+    name_sans_ext <-
+      gsub("\\.[^\\.]{2,3}", "", from_drib$name) %>% unlist()
+    if(is.null(shortcut_name)){
+    shortcut_name2 <-
+      paste0(name_sans_ext, " [Shortcut]", name_ext)
+    }else{
+      shortcut_name2 <- paste0(shortcut_name, " [Shortcut]", name_ext)
+    }
+
+    # Make the move -----------------------------------------------------------
     move_results <-
-      googledrive::drive_mv(file = from_drib, path = to_drib) %>% catch_err(keep_results = TRUE)
+      googledrive::drive_mv(file = from_drib, path = to_drib,name=name) %>% catch_err(keep_results = TRUE)
 
     test_move <- move_results$success
     #leave shortcut behind if move successful
 
+    # Make shortcut -----------------------------------------------------------
     if (test_move & drop_shortcut) {
-      #target extension
-      name_ext <-
-        stringr::str_extract_all(from_drib$name, "\\.([^\\.]{2,3})$") %>% unlist()
-      #remove extension
-      name_sans_ext <-
-        gsub("\\.[^\\.]{2,3}", "", from_drib$name) %>% unlist()
-      shortcut_name <- paste0(name_sans_ext, " [Shortcut]", name_ext)
       #This function works very stupidly, so I have to create it then move it
       test_shortcut <-
         googledrive::shortcut_create(file = from_drib,
-                                     path = to_drib,
-                                     name = shortcut_name) %>%
-        googledrive::drive_mv(file=.,path=from_parent_drib ) %>%
+                                     path = to_drib) %>%
+        googledrive::drive_mv(file = .,
+                              path = from_parent_drib,
+                              name = shortcut_name2) %>%
         catch_err()
     } else if (!test_move & drop_shortcut) {
       test_shortcut <- FALSE

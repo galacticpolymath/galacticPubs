@@ -27,10 +27,14 @@ drive_cp_dir<-function(new_dir_name,
     timer <- TRUE
   }
 
+  #store original input
+  source_dir0 <- source_dir
   #if directories are input as paths, send to helper function
   if(is.character(source_dir)){
-    source_dir<-drive_find_path(source_dir)
+
+    source_dir<-drive_find_path("../",WD=source_dir0)
   }
+
 
   #Test inputs
   if(!googledrive::is_dribble(source_dir)){
