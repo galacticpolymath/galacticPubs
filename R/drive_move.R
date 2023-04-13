@@ -7,6 +7,7 @@
 #' @param name new name after move— passed to [googledrive::drive_mv()]; default =NULL
 #' @param shortcut_name basis of the shortcut name. e.g. if "teaching-materials" supplied, the shortcut will be called "teaching-materials [Shortcut]"; default=NULL means it will be the name derived from the original 'from' path + "[Shortcut]"
 #' @param drop_shortcut logical; if TRUE, will drop a shortcut to the moved file in the parent of the from directory; default=FALSE
+#' @param make_public after move; do you want this object to be viewable to anyone with the link? default=F
 #' @param prompt_user logical; adds a confirmation step before moving something; default = TRUE
 #' @export
 #' @returns tibble of success, to and from paths and IDs
@@ -17,6 +18,7 @@ drive_move <- \(
   name = NULL,
   shortcut_name = NULL,
   drop_shortcut = FALSE,
+  make_public = FALSE,
   prompt_user = TRUE
 ) {
   # Resolve source and destination ------------------------------------------
@@ -113,14 +115,23 @@ drive_move <- \(
     } else{
       test_shortcut <- NA
     }
+        # Make viewable to anyone with link if make_public ------------------------
+
+
+      if (make_public & test_move) {
+        test_share <- googledrive::drive_share_anyone(move_results$result) %>% catch_err()
+      } else{
+        test_share <- NA
+      }
 
   }
 
   # return results ----------------------------------------------------------
-  successes <- convert_T_to_check(c(test_move, test_shortcut))
+  successes <- convert_T_to_check(c(test_move, test_shortcut,test_share))
   dplyr::tibble(
     moved = successes[1],
     shortcut_made = successes[2],
+    made_public = successes[3],
     from_name = from_drib$name,
     to_name = to_drib$name,
     from = from,

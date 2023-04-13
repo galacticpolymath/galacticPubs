@@ -24,7 +24,24 @@ lesson_go_live <- \(WD = getwd()) {
 
   check_wd(WD)
 
+  # Extract important front-matter  -----------------------------------------
   newTitle <- get_fm("MediumTitle", WD)
+  dirID <- get_fm("GdriveDirID", WD)
+  gpID <- get_fm("GdrivePublicID", WD)
+  dir_drib <- drive_find_path(dirID)
+  tm_drib <-
+    drive_find_path("../teaching-materials", drive_root = dir_drib)
+
+  checkmate::assert_character(newTitle, all.missing = FALSE, .var.name = "MediumTitle")
+  checkmate::assert_character(newTitle, all.missing = FALSE, .var.name = "MediumTitle")
+  test_not_published <- checkmate::test_scalar_na(GdrivePublicID)
+  checkmate::assert_data_frame(dir_drib, all.missing = FALSE, .var.name = "Project Directory Google Drive object (dribble)")
+  checkmate::assert_data_frame(tm_drib, all.missing = FALSE, .var.name = "'/teaching-materials/' Google Drive object (dribble)")
+
+  if (!test_not_published) {
+    stop("A GdrivePublicID already found. Try running 'update_fm(drive_reconnect = T)'")
+  }
+
 
   message(
     "-------------------\n   lesson_go_live(): \n   ARE YOU SURE you want to move this project to GP-LIVE?: ",
@@ -39,39 +56,55 @@ lesson_go_live <- \(WD = getwd()) {
 
   if (continue != "y") {
     warning("Move CANCELED")
-    test_move <- NA
+    live_success <-
+      gp_success <-  shortcut_success <- made_public_success <-  NA
     # Move folder to GP-LIVE -----------------------------------------------------------
   } else{
-
-    old_loc <- fs::path("GP-Studio", "Edu", "Lessons", basename(WD))
     test_move_to_live <-
-      drive_move(from = old_loc,
+      drive_move(from = dir_drib,
                  to = "GP-LIVE/Edu/Lessons",
                  prompt_user = FALSE) %>% catch_err(keep_results = TRUE)
-
+    live_success <- test_move_to_live$result$moved[1]
 
     # Move teaching-materials to GalacticPolymath -----------------------------
 
     if (test_move_to_live$success) {
-      old_loc_tm <-
-        fs::path("GP-LIVE",
-                 "Edu",
-                 "Lessons",
-                 basename(WD),
-                 "teaching-materials")
-
-
       test_move_to_gp <-
         drive_move(
-          from = old_loc_tm,
+          from = tm_drib,
           to = "GalacticPolymath/",
           name = newTitle,
           shortcut_name = "teaching-materials",
           drop_shortcut = TRUE,
+          make_public = TRUE,
           prompt_user = FALSE
         ) %>% catch_err(keep_results = TRUE)
+
+
+      gp_success <- test_move_to_gp$result$moved[1]
+      shortcut_success <- test_move_to_gp$result$shortcut_made[1]
+      made_public_success <- test_move_to_gp$result$made_public[1]
+
+
+    } else{
+      gp_success <- shortcut_success <- made_public_success <-  FALSE
     }
 
 
   }
+  successes <-
+    c(live_success,
+      gp_success,
+      shortcut_success,
+      made_public_success) %>% convert_T_to_check()
+  dplyr::tibble(
+    success = successes,
+    task = c(
+      "move project to GP-LIVE",
+      "move /teaching-materials/ to GalacticPolymath",
+      "create shortcut to moved /teaching-materials/",
+      "make teaching-materials public"
+    )
+  )
+
 }
