@@ -31,7 +31,6 @@ lesson_go_live <- \(WD = getwd()) {
   dir_drib <- drive_find_path(dirID)
 
   checkmate::assert_character(newTitle, all.missing = FALSE, .var.name = "MediumTitle")
-  checkmate::assert_character(newTitle, all.missing = FALSE, .var.name = "MediumTitle")
   test_not_published <- checkmate::test_scalar_na(gpID)
   checkmate::assert_data_frame(dir_drib, all.missing = FALSE, .var.name = "Project Directory Google Drive object (dribble)")
 
@@ -103,15 +102,24 @@ lesson_go_live <- \(WD = getwd()) {
 
 
   # Update front-matter -----------------------------------------------------
+
+    # make sure WD still found locally, if not, try the new location
+  if(!fs::dir_exists(WD)){
+    WD2 <- gsub("GP-Studio","GP-LIVE",WD,fixed=T)
+    message("Old WD not found; trying to update_fm() at new location: ",WD2)
+    WD <- WD2
+  }
+
   test_fm1 <- update_fm(
     WD = WD,
     change_this = list(GdriveHome = "GP-LIVE", PublicationStatus = "Live")
   ) %>% catch_err()
 
+
   if (!is.na(live_success)&live_success) {
     gpID <- as.character(test_move_to_gp$result$from$id)
     update_fm(WD = WD,
-              change_this = list(GdrivePublicID = gpID))
+              change_this = list(GdrivePublicID = gpID,GdriveTeachMatID=NA))
     test_fm2 <-
       checkmate::test_character(get_fm("GdrivePublicID", WD = WD), all.missing = FALSE)
   } else if (!is.na(live_success)&!live_success) {
@@ -134,7 +142,7 @@ lesson_go_live <- \(WD = getwd()) {
       "create shortcut to moved /teaching-materials/",
       "make teaching-materials public",
       "update_fm(): GdriveHome='GP-LIVE' and PublicationStatus='Live'",
-      paste0("update_fm(): GdrivePublicID='",gpID,"'")
+      paste0("update_fm(): GdrivePublicID='",gpID,"' and GdriveTeachMatID= NA")
     )
   )
 

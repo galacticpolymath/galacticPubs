@@ -50,6 +50,9 @@ drive_find_path <- function(drive_path,
     #just passes through a dribble if it's already been resolved
     out <- drive_path
   } else{
+    #if it's a character string, make sure to escape any unescaped single or double quotes
+    drive_path <- gsub("[^\\\\](?!<\\\\)\\K\\'","\\\\\'",drive_path,perl=T)
+    drive_path <- gsub('[^\\\\](?!<\\\\)\\K\\"','\\\\\"',drive_path,perl=T)
     if (!is.null(drive_root) &
         !grepl(pattern = "^\\.\\.", drive_path)) {
       warning(

@@ -10,6 +10,7 @@ drive_move(
   name = NULL,
   shortcut_name = NULL,
   drop_shortcut = FALSE,
+  make_public = FALSE,
   prompt_user = TRUE
 )
 }
@@ -23,6 +24,8 @@ drive_move(
 \item{shortcut_name}{basis of the shortcut name. e.g. if "teaching-materials" supplied, the shortcut will be called "teaching-materials \link{Shortcut}"; default=NULL means it will be the name derived from the original 'from' path + "\link{Shortcut}"}
 
 \item{drop_shortcut}{logical; if TRUE, will drop a shortcut to the moved file in the parent of the from directory; default=FALSE}
+
+\item{make_public}{after move; do you want this object to be viewable to anyone with the link? default=F}
 
 \item{prompt_user}{logical; adds a confirmation step before moving something; default = TRUE}
 }

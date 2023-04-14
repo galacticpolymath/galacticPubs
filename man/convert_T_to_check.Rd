@@ -17,3 +17,6 @@ convert_T_to_check(x, no_match = NA)
 \description{
 Takes logical T and F and returns ✓ and ✗, respectively. If not logical, returns NA
 }
+\details{
+It can handle existing ✓ and ✗, so you can run result through convert_T_to_check without problem
+}
