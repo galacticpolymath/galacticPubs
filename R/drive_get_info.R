@@ -168,7 +168,7 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
       part = part,
       SvT= SvT,
       description=NA,
-      studioLink = link,
+      link = link,
       modTime= modTime
 
     )
