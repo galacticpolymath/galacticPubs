@@ -7,8 +7,9 @@
 #' @param drive_path passed to [drive_find_path()]
 #' @param drive_path passed to [drive_find_path()]; default=NULL
 #' @param exact_match passed to [drive_find_path()]; default=TRUE
-#' @param fm_key name of the front-matter key you're trying to fill; mainly used in error messaging.
+#' @param fm_key name of the front-matter key you're trying to fill; used in error messaging and naming output
 #' @param missing_val what to return if key not matched. default=NA
+#' @return an ID as a single character value, named with fm_key parameter
 #' @export
 
 zget_drive_id <-
@@ -33,6 +34,8 @@ zget_drive_id <-
     } else{
       out <- drib_test$result$id %>% as.character()
     }
-
+    if(!is.null(fm_key)){
+      names(out) <- fm_key
+    }
     out
   }

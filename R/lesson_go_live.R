@@ -28,22 +28,27 @@ lesson_go_live <- \(WD = getwd()) {
   newTitle <- get_fm("MediumTitle", WD)
   dirID <- get_fm("GdriveDirID", WD)
   gpID <- get_fm("GdrivePublicID", WD)
+  tmID <- get_fm("GdriveTeachMatID", WD)
   dir_drib <- drive_find_path(dirID)
 
-  checkmate::assert_character(newTitle, all.missing = FALSE, .var.name = "MediumTitle")
+  checkmate::assert_character(newTitle, min.chars=6, .var.name = "MediumTitle")
+  checkmate::assert_character(tmID,null.ok=F, min.chars=6, .var.name = "teaching material google ID (GdriveTeachMatID)")
   test_not_published <- checkmate::test_scalar_na(gpID)
-  checkmate::assert_data_frame(dir_drib, all.missing = FALSE, .var.name = "Project Directory Google Drive object (dribble)")
-
+  checkmate::assert_data_frame(dir_drib, nrows=1, .var.name = "Project Directory Google Drive object (GdriveDirID dribble)")
+browser()
   #If a publicID (on GalacticPolymath) has been assigned, we can skip the moving step
   if (!test_not_published) {
     message("A GdrivePublicID already found. Skipping move to GP-LIVE and GalacticPolymath'")
     live_success <-
-      gp_success <-  shortcut_success <- made_public_success <-  NA
+      gp_success <-
+      shortcut_success <-
+      made_public_success <- test_fm1 <- test_fm2 <-  NA
   } else{
     #only try to look up teaching-materials in unpublished projects
     tm_drib <-
-      drive_find_path("../teaching-materials", drive_root = dir_drib)
+      drive_find_path(tmID, drive_root = dir_drib)
     checkmate::assert_data_frame(tm_drib, all.missing = FALSE, .var.name = "'/teaching-materials/' Google Drive object (dribble)")
+    checkmate::assert(googledrive::is_folder(tm_drib),.var.name = "/teaching-materials/ Google Drive object (dribble)")
 
 
 
@@ -70,7 +75,7 @@ lesson_go_live <- \(WD = getwd()) {
         drive_move(from = dir_drib,
                    to = "GP-LIVE/Edu/Lessons",
                    prompt_user = FALSE) %>% catch_err(keep_results = TRUE)
-      live_success <- test_move_to_live$result$moved[1]
+      live_success <- test_move_to_live$success
 
       # Move teaching-materials to GalacticPolymath -----------------------------
 
@@ -98,42 +103,56 @@ lesson_go_live <- \(WD = getwd()) {
 
 
     }
-  }
 
 
-  # Update front-matter -----------------------------------------------------
 
-    # make sure WD still found locally, if not, try the new location
-  if(!fs::dir_exists(WD)){
-    WD2 <- gsub("GP-Studio","GP-LIVE",WD,fixed=T)
-    message("Old WD not found; trying to update_fm() at new location: ",WD2)
-    WD <- WD2
-  }
+    # Update front-matter -----------------------------------------------------
+    WD0 <- WD
+    WD <- gsub("GP-Studio", "GP-LIVE", WD, fixed = T)#new value
+    # make sure new WD found locally; if not, try new location
+    if (!fs::dir_exists(WD)) {
+      WD <- WD0#reset
+      message(
+        "New WD not found; trying to update_fm() at old location: ",
+        WD
+      )
 
-  test_fm1 <- update_fm(
-    WD = WD,
-    change_this = list(GdriveHome = "GP-LIVE", PublicationStatus = "Live")
-  ) %>% catch_err()
+    }
+
+    test_fm1 <- update_fm(
+      WD = WD,
+      change_this = list(GdriveHome = "GP-LIVE", PublicationStatus = "Live")
+    ) %>% catch_err()
 
 
-  if (!is.na(live_success)&live_success) {
-    gpID <- as.character(test_move_to_gp$result$from$id)
-    update_fm(WD = WD,
-              change_this = list(GdrivePublicID = gpID,GdriveTeachMatID=NA))
-    test_fm2 <-
-      checkmate::test_character(get_fm("GdrivePublicID", WD = WD), all.missing = FALSE)
-  } else if (!is.na(live_success)&!live_success) {
-    test_fm2 <- FALSE
-  } else{
-    test_fm2 <- NA
+    if (!is.na(live_success) & live_success) {
+      gpID <- as.character(test_move_to_gp$result$from$id)
+      update_fm(
+        WD = WD,
+        change_this = list(
+          GdrivePublicID = gpID,
+          GdriveTeachMatID = NA
+        )
+      )
+      test_fm2 <-
+        checkmate::test_character(get_fm("GdrivePublicID", WD = WD), all.missing = FALSE)
+    } else if (!is.na(live_success) & !live_success) {
+      test_fm2 <- FALSE
+    } else{
+      test_fm2 <- NA
+    }
+
   }
 
   successes <-
-    c(live_success,
+    c(
+      live_success,
       gp_success,
       shortcut_success,
       made_public_success,
-      test_fm1,test_fm2) %>% convert_T_to_check()
+      test_fm1,
+      test_fm2
+    ) %>% convert_T_to_check()
   dplyr::tibble(
     success = successes,
     task = c(
@@ -142,7 +161,11 @@ lesson_go_live <- \(WD = getwd()) {
       "create shortcut to moved /teaching-materials/",
       "make teaching-materials public",
       "update_fm(): GdriveHome='GP-LIVE' and PublicationStatus='Live'",
-      paste0("update_fm(): GdrivePublicID='",gpID,"' and GdriveTeachMatID= NA")
+      paste0(
+        "update_fm(): GdrivePublicID='",
+        gpID,
+        "' and GdriveTeachMatID= NA"
+      )
     )
   )
 

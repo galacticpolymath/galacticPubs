@@ -42,7 +42,7 @@ drive_find_path <- function(drive_path,
                             drive_root = NULL,
                             exact_match = TRUE,
                             single_result = TRUE,
-                            checkWD= TRUE) {
+                            checkWD = TRUE) {
   is_drib <- googledrive::is_dribble(drive_path)
 
 
@@ -50,11 +50,24 @@ drive_find_path <- function(drive_path,
     #just passes through a dribble if it's already been resolved
     out <- drive_path
   } else{
+    # clean up supplied paths -------------------------------------------------
     #if it's a character string, make sure to escape any unescaped single or double quotes
-    drive_path <- gsub("[^\\\\](?!<\\\\)\\K\\'","\\\\\'",drive_path,perl=T)
-    drive_path <- gsub('[^\\\\](?!<\\\\)\\K\\"','\\\\\"',drive_path,perl=T)
+    drive_path <-
+      gsub("[^\\\\](?!<\\\\)\\K\\'", "\\\\\'", drive_path, perl = T)
+    drive_path <-
+      gsub('[^\\\\](?!<\\\\)\\K\\"', '\\\\\"', drive_path, perl = T)
+
+    #remove introductory "/" if one is provided
+    drive_path <- gsub("^\\/", "", drive_path)
+
+    #Test if we're likely dealing with a Drive FileID that the user has supplied
+    #We expect no '/' and a specific character length: 33 for folders and 44 for files
+    is_ID <-
+      !grepl("/", drive_path, fixed = TRUE) &
+      nchar(drive_path) %in% c(33, 44)
+
     if (!is.null(drive_root) &
-        !grepl(pattern = "^\\.\\.", drive_path)) {
+        !grepl(pattern = "^\\.\\.", drive_path) & !is_ID) {
       warning(
         "When you supply 'drive_root', you need to add '../' to the beginning of a path to indicate that it's a relative path."
       )
@@ -72,17 +85,10 @@ drive_find_path <- function(drive_path,
       message("Resolving Gdrive Web path for: '", drive_path, "'\n")
     }
 
-    #remove introductory "/" if one is provided
-    drive_path <- gsub("^\\/", "", drive_path)
-
-    #Test if we're likely dealing with a Drive FileID that the user has supplied
-    #We expect no '/' and a specific character length: 33 for folders and 44 for files
-    is_ID <-
-      !grepl("/", drive_path, fixed = TRUE) &
-      nchar(drive_path) %in% c(33, 44)
 
     if (is_ID) {
-      results <- googledrive::drive_get(id = googledrive::as_id(drive_path)) %>% list()#to list for downstream compatibility
+      results <-
+        googledrive::drive_get(id = googledrive::as_id(drive_path)) %>% list()#to list for downstream compatibility
     } else{
       #otherwise proceed splitting and resolving the path
       p <- strsplit(drive_path, split = "/") %>% unlist()
@@ -106,15 +112,20 @@ drive_find_path <- function(drive_path,
               #make sure a valid lesson project directory provided
 
               checkmate::assert_character(drive_path, all.missing = FALSE)
-              if(checkWD){
-              check_wd(WD = WD, throw_error = FALSE)
+              if (checkWD) {
+                check_wd(WD = WD, throw_error = FALSE)
               }
 
               message("\nReading '",
                       basename(WD),
                       "' front-matter.yml: 'GdriveDirID'...")
 
-              gID <- as.character(get_fm("GdriveDirID", WD = WD,checkWD = FALSE))
+              gID <-
+                as.character(get_fm(
+                  "GdriveDirID",
+                  WD = WD,
+                  checkWD = FALSE
+                ))
               checkmate::assert(checkmate::check_character(drive_path))
               results[[i]] <- googledrive::drive_get(id = gID)
               sharedDrive <- "GP-Studio"

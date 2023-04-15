@@ -30,20 +30,21 @@ lesson_go_draft <- \(WD = getwd()) {
   dir_drib <- drive_find_path(dirID)
   gp_drib <- drive_find_path(gpID)
 
-  test_published <- checkmate::test_character(gpID,all.missing=FALSE)
-  checkmate::assert_data_frame(dir_drib, all.missing = FALSE, .var.name = "Project Directory Google Drive object (dribble)")
-  checkmate::assert_data_frame(gp_drib, all.missing = FALSE, .var.name = "GalacticPolymath/ProjectDir Google Drive object (dribble)")
+  test_published <-
+    checkmate::test_character(gpID, min.chars=6)
+  checkmate::assert_data_frame(dir_drib, nrows=1, .var.name = "Project Directory Google Drive object (dribble)")
+  checkmate::assert_data_frame(gp_drib, nrows = 1, .var.name = "GalacticPolymath/ProjectDir Google Drive object (dribble)")
 
   #If a publicID (on GalacticPolymath) has been assigned, we can skip the moving step
   if (!test_published) {
     message("GdrivePublicID not found. Skipping move back to GP-Studio'")
     draft_success <-
-      tm_success <-  shortcut_success <- NA
+      tm_success <-  shortcut_success <-test_fm1 <- test_fm2 <-  NA
   } else{
     #only try to look up teaching-materials in unpublished projects
     tm_drib <-
       drive_find_path(gp_drib)
-    checkmate::assert_data_frame(tm_drib, all.missing = FALSE, .var.name = "GalacticPolymath/'MediumTitle' Google Drive object (dribble)")
+    checkmate::assert_data_frame(tm_drib, nrows=1, .var.name = "GalacticPolymath/'MediumTitle' Google Drive object (dribble)")
 
 
 
@@ -55,14 +56,16 @@ lesson_go_draft <- \(WD = getwd()) {
       basename(WD)
     )
     message(" 2. return teaching materials to project folder from GalacticPolymath/ shared drive")
-    message(" 3. rename '", MediumTitle, "' back to '/teaching-materials/'")
+    message(" 3. rename '",
+            MediumTitle,
+            "' back to '/teaching-materials/'")
     message("**** This will return edit access and make all links on lesson plan show up as DRAFT ****")
     continue <- readline("(y/n) > ")
 
     if (continue != "y") {
       warning("Move CANCELED")
-       draft_success <-
-      tm_success <-  shortcut_success <- NA
+      draft_success <-
+        tm_success <-  shortcut_success <- NA
 
       # Move folder to GP-Studio -----------------------------------------------------------
     } else{
@@ -70,7 +73,7 @@ lesson_go_draft <- \(WD = getwd()) {
         drive_move(from = dir_drib,
                    to = "GP-Studio/Edu/Lessons",
                    prompt_user = FALSE) %>% catch_err(keep_results = TRUE)
-      draft_success <- test_move_to_studio$result$moved[1]
+      draft_success <- test_move_to_studio$success
 
       # Move teaching-materials from GalacticPolymath -----------------------------
 
@@ -84,7 +87,7 @@ lesson_go_draft <- \(WD = getwd()) {
           ) %>% catch_err(keep_results = TRUE)
 
 
-        tm_success <- test_move_tm$result$moved[1]
+        tm_success <- test_move_tm$success
 
 
 
@@ -94,57 +97,74 @@ lesson_go_draft <- \(WD = getwd()) {
 
 
     }
-  }
 
 
-# Clean up shortcuts ------------------------------------------------------
 
-  to_delete_drib <- dir_drib %>% drive_contents() %>% dplyr::filter(.data$name=="teaching-materials [Shortcut]")
-  if(nrow(to_delete_drib)>0){
-    shortcut_success <- googledrive::drive_trash(to_delete_drib) %>% catch_err()
-  }else{
+  # Clean up shortcuts ------------------------------------------------------
+
+  to_delete_drib <-
+    dir_drib %>% drive_contents() %>% dplyr::filter(.data$name == "teaching-materials [Shortcut]")
+  if (nrow(to_delete_drib) > 0) {
+    shortcut_success <-
+      googledrive::drive_trash(to_delete_drib) %>% catch_err()
+  } else{
     shortcut_success <- NA
   }
 
   # Update front-matter -----------------------------------------------------
+    # make sure new WD found locally; if not, try new location
+    WD0 <- WD
+    WD <- gsub("GP-LIVE", "GP-Studio", WD, fixed = T)#new value
+    if (!fs::dir_exists(WD)) {
+      WD <- WD0#reset
+      message(
+        "New WD not found; trying to update_fm() at old location: ",
+        WD
+      )
 
-  # make sure WD still found locally, if not, try the new location
-  if(!fs::dir_exists(WD)){
-    WD2 <- gsub("GP-LIVE","GP-Studio",WD,fixed=T)
-    message("Old WD not found; trying to update_fm() at new location: ",WD2)
-    WD <- WD2
-  }
+    }
+
 
   test_fm1 <- update_fm(
     WD = WD,
     change_this = list(GdriveHome = "GP-Studio", PublicationStatus = "Draft")
   ) %>% catch_err()
 
-  if (!is.na(draft_success)&draft_success) {
+  if (!is.na(draft_success) & draft_success) {
     tmID <- as.character(test_move_tm$result$from$id)
-    update_fm(WD = WD,
-              change_this = list(GdrivePublicID = NA, GdriveTeachMatID=tmID))
+    update_fm(
+      WD = WD,
+      change_this = list(GdrivePublicID = NA, GdriveTeachMatID =
+                           tmID)
+    )
     test_fm2 <-
       checkmate::test_character(get_fm("GdriveTeachMatID", WD = WD), all.missing = FALSE)
-  } else if (!is.na(draft_success)&!draft_success) {
+  } else if (!is.na(draft_success) & !draft_success) {
     test_fm2 <- FALSE
   } else{
     test_fm2 <- NA
   }
+  }
+
 
   successes <-
     c(draft_success,
       tm_success,
       shortcut_success,
-      test_fm1,test_fm2) %>% convert_T_to_check()
+      test_fm1,
+      test_fm2) %>% convert_T_to_check()
   dplyr::tibble(
     success = successes,
     task = c(
       "move project to GP-Studio",
       "move /teaching-materials/ back to project folder",
-      "delete shortcut to GalacticPolymath/teaching-materials/",
+      "delete shortcut to 'GalacticPolymath/teaching-materials/'",
       "update_fm(): GdriveHome='GP-Studio' and PublicationStatus='Draft'",
-      paste0("update_fm(): GdrivePublicID=NA and GdriveTeachMatID='",gpID,"'")
+      paste0(
+        "update_fm(): GdrivePublicID=NA and GdriveTeachMatID='",
+        gpID,
+        "'"
+      )
     )
   )
 
