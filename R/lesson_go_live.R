@@ -35,7 +35,7 @@ lesson_go_live <- \(WD = getwd()) {
   checkmate::assert_character(tmID,null.ok=F, min.chars=6, .var.name = "teaching material google ID (GdriveTeachMatID)")
   test_not_published <- checkmate::test_scalar_na(gpID)
   checkmate::assert_data_frame(dir_drib, nrows=1, .var.name = "Project Directory Google Drive object (GdriveDirID dribble)")
-browser()
+
   #If a publicID (on GalacticPolymath) has been assigned, we can skip the moving step
   if (!test_not_published) {
     message("A GdrivePublicID already found. Skipping move to GP-LIVE and GalacticPolymath'")

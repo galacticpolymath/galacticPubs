@@ -112,13 +112,12 @@ lesson_go_draft <- \(WD = getwd()) {
   }
 
   # Update front-matter -----------------------------------------------------
-    # make sure new WD found locally; if not, try new location
-    WD0 <- WD
-    WD <- gsub("GP-LIVE", "GP-Studio", WD, fixed = T)#new value
+    # make sure WD found locally; if not, try new location
     if (!fs::dir_exists(WD)) {
-      WD <- WD0#reset
+      # WD0 <- WD#save WD
+      WD <- gsub("GP-LIVE", "GP-Studio", WD, fixed = T)#new value
       message(
-        "New WD not found; trying to update_fm() at old location: ",
+        "'GP-LIVE' WD not found; trying to update_fm() at new 'GP-Studio' location: ",
         WD
       )
 

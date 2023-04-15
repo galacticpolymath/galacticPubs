@@ -32,7 +32,14 @@ zget_drive_id <-
       }
       out <- missing_val
     } else{
-      out <- drib_test$result$id %>% as.character()
+
+# validate ----------------------------------------------------------------
+    drib <- drib_test$result
+      checkmate::assert_data_frame(drib,nrows=1)
+      checkmate::assert_class(drib,"dribble")
+      checkmate::assert_false(drib$drive_resource[[1]]$trashed,.var.name=paste0("dribble for fm_key=",fm_key))
+
+      out <- drib$id %>% as.character()
     }
     if(!is.null(fm_key)){
       names(out) <- fm_key
