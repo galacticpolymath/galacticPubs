@@ -54,6 +54,7 @@ Suggests:
     usethis (>= 2.1.3),
     shadowtext (>= 0.0.9),
     showtext (>= 0.9.0),
+    tools (>= 3.6.0)
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
 RoxygenNote: 7.2.3
 Depends: 
