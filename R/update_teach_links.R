@@ -60,9 +60,11 @@ update_teach_links <- function(WD = getwd(),
   )
 
   #Get teaching-materials drive content
+  #If PublicationStatus=="Draft", found on 'GP-Studio'
+  #Else, found on 'GalacticPolymath'
 
   teach_dir <-
-    drive_find_path(tm_dir_id, drive_root = gID)
+    drive_find_path(tm_dir_id)
 
   #regex for folder prefixes we want to use (filter out things like "scraps")
   good_prefixes <- "remote|classroom|assess"
