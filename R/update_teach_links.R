@@ -36,25 +36,35 @@ update_teach_links <- function(WD = getwd(),
   meta_id <-
     get_fm("GdriveMetaID", WD = WD, checkWD = F)#only need to check_wd once
   proj <- get_fm("GdriveDirName", WD = WD, checkWD = F)
+  status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
+  #teaching materials are located in different shared drives depending
+  #on PublicationStatus
+  checkmate::assert_choice(status, choices = c("Live", "Draft"))
+  if(status=="Draft"){
+  tm_dir_id <- get_fm("GdriveTeachMatID",WD=WD,checkWD=F)
+  }else{
+  tm_dir_id <- get_fm("GdrivePublicID",WD=WD,checkWD=F)
+  }
+
   med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
   GdriveHome <- get_fm("GdriveHome", WD = WD, checkWD = F)
-  status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
+
 
 
   checkmate::assert(
     checkmate::check_character(gID, min.chars = 6),
     checkmate::check_character(meta_id,  min.chars = 6),
     checkmate::check_character(proj,  min.chars = 2),
+    checkmate::check_character(tm_dir_id,  min.chars = 6),
     checkmate::check_character(med_title, min.chars = 2),
     checkmate::check_character(GdriveHome, min.chars = 6),
-    checkmate::check_choice(status, choices = c("Live", "Draft")),
     combine = "and"
   )
 
   #Get teaching-materials drive content
 
   teach_dir <-
-    drive_find_path("../teaching-materials", drive_root = gID)
+    drive_find_path(tm_dir_id, drive_root = gID)
 
   #regex for folder prefixes we want to use (filter out things like "scraps")
   good_prefixes <- "remote|classroom|assess"
@@ -397,7 +407,7 @@ update_teach_links <- function(WD = getwd(),
 
     blank_titles <-
       which(is.na(merged_teach_it$title) &
-              merged_teach_it$fileType != "folder")
+              merged_teach_it$fileType != "folder" & merged_teach_it$sharedDrive!="extLink")
 
     if (length(blank_titles) > 0) {
       message("Guessing missing titles...")
@@ -428,7 +438,7 @@ update_teach_links <- function(WD = getwd(),
     # Add default descriptions ------------------------------------------------
     blank_descr <-
       which(is.na(merged_teach_it$description) &
-              merged_teach_it$fileType != "folder")
+              merged_teach_it$fileType != "folder" & merged_teach_it$sharedDrive!="extLink")
     if (length(blank_descr) > 0) {
       message("Guessing missing descriptions...")
       merged_teach_it$description[blank_descr] <-

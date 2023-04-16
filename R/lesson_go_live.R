@@ -42,7 +42,7 @@ lesson_go_live <- \(WD = getwd()) {
     live_success <-
       gp_success <-
       shortcut_success <-
-      made_public_success <- test_fm1 <- test_fm2 <-  NA
+      made_public_success <- test_fm1 <- test_fm2 <- update_success <-  NA
   } else{
     #only try to look up teaching-materials in unpublished projects
     tm_drib <-
@@ -68,7 +68,7 @@ lesson_go_live <- \(WD = getwd()) {
       warning("Move CANCELED")
       live_success <-
         gp_success <-
-        shortcut_success <- made_public_success <-  NA
+        shortcut_success <- made_public_success <-update_success <-   NA
       # Move folder to GP-LIVE -----------------------------------------------------------
     } else{
       test_move_to_live <-
@@ -92,13 +92,13 @@ lesson_go_live <- \(WD = getwd()) {
           ) %>% catch_err(keep_results = TRUE)
 
 
-        gp_success <- test_move_to_gp$result$moved[1]
+        gp_success <- test_move_to_gp$success
         shortcut_success <- test_move_to_gp$result$shortcut_made[1]
         made_public_success <- test_move_to_gp$result$made_public[1]
 
 
       } else{
-        gp_success <- shortcut_success <- made_public_success <-  FALSE
+        gp_success <- shortcut_success <- made_public_success <-update_success <-   FALSE
       }
 
 
@@ -142,6 +142,17 @@ lesson_go_live <- \(WD = getwd()) {
       test_fm2 <- NA
     }
 
+# Update TeachMatLinks to affect new locations of files -------------------
+
+  if(live_success & gp_success & shortcut_success & made_public_success & test_fm1 & test_fm2){
+    message("Running update_teach_links() to reflect new locations of items.")
+    update_success <- update_teach_links(WD=WD) %>% catch_err()
+  }else{
+    message("Skipping update_teach_links() b/c of step failures. Run manually if necessary.")
+    update_success <- FALSE
+  }
+
+
   }
 
   successes <-
@@ -151,7 +162,8 @@ lesson_go_live <- \(WD = getwd()) {
       shortcut_success,
       made_public_success,
       test_fm1,
-      test_fm2
+      test_fm2,
+      update_success
     ) %>% convert_T_to_check()
   dplyr::tibble(
     success = successes,
@@ -165,7 +177,8 @@ lesson_go_live <- \(WD = getwd()) {
         "update_fm(): GdrivePublicID='",
         gpID,
         "' and GdriveTeachMatID= NA"
-      )
+      ),
+      "update_teach_links()"
     )
   )
 

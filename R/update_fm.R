@@ -244,23 +244,42 @@ update_fm <-
     }
 
 
-    # If DRAFT, fill in missing GdriveTeachMatID ------------------------------
-    if ((new_yaml$PublicationStatus == "Draft" &
-         is.na(new_yaml$GdriveTeachMatID)) | drive_reconnect) {
-      tmID <-
-        zget_drive_id(
-          "../teaching-materials/",
-          drive_root = new_yaml$GdriveDirID,
-          fm_key = "GdriveTeachMatID"
-        )
-      test_tmID <- checkmate::test_character(tmID, all.missing = F)
+    # Fill in missing GdriveTeachMatID or GdrivePublicID if BOTH are missing---------------------------
+    # They both refer to teaching-materials/ but are found and named different things depending
+    # on PublicationStatus
+    if ((is.na(new_yaml$GdrivePublicID) & is.na(new_yaml$GdriveTeachMatID))
+        | drive_reconnect) {
+      if (new_yaml$PublicationStatus == "Draft") {
+        #Draft teaching materials found in GdriveDirID
+        tmID <-
+          zget_drive_id(
+            "../teaching-materials/",
+            drive_root = new_yaml$GdriveDirID,
+            fm_key = "GdriveTeachMatID"
+          )
+        pubID <- NA
+        #Live teaching materials found on GalacticPolymath shared drive,
+        #renamed with MediumTitle
+      } else{
+        tmID <-NA
+        pubID <-
+          zget_drive_id(
+            fs::path("GalacticPolymath",new_yaml$MediumTitle),
+            fm_key = "GdrivePublicID"
+          )
+      }
+
+      test_pubID <- checkmate::test_character(pubID, min.chars = 6)
+      test_tmID <- checkmate::test_character(tmID, min.chars = 6)
+
       new_yaml$GdriveTeachMatID <- tmID
+      new_yaml$GdrivePublicID <- pubID
 
       tm_res <-
         dplyr::tibble(
-          success = convert_T_to_check(test_tmID),
-          item = "GdriveTeachMatID",
-          ID = new_yaml$GdriveTeachMatID
+          success = convert_T_to_check(test_tmID,test_pubID),
+          item = c("GdriveTeachMatID","GdrivePublicID"),
+          ID = c(tmID,pubID)
         )
 
       if (output_gdrive_summ) {

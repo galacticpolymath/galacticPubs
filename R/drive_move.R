@@ -127,7 +127,7 @@ drive_move <- \(
   }
 
   # return results ----------------------------------------------------------
-  successes <- convert_T_to_check(c(test_move, test_shortcut,test_share))
+  successes <- c(test_move, test_shortcut,test_share)
   dplyr::tibble(
     moved = successes[1],
     shortcut_made = successes[2],

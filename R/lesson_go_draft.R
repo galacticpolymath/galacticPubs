@@ -31,20 +31,20 @@ lesson_go_draft <- \(WD = getwd()) {
   gp_drib <- drive_find_path(gpID)
 
   test_published <-
-    checkmate::test_character(gpID, min.chars=6)
-  checkmate::assert_data_frame(dir_drib, nrows=1, .var.name = "Project Directory Google Drive object (dribble)")
+    checkmate::test_character(gpID, min.chars = 6)
+  checkmate::assert_data_frame(dir_drib, nrows = 1, .var.name = "Project Directory Google Drive object (dribble)")
   checkmate::assert_data_frame(gp_drib, nrows = 1, .var.name = "GalacticPolymath/ProjectDir Google Drive object (dribble)")
 
   #If a publicID (on GalacticPolymath) has been assigned, we can skip the moving step
   if (!test_published) {
     message("GdrivePublicID not found. Skipping move back to GP-Studio'")
     draft_success <-
-      tm_success <-  shortcut_success <-test_fm1 <- test_fm2 <-  NA
+      tm_success <-  shortcut_success <- test_fm1 <- test_fm2 <- update_success <-  NA
   } else{
     #only try to look up teaching-materials in unpublished projects
     tm_drib <-
       drive_find_path(gp_drib)
-    checkmate::assert_data_frame(tm_drib, nrows=1, .var.name = "GalacticPolymath/'MediumTitle' Google Drive object (dribble)")
+    checkmate::assert_data_frame(tm_drib, nrows = 1, .var.name = "GalacticPolymath/'MediumTitle' Google Drive object (dribble)")
 
 
 
@@ -65,7 +65,7 @@ lesson_go_draft <- \(WD = getwd()) {
     if (continue != "y") {
       warning("Move CANCELED")
       draft_success <-
-        tm_success <-  shortcut_success <- NA
+        tm_success <-  shortcut_success <- update_success <- NA
 
       # Move folder to GP-Studio -----------------------------------------------------------
     } else{
@@ -100,49 +100,67 @@ lesson_go_draft <- \(WD = getwd()) {
 
 
 
-  # Clean up shortcuts ------------------------------------------------------
+    # Clean up shortcuts ------------------------------------------------------
 
-  to_delete_drib <-
-    dir_drib %>% drive_contents() %>% dplyr::filter(.data$name == "teaching-materials [Shortcut]")
-  if (nrow(to_delete_drib) > 0) {
-    shortcut_success <-
-      googledrive::drive_trash(to_delete_drib) %>% catch_err()
-  } else{
-    shortcut_success <- NA
-  }
+    to_delete_drib <-
+      dir_drib %>% drive_contents() %>% dplyr::filter(.data$name == "teaching-materials [Shortcut]")
+    if (nrow(to_delete_drib) > 0) {
+      shortcut_success <-
+        googledrive::drive_trash(to_delete_drib) %>% catch_err()
+    } else{
+      shortcut_success <- NA
+    }
 
-  # Update front-matter -----------------------------------------------------
+    # Update front-matter -----------------------------------------------------
     # make sure WD found locally; if not, try new location
     if (!fs::dir_exists(WD)) {
       # WD0 <- WD#save WD
       WD <- gsub("GP-LIVE", "GP-Studio", WD, fixed = T)#new value
-      message(
-        "'GP-LIVE' WD not found; trying to update_fm() at new 'GP-Studio' location: ",
-        WD
-      )
+      message("'GP-LIVE' WD not found; trying to update_fm() at new 'GP-Studio' location: ",
+              WD)
 
     }
 
 
-  test_fm1 <- update_fm(
-    WD = WD,
-    change_this = list(GdriveHome = "GP-Studio", PublicationStatus = "Draft")
-  ) %>% catch_err()
-
-  if (!is.na(draft_success) & draft_success) {
-    tmID <- as.character(test_move_tm$result$from$id)
-    update_fm(
+    test_fm1 <- update_fm(
       WD = WD,
-      change_this = list(GdrivePublicID = NA, GdriveTeachMatID =
-                           tmID)
-    )
-    test_fm2 <-
-      checkmate::test_character(get_fm("GdriveTeachMatID", WD = WD), all.missing = FALSE)
-  } else if (!is.na(draft_success) & !draft_success) {
-    test_fm2 <- FALSE
-  } else{
-    test_fm2 <- NA
-  }
+      change_this = list(GdriveHome = "GP-Studio", PublicationStatus = "Draft")
+    ) %>% catch_err()
+
+    if (!is.na(draft_success) & draft_success) {
+      tmID <- as.character(test_move_tm$result$from$id)
+      update_fm(
+        WD = WD,
+        change_this = list(
+          GdrivePublicID = NA,
+          GdriveTeachMatID =
+            tmID
+        )
+      )
+      test_fm2 <-
+        checkmate::test_character(get_fm("GdriveTeachMatID", WD = WD), all.missing = FALSE)
+    } else if (!is.na(draft_success) & !draft_success) {
+      test_fm2 <- FALSE
+    } else{
+      test_fm2 <- NA
+    }
+
+    # Update TeachMatLinks to affect new locations of files -------------------
+
+    if (draft_success &
+        tm_success &
+        shortcut_success & test_fm1 & test_fm2) {
+      message("Running update_teach_links() to reflect new locations of items.")
+      update_success <- update_teach_links(WD = WD) %>% catch_err()
+    } else{
+      message("Skipping update_teach_links() b/c of step failures. Run manually if necessary.")
+      update_success <- FALSE
+    }
+
+
+
+
+
   }
 
 
@@ -151,7 +169,8 @@ lesson_go_draft <- \(WD = getwd()) {
       tm_success,
       shortcut_success,
       test_fm1,
-      test_fm2) %>% convert_T_to_check()
+      test_fm2,
+      update_success) %>% convert_T_to_check()
   dplyr::tibble(
     success = successes,
     task = c(
@@ -163,7 +182,8 @@ lesson_go_draft <- \(WD = getwd()) {
         "update_fm(): GdrivePublicID=NA and GdriveTeachMatID='",
         gpID,
         "'"
-      )
+      ),
+      "update_teach_links()"
     )
   )
 
