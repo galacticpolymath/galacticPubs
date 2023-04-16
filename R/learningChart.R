@@ -31,7 +31,7 @@ learningChart=function(caption=NA,
                        dpi = 200,
                        showPlot=TRUE,
                        ...){
-if(WD=="?"){WD <- pick_lesson()}
+ WD <- parse_wd(WD)
 
 if(missing(destFolder)){
   destFolder<-fs::path(WD, "assets","_learning-plots")

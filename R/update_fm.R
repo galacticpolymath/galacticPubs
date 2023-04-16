@@ -21,9 +21,7 @@ update_fm <-
            reorder = TRUE,
            change_this = NULL,
            drive_reconnect = FALSE) {
-    if (WD == "?") {
-      WD <- pick_lesson()
-    }
+    WD <- parse_wd(WD)
 
     #In galacticPubs dev mode, don't do certain things
     is_gPubs <- basename(WD) == "galacticPubs"
@@ -51,6 +49,7 @@ update_fm <-
         new_yaml[[element_i]] <- change_this[[i]]
       }
     }
+
 
 
     # If front-matter exists,  do certain routine processes -------------------
@@ -85,6 +84,11 @@ update_fm <-
              ")"),
       collapse = ""
     )
+
+    #add galacticPubsVer
+      new_yaml$galacticPubsVer <-
+        as.character(utils::packageVersion("galacticPubs"))
+
 
     # Make assertions on YAML keys --------------------------------------------
 

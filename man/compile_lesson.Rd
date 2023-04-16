@@ -5,16 +5,18 @@
 \title{compile_lesson}
 \usage{
 compile_lesson(
+  WD = getwd(),
   choices,
   current_data,
   destFolder,
   outputFileName = "LESSON.json",
-  WD = getwd(),
-  clean = TRUE,
+  clean = FALSE,
   rebuild = NULL
 )
 }
 \arguments{
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
+
 \item{choices}{one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All". If missing, will compile things in the ReadyToCompile entry in front-matter.yml for the WD folder.}
 
 \item{current_data}{the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml}
@@ -23,9 +25,7 @@ compile_lesson(
 
 \item{outputFileName}{output file name; default= "processedProcedure.json"}
 
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
-
-\item{clean}{delete all JSON files in meta/ and start over? default=TRUE}
+\item{clean}{delete all JSON files in meta/ and start over? default=FALSE}
 
 \item{rebuild}{if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL}
 }

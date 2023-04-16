@@ -11,9 +11,7 @@
 #' @export
 
 init_lesson_meta <- function(WD = getwd(), overwrite = FALSE) {
-  if (WD == "?") {
-    WD <- pick_lesson()
-  }
+   WD <- parse_wd(WD)
 
   #GdriveID for lesson templates (must have access to '/GP-Studio/Templates_BE_CAREFUL/lesson-meta-templates/')
 

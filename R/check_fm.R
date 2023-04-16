@@ -15,7 +15,7 @@ check_fm <- function(WD = getwd(),
                        skip = NULL,
                        throw_error = TRUE) {
 
-  if(WD=="?"){WD <- pick_lesson()}
+   WD <- parse_wd(WD)
   yaml_path <- fs::path(WD, "meta", "front-matter.yml")
   yaml_found <- file.exists(yaml_path)
 

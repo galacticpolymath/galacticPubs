@@ -20,10 +20,8 @@ parseGPmarkdown <- function(x, WD = NULL, mlinks = NULL) {
   }
 
   if (!is.null(WD)) {
-    if (WD == "?") {
-      WD <- pick_lesson()
-      checkmate::assert_character(WD, all.missing = FALSE)
-    }
+    WD <- parse_wd(WD)
+
     #try to look up mlinks info if not provided
     if (is.null(mlinks)) {
       tID <- get_fm("GdriveTeachItID", WD = WD)

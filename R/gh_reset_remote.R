@@ -14,7 +14,7 @@ gh_reset_remote<-function(new_proj_name,
                           WD = getwd(),
                           check_current_gh = FALSE,
                           run_check_wd = TRUE) {
-  if(WD=="?"){WD <- pick_lesson()}
+   WD <- parse_wd(WD)
 
   if(missing(new_proj_name)){stop("Include 'new_proj_name'")}
 

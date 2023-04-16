@@ -25,9 +25,7 @@ update_teach_links <- function(WD = getwd(),
                                rm_missing = TRUE,
                                clean = FALSE,
                                ignore = ".txt$") {
-  if (WD == "?") {
-    WD <- pick_lesson()
-  }
+  WD <- parse_wd(WD)
 
   checkmate::assert(check_wd(WD = WD, throw_error = FALSE),
                     combine = "and")

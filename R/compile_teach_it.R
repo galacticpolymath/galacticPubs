@@ -10,9 +10,7 @@
 
 compile_teach_it <- function(WD = getwd(),
                              teach_it_drib = NULL) {
-  if (WD == "?") {
-    WD <- pick_lesson()
-  }
+ WD <- parse_wd(WD)
 
   . = NULL #to avoid errors with dplyr syntax
   #Get front matter from the project working directory

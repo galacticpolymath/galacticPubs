@@ -9,7 +9,7 @@
 #' @export
 #'
 check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
-  if(WD=="?"){WD <- pick_lesson()}
+   WD <- parse_wd(WD)
 
   if(basename(WD)=="galacticPubs"){
     message("galacticPubs environment: ignoring check_wd() call")

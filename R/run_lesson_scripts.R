@@ -8,7 +8,7 @@
 #'
 
 run_lesson_scripts<-function(scripts,skip=NULL,WD=getwd()){
-  if(WD=="?"){WD <- pick_lesson()}
+  WD <- parse_wd(WD)
   # temporarily reset wd while sourcing scripts to allow relative refs to work
   origWD<-getwd()
   setwd(WD)

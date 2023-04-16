@@ -19,7 +19,7 @@ inSync <- function(path1,
                    verbose = FALSE,
                    WD = getwd()
 ) {
-if(WD=="?"){WD <- pick_lesson()}
+ WD <- parse_wd(WD)
 
   pathz <- c(path1, path2,...)
   if(is_empty(path2)){

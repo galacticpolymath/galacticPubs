@@ -16,9 +16,7 @@ compile_standards <- function(WD = getwd(),
                               structureForWeb = TRUE) {
   . = NULL #to avoid errors with dplyr syntax
 
-  if (WD == "?") {
-    WD <- pick_lesson()
-  }
+ WD <- parse_wd(WD)
 
   #############
   # IMPORTANT: Add Subjects here if you need to align new ones --------------

@@ -14,9 +14,7 @@
 #' @export
 
 lesson_go_live <- \(WD = getwd()) {
-  if (WD == "?") {
-    WD <- pick_lesson()
-  }
+   WD <- parse_wd(WD)
 
   if (basename(WD) == "galacticPubs") {
     stop("Beeeeh, supply another WD to work on.")

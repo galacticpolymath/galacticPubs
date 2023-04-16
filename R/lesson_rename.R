@@ -40,10 +40,7 @@ lesson_rename <- function(new_proj_name,
   if(missing(new_proj_name)){stop("You must supply new_proj_name.")}
 
 
-  if (WD == "?") {
-    WD <- pick_lesson()
-  }
-
+  WD <- parse_wd(WD)
   #double check that WD looks like a valid lesson directory
   if(run_check_wd) {
     test_check_wd <- check_wd(WD = WD)

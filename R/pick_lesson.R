@@ -37,7 +37,7 @@ pick_lesson <- function(shared_drive = "s",
 
   d <- data.frame(PROJECT = projects, CHOICE = 1:length(projects))
   d <- rbind(d, c(PROJECT = "all", CHOICE = 0))
-
+  message("Available lessons at: /",switch(shared_drive,s="GP-Studio",l="GP-LIVE",gp="GalacticPolymath"),"/")
   message(utils::capture.output(print(d, row.names = F), type = "message"))
   num0 <-
     readline("Which lesson? (separate multiple with ',') > ") #%>% as.integer()

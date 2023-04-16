@@ -8,7 +8,7 @@
 #' @export
 
 publish <- function(commit_msg = NULL, WD = getwd()) {
-  if(WD=="?"){WD <- pick_lesson()}
+  WD <- parse_wd(WD)
 
   #if not run through the editor app,
   #test that WD is in the root directory with the R Project,

@@ -16,9 +16,7 @@
 #' @export
 
 get_fm <- function(key = NULL, WD = getwd(), checkWD=FALSE) {
-  if (WD == "?") {
-    WD <- pick_lesson()
-  }
+   WD <- parse_wd(WD)
 
   y <- safe_read_yaml(WD=WD,checkWD=checkWD)
   KEYS <- names(y)

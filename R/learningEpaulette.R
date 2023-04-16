@@ -23,7 +23,7 @@
 
 learningEpaulette<-function(heightScalar=0.5,epauletteHeight=0.2,randomSeed=101,saveFile=TRUE,destFolder,fileName="GP-Learning-Epaulette",WD=getwd(),font_size=10,width=11,height=1.6,dpi=200,showPlot=TRUE,...){
 
-  if(WD=="?"){WD <- pick_lesson()}
+   WD <- parse_wd(WD)
   if(missing(destFolder)){destFolder<-fs::path("assets","_learning-plots")}
   # #test for NULL values being supplied; replace with defaults
   # a<-match.call(expand.dots=TRUE)[-1] %>% as.list()

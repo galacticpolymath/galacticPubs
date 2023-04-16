@@ -22,9 +22,7 @@ safe_read_yaml <- function(yaml_path=NULL,
     WD <- path_parent_dir(yaml_path, n_levels = 2)
   }
   #shorthand for picking the lesson to get a path
-  if (WD == "?") {
-    WD <- pick_lesson()
-  }
+  WD <- parse_wd(WD)
 
   #validate that WD is ok
   if (checkWD) {

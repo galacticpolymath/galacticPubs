@@ -11,29 +11,27 @@
 #' - [compileJSON()]
 #'
 #' Intended for a single lesson in the current RStudio project. Use [batch_rebuild()] to compile and rebuild more than one lesson (or a single lesson outside the current project).
-#'
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke [pick_lesson()]
 #' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All". If missing, will compile things in the ReadyToCompile entry in front-matter.yml for the WD folder.
 #' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
-#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke [pick_lesson()]
-#' @param clean delete all JSON files in meta/ and start over? default=TRUE
+#' @param clean delete all JSON files in meta/ and start over? default=FALSE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
 #' @return current_data; also the lesson JSON is saved to `meta/JSON/LESSON.json`
 #' @importFrom rlang .data
 #' @export
 #'
 compile_lesson <-
-  function(choices,
+  function(WD = getwd(),
+           choices,
            current_data,
            destFolder ,
            outputFileName = "LESSON.json",
-           WD = getwd(),
-           clean = TRUE,
+           clean = FALSE,
            rebuild = NULL) {
-    if (WD == "?") {
-      WD <- pick_lesson()
-    }
+
+    WD <- parse_wd(WD)
 
     if (missing(current_data)) {
       current_data <-
@@ -59,7 +57,7 @@ compile_lesson <-
       "Compiling Lesson: '",
       basename(WD)
     )
-
+    browser()
     #clean JSON folder if asked for
     if (clean) {
       to_delete <-
@@ -105,7 +103,7 @@ compile_lesson <-
 
     stnds_out_of_date <- !inSync(
       compiled_standards_path,
-      fs::path(WD, "meta", paste0("teach-it_",current_data$ShortTitle,".gsheet")),
+      fs::path(WD, "meta", paste_valid(c("teach-it",current_data$ShortTitle,".gsheet"),collapse="_")),
       newer = TRUE
     )
 
@@ -266,7 +264,7 @@ compile_lesson <-
 
     if ("Teaching Materials" %in% choices) {
       if (is.na(current_data$GitHubPath)) {
-        warning("GitHubPath is missing from front-matter.yml...if this doesn't work, that's why.")
+        warning("GitHubPath is missing from front-matter.yml...if this doesn't work, try running update_fm().")
       } else{
         update_teach_links(WD = WD)
         compile_teach_it(WD = WD)
@@ -278,9 +276,7 @@ compile_lesson <-
     # Separate parts of Front Matter ------------------------------------------
     #always rebuild front matter if it's in choices
     if ("Front Matter" %in% choices) {
-      #add galacticPubsVer
-      current_data$galacticPubsVer <-
-        as.character(utils::packageVersion("galacticPubs"))
+
 
       #Include everything down to SponsoredBy in the header
       header <-
@@ -485,35 +481,23 @@ compile_lesson <-
             InitiallyExpanded = TRUE
           )
 
-        jsonlite::write_json(
+        save_json(
           credits,
-          path = fs::path(destFolder,
-                          "credits", ext = "json"),
-          pretty = TRUE,
-          auto_unbox = TRUE,
-          na = "null",
-          null = "null"
+          filename = fs::path(destFolder,
+                          "credits", ext = "json")
         )
       }
 
       #always output this stuff
-      jsonlite::write_json(
+      save_json(
         header,
-        path = fs::path(destFolder,
-                        "header", ext = "json"),
-        pretty = TRUE,
-        auto_unbox = TRUE,
-        na = "null",
-        null = "null"
+        filename = fs::path(destFolder,
+                        "header", ext = "json")
       )
-      jsonlite::write_json(
+      save_json(
         overview,
-        path = fs::path(destFolder,
-                        "overview", ext = "json"),
-        pretty = TRUE,
-        auto_unbox = TRUE,
-        na = "null",
-        null = "null"
+        filename = fs::path(destFolder,
+                        "overview", ext = "json")
       )
 
     }#End of Front Matter export

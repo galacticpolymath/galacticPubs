@@ -15,7 +15,7 @@ whichRepo<-function(WD,fullPath=FALSE){
     WD<-rstudioapi::getActiveProject()
   }
 
-  if(WD=="?"){WD <- pick_lesson()}
+  WD <- parse_wd(WD)
 
   origin<-system(paste0("cd '",WD,"' && git remote -v"),intern=TRUE)[1]
 

@@ -7,9 +7,7 @@
 #' @export
 
 init_fm <- function(WD = getwd()) {
-  if (WD == "?") {
-    WD <- pick_lesson()
-  }
+   WD <- parse_wd(WD)
   test_check_fm <-
     suppressWarnings(check_fm(
       WD = WD,

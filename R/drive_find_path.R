@@ -75,9 +75,7 @@ drive_find_path <- function(drive_path,
     }
 
     if (!is.null(WD)) {
-      if (WD == "?") {
-        WD <- pick_lesson()
-      }
+       WD <- parse_wd(WD)
       message("Resolving Gdrive Web path for: '",
               gsub("\\.\\.", paste0("[ ", basename(WD), " ]"), drive_path),
               "'")
