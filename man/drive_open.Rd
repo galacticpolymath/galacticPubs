@@ -28,6 +28,6 @@ Other Google Drive Functions:
 \code{\link{drive_inSync}()},
 \code{\link{drive_new_from_template}()},
 \code{\link{init_lesson_meta}()},
-\code{\link{update_drive_links}()}
+\code{\link{update_teach_links}()}
 }
 \concept{Google Drive Functions}

@@ -2,7 +2,7 @@
 #'
 #' Extract galacticPubs-relevant information from a GP lesson file, with an expected format of *ShortTitle_P1_G5-9_wksht (TEACHER)*
 #'
-#' Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match DriveLinks fields, though they cannot be populated automatically.
+#' Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match TeachMatLinks fields, though they cannot be populated automatically.
 #'
 #' @param dribble a dribble input (e.g. piped from [googledrive::drive_get()]) for a single file
 #' @param set_envir set envir output manually (not from file name); partial string matching of options "classroom", "remote", "assessments"

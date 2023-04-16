@@ -200,7 +200,7 @@ lesson_new_locale <-
                   test_renaming <-
                     lesson_rename(
                       new_proj_name = new_proj_name,
-                      gh_proj_name = gh_proj_name,
+                      WD= new_proj_path,
                       new_ShortTitle = new_proj_base,
                       curr_ShortTitle = ShortTitle,
                       just_files = TRUE

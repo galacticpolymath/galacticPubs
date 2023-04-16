@@ -17,9 +17,12 @@ zget_drive_id(
 
 \item{exact_match}{passed to \code{\link[=drive_find_path]{drive_find_path()}}; default=TRUE}
 
-\item{fm_key}{name of the front-matter key you're trying to fill; mainly used in error messaging.}
+\item{fm_key}{name of the front-matter key you're trying to fill; used in error messaging and naming output}
 
 \item{missing_val}{what to return if key not matched. default=NA}
+}
+\value{
+an ID as a single character value, named with fm_key parameter
 }
 \description{
 Helper function used by \code{\link[=update_fm]{update_fm()}} that attempts to resolve a Google Drive (for Web) path, given a string, and return the id for this path. If it's not found, it should return NULL.

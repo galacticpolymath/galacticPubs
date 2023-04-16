@@ -29,7 +29,7 @@ compile_teach_it <- function(WD = getwd(),
   tlinks0 <-
     googlesheets4::read_sheet(
       teach_it_drib,
-      sheet = "DriveLinks",
+      sheet = "TeachMatLinks",
       skip = 1,
       col_types = "c",
 
@@ -81,7 +81,7 @@ compile_teach_it <- function(WD = getwd(),
     )
 
   # Check and Validate Data Import--------------------------------------------------
-  checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!DriveLinks")
+  checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!TeachMatLinks")
   checkmate::assert_data_frame(mlinks, min.rows = 0, .var.name = "teach-it.gsheet!Multimedia")#multimedia might be 0 rows
   checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!PartTitles")
   checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!PartTitles")

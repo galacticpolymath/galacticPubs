@@ -30,7 +30,7 @@ a tibble with a row corresponding to each row in dribble input, with title and o
 Extract galacticPubs-relevant information from a GP lesson file, with an expected format of \emph{ShortTitle_P1_G5-9_wksht (TEACHER)}
 }
 \details{
-Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match DriveLinks fields, though they cannot be populated automatically.
+Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match TeachMatLinks fields, though they cannot be populated automatically.
 }
 \examples{
   drive_find_path("GP-Studio/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
@@ -46,6 +46,6 @@ Other Google Drive Functions:
 \code{\link{drive_new_from_template}()},
 \code{\link{drive_open}()},
 \code{\link{init_lesson_meta}()},
-\code{\link{update_drive_links}()}
+\code{\link{update_teach_links}()}
 }
 \concept{Google Drive Functions}

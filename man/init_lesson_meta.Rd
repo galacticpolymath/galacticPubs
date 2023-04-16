@@ -5,14 +5,14 @@
 \alias{lesson_init_meta}
 \title{init_lesson_meta()}
 \usage{
-init_lesson_meta(WD = getwd(), overwrite = NA)
+init_lesson_meta(WD = getwd(), overwrite = FALSE)
 
-lesson_init_meta(WD = getwd(), overwrite = NA)
+lesson_init_meta(WD = getwd(), overwrite = FALSE)
 }
 \arguments{
 \item{WD}{the working directory for the virtualized lesson path; default=getwd() if you're working in the lesson's .Rproj. If "?" is supplied, it will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 
-\item{overwrite}{passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}}; default=NA will add "(1)" to avoid duplicates; TRUE will trash existing file before copying}
+\item{overwrite}{logical; Do you want to overwrite target if exact file name found? Does not get passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}} because the way this works is stupid and slow. Instead, we check using virtualized Google Drive for Desktop paths and will overwrite the \emph{exact} file name if T. Default= FALSE.}
 }
 \value{
 logical of success; T=template gsheets copied to meta/ and front-matter updated with \code{\link[=update_fm]{update_fm()}}
@@ -21,7 +21,7 @@ logical of success; T=template gsheets copied to meta/ and front-matter updated 
 Add galacticPubs Google Workspace working documents to a given lesson's \emph{/meta} folder. You \emph{must have access to GP-Studio shared drive}.
 }
 \details{
-WD is used for hybrid file path navigation using virtualized paths on Google Drive for desktop to reach the Edu/Lessons/meta/front-matter.yml for the project of interest. Then, using \code{\link[=get_fm]{get_fm()}} to lookup the GoogleDrive ID for the cloud version of this folder, files will then be copied from the template folder to this project folder using the google web API. All of this is necessary because Google Drive for Desktop doesn't allow copying of Google Documents.
+WD is used for hybrid file path navigation using virtualized paths on Google Drive for desktop to reach the Edu/Lessons/meta/front-matter.yml for the project of interest. Then, using \code{\link[=get_fm]{get_fm()}} to lookup the GoogleDrive ID for the cloud version of this folder, files will then be copied from the template folder to this project folder using the google web API. All of this is necessary because Google Drive for Desktop doesn't allow copying of Google Documents. It will check existence of templates in target directory using virtualized system for efficiency and to prevent duplications.
 }
 \section{Functions}{
 \itemize{
@@ -38,6 +38,6 @@ Other Google Drive Functions:
 \code{\link{drive_inSync}()},
 \code{\link{drive_new_from_template}()},
 \code{\link{drive_open}()},
-\code{\link{update_drive_links}()}
+\code{\link{update_teach_links}()}
 }
 \concept{Google Drive Functions}
