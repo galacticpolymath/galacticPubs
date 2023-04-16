@@ -218,13 +218,21 @@ update_teach_links <- function(WD = getwd(),
   # Read in teach-it.gsheet -------------------------------------------------
 
 
-  teach_it_in0 <-
+  test_teach_it_in0 <-
     googlesheets4::read_sheet(
       teach_it_drib$id,
       sheet = "TeachMatLinks",
       skip = 1,
       col_types = "c"
-    )
+    ) %>% catch_err(keep_results = T)
+
+  if(!test_teach_it_in0$success){
+    stop("Unable to import 'teach-it_*.gsheet!TeachMatLinks'")
+  }else{
+    teach_it_in0 <- test_teach_it_in0$result
+  }
+
+
 
 
   # Remove blank links ------------------------------------------------------
@@ -365,20 +373,10 @@ update_teach_links <- function(WD = getwd(),
     # assign sharedDrive values for where files are found -----------------
     sharedDrive_vec <- sapply(1:nrow(merged_teach_it), \(i) {
       item_i <- merged_teach_it[i, ]
-      item_i_type <- ifelse(item_i$fileType == "folder", "folder", "file")
       item_i_type <-
-        ifelse(!is.na(item_i$extLink), "extLink", item_i_type)
+        ifelse(!is.na(item_i$extLink), "extLink", "gp")
       #teachMatDir will always be in GdriveHome; Publication status will determine where other things are
-      out <- if (item_i_type == "folder") {
-        if (item_i$itemType == "teachMatDir") {
-          GdriveHome
-        } else{
-          switch(status,
-                 Draft = GdriveHome,
-                 Live = "GalacticPolymath",
-                 "Unknown Status provided")
-        }
-      } else if (item_i_type == "extLink") {
+      out <-  if (item_i_type == "extLink") {
         "extLink"
       } else{
         switch(status,
@@ -496,10 +494,10 @@ update_teach_links <- function(WD = getwd(),
 
   if (ss_write_success) {
     message("teach-it.gsheet!'TeachMatLinks' updated successfully!\n")
-    TRUE
+    return(TRUE)
   } else{
     warning("Something went wrong while saving teach-it.gsheet!'TeachMatLinks'")
-    FALSE
+    return(FALSE)
   }
 
 
