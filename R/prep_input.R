@@ -44,7 +44,7 @@ prep_input <-function(input,
     #   saved$TemplateVer<-new_template_ver
     # }
     test_updated<-update_fm(WD=WD,save_output = FALSE,return_fm = TRUE, reorder=TRUE) %>% catch_err(keep_results=TRUE)
-
+browser()
     if(test_updated$success){
       fm <- test_updated$result
       fm_names <- fm %>% names
@@ -69,7 +69,7 @@ prep_input <-function(input,
 
     # figure out which are shiny operational variables in input & ignore em
     #add manual inputs to ignore (will catch any names containing these strings)
-    ignore_pattern<-c("commit_msg","-hot")
+    ignore_pattern<-c("commit_msg","-hot","dummy_")
 
     input_op_var <- lapply(1:length(Y0), function(i) {
       name_i <- names(Y0)[[i]]
