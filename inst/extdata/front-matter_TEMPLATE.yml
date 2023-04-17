@@ -2,21 +2,23 @@
 id: ''
 UniqueID: ''
 ShortTitle: ''
+PublicationStatus: Draft
 Language: 'English'
 Country: 'United States'
 DefaultLanguage: 'English'
 DefaultCountry: 'United States'
 
 #!!---> operational variables (that don't have Shiny inputs
+#LastUpdated has to be at the top here
 LastUpdated: ''
+FirstPublicationDate: ''
 MediumTitle: '' # Format: Title + _Subj_ + _Gx-y_+ (Locale)
 lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.4.4
+TemplateVer: 0.4.5
 galacticPubsVer: ''
-FirstPublicationDate: ''
 URL: ''
 GPCatalogPath: ''
 GitHubPath: ''
@@ -31,8 +33,7 @@ GdrivePublishedID: ''
 GdrivePublicID: ''
 GdriveDirURL: ''
 #!!<--- operational variables (that don't have Shiny inputs)
-
-PublicationStatus: Draft
+# RebuildAllMaterials must be top of this list
 RebuildAllMaterials: no
 ReleaseDate: '2050-01-01'
 Title: ''
@@ -46,7 +47,7 @@ LessonEnvir: ''
 ForGrades: ''
 GradesOrYears: 'Grades'
 EstLessonTime: ''
-PullStandardsInfoFrom: 'standardX'
+PullStandardsInfoFrom: 'myFile'
 LearningPlotCorrection: TRUE
 LearningChartFriendly: ''
 LearningEpaulette: ''

@@ -13,5 +13,10 @@ parse_wd(str = NULL)
 if str is not "?" or "??", it will return str. Otherwise, returns the result of \code{\link[=pick_lesson]{pick_lesson()}}
 }
 \description{
-Helper function to handle Working Directory strings. If "?" supplied, this invokes \link{pick_lesson("s")} to choose from among lessons in the 'GP-Studio' shared drive. If "??" supplied, this invokes \link{pick_lesson("l")} to pick a path to lessons on the 'GP-LIVE' drive.
+Helper function to handle Working Directory strings. Here's what happens when you supply the following:
+\itemize{
+\item "?" or "?s": invokes \link{pick_lesson("s")} to choose from among lessons in the 'GP-Studio' shared drive.
+\item "??" or "?l": invokes \link{pick_lesson("l")} to pick a path to lessons on the 'GP-LIVE' drive.
+\item "???" or "?gp": gives you \link{pick_lesson("gp")} to pick a path to lesson teaching materials found on 'GalacticPolymath' drive
+}
 }

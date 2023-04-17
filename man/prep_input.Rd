@@ -4,12 +4,12 @@
 \alias{prep_input}
 \title{Prep Input for Shiny App \code{\link[=editor]{editor()}}}
 \usage{
-prep_input(input, yaml_path, existing_current_data = NULL, WD = getwd())
+prep_input(input, yaml_path = NULL, existing_current_data = NULL, WD = getwd())
 }
 \arguments{
 \item{input}{shiny input variable}
 
-\item{yaml_path}{relative path to front-matter.yml}
+\item{yaml_path}{relative path to front-matter.yml; default=NULL; preferred way is to provide WD}
 
 \item{existing_current_data}{optional; reactive 'vals' variable containing certain environmental variables that don't have direct user inputs, but are included in front-matter.yml output. Pass in existing_current_data if you want to preserve reactive values (from being overwritten) that are not found in input or yaml.}
 
