@@ -4,16 +4,25 @@
 \alias{compile_teach_it}
 \title{compile_teach_it}
 \usage{
-compile_teach_it(WD = getwd(), teach_it_drib = NULL)
+compile_teach_it(
+  WD = getwd(),
+  teach_it_drib = NULL,
+  rename_parts = TRUE,
+  prompt_rename = TRUE
+)
 }
 \arguments{
-\item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default is WD=getwd()}
+\item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=parse_wd]{parse_wd()}}; default is WD=getwd()}
 
 \item{teach_it_drib}{if you already have the teach-it.gsheet dribble looked up from \code{\link[=drive_find_path]{drive_find_path()}}, passing this object can can save some time; default = NULL}
+
+\item{rename_parts}{logical; do you want to rename part folders based on PartTitles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function \code{\link[=zrename_parts]{zrename_parts()}}}
+
+\item{prompt_rename}{logical, do you want to promput user about whether to rename parts? default=T}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 }
 \description{
-Compile Teaching Materials from a project's 'teach-it.gsheet'
+Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the PartTitles tab.
 }

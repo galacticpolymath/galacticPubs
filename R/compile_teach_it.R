@@ -5,13 +5,15 @@
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [parse_wd()]; default is WD=getwd()
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
 #' @param rename_parts logical; do you want to rename part folders based on PartTitles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_parts()]
+#' @param prompt_rename logical, do you want to promput user about whether to rename parts? default=T
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 #' @importFrom rlang .data
 #' @export
 
 compile_teach_it <- function(WD = getwd(),
                              teach_it_drib = NULL,
-                             rename_parts=TRUE) {
+                             rename_parts=TRUE,
+                             prompt_rename=TRUE) {
   WD <- parse_wd(WD)
 
   . = NULL #to avoid errors with dplyr syntax
@@ -166,7 +168,7 @@ compile_teach_it <- function(WD = getwd(),
   if (pinfo_titles_initialized) {
     # rename Part folders -----------------------------------------------------
     if(rename_parts){
-    zrename_parts(pinfo, tmID)
+    zrename_parts(pinfo, tmID,prompt_rename=prompt_rename)
     }
 
     tlinks <-

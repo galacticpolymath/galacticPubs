@@ -7,6 +7,7 @@
 #' @param key which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'
 #' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]
 #' @param checkWD passed to [safe_read_yaml()]; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory
+#' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=TRUE
 #' @examples
 #' get_fm()
 #' get_fm(key=c("Title","ShortTitle","locale"))
@@ -15,10 +16,10 @@
 #' get_fm("gdrive","?")
 #' @export
 
-get_fm <- function(key = NULL, WD = getwd(), checkWD=FALSE) {
+get_fm <- function(key = NULL, WD = getwd(), checkWD=FALSE,auto_init=TRUE) {
    WD <- parse_wd(WD)
 
-  y <- safe_read_yaml(WD=WD,checkWD=checkWD)
+  y <- safe_read_yaml(WD=WD,checkWD=checkWD,auto_init=auto_init)
   KEYS <- names(y)
 
   #output whole front-matter if no key specifically requested

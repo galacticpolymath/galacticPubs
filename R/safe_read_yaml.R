@@ -6,12 +6,14 @@
 #' @param WD alternate way to specify location. e.g. use "?" to invoke [pick_lesson()]
 #' @param eval.expr boolean; do you want to evaluate expression in yaml prepended with '!expr '? Default=TRUE
 #' @param checkWD do you want to run [check_wd()] which will produce warning messages if working directory assumptions aren't met?; default= TRUE
+#' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=TRUE
 #' @export
 #
-safe_read_yaml <- function(yaml_path=NULL,
+safe_read_yaml <- function(yaml_path = NULL,
                            WD = NULL,
                            eval.expr = TRUE,
-                           checkWD = TRUE) {
+                           checkWD = TRUE,
+                           auto_init = TRUE) {
   if (!is.null(WD) & !is.null(yaml_path)) {
     stop("Only supply 'yaml_path' OR 'WD', not both.")
   }
@@ -40,11 +42,17 @@ safe_read_yaml <- function(yaml_path=NULL,
   # Create YAML from template if it doesn't exist ---------------------------
 
   if (!yaml_exists) {
-    test_init <- init_fm(WD = WD)
-    if(test_init){
+    if (auto_init) {
+      test_init <- init_fm(WD = WD)
+    } else{
+      stop("Front Matter not found at: '", yaml_path, "'")
+    }
+    if (test_init) {
       message("\nSUCCESS: front-matter.yml initialized and updated\n")
-    }else{
-      warning("\nSomething seems to have gone wrong wiht initializing and updating front-matter.yml\n")
+    } else{
+      warning(
+        "\nSomething seems to have gone wrong wiht initializing and updating front-matter.yml\n"
+      )
     }
   }
 
@@ -54,35 +62,35 @@ safe_read_yaml <- function(yaml_path=NULL,
 
 
   #Function to standardize empty values to NA for all items in a list
-  standardize_na <- function(x){
+  standardize_na <- function(x) {
     out <- lapply(1:length(x), function(i) {
-    if(is.list(x)){
-    xi <- x[[i]]
-    }else{
-      xi <- x[i]
-    }
+      if (is.list(x)) {
+        xi <- x[[i]]
+      } else{
+        xi <- x[i]
+      }
 
-    # #run recursively to clean up sub-lists and vectors
-    # if(length(xi)>1){
-    #   unlist_after=!is.list(xi)
-    #   xi <- standardize_na(xi)
-    #   if(unlist_after){
-    #     xi <- xi %>% unlist()
-    #   }
-    # }
-    # #Length>1 necessary to keep long NAs
-    # if (is_empty(xi,names_meaningful=TRUE)  ) {
-    #   xi <- rep(NA,length(xi))
-    # } else{
-    #   xi
-    # }
-  })
-  names(out) <- names(x)
-  out
+      # #run recursively to clean up sub-lists and vectors
+      # if(length(xi)>1){
+      #   unlist_after=!is.list(xi)
+      #   xi <- standardize_na(xi)
+      #   if(unlist_after){
+      #     xi <- xi %>% unlist()
+      #   }
+      # }
+      # #Length>1 necessary to keep long NAs
+      # if (is_empty(xi,names_meaningful=TRUE)  ) {
+      #   xi <- rep(NA,length(xi))
+      # } else{
+      #   xi
+      # }
+    })
+    names(out) <- names(x)
+    out
   }
 
   #standardize first level data
-y2 <- standardize_na(y)
+  y2 <- standardize_na(y)
 
 
 

@@ -57,7 +57,7 @@ compile_lesson <-
       "Compiling Lesson: '",
       basename(WD)
     )
-    browser()
+
     #clean JSON folder if asked for
     if (clean) {
       to_delete <-
@@ -74,7 +74,6 @@ compile_lesson <-
           "Front Matter",
           "Standards Alignment",
           "Teaching Materials",
-          "Procedure",
           "Acknowledgements",
           "Versions",
           "Printable Lesson"

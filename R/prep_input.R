@@ -14,7 +14,14 @@ prep_input <- function(input,
                        WD = getwd()) {
 
   #read in existing front-matter.yml if it exists
-  saved <- get_fm(WD = WD)
+  #Need to try_harder in case we need to wait for Google Drive for Desktop to
+  #catch up with the folder move during live/draft staging
+  test_saved <- get_fm(WD = WD,auto_init=FALSE) %>% catch_err(try_harder = TRUE,keep_results = T)
+  if(test_saved$success){
+    saved <- test_saved$result
+  }else{
+    stop("Unable to retrieve saved, possibly because you just staged the project to Live and Gdrive for Desktop is cofused. Try again in a minute.")
+  }
 
   #update front-matter without saving to prompt user if it needs an update
   test_updated <-

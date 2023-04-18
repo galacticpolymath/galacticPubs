@@ -4,11 +4,13 @@
 #'
 #' @param pinfo pinfo object passed from compile_teach_it()
 #' @param tmID Google Drive ID for the folder where we'll find teaching materials. Depends on PublicationStatus. If it's "Draft", teaching-materials/ is found on GP-Studio; if "Live", it'll be on GalacticPolymath/ and view only
+#' @param prompt_rename logical, do you want to promput user about whether to rename parts? default=T
 #' @return logical of success of renaming; NA if nothing to change or no valid pinfo
 #' @export
 
 zrename_parts <- \(pinfo,
-                   tmID) {
+                   tmID,
+                   prompt_rename = TRUE) {
   pinfo_valid <-
     checkmate::test_data_frame(pinfo[, 1:2], min.rows = 1, all.missing = F)
   if (!pinfo_valid) {
@@ -34,7 +36,7 @@ zrename_parts <- \(pinfo,
     } else{
       #Iterate renaming through parts of all environments found
       test_rename <- purrr::map(1:nrow(tm_ls), \(i) {
-        dir_i <- tm_ls[i, ]
+        dir_i <- tm_ls[i,]
         dir_i_ls <-
           dir_i %>% drive_contents() %>%
           dplyr::mutate(dir = dir_i$name) %>%
@@ -53,9 +55,13 @@ zrename_parts <- \(pinfo,
 
         # Ask user if want to rename ----------------------------------------------
         if (nrow(mismatching) > 0) {
-          message("\nDo you want to rename parts as follows?")
-          print(mismatching[, c("name", "new_name")])
-          continue <- readline("(y/n) > ")
+          if (prompt_rename) {
+            message("\nDo you want to rename parts as follows?")
+            print(mismatching[, c("name", "new_name")])
+            continue <- readline("(y/n) > ")
+          } else{
+            continue <- "y"
+          }
 
           if (continue != "y") {
             message("Part renaming canceled.")
@@ -63,7 +69,7 @@ zrename_parts <- \(pinfo,
           } else{
             message("\nRenaming parts...")
             purrr::map(1:nrow(mismatching), \(ii) {
-              file_i <- mismatching[ii,]
+              file_i <- mismatching[ii, ]
               test_i <-
                 googledrive::drive_rename(file_i$id, file_i$new_name) %>%
                 catch_err(keep_results = T)
@@ -81,8 +87,7 @@ zrename_parts <- \(pinfo,
 
 
         } else{
-
-          message("\nPart names look good for: /",dir_i$name,"/")
+          message("\nPart names look good for: /", dir_i$name, "/")
 
           NULL
         }

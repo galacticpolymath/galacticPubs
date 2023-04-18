@@ -47,10 +47,10 @@ zget_procedure <- \(proc,
   proc <- proc %>% dplyr::filter(.data$Step != 0)
 
   #Expand markdown for PartExt section
-  pext[, c("Description", "Link")] <-
-    apply(pext[, c("Description", "Link")], 2, \(x) {
-      parseGPmarkdown(x, mlinks = mlinks)
-    })
+
+  pext <- pext %>%
+    dplyr::mutate(dplyr::across(c("Description","Link"),\(x){parseGPmarkdown(x,mlinks=mlinks)}))
+
 
 
 

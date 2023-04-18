@@ -4,15 +4,17 @@
 \alias{zrename_parts}
 \title{zrename_parts}
 \usage{
-zrename_parts(pinfo, WD)
+zrename_parts(pinfo, tmID, prompt_rename = TRUE)
 }
 \arguments{
 \item{pinfo}{pinfo object passed from compile_teach_it()}
 
-\item{WD}{working directory}
+\item{tmID}{Google Drive ID for the folder where we'll find teaching materials. Depends on PublicationStatus. If it's "Draft", teaching-materials/ is found on GP-Studio; if "Live", it'll be on GalacticPolymath/ and view only}
+
+\item{prompt_rename}{logical, do you want to promput user about whether to rename parts? default=T}
 }
 \value{
-logical of success of renaming
+logical of success of renaming; NA if nothing to change or no valid pinfo
 }
 \description{
 Helper function for \code{\link[=compile_teach_it]{compile_teach_it()}}. Renames part folders based on information found in the project teach_it_*.gsheet!PartTitles.

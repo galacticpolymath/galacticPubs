@@ -4,7 +4,7 @@
 \alias{get_fm}
 \title{Get front-matter values}
 \usage{
-get_fm(key = NULL, WD = getwd(), checkWD = FALSE)
+get_fm(key = NULL, WD = getwd(), checkWD = FALSE, auto_init = TRUE)
 }
 \arguments{
 \item{key}{which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'}
@@ -12,6 +12,8 @@ get_fm(key = NULL, WD = getwd(), checkWD = FALSE)
 \item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 
 \item{checkWD}{passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory}
+
+\item{auto_init}{logical; do you want to automatically create a front-matter.yml file if it's not found? Runs \code{\link[=init_fm]{init_fm()}}; default=TRUE}
 }
 \description{
 Imports meta/front-matter.yml value(s) to environment as a list.
