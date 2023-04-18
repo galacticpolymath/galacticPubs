@@ -30,12 +30,18 @@ compile_lesson <-
            outputFileName = "LESSON.json",
            clean = FALSE,
            rebuild = NULL) {
-
     WD <- parse_wd(WD)
+
+    #figure out which repo we're connected to (to create full paths to catalog.galacticpolymath.com)
+    repo <- whichRepo(WD = WD)
+
+
+    # Always update front-matter (in case of template updates) ----------------
+    update_fm(WD = WD)
 
     if (missing(current_data)) {
       current_data <-
-       get_fm(WD=WD)
+        get_fm(WD = WD)
     }
     if (missing(choices)) {
       choices <- current_data$ReadyToCompile
@@ -83,12 +89,26 @@ compile_lesson <-
     #quell Rcheck
     lumpItems <- whichRepo <- catalogURL <- expand_md_links <- NULL
 
-    #figure out which repo we're connected to (to create full paths to catalog.galacticpolymath.com)
-    repo <- whichRepo(WD = WD)
 
+    # Define some paths -------------------------------------------------------
+    status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
+    med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
+    checkmate::assert_choice(status, c("Live", "Draft"))
+    checkmate::assert_character(med_title, min.chars = 2)
 
-    # Always update front-matter (in case of template updates) ----------------
-    update_fm(WD = WD)
+    # local path to teaching material
+    # If PublicationStatus=="Draft", found on 'GP-Studio'
+    # Else, found on 'GalacticPolymath'
+    tm_local <-
+      ifelse(
+        status == "Draft",
+        fs::path(WD, "teaching-materials"),
+        fs::path(lessons_get_path("gp"), med_title)
+      )
+
+    #make sure we know local directory path to this lesson's teaching-materials
+    checkmate::assert(fs::is_dir(tm_local), .var.name = "fs::is_dir()")
+
 
 
     # Standards alignment & learning plots -----------------------------------------------------
@@ -97,15 +117,23 @@ compile_lesson <-
     compiled_standards_path <-
       fs::path(WD, "meta", "standards.RDS")
 
+    standards_gsheet_path <- fs::path(WD,
+                                      "meta",
+                                      paste_valid("standards", current_data$ShortTitle),ext= "gsheet")
+
     compiled_standards_json_path <-
-      fs::path(WD, "meta","json",  "standards.json")
+      fs::path(WD, "meta", "json",  "standards.json")
 
-    stnds_out_of_date <- !inSync(
-      compiled_standards_path,
-      fs::path(WD, "meta", paste_valid(c("teach-it",current_data$ShortTitle,".gsheet"),collapse="_")),
-      newer = TRUE
-    )
+    teach_it_path <- fs::path(WD,
+                              "meta",
+                              paste_valid("teach-it", current_data$ShortTitle),ext =  "gsheet")
 
+    #compiled standards should be newer than standards gsheet
+    stnds_out_of_date <- !inSync(compiled_standards_path,
+                                 standards_gsheet_path,
+                                 newer = TRUE)
+
+    # Compile standards if out of date or missing or rebuild==T ----------------
     if ("Standards Alignment" %in% choices &
         (stnds_out_of_date | rebuild)) {
       compile_standards_output <- compile_standards(
@@ -113,6 +141,7 @@ compile_lesson <-
         targetSubj = current_data$TargetSubject,
         learningplot_correction = current_data$LearningPlotCorrection
       ) %>% catch_err(keep_results = T)
+
       alignment <- compile_standards_output$result
       current_data$LearningChartFriendly <-
         alignment$learning_chart_friendly
@@ -135,21 +164,12 @@ compile_lesson <-
         #This header goes before learning chart, which may not always exist...
         sh <- list(`__component` = "lesson-plan.section-heading",
                    SectionTitle = "Learning Standards")
-        jsonlite::write_json(
-          sh,
-          fs::path(destFolder, "standards-header.json"),
-          pretty = TRUE,
-          auto_unbox = TRUE,
-          na = "null",
-          null = "null"
-        )
+        save_json(sh,
+                  fs::path(destFolder, "standards-header.json"))
 
-        jsonlite::write_json(
+        save_json(
           saved_standards$data$list_for_json,
-          fs::path(WD, "meta", "JSON", "standards.json"),
-          pretty = TRUE,
-          auto_unbox = TRUE,
-          na = "null"
+          fs::path(WD, "meta", "JSON", "standards.json")
         )
       }
       #Only proceed to generate learningChart if compatible...
@@ -157,7 +177,7 @@ compile_lesson <-
         current_data$LearningChart <- NULL
       } else if (!inSync(
         fs::path(WD, "assets", "_learning-plots", "GP-Learning-Chart.png"),
-        fs::path(WD, "meta", "standards_GSheetsOnly.xlsx")
+        standards_gsheet_path
       ) |
       (rebuild)) {
         #LEARNING CHART
@@ -231,7 +251,7 @@ compile_lesson <-
               "_learning-plots",
               "GP-Learning-Epaulette.png"
             ),
-            compiled_standards_path
+            standards_gsheet_path
           ) | rebuild | is_empty(current_data$LearningEpaulette)
         )) {
       #####################
@@ -261,12 +281,37 @@ compile_lesson <-
 
 
 
+    # Process Teaching Materials if Out of Date -------------------------------
+
+
     if ("Teaching Materials" %in% choices) {
       if (is.na(current_data$GitHubPath)) {
-        warning("GitHubPath is missing from front-matter.yml...if this doesn't work, try running update_fm().")
+        warning(
+          "GitHubPath is missing from front-matter.yml...if this doesn't work, try running update_fm()."
+        )
       } else{
-        update_teach_links(WD = WD)
-        compile_teach_it(WD = WD)
+        #check if previous save file exists
+        save_path <- fs::path(WD, "meta", "save-state_teach-it.RDS")
+        save_exists <- file.exists(save_path)
+        if (save_exists) {
+
+          #compare current timestamps and file counts from last update to current
+          prev_update_state <- readRDS(save_path)
+          #get state for teach-it.gsheet AND all teaching-materials/ contents
+          curr_update_state <- get_state(c(teach_it_path,tm_local))
+          skip_update <-
+            identical(prev_update_state, curr_update_state)
+        } else{
+          skip_update <- FALSE
+        }
+
+        # update teach_it links and compile ---------------------------------------
+
+
+        if (!skip_update | rebuild) {
+          update_teach_links(WD = WD)
+          compile_teach_it(WD = WD)
+        }
       }
 
     }
@@ -275,8 +320,6 @@ compile_lesson <-
     # Separate parts of Front Matter ------------------------------------------
     #always rebuild front matter if it's in choices
     if ("Front Matter" %in% choices) {
-
-
       #Include everything down to SponsoredBy in the header
       header <-
         current_data[(1:which(names(current_data) == "SponsoredBy"))]
@@ -480,24 +523,18 @@ compile_lesson <-
             InitiallyExpanded = TRUE
           )
 
-        save_json(
-          credits,
-          filename = fs::path(destFolder,
-                          "credits", ext = "json")
-        )
+        save_json(credits,
+                  filename = fs::path(destFolder,
+                                      "credits", ext = "json"))
       }
 
       #always output this stuff
-      save_json(
-        header,
-        filename = fs::path(destFolder,
-                        "header", ext = "json")
-      )
-      save_json(
-        overview,
-        filename = fs::path(destFolder,
-                        "overview", ext = "json")
-      )
+      save_json(header,
+                filename = fs::path(destFolder,
+                                    "header", ext = "json"))
+      save_json(overview,
+                filename = fs::path(destFolder,
+                                    "overview", ext = "json"))
 
     }#End of Front Matter export
 

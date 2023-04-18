@@ -24,8 +24,8 @@ update_teach_links(
 \item{ignore}{regex expression to remove certain filetypes (e.g. txt files); default= ".txt$"}
 }
 \description{
-Searches lesson's google drive folder to populate the 'TeachMatLinks' tab of the lesson's 'meta/teach-it_*.gsheet' file.
-Merges these detected file names and links with manually added "extLink" links to learning resources hosted elsewhere.
+Searches lesson's google drive folder to populate the 'TeachMatLinks' tab of the lesson's 'meta/teach-it_\emph{.gsheet' file.
+Merges these detected file names and links with manually added "extLink" links to learning resources hosted elsewhere. 90\% of this algorithm uses drive_} functions, so it's rather slow. It does save a state of files (see step 7 in details) using the virtualized path, though. This is used to skip updating if all files are up to date.
 }
 \details{
 It's a hybrid lookup system that requires Google Drive for Desktop to be setup with permission to
@@ -37,6 +37,7 @@ GP-Studio shared drive and a web connection. Steps:
 \item Get Gdrive links for downloads, classroom- and remote- lessons, and assessments.
 \item Merge results with manually entered titles and such in 'meta/teach-it.gsheet TeachMatLinks tab'
 \item Save 'meta/teach-it.gsheet'
+\item Save teach-it_state.RDS that stores info about the teaching-materials folder at the time of the last update. \code{\link[=compile_lesson]{compile_lesson()}} uses \code{\link[=get_state]{get_state()}} to check if the current state is identical to the state at the time of the last update to skip this update_teach_links call.
 }
 }
 \seealso{

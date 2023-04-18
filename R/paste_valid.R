@@ -4,11 +4,11 @@
 #'
 #' @param ... a set of arguments to be combined into a single string
 #' @param sep character added to end of each argument; default sep=""
-#' @param collapse character separating the concatenated strings; default collapse=" "
+#' @param collapse character separating the concatenated strings; default collapse="_"
 #' @export
 #' @family simple text string manipulation functions
 
-paste_valid<- function(...,sep="",collapse=" "){
+paste_valid<- function(...,sep="",collapse="_"){
   valid_vec<-sapply(c(...),function(x){
     if(is_empty(x)){}else{
       x

@@ -4,14 +4,14 @@
 \alias{paste_valid}
 \title{paste_valid}
 \usage{
-paste_valid(..., sep = "", collapse = " ")
+paste_valid(..., sep = "", collapse = "_")
 }
 \arguments{
 \item{...}{a set of arguments to be combined into a single string}
 
 \item{sep}{character added to end of each argument; default sep=""}
 
-\item{collapse}{character separating the concatenated strings; default collapse=" "}
+\item{collapse}{character separating the concatenated strings; default collapse="_"}
 }
 \description{
 Given a set of character objects, combine all non-empty variables into a single string. Uses \code{\link[=is_empty]{is_empty()}} to test validity, so should be robust to all kinds of missingness. It will remove both NA and NULL.

@@ -1,7 +1,7 @@
 #' update_teach_links
 #'
 #' Searches lesson's google drive folder to populate the 'TeachMatLinks' tab of the lesson's 'meta/teach-it_*.gsheet' file.
-#' Merges these detected file names and links with manually added "extLink" links to learning resources hosted elsewhere.
+#' Merges these detected file names and links with manually added "extLink" links to learning resources hosted elsewhere. 90% of this algorithm uses drive_* functions, so it's rather slow. It does save a state of files (see step 7 in details) using the virtualized path, though. This is used to skip updating if all files are up to date.
 #'
 #' It's a hybrid lookup system that requires Google Drive for Desktop to be setup with permission to
 #' GP-Studio shared drive and a web connection. Steps:
@@ -11,6 +11,7 @@
 #' 4. Get Gdrive links for downloads, classroom- and remote- lessons, and assessments.
 #' 5. Merge results with manually entered titles and such in 'meta/teach-it.gsheet TeachMatLinks tab'
 #' 6. Save 'meta/teach-it.gsheet'
+#' 7. Save teach-it_state.RDS that stores info about the teaching-materials folder at the time of the last update. [compile_lesson()] uses [get_state()] to check if the current state is identical to the state at the time of the last update to skip this update_teach_links call.
 #'
 #' @param WD a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" which will invoke [pick_lesson()]
 #' @param rebuild if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL
@@ -38,14 +39,16 @@ update_teach_links <- function(WD = getwd(),
   #teaching materials are located in different shared drives depending
   #on PublicationStatus
   checkmate::assert_choice(status, choices = c("Live", "Draft"))
-  if(status=="Draft"){
-  tm_dir_id <- get_fm("GdriveTeachMatID",WD=WD,checkWD=F)
-  }else{
-  tm_dir_id <- get_fm("GdrivePublicID",WD=WD,checkWD=F)
+  if (status == "Draft") {
+    tm_dir_id <- get_fm("GdriveTeachMatID", WD = WD, checkWD = F)
+  } else{
+    tm_dir_id <- get_fm("GdrivePublicID", WD = WD, checkWD = F)
   }
 
   med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
+  short_title <- get_fm("ShortTitle",WD=WD,checkWD = F)
   GdriveHome <- get_fm("GdriveHome", WD = WD, checkWD = F)
+  status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
 
 
 
@@ -55,14 +58,26 @@ update_teach_links <- function(WD = getwd(),
     checkmate::check_character(proj,  min.chars = 2),
     checkmate::check_character(tm_dir_id,  min.chars = 6),
     checkmate::check_character(med_title, min.chars = 2),
+    checkmate::check_character(short_title, min.chars = 2),
     checkmate::check_character(GdriveHome, min.chars = 6),
+    checkmate::check_choice(status,c("Live","Draft")),
     combine = "and"
   )
 
-  #Get teaching-materials drive content
+
+# Set up ability to save folder state after update --------
+  #Get local path to teaching materials
   #If PublicationStatus=="Draft", found on 'GP-Studio'
   #Else, found on 'GalacticPolymath'
+  tm_local <- ifelse(status=="Draft",fs::path(WD,"teaching-materials"),fs::path(lessons_get_path("gp"),med_title) )
+  checkmate::assert(fs::is_dir(tm_local),.var.name = "fs::is_dir()")
+  save_path <- fs::path(WD,"meta","save-state_teach-it.RDS")
+  checkmate::assert_path_for_output(save_path,overwrite=TRUE)
+  teach_it_path <- fs::path(WD,
+                              "meta",
+                              paste_valid("teach-it", short_title),ext= "gsheet")
 
+  #Find Gdrive web equivalent
   teach_dir <-
     drive_find_path(tm_dir_id)
 
@@ -90,7 +105,7 @@ update_teach_links <- function(WD = getwd(),
           "]\n")
   variant_info <-
     pbapply::pblapply(1:nrow(teach_dir_ls), function(i) {
-      dir_i <- teach_dir_ls[i, ]
+      dir_i <- teach_dir_ls[i,]
       print(dir_i$name)
       envir_type <-
         gsub("([^_ -]*)[_ -]?.*", "\\1", dir_i$name) #extract (first part of name before "_,-, or [space]")
@@ -132,7 +147,7 @@ update_teach_links <- function(WD = getwd(),
         dir_i_subfolders_info <-
           lapply(1:nrow(dir_i_subfolders), function(ii) {
             update_teach_links_partHelper(
-              dribble = dir_i_subfolders[ii,],
+              dribble = dir_i_subfolders[ii, ],
               set_grades = dir_i_info$grades,
               set_envir = envir_type
             )
@@ -236,9 +251,9 @@ update_teach_links <- function(WD = getwd(),
       col_types = "c"
     ) %>% catch_err(keep_results = T)
 
-  if(!test_teach_it_in0$success){
+  if (!test_teach_it_in0$success) {
     stop("Unable to import 'teach-it_*.gsheet!TeachMatLinks'")
-  }else{
+  } else{
     teach_it_in0 <- test_teach_it_in0$result
   }
 
@@ -281,7 +296,7 @@ update_teach_links <- function(WD = getwd(),
     #Do hard_left_join on empty teach_it_in0 to keep .gsheet structure,
     #but none of the data; sort
     test_teach_it_out <-
-      hard_left_join(teach_it_in0[-(1:nrow(teach_it_in0)),],
+      hard_left_join(teach_it_in0[-(1:nrow(teach_it_in0)), ],
                      inferred_teach_it,
                      by =
                        "filename",
@@ -369,7 +384,8 @@ update_teach_links <- function(WD = getwd(),
     # Check for duplicated links ----------------------------------------
     # This should only trigger if rm_missing==F, because otherwise should be filtered out
     dupLinks <-
-      duplicated(merged_teach_it$link) & !is.na(merged_teach_it$link)
+      duplicated(merged_teach_it$link) &
+      !is.na(merged_teach_it$link)
     if (sum(dupLinks) > 0) {
       warning(
         "Duplicate links found (delete one entry) in teach-it.gsheet for '",
@@ -382,7 +398,7 @@ update_teach_links <- function(WD = getwd(),
 
     # assign sharedDrive values for where files are found -----------------
     sharedDrive_vec <- sapply(1:nrow(merged_teach_it), \(i) {
-      item_i <- merged_teach_it[i, ]
+      item_i <- merged_teach_it[i,]
       item_i_type <-
         ifelse(!is.na(item_i$extLink), "extLink", "gp")
       #teachMatDir will always be in GdriveHome; Publication status will determine where other things are
@@ -406,14 +422,17 @@ update_teach_links <- function(WD = getwd(),
     # Guess titles for files with title=NA ------------------------------------
 
     blank_titles <-
-      which(is.na(merged_teach_it$title) &
-              merged_teach_it$fileType != "folder" & merged_teach_it$sharedDrive!="extLink")
+      which(
+        is.na(merged_teach_it$title) &
+          merged_teach_it$fileType != "folder" &
+          merged_teach_it$sharedDrive != "extLink"
+      )
 
     if (length(blank_titles) > 0) {
       message("Guessing missing titles...")
       merged_teach_it$title[blank_titles] <-
         sapply(blank_titles, function(i) {
-          d_i <- merged_teach_it[i,]
+          d_i <- merged_teach_it[i, ]
           test_valid_inferred_info <-
             sum(!is_empty(d_i$SvT),
                 !is_empty(d_i$itemType),
@@ -437,8 +456,11 @@ update_teach_links <- function(WD = getwd(),
 
     # Add default descriptions ------------------------------------------------
     blank_descr <-
-      which(is.na(merged_teach_it$description) &
-              merged_teach_it$fileType != "folder" & merged_teach_it$sharedDrive!="extLink")
+      which(
+        is.na(merged_teach_it$description) &
+          merged_teach_it$fileType != "folder" &
+          merged_teach_it$sharedDrive != "extLink"
+      )
     if (length(blank_descr) > 0) {
       message("Guessing missing descriptions...")
       merged_teach_it$description[blank_descr] <-
@@ -502,13 +524,27 @@ update_teach_links <- function(WD = getwd(),
       ) %>% catch_err()
   }
 
+
+
+  # save directory state information for use by compile_lesson() ------------
+  # Save state for both teach_it.gsheet AND teaching-materials contents
+  test_savestate <- get_state(path=c(teach_it_path, tm_local),save_path = save_path) %>% catch_err()
+  if(test_savestate){
+    message("@ Saved /teaching-materials/ state to: \n '",save_path,"'")
+  }else{
+    warning("Failed to save update state: ",save_path)
+  }
+
+
   if (ss_write_success) {
-    message("teach-it.gsheet!'TeachMatLinks' updated successfully!\n")
+    message("\n teach-it.gsheet!'TeachMatLinks' updated successfully!\n")
     return(TRUE)
   } else{
     warning("Something went wrong while saving teach-it.gsheet!'TeachMatLinks'")
     return(FALSE)
   }
+
+
 
 
 }
