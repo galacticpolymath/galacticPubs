@@ -119,7 +119,7 @@ zget_grade_bands <- \(df, fm, assess) {
         gradePrefix = g_pref_i,
         links = list(
           linkText = paste("Download", g_pref_i, "Materials for All Parts"),
-          url = df_variantDir$studioLink[1]
+          url = df_variantDir$link
         ),
         parts = PART_DATA
       )
@@ -188,17 +188,17 @@ zget_items <- \(df, fm) {
   #Sort so presentation is first
   df <- df %>% dplyr::arrange(!.data$fileType == "presentation")
   item_counter <- 1:nrow(df)
+  status <- fm$PublicationStatus
 
   #map across all parts
   out <-  purrr::map(item_counter, \(i) {
     #Get info for the subfolder
     df_item_i <- df[i,]
-    #Handle missing publinks; use studio link if it's not been published to GalacticPolymath shared drive; give disclaimer
-    if (is.na(df_item_i$pubShareLink)) {
-      cust_url <- df_item_i$studioLink
+    #Add DRAFT FILE disclaimer to links if Draft status
+    cust_url <- df_item_i$link
+    if (status=="Draft") {
       disclaimer <- "(DRAFT FILE)"
     } else{
-      cust_url <- df_item_i$pubLink
       disclaimer <- NA
     }
 

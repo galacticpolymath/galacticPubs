@@ -1,20 +1,31 @@
 #' compile_teach_it
 #'
-#' Compile Teaching Materials from a project's 'teach-it.gsheet'
+#' Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the PartTitles tab.
 #'
-#' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [pick_lesson()]; default is WD=getwd()
+#' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [parse_wd()]; default is WD=getwd()
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
+#' @param rename_parts logical; do you want to rename part folders based on PartTitles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_parts()]
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 #' @importFrom rlang .data
 #' @export
 
 compile_teach_it <- function(WD = getwd(),
-                             teach_it_drib = NULL) {
- WD <- parse_wd(WD)
+                             teach_it_drib = NULL,
+                             rename_parts=TRUE) {
+  WD <- parse_wd(WD)
 
   . = NULL #to avoid errors with dplyr syntax
   #Get front matter from the project working directory
   fm <- get_fm(WD = WD)
+
+  status <- fm$PublicationStatus
+  checkmate::assert_choice(status, c("Live", "Draft"))
+  if (status == "Draft") {
+    tmID <- fm$GdriveTeachMatID
+  } else{
+    tmID <- fm$GdrivePublicID
+  }
+  checkmate::assert_character(tmID, min.chars = 6)
 
   if (is.null(teach_it_drib)) {
     teachitID <- fm$GdriveTeachItID
@@ -23,6 +34,7 @@ compile_teach_it <- function(WD = getwd(),
   }
   #check that teach_it_drib has 1 row and is a data frame
   checkmate::assert_data_frame(teach_it_drib, nrows = 1)
+
 
   tlinks0 <-
     googlesheets4::read_sheet(
@@ -57,8 +69,9 @@ compile_teach_it <- function(WD = getwd(),
       sheet = "PartExt",
       skip = 1,
       col_types = "c"
-    ) %>% dplyr::filter(`REF(Is_initiatialized)`==TRUE&!is.na(.data$ItemTitle)) %>%
-    dplyr::select("Part","Order","ItemTitle","Description","Link")
+    ) %>% dplyr::filter(`REF(Is_initiatialized)` == TRUE &
+                          !is.na(.data$ItemTitle)) %>%
+    dplyr::select("Part", "Order", "ItemTitle", "Description", "Link")
 
 
 
@@ -92,15 +105,16 @@ compile_teach_it <- function(WD = getwd(),
   pinfo_preface_initialized <-
     !grepl("^Lesson description", pinfo$LessonPreface[1])
   proc_initialized <-
-    !grepl("^\\*", proc$ChunkTitle[1])|!grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
+    !grepl("^\\*", proc$ChunkTitle[1]) |
+    !grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
   pext_initialized <- !grepl("^URL", pext$Link[1])
   mlinks_initialized <- nrow(mlinks) > 0
 
 
-# Report uninitialized data -----------------------------------------------
+  # Report uninitialized data -----------------------------------------------
 
-  if(!pext_initialized){
-    pext<-pext[0,]
+  if (!pext_initialized) {
+    pext <- pext[0, ]
     message("No valid items found on PartExt tab of `teach-it.gsheet`.")
   }
 
@@ -150,6 +164,11 @@ compile_teach_it <- function(WD = getwd(),
 
   #Add part title and preface to proc tlinks info for convenience
   if (pinfo_titles_initialized) {
+    # rename Part folders -----------------------------------------------------
+    if(rename_parts){
+    zrename_parts(pinfo, tmID)
+    }
+
     tlinks <-
       dplyr::left_join(tlinks0, pinfo[, 1:5], by = c("part" = "Part"))
 
@@ -201,7 +220,9 @@ compile_teach_it <- function(WD = getwd(),
       vocab_outfile <-
         fs::path(WD, "assets", "_other-media-to-publish", "vocab.csv")
       vocab_saved <-
-        write.csv(x = proc_data$vocab, file = vocab_outfile,row.names = FALSE) %>% catch_err()
+        write.csv(x = proc_data$vocab,
+                  file = vocab_outfile,
+                  row.names = FALSE) %>% catch_err()
       if (vocab_saved) {
         message("\nVocab gathered from procedure and saved to ",
                 vocab_outfile,
@@ -240,12 +261,12 @@ compile_teach_it <- function(WD = getwd(),
       )
 
     multimedia <- lapply(1:nrow(m), function(i) {
-      d <- m[i, ]
+      d <- m[i,]
 
       mainLink <- zYTembed(d$mainLink) %>%
-          expand_md_links(repo = whichRepo(WD = WD))
+        expand_md_links(repo = whichRepo(WD = WD))
       #if a drive file is supplied, change /edit?... to /preview
-      mainLink <- gsub("/edit?.*$","/preview",mainLink)
+      mainLink <- gsub("/edit?.*$", "/preview", mainLink)
 
       list(
         order = d$order,
