@@ -110,7 +110,7 @@ lesson_go_live <- \(WD = getwd()) {
       }
 
 
-    }
+
 
 
 
@@ -159,6 +159,7 @@ lesson_go_live <- \(WD = getwd()) {
     }
 
 
+    }
   }
 
   successes <-

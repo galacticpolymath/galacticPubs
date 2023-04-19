@@ -99,70 +99,72 @@ lesson_go_draft <- \(WD = getwd()) {
       }
 
 
-    }
 
 
 
-    # Clean up shortcuts ------------------------------------------------------
 
-    to_delete_drib <-
-      dir_drib %>% drive_contents() %>% dplyr::filter(.data$name == "teaching-materials [Shortcut]")
-    if (nrow(to_delete_drib) > 0) {
-      shortcut_success <-
-        googledrive::drive_trash(to_delete_drib) %>% catch_err()
-    } else{
-      shortcut_success <- NA
-    }
+      # Clean up shortcuts ------------------------------------------------------
 
-    # Update front-matter -----------------------------------------------------
+      to_delete_drib <-
+        dir_drib %>% drive_contents() %>% dplyr::filter(.data$name == "teaching-materials [Shortcut]")
+      if (nrow(to_delete_drib) > 0) {
+        shortcut_success <-
+          googledrive::drive_trash(to_delete_drib) %>% catch_err()
+      } else{
+        shortcut_success <- NA
+      }
 
-    WD <- gsub("GP-LIVE", "GP-Studio", WD, fixed = T)#new value
-    # Let's wait until it's recognized locally (Gdrive for Desktop needs to catch up)
-    message("Waiting for Google Drive for Desktop to find the new working directory at: ",WD)
-    checkmate::assert(fs::is_dir(WD), .var.name = "fs::is_dir()") %>%
-      catch_err(try_harder = T, waits = c(2, 5, 10, 15, 30))
+      # Update front-matter -----------------------------------------------------
+
+      WD <- gsub("GP-LIVE", "GP-Studio", WD, fixed = T)#new value
+      # Let's wait until it's recognized locally (Gdrive for Desktop needs to catch up)
+      message("Waiting for Google Drive for Desktop to find the new working directory at: ",
+              WD)
+      checkmate::assert(fs::is_dir(WD), .var.name = "fs::is_dir()") %>%
+        catch_err(try_harder = T, waits = c(2, 5, 10, 15, 30))
 
 
 
-    test_fm1 <- update_fm(
-      WD = WD,
-      change_this = list(GdriveHome = "GP-Studio", PublicationStatus = "Draft")
-    ) %>% catch_err()
-
-    if (!is.na(draft_success) & draft_success) {
-      tmID <- as.character(test_move_tm$result$from$id)
-      update_fm(
+      test_fm1 <- update_fm(
         WD = WD,
-        change_this = list(
-          GdrivePublicID = NA,
-          GdriveTeachMatID =
-            tmID
+        change_this = list(GdriveHome = "GP-Studio", PublicationStatus = "Draft")
+      ) %>% catch_err()
+
+      if (!is.na(draft_success) & draft_success) {
+        tmID <- as.character(test_move_tm$result$from$id)
+        update_fm(
+          WD = WD,
+          change_this = list(
+            GdrivePublicID = NA,
+            GdriveTeachMatID =
+              tmID
+          )
         )
-      )
-      test_fm2 <-
-        checkmate::test_character(get_fm("GdriveTeachMatID", WD = WD), all.missing = FALSE)
-    } else if (!is.na(draft_success) & !draft_success) {
-      test_fm2 <- FALSE
-    } else{
-      test_fm2 <- NA
+        test_fm2 <-
+          checkmate::test_character(get_fm("GdriveTeachMatID", WD = WD), all.missing = FALSE)
+      } else if (!is.na(draft_success) & !draft_success) {
+        test_fm2 <- FALSE
+      } else{
+        test_fm2 <- NA
+      }
+
+      # Update TeachMatLinks to affect new locations of files -------------------
+
+      if (draft_success &
+          tm_success &
+          shortcut_success & test_fm1 & test_fm2) {
+        message("Running compile_lesson() to make sure the lesson is up-to-date.")
+        update_success <- compile_lesson(WD = WD) %>% catch_err()
+      } else{
+        message("Skipping compile_lesson() b/c of step failures. Run manually if necessary.")
+        update_success <- FALSE
+      }
+
+
+
+
+
     }
-
-    # Update TeachMatLinks to affect new locations of files -------------------
-
-    if (draft_success &
-        tm_success &
-        shortcut_success & test_fm1 & test_fm2) {
-      message("Running compile_lesson() to make sure the lesson is up-to-date.")
-      update_success <- compile_lesson(WD = WD) %>% catch_err()
-    } else{
-      message("Skipping compile_lesson() b/c of step failures. Run manually if necessary.")
-      update_success <- FALSE
-    }
-
-
-
-
-
   }
 
 
