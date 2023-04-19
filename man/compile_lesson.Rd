@@ -2,9 +2,20 @@
 % Please edit documentation in R/compile_lesson.R
 \name{compile_lesson}
 \alias{compile_lesson}
+\alias{lesson_compile}
 \title{compile_lesson}
 \usage{
 compile_lesson(
+  WD = getwd(),
+  choices,
+  current_data,
+  destFolder,
+  outputFileName = "LESSON.json",
+  clean = FALSE,
+  rebuild = NULL
+)
+
+lesson_compile(
   WD = getwd(),
   choices,
   current_data,
@@ -48,3 +59,8 @@ Combines functionality of:
 
 Intended for a single lesson in the current RStudio project. Use \code{\link[=batch_rebuild]{batch_rebuild()}} to compile and rebuild more than one lesson (or a single lesson outside the current project).
 }
+\section{Functions}{
+\itemize{
+\item \code{lesson_compile()}: 
+
+}}

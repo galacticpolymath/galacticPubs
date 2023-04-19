@@ -583,3 +583,11 @@ compile_lesson <-
 
     invisible(current_data)
   }
+
+#' lesson_compile
+#'
+#' @describeIn compile_lesson
+#'
+#' @export
+
+lesson_compile <- compile_lesson

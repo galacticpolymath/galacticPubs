@@ -107,7 +107,7 @@ compile_teach_it <- function(WD = getwd(),
   pinfo_preface_initialized <-
     !grepl("^Lesson description", pinfo$LessonPreface[1])
   proc_initialized <-
-    !grepl("^\\*", proc$ChunkTitle[1]) |
+    !grepl("^\\*", proc$ChunkTitle[1]) &
     !grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
   pext_initialized <- !grepl("^URL", pext$Link[1])
   mlinks_initialized <- nrow(mlinks) > 0
@@ -200,7 +200,7 @@ compile_teach_it <- function(WD = getwd(),
     proc_data$parts <- purrr::map(1:nparts, \(i) {
       list(
         partNum = i,
-        partTitle = NULL,
+        partTitle = paste0("Part ",i,"| Procedure not documented yet"),
         partDur = NULL,
         partPreface = NULL,
         chunks = NULL,

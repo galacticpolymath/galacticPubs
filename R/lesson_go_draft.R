@@ -68,7 +68,7 @@ lesson_go_draft <- \(WD = getwd()) {
     if (continue != "y") {
       warning("Move CANCELED")
       draft_success <-
-        tm_success <-  shortcut_success <- update_success <- NA
+        test_fm1 <- test_fm2 <-  shortcut_success <- update_success <- NA
 
       # Move folder to GP-Studio -----------------------------------------------------------
     } else{

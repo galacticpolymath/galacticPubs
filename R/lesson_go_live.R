@@ -71,7 +71,8 @@ lesson_go_live <- \(WD = getwd()) {
 
     if (continue != "y") {
       warning("Move CANCELED")
-      live_success <-
+      live_success  <-
+        test_fm1 <- test_fm2<-
         gp_success <-
         shortcut_success <-
         made_public_success <- update_success <-   NA
