@@ -107,7 +107,9 @@ compile_lesson <-
       )
 
     #make sure we know local directory path to this lesson's teaching-materials
-    checkmate::assert(fs::is_dir(tm_local), .var.name = "fs::is_dir()")
+    #In case we're waiting on Google Drive for desktop to update, let's repeat this assertion after it fails, increasing wait time
+    checkmate::assert(fs::is_dir(tm_local), .var.name = "fs::is_dir()") %>%
+      catch_err(try_harder = T, waits = c(2, 5, 10, 15))
 
 
 
@@ -119,14 +121,16 @@ compile_lesson <-
 
     standards_gsheet_path <- fs::path(WD,
                                       "meta",
-                                      paste_valid("standards", current_data$ShortTitle),ext= "gsheet")
+                                      paste_valid("standards", current_data$ShortTitle),
+                                      ext = "gsheet")
 
     compiled_standards_json_path <-
       fs::path(WD, "meta", "json",  "standards.json")
 
     teach_it_path <- fs::path(WD,
                               "meta",
-                              paste_valid("teach-it", current_data$ShortTitle),ext =  "gsheet")
+                              paste_valid("teach-it", current_data$ShortTitle),
+                              ext =  "gsheet")
 
     #compiled standards should be newer than standards gsheet
     stnds_out_of_date <- !inSync(compiled_standards_path,
@@ -294,11 +298,10 @@ compile_lesson <-
         save_path <- fs::path(WD, "meta", "save-state_teach-it.RDS")
         save_exists <- file.exists(save_path)
         if (save_exists) {
-
           #compare current timestamps and file counts from last update to current
           prev_update_state <- readRDS(save_path)
           #get state for teach-it.gsheet AND all teaching-materials/ contents
-          curr_update_state <- get_state(c(teach_it_path,tm_local))
+          curr_update_state <- get_state(c(teach_it_path, tm_local))
           skip_update <-
             identical(prev_update_state, curr_update_state)
         } else{

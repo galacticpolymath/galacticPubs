@@ -14,7 +14,10 @@
 #' @export
 
 lesson_go_live <- \(WD = getwd()) {
-   WD <- parse_wd(WD)
+  #Force picking from studio shared drive
+  if (grepl("\\?", WD)) {
+    WD <- pick_lesson(shared_drive = "s")
+  }
 
   if (basename(WD) == "galacticPubs") {
     stop("Beeeeh, supply another WD to work on.")
@@ -29,10 +32,13 @@ lesson_go_live <- \(WD = getwd()) {
   tmID <- get_fm("GdriveTeachMatID", WD)
   dir_drib <- drive_find_path(dirID)
 
-  checkmate::assert_character(newTitle, min.chars=6, .var.name = "MediumTitle")
-  checkmate::assert_character(tmID,null.ok=F, min.chars=6, .var.name = "teaching material google ID (GdriveTeachMatID)")
+  checkmate::assert_character(newTitle, min.chars = 6, .var.name = "MediumTitle")
+  checkmate::assert_character(tmID,
+                              null.ok = F,
+                              min.chars = 6,
+                              .var.name = "teaching material google ID (GdriveTeachMatID)")
   test_not_published <- checkmate::test_scalar_na(gpID)
-  checkmate::assert_data_frame(dir_drib, nrows=1, .var.name = "Project Directory Google Drive object (GdriveDirID dribble)")
+  checkmate::assert_data_frame(dir_drib, nrows = 1, .var.name = "Project Directory Google Drive object (GdriveDirID dribble)")
 
   #If a publicID (on GalacticPolymath) has been assigned, we can skip the moving step
   if (!test_not_published) {
@@ -40,13 +46,14 @@ lesson_go_live <- \(WD = getwd()) {
     live_success <-
       gp_success <-
       shortcut_success <-
-      made_public_success <- test_fm1 <- test_fm2 <- update_success <-  NA
+      made_public_success <-
+      test_fm1 <- test_fm2 <- update_success <-  NA
   } else{
     #only try to look up teaching-materials in unpublished projects
     tm_drib <-
       drive_find_path(tmID, drive_root = dir_drib)
     checkmate::assert_data_frame(tm_drib, all.missing = FALSE, .var.name = "'/teaching-materials/' Google Drive object (dribble)")
-    checkmate::assert(googledrive::is_folder(tm_drib),.var.name = "/teaching-materials/ Google Drive object (dribble)")
+    checkmate::assert(googledrive::is_folder(tm_drib), .var.name = "/teaching-materials/ Google Drive object (dribble)")
 
 
 
@@ -66,7 +73,8 @@ lesson_go_live <- \(WD = getwd()) {
       warning("Move CANCELED")
       live_success <-
         gp_success <-
-        shortcut_success <- made_public_success <-update_success <-   NA
+        shortcut_success <-
+        made_public_success <- update_success <-   NA
       # Move folder to GP-LIVE -----------------------------------------------------------
     } else{
       test_move_to_live <-
@@ -96,7 +104,9 @@ lesson_go_live <- \(WD = getwd()) {
 
 
       } else{
-        gp_success <- shortcut_success <- made_public_success <-update_success <-   FALSE
+        gp_success <-
+          shortcut_success <- made_public_success <- update_success <-
+          FALSE
       }
 
 
@@ -107,15 +117,11 @@ lesson_go_live <- \(WD = getwd()) {
     # Update front-matter -----------------------------------------------------
     WD0 <- WD
     WD <- gsub("GP-Studio", "GP-LIVE", WD, fixed = T)#new value
-    # make sure new WD found locally; if not, try new location
-    if (!fs::dir_exists(WD)) {
-      WD <- WD0#reset
-      message(
-        "New WD not found; trying to update_fm() at old location: ",
-        WD
-      )
+    # Let's wait until it's recognized locally
+    message("Waiting for Google Drive for Desktop to find the new working directory at: ",WD)
+    checkmate::assert(fs::is_dir(WD), .var.name = "fs::is_dir()") %>%
+      catch_err(try_harder = T, waits = c(2, 5, 10, 15,30))
 
-    }
 
     test_fm1 <- update_fm(
       WD = WD,
@@ -140,15 +146,17 @@ lesson_go_live <- \(WD = getwd()) {
       test_fm2 <- NA
     }
 
-# Update TeachMatLinks to affect new locations of files -------------------
+    # Update TeachMatLinks to affect new locations of files -------------------
 
-  if(live_success & gp_success & shortcut_success & made_public_success & test_fm1 & test_fm2){
-    message("Running update_teach_links() to reflect new locations of items.")
-    update_success <- update_teach_links(WD=WD) %>% catch_err()
-  }else{
-    message("Skipping update_teach_links() b/c of step failures. Run manually if necessary.")
-    update_success <- FALSE
-  }
+    if (live_success &
+        gp_success &
+        shortcut_success & made_public_success & test_fm1 & test_fm2) {
+      message("Running compile_lesson() to make sure the lesson is up-to-date.")
+      update_success <- compile_lesson(WD = WD) %>% catch_err()
+    } else{
+      message("Skipping compile_lesson() b/c of step failures. Run manually if necessary.")
+      update_success <- FALSE
+    }
 
 
   }
@@ -176,7 +184,7 @@ lesson_go_live <- \(WD = getwd()) {
         gpID,
         "' and GdriveTeachMatID= NA"
       ),
-      "update_teach_links()"
+      "compile_lesson()"
     )
   )
 

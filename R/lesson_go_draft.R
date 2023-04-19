@@ -13,7 +13,8 @@
 #' @export
 
 lesson_go_draft <- \(WD = getwd()) {
-  if (WD == "?") {
+  #Force picking from live shared drive
+  if (grepl("\\?", WD)) {
     WD <- pick_lesson(shared_drive = "l")
   }
 
@@ -39,7 +40,9 @@ lesson_go_draft <- \(WD = getwd()) {
   if (!test_published) {
     message("GdrivePublicID not found. Skipping move back to GP-Studio'")
     draft_success <-
-      tm_success <-  shortcut_success <- test_fm1 <- test_fm2 <- update_success <-  NA
+      tm_success <-
+      shortcut_success <-
+      test_fm1 <- test_fm2 <- update_success <-  NA
   } else{
     #only try to look up teaching-materials in unpublished projects
     tm_drib <-
@@ -112,14 +115,13 @@ lesson_go_draft <- \(WD = getwd()) {
     }
 
     # Update front-matter -----------------------------------------------------
-    # make sure WD found locally; if not, try new location
-    if (!fs::dir_exists(WD)) {
-      # WD0 <- WD#save WD
-      WD <- gsub("GP-LIVE", "GP-Studio", WD, fixed = T)#new value
-      message("'GP-LIVE' WD not found; trying to update_fm() at new 'GP-Studio' location: ",
-              WD)
 
-    }
+    WD <- gsub("GP-LIVE", "GP-Studio", WD, fixed = T)#new value
+    # Let's wait until it's recognized locally (Gdrive for Desktop needs to catch up)
+    message("Waiting for Google Drive for Desktop to find the new working directory at: ",WD)
+    checkmate::assert(fs::is_dir(WD), .var.name = "fs::is_dir()") %>%
+      catch_err(try_harder = T, waits = c(2, 5, 10, 15, 30))
+
 
 
     test_fm1 <- update_fm(
@@ -150,10 +152,10 @@ lesson_go_draft <- \(WD = getwd()) {
     if (draft_success &
         tm_success &
         shortcut_success & test_fm1 & test_fm2) {
-      message("Running update_teach_links() to reflect new locations of items.")
-      update_success <- update_teach_links(WD = WD) %>% catch_err()
+      message("Running compile_lesson() to make sure the lesson is up-to-date.")
+      update_success <- compile_lesson(WD = WD) %>% catch_err()
     } else{
-      message("Skipping update_teach_links() b/c of step failures. Run manually if necessary.")
+      message("Skipping compile_lesson() b/c of step failures. Run manually if necessary.")
       update_success <- FALSE
     }
 
@@ -183,7 +185,7 @@ lesson_go_draft <- \(WD = getwd()) {
         gpID,
         "'"
       ),
-      "update_teach_links()"
+      "compile_lesson()"
     )
   )
 

@@ -220,7 +220,7 @@ zget_items <- \(df, fm) {
                        "pdf" = "PDF",
                        "Download")#default
 
-    full_link_txt <- paste_valid(cust_txt, disclaimer)
+    full_link_txt <- paste_valid(cust_txt, disclaimer,collapse=" ")
 
     #Revise custom preview/download link based on what_we_want * item_type
     #Necessary b/c some handouts are presentations & exporting to PDF works differently for slides than docs
@@ -245,7 +245,7 @@ zget_items <- \(df, fm) {
         cust_url
       )
 
-    drive_share_txt <- paste_valid("Copy/Edit in Google Docs",disclaimer)
+    drive_share_txt <- paste_valid("Copy/Edit in Google Docs",disclaimer, collapse=" ")
     #output for this part
     list(
       itemTitle = df_item_i$title,
