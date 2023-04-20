@@ -8,7 +8,8 @@
 #' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]
 #' @param checkWD passed to [safe_read_yaml()]; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory
 #' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=TRUE
-#' @param check string referring to a check function to pass to [checkmate::assert()]; e.g. check="checkmate::check_data_frame" will throw an error if all outputs are of the call are not data frames. default=NULL
+#' @param check string referring to a check function(x) to pass to [checkmate::assert()]; e.g. check="checkmate::check_character(x,min.chars=10)" will throw an error if an output is not a string of at least 10 characters. default=NULL
+#' @param ... additional args passed to check function
 #' @examples
 #' get_fm()
 #' get_fm(key=c("Title","ShortTitle","locale"))
@@ -22,7 +23,8 @@ get_fm <-
            WD = getwd(),
            checkWD = FALSE,
            auto_init = TRUE,
-           check = NULL) {
+           check = NULL,
+           ...) {
     WD <- parse_wd(WD)
 
     y <- safe_read_yaml(WD = WD,
@@ -88,9 +90,9 @@ get_fm <-
 
     if (!is.null(check)) {
 
-      cust_check <- eval(parse(text = (substitute(check))))
       results%>%  purrr::map( \(x) {
-        checkmate::assert(cust_check(x),
+        checkmate::assert(
+          eval(parse(text=check)),
                           .var.name = x)
 
       })

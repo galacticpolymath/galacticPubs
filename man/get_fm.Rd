@@ -9,7 +9,8 @@ get_fm(
   WD = getwd(),
   checkWD = FALSE,
   auto_init = TRUE,
-  check = NULL
+  check = NULL,
+  ... = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ get_fm(
 \item{auto_init}{logical; do you want to automatically create a front-matter.yml file if it's not found? Runs \code{\link[=init_fm]{init_fm()}}; default=TRUE}
 
 \item{check}{string referring to a check function to pass to \code{\link[checkmate:assert]{checkmate::assert()}}; e.g. check="checkmate::check_data_frame" will throw an error if all outputs are of the call are not data frames. default=NULL}
+
+\item{...}{additional args passed to check function}
 }
 \description{
 Imports meta/front-matter.yml value(s) to environment as a list.
