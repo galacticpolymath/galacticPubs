@@ -49,7 +49,6 @@ Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but
 \details{
 Combines functionality of:
 \itemize{
-\item \code{\link[=compileProcedure]{compileProcedure()}}
 \item \code{\link[=compile_standards]{compile_standards()}}
 \item \code{\link[=learningChart]{learningChart()}} and \code{\link[=learningEpaulette]{learningEpaulette()}}
 \item \code{\link[=compileAcknowledgments]{compileAcknowledgments()}}

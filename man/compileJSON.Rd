@@ -4,14 +4,14 @@
 \alias{compileJSON}
 \title{compileJSON}
 \usage{
-compileJSON(outputFileName = "LESSON.json", destFolder, WD = getwd())
+compileJSON(WD = getwd(), outputFileName = "LESSON.json", destFolder)
 }
 \arguments{
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
 \item{outputFileName}{output file name; default= "processedProcedure.json"}
 
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
-
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/LESSON.json

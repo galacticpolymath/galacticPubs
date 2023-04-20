@@ -5,6 +5,7 @@
 \title{learningChart}
 \usage{
 learningChart(
+  WD = getwd(),
   caption = NA,
   captionN = TRUE,
   centralText = NA,
@@ -13,13 +14,14 @@ learningChart(
   saveFile = TRUE,
   destFolder,
   fileName = "GP-Learning-Chart",
-  WD = getwd(),
   dpi = 200,
   showPlot = TRUE,
   ...
 )
 }
 \arguments{
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
 \item{caption}{quoted text you want to go at the bottom of the chart}
 
 \item{captionN}{T/F, add the range of the number of standards per grade used to make the plot to caption?}
@@ -35,8 +37,6 @@ learningChart(
 \item{destFolder}{where do you want to save the folder; by default in the "assets/learningPlots" folder, 1 level up from the working directory}
 
 \item{fileName}{expects "somefilename" (file extension will be ignored)}
-
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 
 \item{dpi}{what resolution would you like the output in dots per inch? 300 by default}
 

@@ -7,8 +7,7 @@
 compile_standards(
   WD = getwd(),
   learningplot_correction = TRUE,
-  targetSubj = NULL,
-  structureForWeb = TRUE
+  targetSubj = NULL
 )
 }
 \arguments{

@@ -26,5 +26,6 @@ parse_wd <- \(str=NULL){
     }
   }
   checkmate::assert_character(out, all.missing = FALSE,min.chars = 10)
+  checkmate::assert_directory_exists(out)
   out
 }

@@ -12,11 +12,10 @@
 #'
 compile_standards <- function(WD = getwd(),
                               learningplot_correction = TRUE,
-                              targetSubj = NULL,
-                              structureForWeb = TRUE) {
+                              targetSubj = NULL) {
   . = NULL #to avoid errors with dplyr syntax
-
- WD <- parse_wd(WD)
+  message("compiling standards...")
+  WD <- parse_wd(WD)
 
   #############
   # IMPORTANT: Add Subjects here if you need to align new ones --------------
@@ -47,10 +46,11 @@ compile_standards <- function(WD = getwd(),
   fm <- get_fm(WD = WD)
   #check specifically for standards link
   stnds_id <- get_fm("GdriveStandardsID" , WD = WD)
+  checkmate::assert_character(stnds_id, min.chars = 6)
 
   if (is.na(stnds_id)) {
     warning("No standards link found. Try running updatefm() for ", WD)
-    success=FALSE
+    success = FALSE
 
     # Big else for everything----------------------------------------------------------------
 
@@ -63,27 +63,28 @@ compile_standards <- function(WD = getwd(),
       }
     }
 
-    # Import XLSX files -------------------------------------------------------
-    #Import master alignment with ALL standards from https://github.com/galacticpolymath/standardX or the supplied standardsFile
-
-
-
-    # #initialize list for output
-    # output=list() #initialize list
-    # in_out=list()#initialize list for tracking n standards codes input
-
-    # import alignment --------------------------------------------------------
-    stnds_drib <- drive_find_path(stnds_id)
-
-
-
     # Import standards alignment--------------------------------------------------------
+    # get standards from supplied file, tab 2
+
+    stnds_drib <- drive_find_path(stnds_id)
+    checkmate::assert_data_frame(stnds_drib)
+
+    LOs <-    googlesheets4::read_sheet(
+      stnds_drib$id,
+      sheet = 1,
+      skip = 1,
+      col_types = "c"
+    ) %>% dplyr::filter(!is.na(.data$`LO#`))
+
+
+
     a_master <- googlesheets4::read_sheet(
       stnds_drib$id,
       sheet = 2,
       skip = 1,
       col_types = "c"
     ) %>% dplyr::filter(!is.na(.data$Code))
+
 
     a0 <- googlesheets4::read_sheet(
       stnds_drib$id,
@@ -92,12 +93,14 @@ compile_standards <- function(WD = getwd(),
       col_types = "c"
     ) %>% dplyr::filter(!is.na(.data$Code))
 
+    is_valid_tab1 <- checkmate::test_data_frame(LOs, min.rows = 1)
     is_valid_tab2 <-
       checkmate::test_data_frame(a_master, min.rows = 1)
     is_valid_tab4 <- checkmate::test_data_frame(a0, min.rows = 1)
 
-    #If missing all rows or not a data frame, try updating gdrive links
-    if (!is_valid_tab2 | !is_valid_tab4) {
+
+    # If missing all rows or not a data frame, try updating gdrive links --------
+    if (!is_valid_tab1 | !is_valid_tab2 | !is_valid_tab4) {
       message(
         "Found invalid/empty gsheets_link. Trying to reconnect...running update_fm(WD=WD,drive_reconnect=TRUE)."
       )
@@ -105,6 +108,13 @@ compile_standards <- function(WD = getwd(),
       stnds_id <- get_fm("GdriveStandardsID" , WD = WD)
       #Try again to import
       stnds_drib <- drive_find_path(stnds_id)
+
+      LOs <-    googlesheets4::read_sheet(
+        stnds_drib$id,
+        sheet = 1,
+        skip = 1,
+        col_types = "c"
+      ) %>% dplyr::filter(!is.na(.data$`LO#`))
 
       a_master <- googlesheets4::read_sheet(
         stnds_drib$id,
@@ -133,7 +143,38 @@ compile_standards <- function(WD = getwd(),
     }
 
 
-# Start processing standards ----------------------------------------------
+    # Test if imported standards are initiated --------------------------------
+    message("Checking if standards gsheet has been initialized...")
+    #check that "Help Text" does not occur anywhere in the Learning Objective statement column in Tab1
+    names(LOs)[2] <- "lo_statement"
+    tab1_initiated <-
+      (LOs %>% dplyr::pull("lo_statement") %>% grepl("^[Hh]elp [Tt]ext", .) %>% sum()) == 0
+    #Expect some LO#s
+    tab2_initiated <-
+      (a_master %>% dplyr::filter(!is.na(.data$`LO#`)) %>% dplyr::pull(.data$`LO#`)  %>%
+         length()) > 0
+    #Shouldn't be "Paste here" helper text in first cell of Tab4
+    tab4_initiated <-
+      !grepl("[Pp]aste", a0$Code[1])
+
+
+    # Report initiation checks ------------------------------------------------
+    print(dplyr::tibble(
+      initialized = convert_T_to_check(c(
+        tab1_initiated, tab2_initiated, tab4_initiated
+      )),
+      tab = c(
+        "1.Learning-Objectives",
+        "2.Standard-Selection",
+        "4.Finalize"
+      )
+    ))
+
+    if(!tab1_initiated | !tab2_initiated | !tab4_initiated){
+      warning("compile_standards() aborted because some tab(s) have not been initiated.")
+      success <- FALSE
+    }else{
+    # Start processing standards ----------------------------------------------
 
     #rename so easier to deal with
     names(a0)[1:12] <-
@@ -166,11 +207,10 @@ compile_standards <- function(WD = getwd(),
         "Sustainability")
 
     #required subjects for learning chart
-    req_subjects <- c(
-        "ELA",
-        "Math",
-        "Science",
-        "Social Studies")
+    req_subjects <- c("ELA",
+                      "Math",
+                      "Science",
+                      "Social Studies")
 
 
     found_subjects <- unique_sans_na(a0$subject)
@@ -188,11 +228,12 @@ compile_standards <- function(WD = getwd(),
     if (!(sum(check_all_req) == length(req_subjects))) {
       warning(
         "Not fully interdisciplinary lesson. Subjects found: \n",
-        utils::capture.output(print(check_all_req))
+        paste(utils::capture.output(check_all_req,type="output"),
+              collapse="\n")
       )
     }
 
-    if (!sum(unsupported)==0) {
+    if (!sum(unsupported) == 0) {
       warning("\nUnsupported subjects found: \n -",
               paste0(names(unsupported[which(unsupported)]), collapse = "\n -"))
     }
@@ -201,7 +242,7 @@ compile_standards <- function(WD = getwd(),
     # manage TBDs and flagged, undocumented alignments ------------------------
     tbds <- grepl("tbd", a0$how, ignore.case = TRUE)
     #a1 does not have records with lo_statements containing "TBD" or no entry for "how"
-    if (sum(tbds)>0) {
+    if (sum(tbds) > 0) {
       message(
         "\nThe following were removed because Learning Objective documentation contained 'TBD':\n\t\u2022",
         paste0(a0$code[tbds], collapse = "\n\t\u2022"),
@@ -224,7 +265,7 @@ compile_standards <- function(WD = getwd(),
       )
     }
 
-    a1 <- a0[!undoc & !tbds,]
+    a1 <- a0[!undoc & !tbds, ]
 
     # a2 has markdown bullets ("- ") added if missing
     # Add markdown bullet to front of lines that don't start with it
@@ -294,7 +335,7 @@ compile_standards <- function(WD = getwd(),
 
     #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standardsRef)
     #Remove "Part from a_master to avoid conflicts with changes made in tab 4.Finalize"
-    A <-
+    A0 <-
       dplyr::left_join(a3[, c("code_set",
                               "lo",
                               "lo_stmnt",
@@ -302,18 +343,20 @@ compile_standards <- function(WD = getwd(),
                               "grp",
                               "grouping",
                               "how",
-                              "part")], a_master[-which(tolower(names(a_master))=="part")], by = "code_set")
+                              "part")], a_master[-which(tolower(names(a_master)) ==
+                                                          "part")], by = "code_set")
 
 
     #factor subjects for desired order
 
-    A$subject <-
-      factor(A$subject, levels = ordered_subjects, ordered = T)
-    A <- A %>% dplyr::arrange(.data$subject)
+    A0$subject <-
+      factor(A0$subject, levels = ordered_subjects, ordered = T)
+    A <-
+      A0 %>% dplyr::filter(!is.na(.data$how)) %>%  dplyr::arrange(.data$subject)
 
 
     # warn if statements missing (indicates bad merge) -----------------------
-    if (sum(stats::complete.cases(A$statement)) == 0) {
+    if (nrow(A) == 0) {
       warning(
         "Bad merge. No 'Statements' matched standards code for each set. Try changing 'standardsRef' in compile_standards(); currently, standardsRef = '",
         standardsRef,
@@ -346,7 +389,7 @@ compile_standards <- function(WD = getwd(),
       sapply(gradeBandBreaks, function(x)
         paste0(x[1], "-", x[length(x)]))
 
-    gradeBands <- sapply(A$grade, function(x) {
+    gradeBand <- sapply(A$grade, function(x) {
       #Ignore K-12 wide standards for assigning grade bands
       if (grepl("K", x, ignore.case = TRUE)) {
         NA
@@ -406,8 +449,9 @@ compile_standards <- function(WD = getwd(),
               }
 
               #Get parts assignments for this standard
-              uniq_parts <- strsplit(unique(d_gr$part),split=",") %>% unlist() %>% trimws() %>% unique() %>% sort()
-              if(d_gr$code=="SL.6.2"){
+              uniq_parts <-
+                strsplit(unique(d_gr$part), split = ",") %>% unlist() %>% trimws() %>% unique() %>% sort()
+              if (d_gr$code == "SL.6.2") {
 
               }
               list(
@@ -415,13 +459,11 @@ compile_standards <- function(WD = getwd(),
                 codes = unique(d_gr$code),
                 #make sure grade is never changed to grades in spreadsheet...
 
-                grades = d_gr$grade %>% unique() %>%
-                  #function to force number to be integer and ignore character e.g. "K", but always output character
-                  sapply(., function(x_i) {
-                    as_int <- as.integer(x_i)
-                    r = ifelse(is.na(as_int), x_i, as_int)
-                    as.character(r)
-                  }),
+                #Man, pretty annoying string of pipes necessary to get grades formatted right
+                grades = d_gr$grade %>% gsub("[a-zA-Z]", "", .) %>%
+                  strsplit(split = ",") %>% unlist() %>% trimws() %>%
+                  lapply(., \(x) ifelse(is_empty(x), NA, x)) %>% unique_sans_na() %>%
+                  as.integer() %>% sort() %>% as.character(),
                 statements = unique(d_gr$statement),
                 alignmentNotes = aNotes,
                 subcat = d_gr$subcat[1]
@@ -486,8 +528,8 @@ compile_standards <- function(WD = getwd(),
     a_template <-
       a_master %>% dplyr::select("subject", "dimension") %>%
       dplyr::distinct() %>% dplyr::mutate(n = 0) %>%
-      #Get rid of subjects not included in the alignment
-      dplyr::filter(.data$subject %in% unique(A$subject))
+      #Get rid of subjects not included in the alignment, but also required subjects
+      dplyr::filter(.data$subject %in% c(unique(A$subject),req_subjects))
 
     #super important to refactor subject on the imported data to ensure order
 
@@ -530,9 +572,9 @@ compile_standards <- function(WD = getwd(),
     #*So to make the correction, we'll weight the proportions by total N for subject
     a_combined$id = 1:nrow(a_combined)
     a_combined$n_adj <- a_combined$n / a_combined$tot_n_subj
-    a_combined$n_prop <- a_combined$n / sum(a_combined$n)
+    a_combined$n_prop <- a_combined$n / sum(a_combined$n,na.rm=T)
     a_combined$n_prop_adj <-
-      a_combined$n_adj / sum(a_combined$n_adj)
+      a_combined$n_adj / sum(a_combined$n_adj,na.rm=T)
 
     #Remind r that a_combined factors are ORDERED
     a_combined$subject <-
@@ -544,12 +586,26 @@ compile_standards <- function(WD = getwd(),
     #Calculate corrected proportions if requested
     proportions0 = a_combined  %>% dplyr::group_by(.data$subject)
     if (learningplot_correction) {
-      proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop_adj), 2), .groups =
+      proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop_adj,na.rm=T), 2), .groups =
                                                         "drop")
     } else{
       #don't use adjusted proportions if not requested
-      proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop), 2), .groups =
+      proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop,na.rm=T), 2), .groups =
                                                         "drop")
+    }
+
+    #Make sure proportions = 100%
+
+    tot_prop <- sum(proportions$proportion)
+    if(tot_prop!=1){
+      remaining <- 1-tot_prop
+      where_add <- proportions$proportion %>% which.max()
+      message("In output for learningEpaulette(), adding ",
+              round(remaining,2),
+              " to ",
+              proportions$subject[where_add],
+              " so proportions add to 100%")
+      proportions$proportion[where_add] <- proportions$proportion[where_add]+remaining
     }
 
     #Set up vector to recode subject levels according to key (for learning chart subject abbrevs.)
@@ -603,7 +659,7 @@ compile_standards <- function(WD = getwd(),
     rectangles$border <- "transparent"
 
     #Ensure that xmax[4] is 1, so there's never a gap at the right
-    rectangles$xmax[4] <- 1
+    rectangles$xmax[nrow(rectangles)] <- 1
 
 
     #boldenize & embiggenate if targetSubj indicated
@@ -678,8 +734,8 @@ compile_standards <- function(WD = getwd(),
       data = list(
         input = dplyr::as_tibble(a0),
         compiled = dplyr::as_tibble(A),
-        problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
-        gradeBands = gradeBands,
+        problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0,]),
+        gradeBand = gradeBand,
         list_for_json = out
       ),
       a_combined = a_combined,
@@ -688,16 +744,19 @@ compile_standards <- function(WD = getwd(),
       targetSubj = targetSubj,
       learning_chart_friendly = learning_chart_friendly
     )
+    #
+    rds_saveFile <- fs::path(WD, "meta", "standards.RDS")
+    message("Saving compiled standards data to '", rds_saveFile, "'")
+    saveRDS(toSave, file = rds_saveFile)
 
-    saveFile <- fs::path(WD, "meta", "standards.RDS")
-    message("Saving standards info to '",saveFile,"'")
-    saveRDS(toSave, file = saveFile)
+    json_saveFile <- fs::path(WD,"meta","JSON","standards.json")
+    message("Saving web-formatted standards to '", json_saveFile, "'")
+    save_json(out,json_saveFile)
 
-    save_json()
-
-    problem_entries <- dplyr::as_tibble(a0[(tbds + undoc) > 0, ])
+    problem_entries <- dplyr::as_tibble(a0[(tbds + undoc) > 0,])
     #need to build better checks than this
-    success=TRUE
+    success = TRUE
+    }
   }#End Big else
 
   #add grades information to output
@@ -707,7 +766,7 @@ compile_standards <- function(WD = getwd(),
       input = dplyr::as_tibble(a0),
       compiled = dplyr::as_tibble(A),
       problem_entries = problem_entries,
-      gradeBands = gradeBands,
+      gradeBand = gradeBand,
       learningObj = fm$LearningObj,
       targetSubj = targetSubj,
       subject_proportions = proportions,

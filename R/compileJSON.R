@@ -2,19 +2,21 @@
 #'
 #' Combine all JSON components into 1 compiledLesson.JSON
 #'
+#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param outputFileName output file name; default= "processedProcedure.json"
-#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/LESSON.json
 #' @importFrom rlang .data
 #' @export
 #'
-compileJSON <- function(outputFileName="LESSON.json",destFolder, WD=getwd()){
+compileJSON <- function( WD=getwd(),outputFileName="LESSON.json",destFolder){
+
+  WD=parse_wd(WD)
 
   if(missing(destFolder)){destFolder=fs::path(WD,"meta","JSON")}
 
   #   jsonNames should be ordered; this is telling which json files to look for and assemble them in this order
-  jsonNames<-c("header","overview","preview","teaching-materials","procedure","extensions","bonus","background","standards-header","learning-chart","standards","feedback","job-viz","credits","acknowledgments","versions")
+  jsonNames<-c("header","overview","preview","teaching-materials","extensions","bonus","background","standards-header","learning-chart","standards","feedback","job-viz","credits","acknowledgments","versions")
 
   potentialFilenames<-paste0(jsonNames,".json")
 
@@ -58,7 +60,7 @@ compileJSON <- function(outputFileName="LESSON.json",destFolder, WD=getwd()){
 
 
   # Write JSON for GP Simple Lesson Plan -----------------------------------
-  jsonlite::write_json(lesson,outFile,pretty=TRUE,auto_unbox = TRUE,na="null",null="null")
+  save_json(lesson,outFile)
 
 
   # return compiled output --------------------------------------------------

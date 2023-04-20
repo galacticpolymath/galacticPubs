@@ -8,6 +8,7 @@
 #' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]
 #' @param checkWD passed to [safe_read_yaml()]; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory
 #' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=TRUE
+#' @param check string referring to a check function to pass to [checkmate::assert()]; e.g. check="checkmate::check_data_frame" will throw an error if all outputs are of the call are not data frames. default=NULL
 #' @examples
 #' get_fm()
 #' get_fm(key=c("Title","ShortTitle","locale"))
@@ -16,68 +17,90 @@
 #' get_fm("gdrive","?")
 #' @export
 
-get_fm <- function(key = NULL, WD = getwd(), checkWD=FALSE,auto_init=TRUE) {
-   WD <- parse_wd(WD)
+get_fm <-
+  function(key = NULL,
+           WD = getwd(),
+           checkWD = FALSE,
+           auto_init = TRUE,
+           check = NULL) {
+    WD <- parse_wd(WD)
 
-  y <- safe_read_yaml(WD=WD,checkWD=checkWD,auto_init=auto_init)
-  KEYS <- names(y)
+    y <- safe_read_yaml(WD = WD,
+                        checkWD = checkWD,
+                        auto_init = auto_init)
+    KEYS <- names(y)
 
-  #output whole front-matter if no key specifically requested
-  if (is.null(key)) {
-    results <- y
-    #otherwise check for key existence & output
+    #output whole front-matter if no key specifically requested
+    if (is.null(key)) {
+      results <- y
+      #otherwise check for key existence & output
 
-  } else{
-
-    #check for partial matching prefix '~' only if length==1
-    if (length(key) == 1 & substr(key[1], 1, 1) == "~") {
-      #check starts with; case insensitive, removing ~)
-      pmatches <- startsWith(x = tolower(KEYS),
-                             prefix = tolower(gsub("~", "", key[1]))) %>%
-        which()
-
-      if (length(pmatches) > 0) {
-        #Output partial match keys if found
-        results0 <-  y[KEYS[pmatches]]
-      } else{
-        results0 <- NULL
-        warning("\nNo partial matching results for keys using string: ",key)
-      warning("** Fix your key string or try updating your front-matter with update_fm()")
-
-      }
-    #Otherwise try to exact match
     } else{
-      results0 <- purrr::map(1:length(key), \(i) {
-        key_checks_i <- checkmate::test_choice(key[i], KEYS)
-        if (key_checks_i) {
-          y[[key[i]]]
+      #check for partial matching prefix '~' only if length==1
+      if (length(key) == 1 & substr(key[1], 1, 1) == "~") {
+        #check starts with; case insensitive, removing ~)
+        pmatches <- startsWith(x = tolower(KEYS),
+                               prefix = tolower(gsub("~", "", key[1]))) %>%
+          which()
+
+        if (length(pmatches) > 0) {
+          #Output partial match keys if found
+          results0 <-  y[KEYS[pmatches]]
         } else{
-          NULL
+          results0 <- NULL
+          warning("\nNo partial matching results for keys using string: ",
+                  key)
+          warning("** Fix your key string or try updating your front-matter with update_fm()")
+
         }
+        #Otherwise try to exact match
+      } else{
+        results0 <- purrr::map(1:length(key), \(i) {
+          key_checks_i <- checkmate::test_choice(key[i], KEYS)
+          if (key_checks_i) {
+            y[[key[i]]]
+          } else{
+            NULL
+          }
+
+        })
+        names(results0) <- key
+      }
+
+
+      #remove result items where no key found
+      results <-
+        results0[lengths(results0) > 0]
+      missings <-
+        which(lengths(results0) == 0)
+      if (length(missings) > 0) {
+        warning("\nKeys not found:\n -",
+                paste0("'", key[missings], "'", collapse = "\n -"))
+        warning("*  If you meant to do partial key matching, add a '~' prefix.")
+        warning("** Try updating your front-matter with update_fm()")
+      }
+
+    }#End logic for key provided
+
+
+
+    # Do validation checks for output -----------------------------------------
+
+    if (!is.null(check)) {
+
+      cust_check <- eval(parse(text = (substitute(check))))
+      results%>%  purrr::map( \(x) {
+        checkmate::assert(cust_check(x),
+                          .var.name = x)
 
       })
-      names(results0) <- key
+
     }
 
-
-    #remove result items where no key found
-    results <-
-      results0[lengths(results0) > 0]
-    missings <-
-      which(lengths(results0) == 0)
-    if (length(missings) > 0) {
-      warning("\nKeys not found:\n -",
-              paste0("'", key[missings], "'", collapse = "\n -"))
-      warning("*  If you meant to do partial key matching, add a '~' prefix.")
-      warning("** Try updating your front-matter with update_fm()")
+    #Don't return a list unless more than one item returned
+    if (length(results) <= 1) {
+      unlist(results)
+    } else{
+      results
     }
-
-  }#End logic for key provided
-
-  #Don't return a list unless more than one item returned
-  if (length(results) <= 1) {
-    unlist(results)
-  } else{
-    results
   }
-}
