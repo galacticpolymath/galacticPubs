@@ -236,7 +236,7 @@ compile_fm <- \(WD = getwd()) {
   ack <-
     get_fm("Acknowledgments", WD = WD)[[1]] %>% dplyr::as_tibble()
 
-
+browser()
 
   if (is_empty(ack) ) {
     ack_out0 <- NULL

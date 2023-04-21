@@ -27,6 +27,7 @@ get_fm <-
            auto_init = FALSE,
            check = NULL,
            always_list=FALSE,
+           standardize_NA = FALSE,
            ...) {
     WD <- parse_wd(WD)
 

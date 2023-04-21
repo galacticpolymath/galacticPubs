@@ -91,8 +91,13 @@ safe_read_yaml <- function(yaml_path = NULL,
     out
   }
 
-  #standardize first level data
-  y2 <- standardize_na(y)
+  #standardize first level data if requested
+  if(standardize_NA){
+    standardize_na(y)
+  }else{
+    y
+  }
+
 
 
 
