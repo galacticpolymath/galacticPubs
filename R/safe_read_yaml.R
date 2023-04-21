@@ -7,13 +7,15 @@
 #' @param eval.expr boolean; do you want to evaluate expression in yaml prepended with '!expr '? Default=TRUE
 #' @param checkWD do you want to run [check_wd()] which will produce warning messages if working directory assumptions aren't met?; default= TRUE
 #' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=TRUE
+#' @param standardize_NA logical; do you want all "",NULL,list(), etc. to be read in as NA using [is_empty()]? default=FALSE
 #' @export
 #
 safe_read_yaml <- function(yaml_path = NULL,
                            WD = NULL,
                            eval.expr = TRUE,
                            checkWD = TRUE,
-                           auto_init = TRUE) {
+                           auto_init = TRUE,
+                           standardize_NA = FALSE) {
   if (!is.null(WD) & !is.null(yaml_path)) {
     stop("Only supply 'yaml_path' OR 'WD', not both.")
   }
@@ -62,35 +64,35 @@ safe_read_yaml <- function(yaml_path = NULL,
 
 
   # #Function to standardize empty values to NA for all items in a list
-  # standardize_na <- function(x) {
-  #   out <- lapply(1:length(x), function(i) {
-  #     if (is.list(x)) {
-  #       xi <- x[[i]]
-  #     } else{
-  #       xi <- x[i]
-  #     }
-  #
-  #     # #run recursively to clean up sub-lists and vectors
-  #     # if(length(xi)>1){
-  #     #   unlist_after=!is.list(xi)
-  #     #   xi <- standardize_na(xi)
-  #     #   if(unlist_after){
-  #     #     xi <- xi %>% unlist()
-  #     #   }
-  #     # }
-  #     # #Length>1 necessary to keep long NAs
-  #     # if (is_empty(xi,names_meaningful=TRUE)  ) {
-  #     #   xi <- rep(NA,length(xi))
-  #     # } else{
-  #     #   xi
-  #     # }
-  #   })
-  #   names(out) <- names(x)
-  #   out
-  # }
-  #
-  # #standardize first level data
-  # y2 <- standardize_na(y)
+  standardize_na <- function(x) {
+    out <- lapply(1:length(x), function(i) {
+      if (is.list(x)) {
+        xi <- x[[i]]
+      } else{
+        xi <- x[i]
+      }
+
+      #run recursively to clean up sub-lists and vectors
+      if(length(xi)>1){
+        unlist_after=!is.list(xi)
+        xi <- standardize_na(xi)
+        if(unlist_after){
+          xi <- xi %>% unlist()
+        }
+      }
+      #Length>1 necessary to keep long NAs
+      if (is_empty(xi,names_meaningful=TRUE)  ) {
+        xi <- rep(NA,length(xi))
+      } else{
+        xi
+      }
+    })
+    names(out) <- names(x)
+    out
+  }
+
+  #standardize first level data
+  y2 <- standardize_na(y)
 
 
 

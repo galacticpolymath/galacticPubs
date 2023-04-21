@@ -9,7 +9,8 @@ safe_read_yaml(
   WD = NULL,
   eval.expr = TRUE,
   checkWD = TRUE,
-  auto_init = TRUE
+  auto_init = TRUE,
+  standardize_NA = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ safe_read_yaml(
 \item{checkWD}{do you want to run \code{\link[=check_wd]{check_wd()}} which will produce warning messages if working directory assumptions aren't met?; default= TRUE}
 
 \item{auto_init}{logical; do you want to automatically create a front-matter.yml file if it's not found? Runs \code{\link[=init_fm]{init_fm()}}; default=TRUE}
+
+\item{standardize_NA}{logical; do you want all "",NULL,list(), etc. to be read in as NA using \code{\link[=is_empty]{is_empty()}}? default=FALSE}
 }
 \description{
 Wrapper for \link[yaml:read_yaml]{read_yaml} that simplifies all null and missing data to NA. Creates front-matter.yml if not found

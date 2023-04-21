@@ -6,8 +6,6 @@
 \usage{
 update_teach_links(
   WD = getwd(),
-  rename_parts = TRUE,
-  prompt_rename = TRUE,
   rebuild = NULL,
   rm_missing = TRUE,
   clean = FALSE,
@@ -16,10 +14,6 @@ update_teach_links(
 }
 \arguments{
 \item{WD}{a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" which will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
-
-\item{rename_parts}{logical; do you want to rename part folders based on PartTitles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function \code{\link[=zrename_parts]{zrename_parts()}}}
-
-\item{prompt_rename}{logical, do you want to promput user about whether to rename parts? default=T}
 
 \item{rebuild}{if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL}
 
@@ -30,11 +24,8 @@ update_teach_links(
 \item{ignore}{regex expression to remove certain filetypes (e.g. txt files); default= ".txt$"}
 }
 \description{
-Updates links to teaching materials and also renames Part Folders.
-How?: Searches lesson's google drive folder to populate the 'TeachMatLinks' tab of the lesson's \code{meta/teach-it_*.gsheet} file.
-Merges these detected file names and links with manually added "extLink" links to learning resources hosted elsewhere.
-90\% of this algorithm uses drive_* functions, so it's rather slow. It does save a state of files (see step 7 in details)
-using the virtualized path, though. This is used to skip updating if all files are up to date.
+Searches lesson's google drive folder to populate the 'TeachMatLinks' tab of the lesson's 'meta/teach-it_\emph{.gsheet' file.
+Merges these detected file names and links with manually added "extLink" links to learning resources hosted elsewhere. 90\% of this algorithm uses drive_} functions, so it's rather slow. It does save a state of files (see step 7 in details) using the virtualized path, though. This is used to skip updating if all files are up to date.
 }
 \details{
 It's a hybrid lookup system that requires Google Drive for Desktop to be setup with permission to
@@ -46,7 +37,6 @@ GP-Studio shared drive and a web connection. Steps:
 \item Get Gdrive links for downloads, classroom- and remote- lessons, and assessments.
 \item Merge results with manually entered titles and such in 'meta/teach-it.gsheet TeachMatLinks tab'
 \item Save 'meta/teach-it.gsheet'
-\item **Renames folders based on info in the PartTitles tab
 \item Save teach-it_state.RDS that stores info about the teaching-materials folder at the time of the last update. \code{\link[=compile_lesson]{compile_lesson()}} uses \code{\link[=get_state]{get_state()}} to check if the current state is identical to the state at the time of the last update to skip this update_teach_links call.
 }
 }

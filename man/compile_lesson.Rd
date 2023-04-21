@@ -44,11 +44,12 @@ lesson_compile(
 current_data; also the lesson JSON is saved to \code{meta/JSON/LESSON.json}
 }
 \description{
-Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to \code{\link[=stage_assets]{stage_assets()}} and \code{\link[=publish]{publish()}} to publish these changes to the web.
+Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to \code{\link[=stage_assets]{stage_assets()}} and \code{\link[=publish]{publish()}} to publish these changes to the web. Tries to use cacheing, but sometimes, may need to run a function twice to get efficient time savings because of delay in modTimes with Google Drive for Desktop.
 }
 \details{
 Combines functionality of:
 \itemize{
+\item \code{\link[=compile_fm]{compile_fm()}}
 \item \code{\link[=compile_standards]{compile_standards()}}
 \item \code{\link[=learningChart]{learningChart()}} and \code{\link[=learningEpaulette]{learningEpaulette()}}
 \item \code{\link[=compileAcknowledgments]{compileAcknowledgments()}}

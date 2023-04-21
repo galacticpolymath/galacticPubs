@@ -234,14 +234,15 @@ compile_fm <- \(WD = getwd()) {
   # acknowledgments.json ----------------------------------------------------
   #
   ack <-
-    get_fm("Acknowledgments", WD = WD) %>% dplyr::as_tibble()
-  browser()
+    get_fm("Acknowledgments", WD = WD)[[1]] %>% dplyr::as_tibble()
 
 
-  if (nrow(ack) == 0) {
+
+  if (is_empty(ack) ) {
     ack_out0 <- NULL
   } else{
     roles <- unique(ack$Role)
+    browser()
     ack_out0 <- list()
     for (i in 1:length(roles)) {
       #Also allow {vid} shortcodes

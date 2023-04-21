@@ -10,6 +10,7 @@ get_fm(
   checkWD = FALSE,
   auto_init = FALSE,
   check = NULL,
+  always_list = FALSE,
   ...
 )
 }
@@ -24,7 +25,11 @@ get_fm(
 
 \item{check}{string referring to a check function(x) to pass to \code{\link[checkmate:assert]{checkmate::assert()}}; e.g. check="checkmate::check_character(x,min.chars=10)" will throw an error if an output is not a string of at least 10 characters. default=NULL}
 
+\item{always_list}{logical; do you want to always return a list? default=FALSE will unlist() the result if it seems to be a single item}
+
 \item{...}{additional args passed to check function}
+
+\item{standardize_NA}{logical; do you want all "",NULL,list(), etc. to be read in as NA using \code{\link[=is_empty]{is_empty()}}? passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}; default=FALSE}
 }
 \description{
 Imports meta/front-matter.yml value(s) to environment as a list.

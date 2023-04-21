@@ -43,6 +43,7 @@ compile_lesson <-
       current_data <-
         get_fm(WD = WD)
     }
+
     if (missing(choices)) {
       choices <- current_data$ReadyToCompile
     }
