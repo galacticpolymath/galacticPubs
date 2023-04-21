@@ -234,9 +234,9 @@ compile_fm <- \(WD = getwd()) {
   # acknowledgments.json ----------------------------------------------------
   #
   ack <-
-    get_fm("Acknowledgments", WD = WD)[[1]] %>% dplyr::as_tibble()
+    get_fm("Acknowledgments", WD = WD,standardize_NA = TRUE)[[1]] %>% dplyr::as_tibble()
 
-browser()
+
 
   if (is_empty(ack) ) {
     ack_out0 <- NULL
@@ -295,15 +295,15 @@ browser()
   # versions.json -----------------------------------------------------------
 
   ver <-
-    get_fm("Versions", WD = WD, check = "checkmate::check_data_frame(x)")
+    get_fm("Versions", WD = WD,standardize_NA = TRUE)[[1]] %>% dplyr::as_tibble()
 
-  if (nrow(ver) == 0) {
+  if (is_empty(ver)) {
     ack_out0 <- NULL
   } else{
-    ver$date <-
-      sapply(ver$date, function(x) {
-        as.character(as.Date(as.numeric(x), origin = "1899-12-30"), format = "%b %d, %Y")
-      }, USE.NAMES = FALSE)
+    # ver$date <-
+    #   sapply(ver$date, function(x) {
+    #     as.character(as.Date(as.numeric(x), origin = "1899-12-30"), format = "%b %d, %Y")
+    #   }, USE.NAMES = FALSE)
     ver$major <- gsub("(^[^\\.]*)\\..*", "\\1", ver$ver_num)
     #Change 0 release to beta for hierarchy
     ver$major <-
@@ -325,7 +325,7 @@ browser()
             date = ver_i$date,
             summary = ver_i$ver_summary,
             notes = ver_i$ver_notes,
-            acknowledgments = ver_i$ver_acknowledgements
+            acknowledgments = ver_i$ver_acknowledgments
           )
       }
       ver_out0[[mjr]] <-
