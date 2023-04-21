@@ -12,18 +12,21 @@ prep_input <- function(input,
                        yaml_path = NULL,
                        existing_current_data = NULL,
                        WD = getwd()) {
-
   #read in existing front-matter.yml if it exists
   #Need to try_harder in case we need to wait for Google Drive for Desktop to
   #catch up with the folder move during live/draft staging
-  test_saved <- get_fm(WD = WD,auto_init=FALSE) %>% catch_err(try_harder = TRUE,keep_results = T)
-  if(test_saved$success){
+
+  test_saved <-
+    get_fm(WD = WD, auto_init = FALSE) %>% catch_err(try_harder = TRUE, keep_results = T)
+  if (test_saved$success) {
     saved <- test_saved$result
-  }else{
-    stop("Unable to retrieve saved, possibly because you just staged the project to Live and Gdrive for Desktop is cofused. Try again in a minute.")
+  } else{
+    stop(
+      "Unable to retrieve saved, possibly because you just staged the project to Live and Gdrive for Desktop is cofused. Try again in a minute."
+    )
   }
 
-  #update front-matter without saving to prompt user if it needs an update
+  #update front-matter without saving to prompt user if they want to update
   test_updated <-
     update_fm(
       WD = WD,
@@ -32,18 +35,20 @@ prep_input <- function(input,
       reorder = TRUE
     ) %>% catch_err(keep_results = TRUE)
 
+  #fm_updated is what we want to merge into "current" to trigger a Template needs update message
+  #Also add other missing things, etc.
   if (test_updated$success) {
     fm_updated <- test_updated$result
   } else{
     stop("update_fm() failed for some reason in prep_input() for WD=",
-            WD)
+         WD)
   }
 
-# Read in the input data --------------------------------------------------
+  # Read in the input data --------------------------------------------------
   #Y00 is original environmental input data
   Y00 <- shiny::reactiveValuesToList(input)
 
-# Handle "hands-on-table" UI elements -------------------------------------
+  # Handle "hands-on-table" UI elements -------------------------------------
   #Read in "-hot" hands-on-table input data
   #Convert to base name (without-hot suffix)
   #Output to Y0 object which will get saved to yaml
@@ -55,12 +60,13 @@ prep_input <- function(input,
   if (!is_empty(hot_names)) {
     for (i in 1:length(hot_names)) {
       fm_key <- gsub("-hot", "", hot_names[i])
-      Y0[[fm_key]] <- rhandsontable::hot_to_r(Y0[[hot_names[i]]])
+      table_i <- rhandsontable::hot_to_r(Y0[[hot_names[i]]])
+      Y0[[fm_key]] <- if(is_empty(table_i)){NULL}else{table_i}
     }
   }
 
 
-# Remove uninterpretable shiny functions from output ------------------------
+  # Remove uninterpretable shiny functions from output ------------------------
   # figure out which are shiny operational variables in input & ignore em
   #add manual inputs to ignore (will catch any names containing these strings)
   ignore_pattern <- c("commit_msg", "-hot", "dummy_")
@@ -116,34 +122,46 @@ prep_input <- function(input,
   #######
   # Now, merge saved_data into Y2 for variables that are not found in input
 
-  Y2<-Y
+  Y2 <- Y
 
 
 
-  saved_not_in_Y <- names(saved)[which(!names(saved) %in% names(Y))]
+  updated_not_in_Y <-
+    names(fm_updated)[which(!names(fm_updated) %in% names(Y))]
 
-  if (length(saved_not_in_Y)>0) {
-
+  if (length(updated_not_in_Y) > 0) {
     #This overwrites overlapping fields onto Y2
-      Y2[saved_not_in_Y] <- saved[saved_not_in_Y]
+    Y2[updated_not_in_Y] <- fm_updated[updated_not_in_Y]
   }
 
-  # Add values from UPDATED yaml that are not in input data (i.e. YAML fields with no GUI/Shiny inputs)
-  #also create lang and locale variables from Language and Country
-  #BUT, only use fields of Y2 that are in the saved file, allowing new template values to override
+  # # Add values from UPDATED yaml that are not in input data (i.e. YAML fields with no GUI/Shiny inputs)
+  # #also create lang and locale variables from Language and Country
+  # #BUT, only use fields of Y2 that are in the saved file, allowing new template values to override
+  #
+  # Y3 <-
+  #   add_missing_fields(Y2[which(names(Y2) %in% names(saved))], template = fm_updated, reorder =
+  #                        TRUE) %>% parse_locale()
 
+
+
+  # #Remove Nulls! They cause many problems when we output to character & get character(0)
   Y3 <-
-    add_missing_fields(Y2[which(names(Y2) %in% names(saved))], template = fm_updated, reorder =
-                         TRUE) %>% parse_locale()
+    sapply(Y2, function(x) {
+      if (is.null(x)) {
+        ""
+      } else{
+        x
+      }
+    } , simplify = F)
 
-    # #Remove Nulls! They cause many problems when we output to character & get character(0)
-  Y4<- sapply(Y3,function(x){if(is.null(x)){""}else{x}} ,simplify = F)
 
+  #Make sure order is maintained from updated template
+  Y3 <- Y3[names(fm_updated)]
 
   #Return a list of current_data and saved_data to trigger an Save Changes? message in editor()
   #gotta make sure all POSIX Y3 elements are characters, cuz otherwise the publication date will get screwed up :/
   list(saved_data = saved,
-       current_data = purrr::map(Y4, function(x) {
+       current_data = purrr::map(Y3, function(x) {
          if ("POSIXct" %in% class(x) | "Date" %in% class(x)) {
            as.character(x)
          } else{
@@ -151,4 +169,4 @@ prep_input <- function(input,
          }
        }))
 
-  }
+}

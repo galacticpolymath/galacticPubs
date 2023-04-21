@@ -17,7 +17,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.4.5
+TemplateVer: 0.4.7
 galacticPubsVer: ''
 URL: ''
 GPCatalogPath: ''
@@ -86,9 +86,6 @@ Feedback: |
   - [For teachers](https://forms.gle/HY1sFxZUH7uG6JqP8)
   - [For students](https://forms.gle/gwkRYvvZY6Sp2dQb9)
 Credits: ''
-ScriptsToRun: ''
-ReadyToCompile:
-- Front Matter
 Acknowledgments:
   Role:
   - ''
@@ -106,12 +103,15 @@ Acknowledgments:
   - ''
 Versions:
   ver_num:
-  - ''
+  - '0.1.0'
   date:
-  - ''
+  - !expr format(Sys.Date(), '%B %d, %Y')
   ver_summary:
-  - ''
+  - 'Lesson initialized'
   ver_notes:
   - ''
   ver_acknowledgments:
   - ''
+ScriptsToRun: ''
+ReadyToCompile:
+- Front Matter

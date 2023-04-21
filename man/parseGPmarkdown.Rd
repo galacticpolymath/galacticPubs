@@ -5,7 +5,13 @@
 \alias{parseGPmarkdown}
 \title{parseGPmarkdown}
 \usage{
-parseGPmarkdown(x, WD = NULL, mlinks = NULL)
+parseGPmarkdown(
+  x,
+  WD = NULL,
+  mlinks = NULL,
+  use_cache = TRUE,
+  force_lookup = FALSE
+)
 }
 \arguments{
 \item{x}{a text string to parse}
@@ -18,6 +24,10 @@ parseGPmarkdown(x, WD = NULL, mlinks = NULL)
 markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
 that has order=1
 }}
+
+\item{use_cache}{logical; do you want to use saved multimedia links if they are found at  \code{../meta/multimedia.RDS}? default =T will prefer the cached files. use_cache=FALSE will trigger a time-consuming gdrive lookup to \code{teach-it.gsheet*!multimedia}}
+
+\item{force_lookup}{logical; do you want to force looking up \code{teach-it.gsheet*!multimedia}? default=FALSE}
 }
 \value{
 formatted replacement text

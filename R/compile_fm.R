@@ -14,225 +14,335 @@
 #' @export
 #' @return logical of success
 
-compile_fm <- \(WD=getwd()){
-WD <- parse_wd(WD)
-
-#Include everything down to SponsoredBy in the header
-      header <-
-        current_data[(1:which(names(current_data) == "SponsoredBy"))]
-      #make full catalog paths following naming conventions the frontend expects
-
-      header$SponsorImage = list(url = ifelse(
-        is.na(current_data$SponsorLogo),
-        NA,
-        catalogURL(basename(current_data$SponsorLogo), repo)
-      ))
-      header$CoverImage = list(url = ifelse(
-        is.na(current_data$LessonBanner),
-        NA,
-        catalogURL(basename(current_data$LessonBanner), repo)
-      ))
+compile_fm <- \(WD = getwd()) {
+  WD <- parse_wd(WD)
+  json_dir <- fs::path(WD, "meta", "JSON")
+  fm <- get_fm(WD = WD)
+  fm_keys <- fm %>% names()
+  header <- fm[1:which(fm_keys == "GradesOrYears")]
+  #used for constructing catalog paths
+  repo <- whichRepo(WD = WD)
+  # Make a few assertions to require minimally functional header ------------
+  checkmate::assert_character(fm$ShortTitle,
+                              min.chars = 2,
+                              any.missing = F)
+  checkmate::assert_choice(fm$PublicationStatus, c("Draft", "Live"))
+  checkmate::assert_character(fm$Title, min.chars = 4, any.missing = F)
+  checkmate::assert_character(fm$locale, n.chars = 5, any.missing = F)
 
 
-      overview <- list(
-        `__component` = "lesson-plan.overview",
-        EstLessonTime = current_data$EstLessonTime,
-        GradesOrYears = current_data$GradesOrYears,
-        ForGrades = current_data$ForGrades,
-        TargetSubject = current_data$TargetSubject,
-        #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
 
-        Text = lumpItems(
-          c(
-            "DrivingQ",
-            "EssentialQ",
-            "Hooks",
-            "LearningSummary",
-            "MiscMD"
-          ),
-          item.labs = c(
-            "Driving Question(s):",
-            "Essential Question(s):",
-            "Hook(s):",
-            "Learning Summary:",
-            ""
-          ),
-          list.obj = current_data,
-          new.name = "Text"
-        )$Text,
-        Tags = lapply(current_data$Tags, function(x)
-          list(Value = x)),
-        SteamEpaulette = list(url = ifelse(
-          is.na(current_data$LearningEpaulette[1]),
-          NA,
-          catalogURL(basename(current_data$LearningEpaulette[1]), repo)
-        )),
-        #might want to add more complex image handling later),
-        SteamEpaulette_vert = list(url = ifelse(
-          is.na(current_data$LearningEpaulette_vert[1]),
-          NA,
-          catalogURL(basename(
-            current_data$LearningEpaulette_vert[1]
-          ), repo)
-        )),
-        #might want to add more complex image handling later),
-        Description = current_data$Description %>% fixAnchorLinks()
-      ) #allow smooth-scrolling to in-page references
+  # make full catalog paths following naming conventions the frontend --------
+  header$SponsorImage = list(url = ifelse(is.na(fm$SponsorLogo),
+                                          NA,
+                                          catalogURL(basename(fm$SponsorLogo), repo)))
+  header$CoverImage = list(url = ifelse(is.na(fm$LessonBanner),
+                                        NA,
+                                        catalogURL(basename(fm$LessonBanner), repo)))
 
-      #read in multimedia file created from multimedia tab of teaching-materials.xlsx if that file exists
-      mmExists <-
-        file.exists(fs::path(WD, "meta", "JSON", "multimedia.json"))
-      if (mmExists) {
-        mm <-
-          jsonlite::read_json(fs::path(WD, "meta", "JSON", "multimedia.json"), null =
-                                "null")
-      } else{
-        mm <- NULL
-        message("No multimedia found.")
-      }
+  #output header.json
+  save_json(header,
+            filename = fs::path(json_dir,
+                                "header", ext = "json"))
+
+  # Export overview.json ----------------------------------------------------
+  overview <- list(
+    `__component` = "lesson-plan.overview",
+    LearningSummary = fm$LearningSummary,
+    EstLessonTime = fm$EstLessonTime,
+    GradesOrYears = fm$GradesOrYears,
+    ForGrades = fm$ForGrades,
+    TargetSubject = fm$TargetSubject,
+    #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
+
+    Text = lumpItems(
+      c("DrivingQ",
+        "EssentialQ",
+        "Hooks",
+        "MiscMD"),
+      item.labs = c(
+        "Driving Question(s):",
+        "Essential Question(s):",
+        "Hook(s):",
+        ""
+      ),
+      list.obj = fm,
+      new.name = "Text"
+    )$Text,
+    Tags = lapply(fm$Tags, function(x)
+      list(Value = x)),
+    SteamEpaulette = list(url = ifelse(
+      is.na(fm$LearningEpaulette[1]),
+      NA,
+      catalogURL(basename(fm$LearningEpaulette[1]), repo)
+    )),
+    #might want to add more complex image handling later),
+    SteamEpaulette_vert = list(url = ifelse(
+      is.na(fm$LearningEpaulette_vert[1]),
+      NA,
+      catalogURL(basename(fm$LearningEpaulette_vert[1]), repo)
+    )),
+    #might want to add more complex image handling later),
+    Description = fm$Description  %>% fixAnchorLinks()
+  ) #allow smooth-scrolling to in-page references
 
 
-      #PREVIEW
-      preview <- list(
-        `__component` = "lesson-plan.lesson-preview",
-        SectionTitle = "Lesson Preview",
-        QuickPrep = current_data$QuickPrep %>% fixAnchorLinks(),
-        #allow smooth-scrolling to in-page references
-        Multimedia = mm,
+  save_json(overview,
+            filename = fs::path(json_dir,
+                                "overview", ext = "json"))
+
+
+
+
+
+
+  # read in multimedia file created from multimedia tab of teach-it. --------
+
+  mmExists <-
+    file.exists(fs::path(json_dir, "multimedia.json"))
+  if (mmExists) {
+    mm <-
+      jsonlite::read_json(fs::path(json_dir, "multimedia.json"), null =
+                            "null")
+  }
+
+  if (!mmExists | is_empty(mm)) {
+    mm <- NULL
+    message("No multimedia found.")
+  }
+
+
+
+  # Create preview.json -----------------------------------------------------
+  #Multimedia browser
+  preview <- list(
+    `__component` = "lesson-plan.lesson-preview",
+    SectionTitle = "Lesson Preview",
+    #allow smooth-scrolling to in-page references (with Anchor Links)
+    QuickPrep = fm$QuickPrep %>% fixAnchorLinks(),
+    Multimedia = mm,
+    InitiallyExpanded = TRUE
+  )
+
+  #write preview json even if empty
+  save_json(preview,
+            filename = fs::path(json_dir,
+                                "preview", ext = "json"))
+
+  #BONUS (optional section)
+  # markdown links to supporting materials allowed
+  Bonus <- get_fm("Bonus", WD = WD)
+  bonus_web <- list(
+      `__component` = "lesson-plan.collapsible-text-section",
+      SectionTitle = "Bonus Content",
+      Content = expand_md_links(Bonus, repo) %>% fixAnchorLinks(),
+      #allow smooth-scrolling to in-page references
+      InitiallyExpanded = TRUE
+    )
+    save_json(bonus_web,
+              filename = fs::path(json_dir, "bonus", ext = "json"))
+
+
+  # extensions.json ---------------------------------------------------------
+
+
+  #EXTENSIONS (optional section)
+  # markdown links to supporting materials allowed
+  Extensions <- get_fm("Extensions", WD = WD)
+  if (!is_empty(Extensions)) {
+    extensions_web <- list(
+      `__component` = "lesson-plan.collapsible-text-section",
+      SectionTitle = "Extensions",
+      Content = expand_md_links(Extensions, repo) %>% fixAnchorLinks(),
+      #allow smooth-scrolling to in-page references
+      InitiallyExpanded = TRUE
+    )
+    save_json(extensions_web,
+              filename = fs::path(json_dir, "extensions", ext = "json"))
+  }
+
+  # background.json ---------------------------------------------------------
+  #Combine Sci Background and Lesson Connections to Research
+  # markdown links to supporting materials allowed
+  # expand_md_links takes relative links in [](x.jpg) format and makes a full path to GP catalog
+  # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
+  # BACKGROUND
+  Background <- get_fm("Background", WD = WD)
+  C2R <- get_fm("ConnectionToResearch", WD = WD)
+  if (!is_empty(Background)) {
+    background_web <-
+      list(
+        `__component` = "lesson-plan.collapsible-text-section",
+        SectionTitle = "Background",
+        Content = ifelse(
+          is.na(C2R),
+          Background,
+          paste(
+            "#### Connection to Research\n",
+            C2R,
+            "\n#### Research Background\n",
+            Background
+          )
+        ) %>% expand_md_links(repo = repo) %>%
+          fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
         InitiallyExpanded = TRUE
       )
-      #write preview json
-      jsonlite::write_json(
-        preview,
-        path = fs::path(destFolder,
-                        "preview", ext = "json"),
-        pretty = TRUE,
-        auto_unbox = TRUE,
-        na = "null",
-        null = "null"
+
+    save_json(background_web,
+              fs::path(json_dir,
+                       "background", ext = "json"))
+  }
+
+
+  # feedback.json -----------------------------------------------------------
+  Feedback <- get_fm("Feedback", WD = WD)
+
+  if (!is_empty(Feedback)) {
+    feedback_web <-
+      list(
+        `__component` = "lesson-plan.collapsible-text-section",
+        SectionTitle = "Feedback",
+        Content = expand_md_links(Feedback,
+                                  repo) %>% fixAnchorLinks(),
+        InitiallyExpanded = TRUE
       )
 
-      #BONUS (optional section)
-      # markdown links to supporting materials allowed
-      if (!is_empty(current_data$Bonus)) {
-        bonus <- list(
-          `__component` = "lesson-plan.collapsible-text-section",
-          SectionTitle = "Bonus Content",
-          Content = expand_md_links(current_data$Bonus, repo) %>% fixAnchorLinks(),
-          #allow smooth-scrolling to in-page references
-          InitiallyExpanded = TRUE
-        )
-        jsonlite::write_json(
-          bonus,
-          path = fs::path(destFolder, "bonus", ext = "json"),
-          pretty = TRUE,
-          auto_unbox = TRUE,
-          na = "null",
-          null = "null"
-        )
-      }
+    save_json(feedback_web,
+              fs::path(json_dir,
+                       "feedback", ext = "json"))
+  }
 
-      #EXTENSIONS (optional section)
-      # markdown links to supporting materials allowed
-      if (!is_empty(current_data$Extensions)) {
-        extensions <- list(
-          `__component` = "lesson-plan.collapsible-text-section",
-          SectionTitle = "Extensions",
-          Content = expand_md_links(current_data$Extensions, repo) %>% fixAnchorLinks(),
-          #allow smooth-scrolling to in-page references
-          InitiallyExpanded = TRUE
-        )
-        jsonlite::write_json(
-          extensions,
-          path = fs::path(destFolder, "extensions", ext = "json"),
-          pretty = TRUE,
-          auto_unbox = TRUE,
-          na = "null",
-          null = "null"
-        )
-      }
 
-      #Combine Sci Background and Lesson Connections to Research
-      # markdown links to supporting materials allowed
-      # expand_md_links takes relative links in [](x.jpg) format and makes a full path to GP catalog
-      # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
-      # BACKGROUND
-      if (!is_empty(current_data$Background)) {
-        background <-
+  # credits.json ------------------------------------------------------------
+  Credits <- get_fm("Credits", WD = WD)
+  if (!is_empty(Credits)) {
+    credits_web <-
+      list(
+        `__component` = "lesson-plan.collapsible-text-section",
+        SectionTitle = "Credits",
+        Content = expand_md_links(Credits,
+                                  repo) %>% fixAnchorLinks(),
+        InitiallyExpanded = TRUE
+      )
+
+    save_json(credits_web,
+              filename = fs::path(json_dir,
+                                  "credits", ext = "json"))
+  }
+
+
+  # acknowledgments.json ----------------------------------------------------
+  #
+  ack <-
+    get_fm("Acknowledgments", WD = WD) %>% dplyr::as_tibble()
+  browser()
+
+
+  if (nrow(ack) == 0) {
+    ack_out0 <- NULL
+  } else{
+    roles <- unique(ack$Role)
+    ack_out0 <- list()
+    for (i in 1:length(roles)) {
+      #Also allow {vid} shortcodes
+      role_i <-
+        roles[i] %>% parseGPmarkdown(WD = WD) %>% expand_md_links(repo = whichRepo(WD =
+                                                                                     WD))
+      ack_i <- subset(ack, ack$Role == role_i)
+      def_i <-
+        ack_i$Role_def[1] %>% parseGPmarkdown(WD = WD) %>% expand_md_links(repo =
+                                                                             whichRepo(WD = WD))
+      #capitalize first letter if necessary
+      if (!substr(def_i, 1, 1) %in% LETTERS) {
+        substr(def_i, 1, 1) <- toupper(substr(def_i, 1, 1))
+      }
+      #put parentheses around definition if necessary
+      if (substr(def_i, 1, 1) != "(") {
+        def_i <- paste0("(", def_i, ")")
+      }
+      persons_i <- lapply(1:nrow(ack_i), function(row) {
+        tmp <-
           list(
-            `__component` = "lesson-plan.collapsible-text-section",
-            SectionTitle = "Background",
-            Content = ifelse(
-              is.na(current_data$ConnectionToResearch),
-              current_data$Background,
-              paste(
-                "#### Connection to Research\n",
-                current_data$ConnectionToResearch,
-                "\n#### Research Background\n",
-                current_data$Background
-              )
-            ) %>% expand_md_links(repo = repo) %>%
-              fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
-            InitiallyExpanded = TRUE
+            ack_i$Name[row],
+            ack_i$Social_link[row],
+            ack_i$Title[row],
+            ack_i$Affiliation[row],
+            ack_i$Location[row]
           )
+        names(tmp) <-
+          c("name", "url", "title", "affiliation", "location")
+        tmp
+      })
 
-        jsonlite::write_json(
-          background,
-          path = fs::path(destFolder,
-                          "background", ext = "json"),
-          pretty = TRUE,
-          auto_unbox = TRUE,
-          na = "null",
-          null = "null"
-        )
-      }
 
-      # FEEDBACK
-      if (!is_empty(current_data$Feedback)) {
-        feedback <-
+      ack_out0[[i]] <- c(role = role_i,
+                         def = def_i,
+                         records = list(persons_i))
+    }
+  }
+
+  # Prefix with component and title, and nest output in Data if structuring for web deployment
+  ack_out <-  list(`__component` = "lesson-plan.acknowledgments",
+                   SectionTitle = "Acknowledgments",
+                   Data = ack_out0)
+
+
+  save_json(ack_out, fs::path(json_dir, "acknowledgments.json"))
+
+
+
+  # versions.json -----------------------------------------------------------
+
+  ver <-
+    get_fm("Versions", WD = WD, check = "checkmate::check_data_frame(x)")
+
+  if (nrow(ver) == 0) {
+    ack_out0 <- NULL
+  } else{
+    ver$date <-
+      sapply(ver$date, function(x) {
+        as.character(as.Date(as.numeric(x), origin = "1899-12-30"), format = "%b %d, %Y")
+      }, USE.NAMES = FALSE)
+    ver$major <- gsub("(^[^\\.]*)\\..*", "\\1", ver$ver_num)
+    #Change 0 release to beta for hierarchy
+    ver$major <-
+      sapply(ver$major, function(x)
+        if (x == 0) {
+          x <- "Beta"
+        } else{
+          x <- x
+        })
+    ver_out0 <- list()
+    for (mjr in 1:length(unique(ver$major))) {
+      ver_mjr <- subset(ver, ver$major == unique(ver$major)[mjr])
+      out_mjr <- list()
+      for (i in 1:nrow(ver_mjr)) {
+        ver_i <- ver_mjr[i, ]
+        out_mjr[[i]] <-
           list(
-            `__component` = "lesson-plan.collapsible-text-section",
-            SectionTitle = "Feedback",
-            Content = expand_md_links(current_data$Feedback,
-                                      repo) %>% fixAnchorLinks(),
-            InitiallyExpanded = TRUE
+            version = ver_i$ver_num,
+            date = ver_i$date,
+            summary = ver_i$ver_summary,
+            notes = ver_i$ver_notes,
+            acknowledgments = ver_i$ver_acknowledgements
           )
-
-        jsonlite::write_json(
-          feedback,
-          path = fs::path(destFolder,
-                          "feedback", ext = "json"),
-          pretty = TRUE,
-          auto_unbox = TRUE,
-          na = "null",
-          null = "null"
-        )
       }
+      ver_out0[[mjr]] <-
+        list(major_release = unique(ver$major)[mjr],
+             sub_releases = (out_mjr))
+    }
+  }
 
-      #CREDITS
-      if (!is_empty(current_data$Credits)) {
-        credits <-
-          list(
-            `__component` = "lesson-plan.collapsible-text-section",
-            SectionTitle = "Credits",
-            Content = expand_md_links(current_data$Credits,
-                                      repo) %>% fixAnchorLinks(),
-            InitiallyExpanded = TRUE
-          )
 
-        save_json(credits,
-                  filename = fs::path(destFolder,
-                                      "credits", ext = "json"))
-      }
+  # Prefix with component and title, and nest output in Data if structuring for web deployment
+  ver_out <- list(`__component` = "lesson-plan.versions",
+                  SectionTitle = "Version Notes",
+                  Data = ver_out0)
 
-      #always output this stuff
-      save_json(header,
-                filename = fs::path(destFolder,
-                                    "header", ext = "json"))
-      save_json(overview,
-                filename = fs::path(destFolder,
-                                    "overview", ext = "json"))
+  save_json(ver_out, fs::path(json_dir, "versions.json"))
 
+
+  message("front-matter compiled")
 
 }
 

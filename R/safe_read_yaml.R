@@ -61,36 +61,36 @@ safe_read_yaml <- function(yaml_path = NULL,
   y <- yaml::read_yaml(yaml_path, eval.expr = eval.expr)
 
 
-  #Function to standardize empty values to NA for all items in a list
-  standardize_na <- function(x) {
-    out <- lapply(1:length(x), function(i) {
-      if (is.list(x)) {
-        xi <- x[[i]]
-      } else{
-        xi <- x[i]
-      }
-
-      # #run recursively to clean up sub-lists and vectors
-      # if(length(xi)>1){
-      #   unlist_after=!is.list(xi)
-      #   xi <- standardize_na(xi)
-      #   if(unlist_after){
-      #     xi <- xi %>% unlist()
-      #   }
-      # }
-      # #Length>1 necessary to keep long NAs
-      # if (is_empty(xi,names_meaningful=TRUE)  ) {
-      #   xi <- rep(NA,length(xi))
-      # } else{
-      #   xi
-      # }
-    })
-    names(out) <- names(x)
-    out
-  }
-
-  #standardize first level data
-  y2 <- standardize_na(y)
+  # #Function to standardize empty values to NA for all items in a list
+  # standardize_na <- function(x) {
+  #   out <- lapply(1:length(x), function(i) {
+  #     if (is.list(x)) {
+  #       xi <- x[[i]]
+  #     } else{
+  #       xi <- x[i]
+  #     }
+  #
+  #     # #run recursively to clean up sub-lists and vectors
+  #     # if(length(xi)>1){
+  #     #   unlist_after=!is.list(xi)
+  #     #   xi <- standardize_na(xi)
+  #     #   if(unlist_after){
+  #     #     xi <- xi %>% unlist()
+  #     #   }
+  #     # }
+  #     # #Length>1 necessary to keep long NAs
+  #     # if (is_empty(xi,names_meaningful=TRUE)  ) {
+  #     #   xi <- rep(NA,length(xi))
+  #     # } else{
+  #     #   xi
+  #     # }
+  #   })
+  #   names(out) <- names(x)
+  #   out
+  # }
+  #
+  # #standardize first level data
+  # y2 <- standardize_na(y)
 
 
 

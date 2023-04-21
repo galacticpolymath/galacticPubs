@@ -7,7 +7,7 @@
 #' @param key which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'
 #' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]
 #' @param checkWD passed to [safe_read_yaml()]; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory
-#' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=TRUE
+#' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=FALSE
 #' @param check string referring to a check function(x) to pass to [checkmate::assert()]; e.g. check="checkmate::check_character(x,min.chars=10)" will throw an error if an output is not a string of at least 10 characters. default=NULL
 #' @param ... additional args passed to check function
 #' @examples
@@ -22,7 +22,7 @@ get_fm <-
   function(key = NULL,
            WD = getwd(),
            checkWD = FALSE,
-           auto_init = TRUE,
+           auto_init = FALSE,
            check = NULL,
            ...) {
     WD <- parse_wd(WD)
@@ -91,9 +91,9 @@ get_fm <-
     if (!is.null(check)) {
 
       results%>%  purrr::map( \(x) {
-        checkmate::assert(
+         checkmate::assert(
           eval(parse(text=check)),
-                          .var.name = x)
+                          .var.name = x[1])
 
       })
 

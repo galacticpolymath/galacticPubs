@@ -1,8 +1,9 @@
 #' compile_lesson
 #'
-#' Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to [stage_assets()] and [publish()] to publish these changes to the web.
+#' Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to [stage_assets()] and [publish()] to publish these changes to the web. Tries to use cacheing, but sometimes, may need to run a function twice to get efficient time savings because of delay in modTimes with Google Drive for Desktop.
 #'
 #' Combines functionality of:
+#' - [compile_fm()]
 #' - [compile_standards()]
 #' - [learningChart()] and [learningEpaulette()]
 #' - [compileAcknowledgments()]
@@ -305,14 +306,19 @@ compile_lesson <-
             identical(prev_update_state, curr_update_state)
         } else{
           skip_update <- FALSE
+          message("No changes to `../teaching-materials/` detected...")
+          message("Skipping update_teach_links() and compile_teach-it()")
         }
 
         # update teach_it links and compile ---------------------------------------
-
+        message("Changes to `../teaching-materials/` detected...")
+        message("Running update_teach_links() and compile_teach-it()")
 
         if (!skip_update | rebuild) {
           update_teach_links(WD = WD)
           compile_teach_it(WD = WD)
+          #update the cache of the teaching-material state of things
+           get_state(path=c(teach_it_path, tm_local),save_path=save_path)
         }
       }
 

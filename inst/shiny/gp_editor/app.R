@@ -3,6 +3,7 @@
 #
 # Load helper functions
 source("helpers.R")
+source("modules.R")
 pacman_test <-
   tryCatch(
     require(pacman),
@@ -11,11 +12,12 @@ pacman_test <-
     }
   )
 if (!"error" %in% class(pacman_test)) {
-  p_load(shiny, shinythemes, sortable)
+  p_load(shiny, shinythemes, sortable, rhandsontable)
 } else{
   library(shiny)
   library(shinythemes)
   library(sortable)
+  library(rhandsontable)
 }
 
 
@@ -31,17 +33,9 @@ meta_path <- fs::path(WD0, "meta/")
 yaml_path <- fs::path(meta_path, "front-matter.yml")
 yaml_test <- file.exists(yaml_path)
 
-if (yaml_test == FALSE) {
-  warning(paste(
-    "Failed to import `meta/front-matter.yml`\n  *You're starting from scratch.*"
-  ))
-  #use the front matter template supplied with galacticPubs as a starting point
-  y <-
-    safe_read_yaml(system.file("extdata", "front-matter_TEMPLATE.yml", package =
-                                 "galacticPubs"))
-} else{
-  y <- safe_read_yaml(yaml_path, eval.expr = TRUE)
-}
+
+y <- safe_read_yaml(yaml_path, eval.expr = TRUE,auto_init = TRUE)
+
 #Image storage is temporary, in the app working directory (force, so it gets set now in current wd)
 img_loc <- paste0(getwd(), "/www/", collapse = "/")
 #create image preview directory
@@ -315,8 +309,16 @@ ui <- navbarPage(
       width = "100%"
     ),
     hr(class = "blhr"),
-    div(class = "spacer")
-  ),
+  #Acknowledgments
+  h3("Acknowledgments"),
+  ediTable(id = "Acknowledgments"),
+  hr(class = "blhr"),
+  #Acknowledgments
+  h3("Version Info"),
+  ediTable(id = "Versions"),
+  hr(class = "blhr"),
+  div(class="spacer")
+),
   #End Setup Panel
 
   # TAB 2: COMPILE ----------------------------------------------------------
@@ -395,6 +397,8 @@ server <- function(input, output, session) {
       ))
     )
   })
+
+
 
   # Some UI elements that need access to the reactive WD()
   # working directory that may change
@@ -491,6 +495,20 @@ server <- function(input, output, session) {
     )
   })
 
+   # Server logic for Tab 1 modules ------------------------------------------
+  #initialize values
+  #define initial reactive values for ediTable
+  ack_data <- reactiveVal(y$Acknowledgments)
+  versions_data <- reactiveVal(y$Versions)
+
+
+  #id must match ediTable id in UI section and the key in front-matter.yml (i.e. an item in get_fm())
+  #This step prevents trying to load this before data is available
+
+  ediTable_server(id = "Acknowledgments", rd = ack_data)
+  ediTable_server(id = "Versions", rd = versions_data)
+
+
 
   # Open local folder for WD when clicked -----------------------------------
   observeEvent(input$open_WD, system2("open", paste0("'", WD(), "'")))
@@ -542,6 +560,7 @@ server <- function(input, output, session) {
         data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
 
       if (count_outOfDate > 0) {
+
         if (template_upgraded) {
           vals$yaml_update_txt <- paste0(
             "Save & Upgrade template:\n",
@@ -561,7 +580,6 @@ server <- function(input, output, session) {
       #       #Check if Github link is present
       #       ## Add github URL if missing in yaml
       if (is_empty(data_check$saved_data$GitHubPath)) {
-
         isolate({
           vals$current_data$GitHubPath <-
             whichRepo(WD = WD(), fullPath = TRUE)
@@ -604,7 +622,8 @@ server <- function(input, output, session) {
                      fs::path(WD(), "meta", "front-matter.yml"))
     vals$saved <- TRUE
     #synchronize saved and current_data
-    vals$saved_data <- vals$current_data <-  safe_read_yaml(WD = WD())
+    vals$saved_data <-
+      vals$current_data <-  safe_read_yaml(WD = WD())
     vals$yaml_update_txt <-
       txt <- (paste0(
         "front-matter.yml updated:<br>",
@@ -823,7 +842,8 @@ server <- function(input, output, session) {
       current_data <- prep_input(input,  WD = WD())$current_data
       yaml::write_yaml(current_data, fs::path(WD(), "meta", "front-matter.yml"))
 
-      scripts <- list.files(fs::path(WD(), "scripts"), pattern = ".R")
+      scripts <-
+        list.files(fs::path(WD(), "scripts"), pattern = ".R")
       script_subset <- scripts[scripts %in% input$ScriptsToRun]
       run_lesson_scripts(script_subset, WD = WD())
     })

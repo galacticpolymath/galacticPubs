@@ -8,9 +8,9 @@ get_fm(
   key = NULL,
   WD = getwd(),
   checkWD = FALSE,
-  auto_init = TRUE,
+  auto_init = FALSE,
   check = NULL,
-  ... = NULL
+  ...
 )
 }
 \arguments{
@@ -20,9 +20,9 @@ get_fm(
 
 \item{checkWD}{passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory}
 
-\item{auto_init}{logical; do you want to automatically create a front-matter.yml file if it's not found? Runs \code{\link[=init_fm]{init_fm()}}; default=TRUE}
+\item{auto_init}{logical; do you want to automatically create a front-matter.yml file if it's not found? Runs \code{\link[=init_fm]{init_fm()}}; default=FALSE}
 
-\item{check}{string referring to a check function to pass to \code{\link[checkmate:assert]{checkmate::assert()}}; e.g. check="checkmate::check_data_frame" will throw an error if all outputs are of the call are not data frames. default=NULL}
+\item{check}{string referring to a check function(x) to pass to \code{\link[checkmate:assert]{checkmate::assert()}}; e.g. check="checkmate::check_character(x,min.chars=10)" will throw an error if an output is not a string of at least 10 characters. default=NULL}
 
 \item{...}{additional args passed to check function}
 }
