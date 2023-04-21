@@ -44,10 +44,36 @@ update_fm <-
 
     # Make manual changes if requested ----------------------------------------
     if (!is.null(change_this)) {
-      for (i in 1:length(change_this)) {
-        element_i <- names(change_this)[i]
-        new_yaml[[element_i]] <- change_this[[i]]
+      checkmate::assert_list(change_this, .var.name = "change_this")
+      change_keys <- names(change_this)
+      valid_names <- change_keys %in% names(galacticPubs_template)
+      test_valid <- sum(valid_names) == length(change_keys)
+      if (!test_valid) {
+        stop(
+          "Invalid keys suplied to `change_this`: \n  - ",
+          paste0(change_keys[!valid_names], collapse = "\n  -")
+        )
       }
+      test_changes <- vector()
+      for (i in 1:length(change_this)) {
+        element_i <- change_keys[i]
+        if (new_yaml[[element_i]] == change_this[[i]]) {
+          test_changes[i] <- NA
+        } else{
+          new_yaml[[element_i]] <- change_this[[i]]
+          test_changes[i] <- TRUE
+        }
+      }
+      message("The following keys were changed in front-matter: ")
+
+      print(
+        dplyr::tibble(
+          key = change_keys,
+          old_value = old_yaml[change_keys] %>% unlist(),
+          new_value = new_yaml[change_keys] %>% unlist(),
+          `renamed?` = convert_T_to_check(test_changes)
+        )
+      )
     }
 
 
