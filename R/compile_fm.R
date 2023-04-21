@@ -132,6 +132,7 @@ compile_fm <- \(WD = getwd()) {
   #BONUS (optional section)
   # markdown links to supporting materials allowed
   Bonus <- get_fm("Bonus", WD = WD)
+  if(!is_empty(Bonus)){
   bonus_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Bonus Content",
@@ -141,14 +142,16 @@ compile_fm <- \(WD = getwd()) {
     )
     save_json(bonus_web,
               filename = fs::path(json_dir, "bonus", ext = "json"))
-
+}
 
   # extensions.json ---------------------------------------------------------
 
 
   #EXTENSIONS (optional section)
   # markdown links to supporting materials allowed
+
   Extensions <- get_fm("Extensions", WD = WD)
+
   if (!is_empty(Extensions)) {
     extensions_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",

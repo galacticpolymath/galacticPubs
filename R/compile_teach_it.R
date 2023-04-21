@@ -200,7 +200,7 @@ compile_teach_it <- function(WD = getwd(),
     proc_data$parts <- purrr::map(1:nparts, \(i) {
       list(
         partNum = i,
-        partTitle = paste0("Part ",i,"| Procedure not documented yet"),
+        partTitle = paste0("Procedure not documented yet"),
         partDur = NULL,
         partPreface = NULL,
         chunks = NULL,
