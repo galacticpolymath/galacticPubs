@@ -301,7 +301,7 @@ compile_fm <- \(WD = getwd()) {
     get_fm("Versions", WD = WD,standardize_NA = TRUE)[[1]] %>% dplyr::as_tibble()
 
   if (is_empty(ver)) {
-    ack_out0 <- NULL
+    ver_out0 <- NULL
   } else{
     # ver$date <-
     #   sapply(ver$date, function(x) {

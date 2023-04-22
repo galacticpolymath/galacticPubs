@@ -26,9 +26,11 @@ parseGPmarkdown <-
       stop("Must supply either mlinks or WD.")
     }
 
-
+    #WD is an optional parameter
+    if(!is.null(WD)){
     WD <- parse_wd(WD)
     cache_path <- fs::path(WD, "meta", "multimedia.RDS")
+    }
 
     # 1. Look for multimedia json if use_cache --------------------------------
     if (use_cache & is.null(mlinks)) {
@@ -80,7 +82,7 @@ parseGPmarkdown <-
 
 
     if (is_empty(mlinks)) {
-      message("parseGPmarkdown(): No multimedia found.")
+      # message("parseGPmarkdown(): No multimedia found.")
       final <- x
     } else{
       vidLinks <-

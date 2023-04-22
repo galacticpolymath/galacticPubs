@@ -52,6 +52,7 @@ is_empty <- function(x, names_meaningful = FALSE) {
       identical(x, ".na.character") |
       identical(x, "\n") |
       identical(x, list()) |
+      identical(x,list(list())) |
       length(x) == 0
 
     #For longer objects
@@ -86,6 +87,7 @@ is_empty <- function(x, names_meaningful = FALSE) {
             identical(x_i, ".na.character") |
             identical(x_i, "\n") |
             identical(x_i, list()) |
+            identical(x_i,list(list())) |
             is_empty_df
         ) &
           !skip_this

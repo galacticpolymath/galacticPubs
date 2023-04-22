@@ -37,7 +37,7 @@ compile_lesson <-
 
 
     # Always update front-matter (in case of template updates) ----------------
-    update_fm(WD = WD)
+    update_fm(WD = WD,save_output = TRUE)
 
     if (missing(current_data)) {
       current_data <-

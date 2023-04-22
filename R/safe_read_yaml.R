@@ -67,7 +67,11 @@ safe_read_yaml <- function(yaml_path = NULL,
   standardize_na <- function(x) {
     out <- lapply(1:length(x), function(i) {
       if (is.list(x)) {
+        if(is_empty(x,names_meaningful = FALSE)){
+          xi <- NA
+        }else{
         xi <- x[[i]]
+        }
       } else{
         xi <- x[i]
       }

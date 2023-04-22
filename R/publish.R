@@ -24,7 +24,8 @@ publish <- function(commit_msg = NULL, WD = getwd()) {
   # check if files have been staged and are up to date ----------------------
   published_path <- fs::path(WD, "published")
   meta_path <- fs::path(WD, "meta")
-  sm<-get_fm(WD=WD,key="SupportingMedia")
+
+  sm<-get_fm(WD=WD,key="SupportingMedia",standardize_NA = T)
 
   if(!is_empty(sm)){
   sm_paths<-fs::path(WD,sm)
