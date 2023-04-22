@@ -33,12 +33,18 @@
 #' @export
 #' @return logical T=Empty, F=Not empty
 #tests for all variations on NULL, "", NA, etc
+
 is_empty <- function(x, names_meaningful = FALSE) {
+
   if (length(x) == 0) {
     nulls <- TRUE
     #for single item vector entries
   } else if (length(x) == 1) {
     #True if 1 condition met
+    if (!names_meaningful) {
+      x <- unname(x)
+    }
+
     nulls <- identical(x, NULL) |
       identical(x, "") |
       identical(is.na(x), TRUE) |
