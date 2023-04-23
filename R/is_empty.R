@@ -25,6 +25,7 @@
 #'
 #' is_empty(list(a=NA,b=b,c=list(),d=NULL))
 #' is_empty(list(a=NA,b=b,c=list(),d=NULL), names_meaningful=TRUE)
+#' is_empty(data.frame(a=NA,b=NA))
 #'
 #' #
 #' @returns TRUE (if empty) or FALSE (if not empty)
@@ -39,23 +40,27 @@ is_empty <- function(x, names_meaningful = FALSE) {
   if (length(x) == 0) {
     nulls <- TRUE
     #for single item vector entries
-  } else if (length(x) == 1) {
-    #True if 1 condition met
-    if (!names_meaningful) {
-      x <- unname(x)
-    }
-
-    nulls <- identical(x, NULL) |
-      identical(x, "") |
-      identical(is.na(x), TRUE) |
-      identical(x, "NA") |
-      identical(x, ".na.character") |
-      identical(x, "\n") |
-      identical(x, list()) |
-      identical(x,list(list())) |
-      length(x) == 0
-
-    #For longer objects
+  # } else if (length(x) == 1) {
+  #   #True if 1 condition met
+  #   if (!names_meaningful&!is.data.frame(x)) {
+  #     x <- unname(x)
+  #   }
+  #
+  #   if(is.data.frame(x)){
+  #
+  #   }
+  #
+  #   nulls <- identical(x, NULL) |
+  #     identical(x, "") |
+  #     identical(is.na(x), TRUE) |
+  #     identical(x, "NA") |
+  #     identical(x, ".na.character") |
+  #     identical(x, "\n") |
+  #     identical(x, list()) |
+  #     identical(x,list(list())) |
+  #     length(x) == 0
+  #
+  #   #For longer objects
   } else{
     nulls <- sapply(1:length(x), function(i) {
       #special exception if we for some reason want to consider an empty tibble or list as not empty (e.g. column names meaningful)

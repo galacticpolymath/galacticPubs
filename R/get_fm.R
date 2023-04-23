@@ -42,6 +42,7 @@ get_fm <-
     #output whole front-matter if no key specifically requested
     if (is.null(key)) {
       results <- y
+
       #otherwise check for key existence & output
 
     } else{
@@ -56,11 +57,15 @@ get_fm <-
 
         if (length(matches) > 0) {
           #Output partial match keys if found
-          results <-  y[KEYS[matches]]
+          results <-  y[[KEYS[matches]]]
 
-          if(is_empty(results)&standardize_NA){
-              results <- NA
-            }
+
+          if (is_empty(results) & standardize_NA) {
+            results <- NA
+          }
+          if (is.null(names(results))) {
+            names(results) <- KEYS[matches]
+          }
         } else{
           results <- NULL
           warning("\nNo partial matching results for keys using string: ",
@@ -88,9 +93,10 @@ get_fm <-
           key_checks_i <- checkmate::test_choice(key[i], KEYS)
           if (key_checks_i) {
             res_i <- y[[key[i]]]
-            if(is_empty(res_i)&standardize_NA){
+            if (is_empty(res_i) & standardize_NA) {
               res_i <- NA
             }
+            res_i
           } else{
             NULL
           }

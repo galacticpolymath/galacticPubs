@@ -94,6 +94,7 @@ compile_lesson <-
     # Define some paths -------------------------------------------------------
     status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
     med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
+
     checkmate::assert_choice(status, c("Live", "Draft"))
     checkmate::assert_character(med_title, min.chars = 2)
 

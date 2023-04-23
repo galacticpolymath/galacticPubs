@@ -34,7 +34,7 @@ yaml_path <- fs::path(meta_path, "front-matter.yml")
 yaml_test <- file.exists(yaml_path)
 
 
-y <- safe_read_yaml(yaml_path, eval.expr = TRUE,auto_init = TRUE)
+y <- safe_read_yaml(yaml_path, eval.expr = TRUE,auto_init = TRUE,standardize_NA = F)
 
 #Image storage is temporary, in the app working directory (force, so it gets set now in current wd)
 img_loc <- paste0(getwd(), "/www/", collapse = "/")
@@ -623,7 +623,7 @@ server <- function(input, output, session) {
     vals$saved <- TRUE
     #synchronize saved and current_data
     vals$saved_data <-
-      vals$current_data <-  safe_read_yaml(WD = WD())
+      vals$current_data <-  safe_read_yaml(WD = WD(),standardize_NA = F)
     vals$yaml_update_txt <-
       txt <- (paste0(
         "front-matter.yml updated:<br>",
@@ -1199,7 +1199,7 @@ server <- function(input, output, session) {
     #we update the reactive value, which should supercede the now outdated input$LastUpdated
 
     vals$current_data <-
-      overwrite_matching(safe_read_yaml(fs::path(WD(), "meta", "front-matter.yml")), vals$current_data)
+      overwrite_matching(safe_read_yaml(fs::path(WD(), "meta", "front-matter.yml"),standardize_NA = F), vals$current_data)
 
     if (pub_status$SUCCESS == "\u2713") {
       output$publishReport <-
