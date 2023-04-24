@@ -55,7 +55,7 @@ compile_teach_it <- function(WD = getwd(),
       col_types = "c",
 
     ) %>% dplyr::filter(!is.na(.data$code)) %>%
-    dplyr::select(1:11)
+    dplyr::select(1:dplyr::starts_with("otherLink"))
 
   pinfo <-
     googlesheets4::read_sheet(
@@ -243,7 +243,7 @@ compile_teach_it <- function(WD = getwd(),
     gatheredVocab = list(proc_data$vocab)
   )
 
-
+browser()
   # Multimedia --------------------------------------------------------------
   # Outputs to separate multimedia JSON
   # if "by" is left blank, add Galactic Polymath by default

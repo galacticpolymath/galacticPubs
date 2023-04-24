@@ -58,7 +58,7 @@ parseGPmarkdown <-
                                   sheet = "Multimedia",
                                   skip = 1,
                                   col_types = "c") %>%
-        dplyr::select(1:11) %>%
+        dplyr::select(1:dplyr::starts_with("otherLink")) %>%
         dplyr::filter(!is.na(.data$code))
 
       valid_mm <-
