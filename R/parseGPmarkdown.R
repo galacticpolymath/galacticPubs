@@ -148,7 +148,7 @@ parseGPmarkdown <-
                                                                                 "")
             #extract number from codes
             codeN <-
-              stringr::str_extract(vidLinks$code, "[^\\d]*(\\d*)", group = 1)
+              stringr::str_extract(mlinks$code, "[^\\d]*(\\d*)", group = 1)
             #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
             index <- match(itemN, codeN, nomatch = 999)
             if (index != 999 & !is.na(index)) {

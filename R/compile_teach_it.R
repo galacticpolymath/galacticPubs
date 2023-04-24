@@ -186,7 +186,48 @@ compile_teach_it <- function(WD = getwd(),
       )
   }
 
+ # Multimedia --------------------------------------------------------------
+  # Outputs to separate multimedia JSON
+  # if "by" is left blank, add Galactic Polymath by default
+  if (!mlinks_initialized) {
+    multimedia <- list(NULL)
+  } else{
+    m <- mlinks
+    m$by <-
+      ifelse(is.na(m$by), "Galactic Polymath", m$by)
+    #if byLink is blank, but by is galactic polymath, add our Youtube channel
+    m$byLink <-
+      ifelse(
+        is.na(m$byLink) &
+          !is.na(m$by),
+        "https://www.youtube.com/channel/UCfyBNvN3CH4uWmwOCQVhmhg/featured",
+        m$byLink
+      )
 
+    multimedia <- lapply(1:nrow(m), function(i) {
+      d <- m[i,]
+
+      mainLink <- zYTembed(d$mainLink) %>%
+        expand_md_links(repo = whichRepo(WD = WD))
+      #if a drive file is supplied, change /edit?... to /preview
+      mainLink <- gsub("/edit?.*$", "/preview", mainLink)
+
+      list(
+        order = d$order,
+        type = d$type,
+        forPart = d$forPart,
+        title = d$title,
+        description = d$description,
+        lessonRelevance = d$lessonRelevance,
+        by = d$by,
+        #if byLink left blank, but
+        byLink = d$byLink,
+        #Change YouTube links to be embeds & turn {filename.png} links to files found in assets/_other-media-to-publish into catalog.galacticpolymath.com links
+        mainLink = mainLink,
+        otherLink = d$otherLink
+      )
+    })
+  }
 
   # Extract majority of Teach-It data ---------------------------------------
   #Get item links for each environment*gradeBand
@@ -243,48 +284,6 @@ compile_teach_it <- function(WD = getwd(),
     gatheredVocab = list(proc_data$vocab)
   )
 
-browser()
-  # Multimedia --------------------------------------------------------------
-  # Outputs to separate multimedia JSON
-  # if "by" is left blank, add Galactic Polymath by default
-  if (!mlinks_initialized) {
-    multimedia <- list(NULL)
-  } else{
-    m <- mlinks
-    m$by <-
-      ifelse(is.na(m$by), "Galactic Polymath", m$by)
-    #if byLink is blank, but by is galactic polymath, add our Youtube channel
-    m$byLink <-
-      ifelse(
-        is.na(m$byLink) &
-          !is.na(m$by),
-        "https://www.youtube.com/channel/UCfyBNvN3CH4uWmwOCQVhmhg/featured",
-        m$byLink
-      )
-
-    multimedia <- lapply(1:nrow(m), function(i) {
-      d <- m[i,]
-
-      mainLink <- zYTembed(d$mainLink) %>%
-        expand_md_links(repo = whichRepo(WD = WD))
-      #if a drive file is supplied, change /edit?... to /preview
-      mainLink <- gsub("/edit?.*$", "/preview", mainLink)
-
-      list(
-        order = d$order,
-        type = d$type,
-        title = d$title,
-        description = d$description,
-        lessonRelevance = d$lessonRelevance,
-        by = d$by,
-        #if byLink left blank, but
-        byLink = d$byLink,
-        #Change YouTube links to be embeds & turn {filename.png} links to files found in assets/_other-media-to-publish into catalog.galacticpolymath.com links
-        mainLink = mainLink,
-        otherLink = d$otherLink
-      )
-    })
-  }
 
   #Compile Procedure if it's been documented
   if (!proc_initialized) {
@@ -307,6 +306,8 @@ browser()
 
   save_json(out, outFile)
   save_json(multimedia, fs::path(destFolder, "multimedia", ext = "json"))
+
+
   # return compiled output --------------------------------------------------
   message(" ", rep("-", 30))
   message(" Teaching Material Compiled:")

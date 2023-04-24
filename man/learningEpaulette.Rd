@@ -5,14 +5,14 @@
 \title{learningEpaulette}
 \usage{
 learningEpaulette(
+  WD = getwd(),
   heightScalar = 0.5,
   epauletteHeight = 0.2,
   randomSeed = 101,
   saveFile = TRUE,
   destFolder,
   fileName = "GP-Learning-Epaulette",
-  WD = getwd(),
-  font_size = 10,
+  font_size = 20,
   width = 11,
   height = 1.6,
   dpi = 200,
@@ -21,6 +21,8 @@ learningEpaulette(
 )
 }
 \arguments{
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+
 \item{heightScalar}{for horizontal epaulette, multiplier for image height which affects amount of padding between label text and epaulette; default=1}
 
 \item{epauletteHeight}{relative size of the epaulette; default=0.2}
@@ -32,8 +34,6 @@ learningEpaulette(
 \item{destFolder}{where do you want to save the folder; by default in the "assets/_learning-plots" folder, 1 level up from the working directory}
 
 \item{fileName}{expects "somefilename" for ggsave output image file}
-
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
 
 \item{font_size}{size of font in pts;default=11}
 

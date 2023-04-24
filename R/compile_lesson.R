@@ -303,7 +303,8 @@ compile_lesson <-
           #compare current timestamps and file counts from last update to current
           prev_update_state <- readRDS(save_path)
           #get state for teach-it.gsheet AND all teaching-materials/ contents
-          curr_update_state <- get_state(c(teach_it_path, tm_local))
+          curr_update_state <- get_state(c(teach_it_path, tm_local),save_path = NULL)
+
           skip_update <-
             identical(prev_update_state, curr_update_state)
         } else{

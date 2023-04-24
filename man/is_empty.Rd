@@ -45,6 +45,7 @@ is_empty(b, names_meaningful=TRUE)
 
 is_empty(list(a=NA,b=b,c=list(),d=NULL))
 is_empty(list(a=NA,b=b,c=list(),d=NULL), names_meaningful=TRUE)
+is_empty(data.frame(a=NA,b=NA))
 
 #
 }

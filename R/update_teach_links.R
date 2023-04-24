@@ -69,7 +69,7 @@ update_teach_links <- function(WD = getwd(),
   #Get local path to teaching materials
   #If PublicationStatus=="Draft", found on 'GP-Studio'
   #Else, found on 'GalacticPolymath'
-  tm_local <- ifelse(status=="Draft",fs::path(WD,"teaching-materials"),fs::path(lessons_get_path("gp"),med_title) )
+  tm_local <- ifelse(status=="Draft"|status=="Proto",fs::path(WD,"teaching-materials"),fs::path(lessons_get_path("gp"),med_title) )
   checkmate::assert(fs::is_dir(tm_local),.var.name = "fs::is_dir()")
   save_path <- fs::path(WD,"meta","save-state_teach-it.RDS")
   checkmate::assert_path_for_output(save_path,overwrite=TRUE)
