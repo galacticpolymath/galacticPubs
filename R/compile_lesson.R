@@ -37,7 +37,7 @@ compile_lesson <-
 
 
     # Always update front-matter (in case of template updates) ----------------
-    update_fm(WD = WD,save_output = TRUE)
+    update_fm(WD = WD, save_output = TRUE)
 
     if (missing(current_data)) {
       current_data <-
@@ -303,25 +303,27 @@ compile_lesson <-
           #compare current timestamps and file counts from last update to current
           prev_update_state <- readRDS(save_path)
           #get state for teach-it.gsheet AND all teaching-materials/ contents
-          curr_update_state <- get_state(c(teach_it_path, tm_local),save_path = NULL)
+          curr_update_state <-
+            get_state(c(teach_it_path, tm_local), save_path = NULL)
 
           skip_update <-
             identical(prev_update_state, curr_update_state)
         } else{
           skip_update <- FALSE
-          message("No changes to `../teaching-materials/` detected...")
-          message("Skipping update_teach_links() and compile_teach-it()")
         }
 
-        # update teach_it links and compile ---------------------------------------
-        message("Changes to `../teaching-materials/` detected...")
-        message("Running update_teach_links() and compile_teach-it()")
-
         if (!skip_update | rebuild) {
+          # update teach_it links and compile ---------------------------------------
+          message("Changes to `../teaching-materials/` detected...")
+          message("Running update_teach_links() and compile_teach-it()")
           update_teach_links(WD = WD)
           compile_teach_it(WD = WD)
           #update the cache of the teaching-material state of things
-           get_state(path=c(teach_it_path, tm_local),save_path=save_path)
+          get_state(path = c(teach_it_path, tm_local),
+                    save_path = save_path)
+        } else{
+          message("No changes to `../teaching-materials/` detected...")
+          message("Skipping update_teach_links() and compile_teach-it()")
         }
       }
 
@@ -331,7 +333,7 @@ compile_lesson <-
     # Separate parts of Front Matter ------------------------------------------
     #always rebuild front matter if it's in choices
     if ("Front Matter" %in% choices) {
-      compile_fm(WD=WD)
+      compile_fm(WD = WD)
 
     }#End of Front Matter export
 

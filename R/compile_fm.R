@@ -267,7 +267,7 @@ compile_fm <- \(WD = getwd()) {
         tmp <-
           list(
             ack_i$Name[row],
-            ack_i$Social_link[row],
+            ack_i$Link[row],
             ack_i$Title[row],
             ack_i$Affiliation[row],
             ack_i$Location[row]

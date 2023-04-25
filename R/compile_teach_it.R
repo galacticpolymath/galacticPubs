@@ -172,7 +172,11 @@ compile_teach_it <- function(WD = getwd(),
     }
 
     tlinks <-
-      dplyr::left_join(tlinks0, pinfo[, 1:5], by = c("part" = "Part"))
+      dplyr::left_join(tlinks0, pinfo[, c("Part",
+                                          "PartTitle",
+                                          "PartPreface",
+                                          "PartGradeVarNotes",
+                                          "ActTags")], by = c("part" = "Part"))
 
 
   } else{
@@ -237,7 +241,7 @@ compile_teach_it <- function(WD = getwd(),
     #should change 'parts' to something more like 'procedure'
     #output NULL structure paralleling real data
     proc_data <- list()
-    proc_data$lesson_dur <- NULL
+    proc_data$lessonDur <- NULL
     proc_data$parts <- purrr::map(1:nparts, \(i) {
       list(
         partNum = i,
@@ -278,6 +282,7 @@ compile_teach_it <- function(WD = getwd(),
   }
 
   Data <- c(
+    lessonPreface = pinfo$LessonPreface[1],
     lessonDur = proc_data$lessonDur,
     teach_mat_data,
     parts = list(proc_data$parts),
