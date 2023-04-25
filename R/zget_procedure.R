@@ -98,7 +98,7 @@ zget_procedure <- \(proc,
   ####
   #Figure out lesson duration string
   partDurations <-
-    proc$PartDur[which(proc$PartDur != "")] %>% as.numeric()
+    proc_w_prep$PartDur[which(proc_w_prep$PartDur != "")] %>% as.numeric()
   lessonDur <-
     if (length(partDurations) == 1) {
       paste0(partDurations, " min") #if just 1 part listed, do X min
@@ -107,10 +107,9 @@ zget_procedure <- \(proc,
       if (length(unique(partDurations)) == 1) {
         paste0(length(partDurations), " x ", partDurations[1], " min")
       } else{
-        #otherwise state each length separately
-        sapply(1:length(partDurations), function(x) {
-          paste0("Part ", x, ": ", partDurations[x], " min")
-        }) %>% paste0(collapse = ", ")
+        #otherwise average, rounding to 5 min
+        m <- mean(partDurations,na.rm=T)
+        paste0(length(partDurations)," x ~",5*round(m/5)," min")
       }
     }
   lessonDur
