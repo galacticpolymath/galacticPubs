@@ -214,7 +214,7 @@ compile_teach_it <- function(WD = getwd(),
       mainLink <- zYTembed(d$mainLink) %>%
         expand_md_links(repo = whichRepo(WD = WD))
       #if a drive file is supplied, change /edit?... to /preview
-      mainLink <- gsub("/edit?.*$", "/preview", mainLink)
+      mainLink <- gsub("/edit?.*$", "/preview?rm=minimal", mainLink)
 
       list(
         order = d$order,
