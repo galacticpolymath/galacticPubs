@@ -445,7 +445,7 @@ update_teach_links <- function(WD = getwd(),
                           is_empty(d_i$part),
                           "",
                           paste0("(Part ", d_i$part, ")")
-                        )) %>%
+                        ),collapse=" ") %>%
               stringr::str_to_title()
           } else{
             d_i$filename
