@@ -57,7 +57,7 @@ get_fm <-
 
         if (length(matches) > 0) {
           #Output partial match keys if found
-          results <-  y[[KEYS[matches]]]
+          results <-  y[KEYS[matches]]
 
 
           if (is_empty(results) & standardize_NA) {

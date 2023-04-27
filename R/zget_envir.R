@@ -224,15 +224,16 @@ zget_items <- \(df, fm) {
 
     #Revise custom preview/download link based on what_we_want * item_type
     #Necessary b/c some handouts are presentations & exporting to PDF works differently for slides than docs
+
     cust_url2 <- switch(
       paste(what_we_want, df_item_i$fileType, sep = "-"),
-      "present-presentation" = fs::path(cust_url, "present"),
+      "present-presentation" = paste0(cust_url, "/present"),
       #preview link for Slides presentation
-      "pdf-presentation" = fs::path(cust_url, "export/pdf"),
+      "pdf-presentation" = paste0(cust_url, "/export/pdf"),
       #pdf link for Slides presentation
-      "pdf-document" = fs::path(cust_url, "export?format=pdf"),
+      "pdf-document" = paste0(cust_url, "/export?format=pdf"),
       #pdf link for Workspace document
-      "pdf-docx" = fs::path(cust_url, "export?format=pdf"),
+      "pdf-docx" = paste0(cust_url, "/export?format=pdf"),
       #pdf link for docx Office document
       cust_url #don't modify link otherwise
     )
@@ -241,7 +242,7 @@ zget_items <- \(df, fm) {
     drive_share_link <-
       ifelse(
         df_item_i$fileType %in% c("document", "presentation"),
-        fs::path(cust_url, "template", "preview"),
+        paste0(cust_url, "/template/preview"),
         cust_url
       )
 
