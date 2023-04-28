@@ -11,7 +11,7 @@
 #' @export
 
 init_lesson_meta <- function(WD = getwd(), overwrite = FALSE) {
-   WD <- parse_wd(WD)
+  WD <- parse_wd(WD)
 
   #GdriveID for lesson templates (must have access to '/GP-Studio/Templates_BE_CAREFUL/lesson-meta-templates/')
 
@@ -21,9 +21,13 @@ init_lesson_meta <- function(WD = getwd(), overwrite = FALSE) {
 
 
   checkmate::assert(
-    checkmate::check_character(GdriveMetaID, min.chars = 10),
-    checkmate::check_character(GdriveDirName, min.chars = 2),
-    checkmate::check_character(ShortTitle, min.chars = 2),
+    checkmate::check_character(GdriveMetaID, min.chars = 10, all.missing = F),
+    checkmate::check_character(
+      GdriveDirName,
+      min.chars = 2,
+      all.missing = F
+    ),
+    checkmate::check_character(ShortTitle, min.chars = 2, all.missing = F),
     combine = "and"
   )
 
@@ -57,70 +61,73 @@ init_lesson_meta <- function(WD = getwd(), overwrite = FALSE) {
   } else{
     #identify any existing meta templates for deletion (i.e. overwriting by deleting and copying new)
     to_delete <- loc_meta_ls %>%
-      dplyr::filter(.data$name%in%meta_matching$name2)
+      dplyr::filter(.data$name %in% meta_matching$name2)
 
-    message("**** Sure you want to delete and overwrite the following files?\n -",
-            paste0(to_delete$name,collapse="\n -"))
+    message(
+      "**** Sure you want to delete and overwrite the following files?\n -",
+      paste0(to_delete$name, collapse = "\n -")
+    )
 
     continue <- readline("(y/n) > ")
-    if(continue!="y"){
+    if (continue != "y") {
       stop("init_lesson_meta() cancelled.")
     }
     test_delete <- fs::file_delete(to_delete$full) %>% catch_err()
-    if(test_delete){
+    if (test_delete) {
       message("Deletion successful")
-    }else{
-      warning("Something went wrong deleting: \n -",paste0(to_delete$full,collapse = "\n -"))
+    } else{
+      warning("Something went wrong deleting: \n -",
+              paste0(to_delete$full, collapse = "\n -"))
     }
     meta_to_copy <- meta_matching
   }
 
   # Copy template files -----------------------------------------------------
-  if(nrow(meta_to_copy)==0){
-     message("Templates already in directory")
+  if (nrow(meta_to_copy) == 0) {
+    message("Templates already in directory")
     success <- NA
-  }else{
-  message("\nCopying new template-files to project...\n")
-  res <-
-    drive_new_from_template(
-      meta_to_copy,
-      GdriveMetaID,
-      #unname necessary to avoid annoying concat.enation of varNames
-      new_name_gsub = c("TEMPLATE" = unname(ShortTitle))
-    ) %>% catch_err(keep_results = T)
+  } else{
+    message("\nCopying new template-files to project...\n")
+    res <-
+      drive_new_from_template(meta_to_copy,
+                              GdriveMetaID,
+                              #unname necessary to avoid annoying concat.enation of varNames
+                              new_name_gsub = c("TEMPLATE" = unname(ShortTitle))) %>% catch_err(keep_results = T)
 
 
 
-# Check for duplications of templates -------------------------------------
-# Get template basenames (excluding suffixes which might be renamed)
-  loc_templates <- fs::dir_ls(locpath_meta) %>% basename() %>% tools::file_path_sans_ext() %>% stringr::str_extract(.,"^[^_]*?(?=_)")
-  dupes <- loc_templates[!is.na(loc_templates)&duplicated(loc_templates)]
+    # Check for duplications of templates -------------------------------------
+    # Get template basenames (excluding suffixes which might be renamed)
+    loc_templates <-
+      fs::dir_ls(locpath_meta) %>% basename() %>% tools::file_path_sans_ext() %>% stringr::str_extract(., "^[^_]*?(?=_)")
+    dupes <-
+      loc_templates[!is.na(loc_templates) & duplicated(loc_templates)]
 
-  if(!is_empty(dupes)){
-    warning("Check for duplicate meta/ templates: ",dupes)
-  }
+    if (!is_empty(dupes)) {
+      warning("Check for duplicate meta/ templates: ", dupes)
+    }
 
 
-  # drive_new_from_template(template_path = "1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me",dest_path = GdriveMetaID)
-  if (res$success) {
-    message("SUCCESS! Template files copied to: '[",
-            GdriveDirName,
-            "]/meta'")
-    res$result
-    message(
-      "\nNow running update_fm() to record new GdriveTeachItID & other IDs in the front-matter.yml"
-    )
-    test_update <- update_fm(WD = WD,drive_reconnect = TRUE)
-    if (test_update) {
-      success <- TRUE
+    # drive_new_from_template(template_path = "1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me",dest_path = GdriveMetaID)
+    if (res$success) {
+      message("SUCCESS! Template files copied to: '[",
+              GdriveDirName,
+              "]/meta'")
+      res$result
+      message(
+        "\nNow running update_fm() to record new GdriveTeachItID & other IDs in the front-matter.yml"
+      )
+      test_update <- update_fm(WD = WD, drive_reconnect = TRUE)
+      if (test_update) {
+        success <- TRUE
+      } else{
+        success <- FALSE
+      }
     } else{
+      warning("Template files not copied to: ",
+              fs::path(GdriveDirName, "meta"))
       success <- FALSE
     }
-  } else{
-    warning("Template files not copied to: ",
-            fs::path(GdriveDirName, "meta"))
-    success <- FALSE
-  }
 
   }
 

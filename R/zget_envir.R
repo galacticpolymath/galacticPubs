@@ -118,7 +118,7 @@ zget_grade_bands <- \(df, fm, assess) {
         grades = paste(grade_yr_term, grade_band_i),
         gradePrefix = g_pref_i,
         links = list(
-          linkText = paste("Download", g_pref_i, "Materials for All Parts"),
+          linkText = paste("Browse & Download All", g_pref_i, "Materials"),
           url = df_variantDir$link
         ),
         parts = PART_DATA

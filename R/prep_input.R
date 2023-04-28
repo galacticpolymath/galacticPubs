@@ -17,7 +17,7 @@ prep_input <- function(input,
   #catch up with the folder move during live/draft staging
 
   test_saved <-
-    get_fm(WD = WD, auto_init = FALSE) %>% catch_err(try_harder = TRUE, keep_results = T)
+    get_fm(WD = WD, auto_init = FALSE,standardize_NA = FALSE) %>% catch_err(try_harder = TRUE, keep_results = T)
   if (test_saved$success) {
     saved <- test_saved$result
   } else{
@@ -60,6 +60,10 @@ prep_input <- function(input,
   if (!is_empty(hot_names)) {
     for (i in 1:length(hot_names)) {
       fm_key <- gsub("-hot", "", hot_names[i])
+      #Since this is a handsontable item, make sure the imported saved data is formatted as a tibble
+      ## This will avoid issues of saved_data and current_data not being identical for
+      ## saved check in editor()
+      saved[[fm_key]] <- saved[[fm_key]] %>% as.data.frame()
       table_i <- rhandsontable::hot_to_r(Y0[[hot_names[i]]])
       Y0[[fm_key]] <- if(is_empty(table_i)){NULL}else{table_i}
     }

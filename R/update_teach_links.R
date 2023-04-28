@@ -289,14 +289,14 @@ update_teach_links <- function(WD = getwd(),
   }
 
 
-
+  teach_it_in <- teach_it_in0
   # Begin logic for clean parameter (merge or overwrite .gsheet?-----------------
   if (clean) {
     #Assign the inferred data for output if clean==T
     #Do hard_left_join on empty teach_it_in0 to keep .gsheet structure,
     #but none of the data; sort
     test_teach_it_out <-
-      hard_left_join(teach_it_in0[-(1:nrow(teach_it_in0)), ],
+      hard_left_join(teach_it_in[-(1:nrow(teach_it_in)), ],
                      inferred_teach_it,
                      by =
                        "filename",
@@ -309,7 +309,7 @@ update_teach_links <- function(WD = getwd(),
 
     # For !clean, handle reading in, merging and updating teaching-mat.gsheet ----
   } else{
-    teach_it_in <- teach_it_in0 #%>%
+    #%>%
     # dplyr::mutate(f_g_e = paste(.data$filename, .data$grades, .data$envir, sep = "---"))
 
     # inferred_teach_it2 <-
@@ -473,12 +473,12 @@ update_teach_links <- function(WD = getwd(),
           #Default instructions for each type of item
           switch(
             itemSvT,
-            "worksheet-teacher" = "Print 1 Copy",
-            "worksheet-student" = "Print 1 per Student",
-            "handout/ card"     = "Print 1 per Student",
+            "worksheet-teacher" = "Print 1",
+            "worksheet-student" = "Print 1 Per Student",
+            "handout/ card"     = "Print 1 Per Student",
             "handout/ table" = "Print Classroom Set",
             "handout/ table student" = "Print Classroom Set",
-            "handout student" = "Print Classroom Set or 1 per Student",
+            "handout student" = "Print Classroom Set or 1 Per Student",
             "presentation" = "Need: WiFi, Computer, Projector, Sound",
             ""
           )

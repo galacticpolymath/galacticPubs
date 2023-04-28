@@ -1,6 +1,6 @@
 #' compile_teach_it
 #'
-#' Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the PartTitles tab.
+#' Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the PartTitles tab and invokes [sweep_teaching_materials()] to relocate scrap working files.
 #'
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [parse_wd()]; default is WD=getwd()
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
@@ -17,8 +17,12 @@ compile_teach_it <- function(WD = getwd(),
   WD <- parse_wd(WD)
 
   . = NULL #to avoid errors with dplyr syntax
+  #Keep teaching-materials/ folder tidy
+  sweep_teaching_materials(WD=WD)
+
   #Get front matter from the project working directory
   fm <- get_fm(WD = WD)
+
 
   status <- fm$PublicationStatus
   checkmate::assert_choice(status, c("Live", "Draft"))

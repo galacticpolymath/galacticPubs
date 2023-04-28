@@ -547,13 +547,20 @@ server <- function(input, output, session) {
               #or any variety of mismatched "", NULL, NA,etc (empties)
               (is_empty(data_check[[1]][[i]]) &
                  is_empty(data_check[[2]][[i]])))
-          }) %>% unlist()
+          }) %>% unlist() %>% which()
           prob_names <- names(data_check[[1]])[probs]
-          prob_names
+
+          if(length(prob_names)>0){
+          dplyr::tibble(item=prob_names,saved_data=data_check$saved_data[probs],
+                        current_data=data_check$current_data[probs])
+          }else{
+            dplyr::tibble(NULL)
+          }
+
         }
 
 
-      count_outOfDate <- length(outOfDate)
+      count_outOfDate <- nrow(outOfDate)
 
       #Check if template upgraded
       template_upgraded <-
@@ -623,7 +630,7 @@ server <- function(input, output, session) {
     vals$saved <- TRUE
     #synchronize saved and current_data
     vals$saved_data <-
-      vals$current_data <-  safe_read_yaml(WD = WD(),standardize_NA = F)
+      vals$current_data
     vals$yaml_update_txt <-
       txt <- (paste0(
         "front-matter.yml updated:<br>",

@@ -43,7 +43,7 @@ check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
 
   #Test if contains teaching-mat
   meta_files<-list.files(fs::path(WD,"meta"))
-  teachmat_count<-stringr::str_detect(meta_files,"teach-it.*.gsheet") %>% sum
+  teachmat_count<-stringr::str_detect(meta_files,"teach-it.*\\.gsheet") %>% sum
 
   loc_check3<-teachmat_count>0
   if(!loc_check3) {
@@ -56,7 +56,7 @@ check_wd<-function(WD=getwd(),simple_out=TRUE,throw_error=TRUE){
     }
   }
   if(teachmat_count>1){
-    stop("Duplicate 'teaching-materials' gsheets found. Like Highlander, there can only be one!")
+    stop("Duplicate 'teach-it' gsheets found. Like Highlander, there can only be one!")
   }
 
   test_result <- loc_check&loc_check2&loc_check3

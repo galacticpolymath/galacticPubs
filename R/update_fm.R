@@ -198,13 +198,11 @@ update_fm <-
                         fm_key = "GdriveMetaID")
 
         #find gID for meta/teach-it_ShortTitle.gsheet
-        #This needs a flexible match b/c the file will be named with lesson _ShortTitle suffix
         new_yaml$GdriveTeachItID <-
           zget_drive_id(
             drive_path = paste_valid("../teach-it", new_yaml$ShortTitle, collapse =
                                        "_"),
             drive_root = new_yaml$GdriveMetaID,
-            exact_match = FALSE,
             fm_key = "GdriveTeachItID"
           )
 
@@ -213,7 +211,6 @@ update_fm <-
           drive_path = paste_valid("../standards", new_yaml$ShortTitle, collapse =
                                      "_"),
           drive_root = new_yaml$GdriveMetaID,
-          exact_match = FALSE,
           fm_key = "GdriveStandardsID"
         )
 
@@ -221,7 +218,6 @@ update_fm <-
         new_yaml$GdrivePublishedID <- zget_drive_id(
           drive_path = "../published/",
           drive_root =  new_yaml$GdriveDirID,
-          exact_match = FALSE,
           fm_key = "GdrivePublishedID"
         )
 
