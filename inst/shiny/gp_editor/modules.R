@@ -13,7 +13,7 @@ ediTable_server <-
            allowColumnEdit = FALSE,
            manualRowMove = TRUE,
            width = "'100%'",
-           height = "300",
+           height = "100%",
            ...) {
     moduleServer(id,
                  function(input, output, session) {
