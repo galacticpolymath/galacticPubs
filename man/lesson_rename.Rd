@@ -50,7 +50,7 @@ Scenario where working title changes midway through project development. Don't r
 \item Finds and renames all file names to found in the project folder e.g. OldShortTitle_yadayada.* -> NewShortTitle_yadayada. This is done locally using Google Drive for Desktop virtualization of the Lessons Folder
 \item Changes name of GitHub Repo at galacticpolymath/ and galacticpolymath/catalog to "new_proj_name"
 \item Reassociates lesson folder to new GitHub name with \code{\link[=gh_reset_remote]{gh_reset_remote()}}
-\item Changes the ShortTitle and GPCatalogPath and GitHubPath items in front-matter.yml using \code{\link[=update_fm]{update_fm()}}.
+\item Changes the ShortTitle and GPCatalogURL and GitHubPath items in front-matter.yml using \code{\link[=update_fm]{update_fm()}}.
 }
 }
 \details{

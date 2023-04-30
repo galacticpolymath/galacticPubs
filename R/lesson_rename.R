@@ -5,7 +5,7 @@
 #' 2. Finds and renames all file names to found in the project folder e.g. OldShortTitle_yadayada.* -> NewShortTitle_yadayada. This is done locally using Google Drive for Desktop virtualization of the Lessons Folder
 #' 3. Changes name of GitHub Repo at galacticpolymath/ and galacticpolymath/catalog to "new_proj_name"
 #' 4. Reassociates lesson folder to new GitHub name with [gh_reset_remote()]
-#' 5. Changes the ShortTitle and GPCatalogPath and GitHubPath items in front-matter.yml using [update_fm()].
+#' 5. Changes the ShortTitle and GPCatalogURL and GitHubPath items in front-matter.yml using [update_fm()].
 #'
 #' Assumes that you have Google Drive for Desktop set up with access to Lessons/ folder; github and gh CLI set up with proper permissions with GP GitHub. Will ignore case to account for different user behaviors.
 #' @param new_proj_name The new name you want to give the selected project
@@ -277,7 +277,7 @@ test_reset_remote <- catch_err(
 
 
 
-# 5. Change the ShortTitle and GPCatalogPath and GitHubPath items  --------
+# 5. Change the ShortTitle and GPCatalogURL and GitHubPath items  --------
 #only update front-matter.yml if previous steps succeeded
 
 
@@ -298,7 +298,7 @@ if(proceed){
     c(change_this,
       list(
         ShortTitle = new_ShortTitle,
-        GPCatalogPath = paste0("https://catalog.galacticpolymath.com/lessons/",new_proj_name,"/LESSON.json"),
+        GPCatalogURL = paste0("https://catalog.galacticpolymath.com/lessons/",new_proj_name,"/LESSON.json"),
         GdriveDirName = new_proj_name,
         GitHubPath = paste0("git@github.com:galacticpolymath/", new_proj_name, ".git"),
         LastUpdated = Sys.time()

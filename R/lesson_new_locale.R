@@ -152,7 +152,7 @@ lesson_new_locale <-
                 LastUpdated = Sys.time(),
                 URL = "",
                 GitHubPath = "",
-                GPCatalogPath = "",
+                GPCatalogURL = "",
                 LearningEpaulette = "",
                 LearningChart = "",
                 LearningChartFriendly = ""

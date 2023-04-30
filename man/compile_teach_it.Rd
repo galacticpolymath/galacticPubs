@@ -24,5 +24,5 @@ compile_teach_it(
 tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 }
 \description{
-Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the PartTitles tab.
+Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the PartTitles tab and invokes \code{\link[=sweep_teaching_materials]{sweep_teaching_materials()}} to relocate scrap working files.
 }

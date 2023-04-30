@@ -8,9 +8,11 @@ sweep_teaching_materials(WD = get_wd())
 }
 \arguments{
 \item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=parse_wd]{parse_wd()}}; default is WD=getwd()}
+
+\item{return}{NULL}
 }
 \description{
-Move anything extra that doesn't belong in /teaching-materials into a /teaching-materials_scraps folder. This function gets called by \code{\link[=lesson_go_live]{lesson_go_live()}} to remove anything we don't want to be public-facing in the /GalacticPolymath/ shared folder. Uses virtual file tools, so should be quite efficient.
+Move anything extra that doesn't belong in /teaching-materials into a /teaching-materials_scraps folder. This function gets called by \code{\link[=compile_teach_it]{compile_teach_it()}} to remove anything we don't want to be public-facing in the /GalacticPolymath/ shared folder. Uses virtual file tools, so should be quite efficient.
 }
 \details{
 The search patterns for sweeping are:
