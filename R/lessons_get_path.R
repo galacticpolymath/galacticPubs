@@ -22,9 +22,16 @@ lessons_get_path <- function(shared_drive = "s") {
 
   lessons_dir <- Sys.getenv(which_path)
   if (is_empty(lessons_dir)) {
-    warning("\nLessons path not set. Calling set_drive_local_credentials().")
+    message("\nLessons path not set. Calling set_drive_local_credentials().")
     set_drive_local_credentials()
-    lessons_dir <- lessons_get_path()
+    lessons_dir <- lessons_get_path(shared_drive=shared_drive)
   }
   lessons_dir
 }
+
+#' get_lessons_path()
+#'
+#' @describeIn lessons_get_path  Alias for [lessons_get_path()]
+#' @export
+
+get_lessons_path <- lessons_get_path

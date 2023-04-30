@@ -5,7 +5,7 @@
 #' 2. Move lesson teaching-materials from GalacticPolymath Shared Drive
 #' 3. Rename from "MediumTitle" in public folder back to "teaching-materials"
 #' 4. Make the following updates to front-matter:
-#'    - PublicationStatus: 'draft'
+#'    - PublicationStatus: 'Draft'
 #'    - GdriveHome: 'GP-Studio'
 #'    - GdrivePublicID: NA
 #'
@@ -26,6 +26,7 @@ lesson_go_draft <- \(WD = getwd()) {
 
   # Extract important front-matter  -----------------------------------------
   MediumTitle <- get_fm("MediumTitle", WD)
+  projDirName <- get_fm("GdriveDirName", WD)
   dirID <- get_fm("GdriveDirID", WD)
   gpID <- get_fm("GdrivePublicID", WD)
   dir_drib <- drive_find_path(dirID)
@@ -33,6 +34,12 @@ lesson_go_draft <- \(WD = getwd()) {
 
   test_published <-
     checkmate::test_character(gpID, min.chars = 6)
+  checkmate::assert_character(
+    projDirName,
+    min.chars = 6,
+    .var.name = "GdriveDirName",
+    all.missing = FALSE
+  )
   checkmate::assert_data_frame(dir_drib, nrows = 1, .var.name = "Project Directory Google Drive object (dribble)")
   checkmate::assert_data_frame(gp_drib, nrows = 1, .var.name = "GalacticPolymath/ProjectDir Google Drive object (dribble)")
 
@@ -68,7 +75,8 @@ lesson_go_draft <- \(WD = getwd()) {
     if (continue != "y") {
       warning("Move CANCELED")
       draft_success <-
-        test_fm1 <- test_fm2 <-  shortcut_success <- update_success <- NA
+        test_fm1 <-
+        test_fm2 <-  shortcut_success <- update_success <- NA
 
       # Move folder to GP-Studio -----------------------------------------------------------
     } else{
@@ -120,14 +128,26 @@ lesson_go_draft <- \(WD = getwd()) {
       # Let's wait until it's recognized locally (Gdrive for Desktop needs to catch up)
       message("Waiting for Google Drive for Desktop to find the new working directory at: ",
               WD)
-      checkmate::assert(fs::is_dir(WD), .var.name = "fs::is_dir()") %>%
+      checkmate::assert_directory_exists(WD, .var.name = "WD exists") %>%
         catch_err(try_harder = T, waits = c(2, 5, 10, 15, 30))
 
-
-
+      #Test the teaching materials are found and set the new path
+      tmPath_full <-
+        fs::path(lessons_get_path("s"),
+                 projDirName,
+                 "teaching-materials")
+      message("Now checking that teaching-materials found at: ",tmPath_full)
+      checkmate::assert_directory_exists(tmPath_full) %>% catch_err(try_harder = T, waits =
+                                                                 c(2, 5, 1, 9))
+      #Only store a partial path to be more general
+      tmPath <- fs::path("GP-Studio",projDirName,"teaching-materials")
       test_fm1 <- update_fm(
         WD = WD,
-        change_this = list(GdriveHome = "GP-Studio", PublicationStatus = "Draft")
+        change_this = list(
+          GdriveHome = "GP-Studio",
+          GdriveTeachMatPath = tmPath,
+          PublicationStatus = "Draft"
+        )
       ) %>% catch_err()
 
       if (!is.na(draft_success) & draft_success) {
@@ -137,7 +157,7 @@ lesson_go_draft <- \(WD = getwd()) {
           change_this = list(
             GdrivePublicID = NA,
             GdriveTeachMatID =
-              tmID
+              unname(tmID)
           )
         )
         test_fm2 <-
@@ -181,7 +201,10 @@ lesson_go_draft <- \(WD = getwd()) {
       "move project to GP-Studio",
       "move /teaching-materials/ back to project folder",
       "delete shortcut to 'GalacticPolymath/teaching-materials/'",
-      "update_fm(): GdriveHome='GP-Studio' and PublicationStatus='Draft'",
+      paste0(
+        "update_fm(): GdriveHome='GP-Studio' and PublicationStatus='Draft' and GdriveTeachMatPath=",
+        tmPath
+      ),
       paste0(
         "update_fm(): GdrivePublicID=NA and GdriveTeachMatID='",
         gpID,

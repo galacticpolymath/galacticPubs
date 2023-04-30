@@ -101,16 +101,13 @@ compile_lesson <-
     # local path to teaching material
     # If PublicationStatus=="Draft", found on 'GP-Studio'
     # Else, found on 'GalacticPolymath'
-    tm_local <-
-      ifelse(
-        status == "Draft",
-        fs::path(WD, "teaching-materials"),
-        fs::path(lessons_get_path("gp"), med_title)
-      )
+    #****To do::: need to construct this from shared_drive_path, GdriveTeachMatPath
+
+    tm_path_full <-fs::path(get_shared_drive_path(),get_fm("GdriveTeachMatPath",WD=WD,checkWD=F))
 
     #make sure we know local directory path to this lesson's teaching-materials
     #In case we're waiting on Google Drive for desktop to update, let's repeat this assertion after it fails, increasing wait time
-    checkmate::assert(fs::is_dir(tm_local), .var.name = "fs::is_dir()") %>%
+    checkmate::assert_directory_exists(tm_path_full, .var.name = "GdriveTeachMatPath") %>%
       catch_err(try_harder = T, waits = c(2, 5, 10, 15))
 
 
@@ -304,7 +301,7 @@ compile_lesson <-
           prev_update_state <- readRDS(save_path)
           #get state for teach-it.gsheet AND all teaching-materials/ contents
           curr_update_state <-
-            get_state(c(teach_it_path, tm_local), save_path = NULL)
+            get_state(c(teach_it_path, tm_path_full), save_path = NULL)
 
           skip_update <-
             identical(prev_update_state, curr_update_state)
@@ -316,10 +313,11 @@ compile_lesson <-
           # update teach_it links and compile ---------------------------------------
           message("Changes to `../teaching-materials/` detected...")
           message("Running update_teach_links() and compile_teach-it()")
-          update_teach_links(WD = WD)
-          compile_teach_it(WD = WD)
+
+          test_update_teach_it <- update_teach_links(WD = WD) %>% catch_err()
+          test_compile_teach_it <- compile_teach_it(WD = WD) %>% catch_err()
           #update the cache of the teaching-material state of things
-          get_state(path = c(teach_it_path, tm_local),
+          get_state(path = c(teach_it_path, tm_path_full),
                     save_path = save_path)
         } else{
           message("No changes to `../teaching-materials/` detected...")

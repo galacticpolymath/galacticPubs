@@ -28,17 +28,37 @@ lesson_go_live <- \(WD = getwd()) {
   # Extract important front-matter  -----------------------------------------
   newTitle <- get_fm("MediumTitle", WD)
   dirID <- get_fm("GdriveDirID", WD)
+  projDirName <- get_fm("GdriveDirName", WD)
   gpID <- get_fm("GdrivePublicID", WD)
   tmID <- get_fm("GdriveTeachMatID", WD)
   dir_drib <- drive_find_path(dirID)
 
-  checkmate::assert_character(newTitle, min.chars = 6, .var.name = "MediumTitle")
-  checkmate::assert_character(tmID,
-                              null.ok = F,
-                              min.chars = 6,
-                              .var.name = "teaching material google ID (GdriveTeachMatID)")
+  checkmate::assert_character(
+    newTitle,
+    min.chars = 6,
+    .var.name = "MediumTitle",
+    all.missing = FALSE
+  )
+  checkmate::assert_character(
+    projDirName,
+    min.chars = 6,
+    .var.name = "GdriveDirName",
+    all.missing = FALSE
+  )
+  checkmate::assert_character(
+    tmID,
+    null.ok = F,
+    all.missing = FALSE,
+    min.chars = 6,
+    .var.name = "teaching material google ID (GdriveTeachMatID)"
+  )
   test_not_published <- checkmate::test_scalar_na(gpID)
-  checkmate::assert_data_frame(dir_drib, nrows = 1, .var.name = "Project Directory Google Drive object (GdriveDirID dribble)")
+  checkmate::assert_data_frame(
+    dir_drib,
+    nrows = 1,
+    all.missing = FALSE,
+    .var.name = "Project Directory Google Drive object (GdriveDirID dribble)"
+  )
 
   #If a publicID (on GalacticPolymath) has been assigned, we can skip the moving step
   if (!test_not_published) {
@@ -72,7 +92,7 @@ lesson_go_live <- \(WD = getwd()) {
     if (continue != "y") {
       warning("Move CANCELED")
       live_success  <-
-        test_fm1 <- test_fm2<-
+        test_fm1 <- test_fm2 <-
         gp_success <-
         shortcut_success <-
         made_public_success <- update_success <-   NA
@@ -106,7 +126,8 @@ lesson_go_live <- \(WD = getwd()) {
 
       } else{
         gp_success <-
-          shortcut_success <- made_public_success <- update_success <-
+          shortcut_success <-
+          made_public_success <- update_success <-
           FALSE
       }
 
@@ -115,49 +136,66 @@ lesson_go_live <- \(WD = getwd()) {
 
 
 
-    # Update front-matter -----------------------------------------------------
-    WD0 <- WD
-    WD <- gsub("GP-Studio", "GP-LIVE", WD, fixed = T)#new value
-    # Let's wait until it's recognized locally
-    message("Waiting for Google Drive for Desktop to find the new working directory at: ",WD)
-    checkmate::assert(fs::is_dir(WD), .var.name = "fs::is_dir()") %>%
-      catch_err(try_harder = T, waits = c(2, 5, 10, 15,30))
+      # Update front-matter -----------------------------------------------------
+      WD0 <- WD
+      WD <- gsub("GP-Studio", "GP-LIVE", WD, fixed = T)#new value
+      # Let's wait until it's recognized locally
+      message("Waiting for Google Drive for Desktop to find the new working directory at: ",
+              WD)
+      checkmate::assert(fs::is_dir(WD), .var.name = "fs::is_dir()") %>%
+        catch_err(try_harder = T, waits = c(2, 5, 10, 15, 30))
 
+      #Test the teaching materials are found and set the new path
+      tmPath_full <-
+        fs::path(lessons_get_path("gp"),
+                 newTitle)
+      message("Now checking that teaching-materials found at: ",tmPath_full)
+      checkmate::assert_directory_exists(tmPath_full) %>% catch_err(try_harder = T, waits =
+                                                                 c(2, 5, 1, 9))
 
-    test_fm1 <- update_fm(
-      WD = WD,
-      change_this = list(GdriveHome = "GP-LIVE", PublicationStatus = "Live")
-    ) %>% catch_err()
+      #Only store a partial path to be more general
+      tmPath <-
+        fs::path("GalacticPolymath", newTitle)
 
-
-    if (!is.na(live_success) & live_success) {
-      gpID <- as.character(test_move_to_gp$result$from$id)
-      update_fm(
+      test_fm1 <- update_fm(
         WD = WD,
         change_this = list(
-          GdrivePublicID = gpID,
-          GdriveTeachMatID = NA
+          GdriveHome = "GP-LIVE",
+          GdriveTeachMatPath = tmPath,
+          PublicationStatus = "Live"
         )
-      )
-      test_fm2 <-
-        checkmate::test_character(get_fm("GdrivePublicID", WD = WD), all.missing = FALSE)
-    } else if (!is.na(live_success) & !live_success) {
-      test_fm2 <- FALSE
-    } else{
-      test_fm2 <- NA
-    }
+      ) %>% catch_err()
 
-    # Update TeachMatLinks to affect new locations of files -------------------
 
-    if (live_success &
-        gp_success &
-        shortcut_success & made_public_success & test_fm1 & test_fm2) {
-      message("Running compile_lesson() to make sure the lesson is up-to-date.")
-      update_success <- compile_lesson(WD = WD) %>% catch_err()
-    } else{
-      message("Skipping compile_lesson() b/c of step failures. Run manually if necessary.")
-      update_success <- FALSE
-    }
+      if (!is.na(live_success) & live_success) {
+        gpID <- as.character(test_move_to_gp$result$from$id)
+        update_fm(
+          WD = WD,
+          change_this = list(
+            GdrivePublicID = unname(gpID),
+            GdriveTeachMatID = NA
+          )
+        )
+        test_fm2 <-
+          checkmate::test_character(get_fm("GdrivePublicID", WD = WD), all.missing = FALSE)
+      } else if (!is.na(live_success) & !live_success) {
+        test_fm2 <- FALSE
+      } else{
+        test_fm2 <- NA
+      }
+
+      # Run compile_lesson() to affect new locations of files -------------------
+
+      if (live_success &
+          gp_success &
+          shortcut_success &
+          made_public_success & test_fm1 & test_fm2) {
+        message("Running compile_lesson() to make sure the lesson is up-to-date.")
+        update_success <- compile_lesson(WD = WD) %>% catch_err()
+      } else{
+        message("Skipping compile_lesson() b/c of step failures. Run manually if necessary.")
+        update_success <- FALSE
+      }
 
 
     }
@@ -180,7 +218,10 @@ lesson_go_live <- \(WD = getwd()) {
       "move /teaching-materials/ to GalacticPolymath",
       "create shortcut to moved /teaching-materials/",
       "make teaching-materials public",
-      "update_fm(): GdriveHome='GP-LIVE' and PublicationStatus='Live'",
+      paste0(
+        "update_fm(): GdriveHome='GP-LIVE' and PublicationStatus='Live' and GdriveTeachmatPath=",
+        tmPath
+      ),
       paste0(
         "update_fm(): GdrivePublicID='",
         gpID,

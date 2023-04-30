@@ -17,7 +17,7 @@ Unstage a lesson (i.e. remove public access and make it editable again). Does th
 \item Rename from "MediumTitle" in public folder back to "teaching-materials"
 \item Make the following updates to front-matter:
 \itemize{
-\item PublicationStatus: 'draft'
+\item PublicationStatus: 'Draft'
 \item GdriveHome: 'GP-Studio'
 \item GdrivePublicID: NA
 }

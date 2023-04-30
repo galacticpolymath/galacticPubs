@@ -2,9 +2,12 @@
 % Please edit documentation in R/lessons_get_path.R
 \name{lessons_get_path}
 \alias{lessons_get_path}
+\alias{get_lessons_path}
 \title{Get path to Edu/Lessons folder containing GP projects}
 \usage{
 lessons_get_path(shared_drive = "s")
+
+get_lessons_path(shared_drive = "s")
 }
 \arguments{
 \item{shared_drive}{which shared drive do you want to find the lessons in? default= "s" Options:
@@ -17,3 +20,8 @@ lessons_get_path(shared_drive = "s")
 \description{
 Retrieves an environmental variable set with \code{\link[=set_drive_local_credentials]{set_drive_local_credentials()}}
 }
+\section{Functions}{
+\itemize{
+\item \code{get_lessons_path()}: Alias for \code{\link[=lessons_get_path]{lessons_get_path()}}
+
+}}

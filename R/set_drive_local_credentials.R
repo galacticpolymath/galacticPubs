@@ -61,6 +61,7 @@ set_drive_local_credentials <- function() {
              "Edu",
              "Lessons")
 
+  test_root_dir <- dir.exists(gdrive_root_dir)
   test_live_lessons_dir <- dir.exists(live_lessons_dir)
   test_gp_lessons_dir <- dir.exists(gp_lessons_dir)
   test_studio_lessons_dir <- dir.exists(studio_lessons_dir)
@@ -102,16 +103,18 @@ set_drive_local_credentials <- function() {
 
 
     # Set remaining environmental variables for paths---------------------------------------------
+    Sys.setenv(galacticPubs_gdrive_shared_drives_dir =ifelse(!test_root_dir,NA,gdrive_root_dir))
     Sys.setenv(galacticPubs_gdrive_studio_lessons_dir = ifelse(!test_studio_lessons_dir,NA,studio_lessons_dir))
     Sys.setenv(galacticPubs_gdrive_live_lessons_dir = ifelse(!test_live_lessons_dir,NA,live_lessons_dir))
     Sys.setenv(galacticPubs_gdrive_gp_lessons_dir = ifelse(!test_gp_lessons_dir,NA,gp_lessons_dir))
     Sys.setenv(galacticPubs_gdrive_catalog_dir = ifelse(!test_catalog_dir,NA,catalog_dir))
 
-    message("\nSUMMARY", "\n===========")
-    dplyr::tibble(
+
+    out <- dplyr::tibble(
       `Set?` = convert_T_to_check(
         c(
           test_user,
+          test_root_dir,
           test_studio_lessons_dir,
           test_live_lessons_dir,
           test_gp_lessons_dir,
@@ -120,12 +123,23 @@ set_drive_local_credentials <- function() {
       ),
       EnvirVariable = c(
         "galacticPubs_gdrive_userdir",
+        "galacticPubs_gdrive_shared_drives_dir",
         "galacticPubs_gdrive_studio_lessons_dir",
         "galacticPubs_gdrive_live_lessons_dir",
         "galacticPubs_gdrive_gp_lessons_dir",
         "galacticPubs_gdrive_catalog_dir"
+      ),
+      Value=c(
+        gdrive_userdir,
+        gdrive_root_dir,
+        studio_lessons_dir,
+        live_lessons_dir,
+        gp_lessons_dir,
+        catalog_dir
       )
     )
+    message("\nSUMMARY", "\n===========")
+    print(out)
   }
 
 }

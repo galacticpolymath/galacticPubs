@@ -15,29 +15,38 @@
 pick_lesson <- function(shared_drive = "s",
                         full_path = TRUE,
                         lessons_dir = NULL,
-                        sort_az=FALSE) {
+                        sort_az = FALSE) {
   if (is.null(lessons_dir)) {
-    lessons_dir <- lessons_get_path(shared_drive=shared_drive)
+    lessons_dir <- lessons_get_path(shared_drive = shared_drive)
   }
   projects00 <- fs::dir_ls(lessons_dir, type = "directory")
 
   #Filter out some patterns for things we don't want to process
   #mainly for GP-Studio
-  if(shared_drive!="gp"){
-  projects0 <- projects00[which(!grepl("^.*Lessons[\\/]~", projects00) &
-                                !grepl("OLD_", projects00))]
-  }else{projects0 <- projects00}
+  if (shared_drive != "gp") {
+    projects0 <-
+      projects00[which(!grepl("^.*Lessons[\\/]~", projects00) &
+                         !grepl("OLD_", projects00))]
+  } else{
+    projects0 <- projects00
+  }
 
 
-  if(sort_az){
-    projects<- projects0 %>% basename() %>% sort()
-  }else{
-    projects<-fs::file_info(projects0) %>% dplyr::arrange(dplyr::desc(modification_time)) %>% dplyr::select("path") %>% unlist() %>% basename()
+  if (sort_az) {
+    projects <- projects0 %>% basename() %>% sort()
+  } else{
+    projects <-
+      fs::file_info(projects0) %>% dplyr::arrange(dplyr::desc(modification_time)) %>% dplyr::select("path") %>% unlist() %>% basename()
   }
 
   d <- data.frame(PROJECT = projects, CHOICE = 1:length(projects))
   d <- rbind(d, c(PROJECT = "all", CHOICE = 0))
-  message("Available lessons at: /",switch(shared_drive,s="GP-Studio",l="GP-LIVE",gp="GalacticPolymath"),"/")
+  message("Available lessons at: /", switch(
+    shared_drive,
+    s = "GP-Studio",
+    l = "GP-LIVE",
+    gp = "GalacticPolymath"
+  ), "/")
   message(utils::capture.output(print(d, row.names = F), type = "message"))
   num0 <-
     readline("Which lesson? (separate multiple with ',') > ") #%>% as.integer()
@@ -65,4 +74,4 @@ pick_lesson <- function(shared_drive = "s",
 #'
 #' @export
 #provide alias
-lesson_pick<-pick_lesson
+lesson_pick <- pick_lesson

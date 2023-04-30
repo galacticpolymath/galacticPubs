@@ -14,7 +14,10 @@ sweep_teaching_materials <- \(WD=get_wd()){
 
   #grep patterns for folders to sweep away
   dirt <- c("scrap")
-  tm_ls_dirt <- fs::dir_ls(fs::path(WD,"teaching-materials"),regexp = paste0(dirt,collapse="|"))
+  tm_path <- get_fm("GdriveTeachMatPath",WD=WD)
+  tm_path_full <- fs::path(get_shared_drive_path(),tm_path)
+  checkmate::assert_directory_exists(tm_path_full,.var.name = "GdriveTeachMatPath")
+  tm_ls_dirt <- fs::dir_ls(tm_path_full,regexp = paste0(dirt,collapse="|"))
 
   if(length(tm_ls_dirt)>0){
     message("sweep_teaching_materials(): Scraps detected in /teaching-materials/ folder.")

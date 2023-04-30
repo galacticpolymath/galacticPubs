@@ -22,7 +22,7 @@ update_fm <-
            change_this = NULL,
            drive_reconnect = FALSE) {
     WD <- parse_wd(WD)
-
+    . = NULL
     #In galacticPubs dev mode, don't do certain things
     is_gPubs <- basename(WD) == "galacticPubs"
 
@@ -57,7 +57,8 @@ update_fm <-
       test_changes <- vector()
       for (i in 1:length(change_this)) {
         element_i <- change_keys[i]
-        if (new_yaml[[element_i]] == change_this[[i]]) {
+
+        if (identical(new_yaml[[element_i]], change_this[[i]])) {
           test_changes[i] <- NA
         } else{
           new_yaml[[element_i]] <- change_this[[i]]
@@ -111,6 +112,7 @@ update_fm <-
       collapse = ""
     )
 
+
     #add galacticPubsVer
     new_yaml$galacticPubsVer <-
       as.character(utils::packageVersion("galacticPubs"))
@@ -130,7 +132,7 @@ update_fm <-
     )
 
 
-    #Add path to this lesson for once it's published to gp-catalog (if it doesn't exist)
+    #Add URL to this lesson for once it's published to gp-catalog (if it doesn't exist)
     if (is_empty(new_yaml$GPCatalogURL) |
         is_empty(new_yaml$GdriveDirName)) {
       repo <- whichRepo(WD = WD)
@@ -276,14 +278,22 @@ update_fm <-
     }
 
 
-    # Fill in missing GdriveTeachMatID or GdrivePublicID if BOTH are missing---------------------------
-    # They both refer to teaching-materials/ but are found and named different things depending
-    # on PublicationStatus
-    if ((is.na(new_yaml$GdrivePublicID) &
-         is.na(new_yaml$GdriveTeachMatID))
-        | drive_reconnect) {
-      if (new_yaml$PublicationStatus == "Draft") {
-        #Draft teaching materials found in GdriveDirID
+    # Fill in GdriveTeachMatPath and GdriveTeachMatID or GdrivePublicID if BOTH are missing---------------------------
+    # All refer to teaching-materials/ but are found and named different things depending
+    # on PublicationStatus; IDs are Gdrive IDs for the Drive API; Path is a local, virtualized path
+    # Draft teaching materials are found on GP-Studio
+    if (is_empty(new_yaml$GdriveTeachMatPath) |
+        drive_reconnect) {
+
+      if (new_yaml$PublicationStatus %in% c("Proto", "Draft")) {
+        #Full local path to teaching-materials/folder
+        tm_path_full <-
+          fs::path(lessons_get_path("s"),
+                   new_yaml$GdriveDirName,
+                   "teaching-materials")
+        #shorthand path (usable for drive_find_path()), and more general across others' computers
+        tm_path <- fs::path("GP-Studio","Edu","Lessons",new_yaml$GdriveDirName,"teaching-materials")
+
         tmID <-
           zget_drive_id(
             "../teaching-materials/",
@@ -294,29 +304,43 @@ update_fm <-
         #Live teaching materials found on GalacticPolymath shared drive,
         #renamed with MediumTitle
       } else{
+
+        tm_path <-
+          fs::path("GalacticPolymath", new_yaml$MediumTitle)
+        tm_path_full <- fs::path(lessons_get_path("gp"),new_yaml$MediumTitle)
         tmID <- NA
         pubID <-
           zget_drive_id(fs::path("GalacticPolymath", new_yaml$MediumTitle),
                         fm_key = "GdrivePublicID")
       }
 
+      test_tmPath <- checkmate::test_directory_exists(tm_path_full)
       test_pubID <- checkmate::test_character(pubID, min.chars = 6)
       test_tmID <- checkmate::test_character(tmID, min.chars = 6)
 
+      if (!test_tmPath) {
+        stop("teaching-materials not found at:\n", tm_path_full)
+      }
+      new_yaml$GdriveTeachMatPath <- tm_path
       new_yaml$GdriveTeachMatID <- tmID
       new_yaml$GdrivePublicID <- pubID
 
       tm_res <-
         dplyr::tibble(
-          success = convert_T_to_check(test_tmID, test_pubID),
-          item = c("GdriveTeachMatID", "GdrivePublicID"),
-          ID = c(tmID, pubID)
+          success = convert_T_to_check(c(test_tmPath, test_tmID, test_pubID)),
+          item = c(
+            "GdriveTeachMatPath",
+            "GdriveTeachMatID",
+            "GdrivePublicID"
+          ),
+          ID = c(tm_path, tmID, pubID)
         )
 
       if (output_gdrive_summ) {
         gdrive_summ <- gdrive_summ %>% dplyr::add_row(tm_res)
       } else{
         gdrive_summ <- tm_res
+        output_gdrive_summ <- TRUE
       }
 
     }
