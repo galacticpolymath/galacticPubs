@@ -41,7 +41,7 @@ lesson_go_live <- \(WD = getwd()) {
   )
   checkmate::assert_character(
     projDirName,
-    min.chars = 6,
+    min.chars = 2,
     .var.name = "GdriveDirName",
     all.missing = FALSE
   )
@@ -211,7 +211,7 @@ lesson_go_live <- \(WD = getwd()) {
       test_fm2,
       update_success
     ) %>% convert_T_to_check()
-  dplyr::tibble(
+  out <- dplyr::tibble(
     success = successes,
     task = c(
       "move project to GP-LIVE",
@@ -231,4 +231,6 @@ lesson_go_live <- \(WD = getwd()) {
     )
   )
 
+  message("lesson_go_live() summary:")
+  print(out)
 }

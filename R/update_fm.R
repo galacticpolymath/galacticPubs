@@ -285,7 +285,8 @@ update_fm <-
     if (is_empty(new_yaml$GdriveTeachMatPath) |
         drive_reconnect) {
 
-      if (new_yaml$PublicationStatus %in% c("Proto", "Draft")) {
+      if ((new_yaml$PublicationStatus %in% c("Proto", "Draft"))|
+          new_yaml$GdriveHome=="GP-Studio") {
         #Full local path to teaching-materials/folder
         tm_path_full <-
           fs::path(lessons_get_path("s"),

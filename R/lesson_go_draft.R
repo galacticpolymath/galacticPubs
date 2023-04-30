@@ -36,7 +36,7 @@ lesson_go_draft <- \(WD = getwd()) {
     checkmate::test_character(gpID, min.chars = 6)
   checkmate::assert_character(
     projDirName,
-    min.chars = 6,
+    min.chars = 2,
     .var.name = "GdriveDirName",
     all.missing = FALSE
   )
@@ -140,7 +140,7 @@ lesson_go_draft <- \(WD = getwd()) {
       checkmate::assert_directory_exists(tmPath_full) %>% catch_err(try_harder = T, waits =
                                                                  c(2, 5, 1, 9))
       #Only store a partial path to be more general
-      tmPath <- fs::path("GP-Studio",projDirName,"teaching-materials")
+      tmPath <- fs::path("GP-Studio","Edu","Lessons",projDirName,"teaching-materials")
       test_fm1 <- update_fm(
         WD = WD,
         change_this = list(
@@ -195,7 +195,7 @@ lesson_go_draft <- \(WD = getwd()) {
       test_fm1,
       test_fm2,
       update_success) %>% convert_T_to_check()
-  dplyr::tibble(
+  out <- dplyr::tibble(
     success = successes,
     task = c(
       "move project to GP-Studio",
@@ -213,5 +213,7 @@ lesson_go_draft <- \(WD = getwd()) {
       "compile_lesson()"
     )
   )
+  message("lesson_go_draft() summary:")
+  print(out)
 
 }
