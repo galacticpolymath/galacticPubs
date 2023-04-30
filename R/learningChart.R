@@ -37,7 +37,7 @@ learningChart = function(WD = getwd(),
     destFolder <- fs::path(WD, "assets", "_learning-plots")
   }
 
-  ShortTitle <- get_fm("ShortTitle",WD)
+  ShortTitle <- get_fm("ShortTitle", WD)
 
   if (is_empty(quotedTitle)) {
     quotedTitle <-
@@ -80,17 +80,17 @@ learningChart = function(WD = getwd(),
       if (captionN) {
         avgN <-
           table(compiledAlignment$compiled$gradeband) %>% as.vector() %>%
-          mean(na.rm =T)
+          mean(na.rm = T)
         caption <-
           paste0(caption, " (~", floor(avgN), " standards per grade band)")
       }
 
       if (is_empty(centralText)) {
-        Gs <- get_fm("ForGrades",WD)
-        prefix <- get_fm("GradesOrYears",WD)
+        Gs <- get_fm("ForGrades", WD)
+        prefix <- get_fm("GradesOrYears", WD)
 
         centralText <-
-          paste0(prefix,"\n", Gs)
+          paste0(prefix, "\n", Gs)
       }
 
 
@@ -101,7 +101,7 @@ learningChart = function(WD = getwd(),
       # Make a proportional Learning Chart --------------------------------------
 
       #val for scale of the biggest ray
-      barScale <- max(a_combined$n_prop_adj,na.rm=T)
+      barScale <- max(a_combined$n_prop_adj, na.rm = T)
 
       #function for putting things a little beyond the max value in the dataset
       smidge <- function(amt = 1) {
@@ -126,7 +126,7 @@ learningChart = function(WD = getwd(),
         )
 
       targetRows <- which(bgRec2$subject %in% tolower(targetSubj))
-      outerFill <- bgRec2[targetRows,]
+      outerFill <- bgRec2[targetRows, ]
       outerFill$ymin <- smidge(.1)
       outerFill$ymax <- 10
 
@@ -350,9 +350,7 @@ learningChart = function(WD = getwd(),
         }
 
       gridFooter <-
-        function(bg,
-                 textCol,
-                 caption,
+        function(caption,
                  x,
                  y,
                  fontsize = 8,
@@ -459,6 +457,7 @@ learningChart = function(WD = getwd(),
           y = .0275,
           fontsize = 9
         )
+
         invisible(sapply(targetSubj, function(x) {
           d = targetDF %>% dplyr::filter(.data$subject == tolower(!!x))
           grid::grid.text(
@@ -487,6 +486,8 @@ learningChart = function(WD = getwd(),
           )
         }))
       })
+
+
       # output PNG of learning chart --------------------------------------------
       dir.create(destFolder,
                  showWarnings = FALSE,
