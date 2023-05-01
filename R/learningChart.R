@@ -96,7 +96,9 @@ learningChart = function(WD = getwd(),
 
 
       subjPal <- gpColors(c("math", "ela", "science", "socstudies"))
+      #Need to rename to agree with named subjects
 
+      names(subjPal) <- c("Math","ELA","Science","Social Studies")
 
       # Make a proportional Learning Chart --------------------------------------
 
@@ -115,6 +117,7 @@ learningChart = function(WD = getwd(),
       label_data2$y[c(1, 12)] <- smidge(3)
 
       #make background rectangles for each set of dimensions
+
       bgRec2 <-
         dplyr::tibble(
           subject = c("math", "ela", "science", "social studies"),
@@ -181,7 +184,7 @@ learningChart = function(WD = getwd(),
             alpha = .9,
             position = "stack"
           ) +
-          ggplot2::scale_fill_manual(values = as.vector(subjPal)) +
+          ggplot2::scale_fill_manual(values = subjPal) +
           ggplot2::scale_y_continuous(
             expand = c(0, 0),
             breaks = seq(0, barScale, .1),
@@ -203,31 +206,26 @@ learningChart = function(WD = getwd(),
       #Make target rectangle(s) where necessary
       #because of a stupid clipping thing with aesthetics I need to add rectangles for out-of bounds blocks highlighting target quadrant(s)
       if (length(targetSubj) > 0) {
-        for (i in 1:nrow(outerFill)) {
-          rect_i <-
-            paste0(
-              "ggplot2::geom_rect(xmin=outerFill[",
-              i,
-              ",]$xmin,xmax=outerFill[",
-              i,
-              ",]$xmax,ymin= outerFill[",
-              i,
-              ",]$ymin,ymax=outerFill[",
-              i,
-              ",]$ymax,fill=outerFill[",
-              i,
-              ",]$fill,col='transparent',alpha=0.03,inherit.aes=F)"
-            )
-          badge_prop0 <-
-            eval(parse(text = paste0("badge_prop0+", rect_i)))
-        }
-      }
+        g_outerFill <- lapply(1:nrow(outerFill),\(i){
+          ggplot2::geom_rect(
+            xmin = outerFill$xmin[i],
+            xmax = outerFill$xmax[i],
+            ymin = outerFill$ymin[i],
+            ymax = outerFill$ymax[i],
+            fill = outerFill$fill[i],
+            col = 'transparent',
+            alpha = 0.03,
+            inherit.aes = F
+          )
+        })
+
+      }else{g_outerFill <- {}}
 
       #Because \ gets escaped at some point, let's remove that and allow user to add newlines in centralText
       centralText <- gsub("\\n", "\n", centralText, fixed = T)
 
       (
-        badge_prop <- badge_prop0 +
+        badge_prop <- badge_prop0 + g_outerFill+
           #white background at center of circle
           ggplot2::geom_rect(
             data = NULL,
