@@ -5,7 +5,7 @@
 #' Don't use this if you want the expression to stop on an error!
 #'
 #' @param expr the expression to be evaluated
-#' @param keep_results Affects output. See returns.
+#' @param keep_results Affects output. See returns. default=FALSE
 #' @param add_values This will concatenate named values to output. Only works for keep_results==TRUE. Default=NULL.
 #' @param try_harder logical; do you want to iteratively try this expression after waiting an increasing amount of time(s) set by waits? default=F
 #' @param waits time(s) in seconds to wait before trying the expr again; default 5 increasing wait periods= c(0.1,0.5,1,2,5)
@@ -52,10 +52,15 @@ catch_err <- function(expr,
                       try_harder = FALSE,
                       waits = c(0.1,0.5,1,2,5)
                       ) {
+
+  #Annoying syntax for getting unevaluated expression text
+  qexpr<-deparse(substitute(expr))
+
   result <- tryCatch(
     expr,
-    error = function(e,expr=expr) {
-      e
+    error = function(e,expr=qexpr) {
+      message("Hit a snag with expr: ",expr)
+      return(e)
     }
   )
 
@@ -63,7 +68,6 @@ catch_err <- function(expr,
   if(inherits(result, "error")&
      try_harder) {
 
-    qexpr<-deparse(substitute(expr)) #Annoying syntax for getting unevaluated expression text
     message("Hit a snag with expr: ", qexpr)
     for (i in 1:length(waits)) {
       intvl <- waits[i]
@@ -72,10 +76,10 @@ catch_err <- function(expr,
 
       result <- tryCatch(
         expr,
-        error = function(e, expr = expr) {
-          e
+        error = function(e, expr = qexpr) {
+          return(e)
         }
-      ) %>% suppressWarnings()#Will be redundant with first try
+      ) %>% suppressWarnings()#Will already be shown during first try
       if (!inherits(result, "error")) {
         break
       }
@@ -84,6 +88,7 @@ catch_err <- function(expr,
   }
 
 # output ------------------------------------------------------------------
+
   if (inherits(result, "error")) {
     warning(result$message)
     success <- FALSE
@@ -96,7 +101,7 @@ catch_err <- function(expr,
 
     return(
       as.list(c(
-      success = success, expr=substitute(expr), add_values, result = list(result)
+      success = success, expr=qexpr, add_values, result = list(result)
     ))
     )
   }

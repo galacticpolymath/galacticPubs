@@ -50,12 +50,12 @@ update_fm <-
       test_valid <- sum(valid_names) == length(change_keys)
       if (!test_valid) {
         stop(
-          "Invalid keys suplied to `change_this`: \n  - ",
+          "Invalid keys supplied to `change_this`: \n  - ",
           paste0(change_keys[!valid_names], collapse = "\n  -")
         )
       }
-      test_changes <- vector()
-      for (i in 1:length(change_this)) {
+
+      test_changes <- sapply(1:length(change_this), \(i) {
         element_i <- change_keys[i]
 
         if (identical(new_yaml[[element_i]], change_this[[i]])) {
@@ -64,13 +64,20 @@ update_fm <-
           new_yaml[[element_i]] <- change_this[[i]]
           test_changes[i] <- TRUE
         }
-      }
+      })
+browser()
+
       message("The following keys were changed in front-matter: ")
+      # Gotta handle scenario where new template keys were added and don't exist in old data
+      old_vals <-  old_yaml[change_keys]
+      names(old_vals) <- change_keys
+      #Gotta switch NULL values to NA to keep them in vector output
+      old_vals2 <- lapply(old_vals,\(x){if(is.null(x)){NA}else{x}}) %>% unlist()
 
       print(
         dplyr::tibble(
           key = change_keys,
-          old_value = old_yaml[change_keys] %>% unlist(),
+          old_value = old_vals2,
           new_value = new_yaml[change_keys] %>% unlist(),
           `renamed?` = convert_T_to_check(test_changes)
         )
@@ -284,16 +291,20 @@ update_fm <-
     # Draft teaching materials are found on GP-Studio
     if (is_empty(new_yaml$GdriveTeachMatPath) |
         drive_reconnect) {
-
-      if ((new_yaml$PublicationStatus %in% c("Proto", "Draft"))|
-          new_yaml$GdriveHome=="GP-Studio") {
+      if ((new_yaml$PublicationStatus %in% c("Proto", "Draft")) |
+          new_yaml$GdriveHome == "GP-Studio") {
         #Full local path to teaching-materials/folder
         tm_path_full <-
           fs::path(lessons_get_path("s"),
                    new_yaml$GdriveDirName,
                    "teaching-materials")
         #shorthand path (usable for drive_find_path()), and more general across others' computers
-        tm_path <- fs::path("GP-Studio","Edu","Lessons",new_yaml$GdriveDirName,"teaching-materials")
+        tm_path <-
+          fs::path("GP-Studio",
+                   "Edu",
+                   "Lessons",
+                   new_yaml$GdriveDirName,
+                   "teaching-materials")
 
         tmID <-
           zget_drive_id(
@@ -305,10 +316,10 @@ update_fm <-
         #Live teaching materials found on GalacticPolymath shared drive,
         #renamed with MediumTitle
       } else{
-
         tm_path <-
           fs::path("GalacticPolymath", new_yaml$MediumTitle)
-        tm_path_full <- fs::path(lessons_get_path("gp"),new_yaml$MediumTitle)
+        tm_path_full <-
+          fs::path(lessons_get_path("gp"), new_yaml$MediumTitle)
         tmID <- NA
         pubID <-
           zget_drive_id(fs::path("GalacticPolymath", new_yaml$MediumTitle),

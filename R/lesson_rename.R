@@ -53,6 +53,8 @@ lesson_rename <- function(new_proj_name,
     stop("You seem to be in the project you want to modify. You need to run lesson_rename() from a different RStudio project.")
   }
 
+  curr_proj_name <- basename(WD)
+
     #check change_this; must be a list
   if(!is.list(change_this)&!is.null(change_this)){
     stop("change_this parameter must be a list. See ?update_fm() for help.")
@@ -72,19 +74,12 @@ lesson_rename <- function(new_proj_name,
     message("Guessing new_ShortTitle from front-matter.yml: '",new_ShortTitle,"'")
   }
 
-  #Enforce initial capital letter in all names if requested
-  if(force_init_capital){
-    new_ShortTitle<-string_capitalize_first(new_ShortTitle)
-    new_proj_name <- string_capitalize_first(new_proj_name)
-  }
-  #Define project directory now we've settled on new_proj_name
-  new_proj_dir<-fs::path(path_parent_dir(WD),new_proj_name)
 
   if(missing(curr_ShortTitle)){
     curr_ShortTitle<-y$ShortTitle
     #very dangerous to provide an empty regex pattern! ('') will capture anything!
     if(is_empty(curr_ShortTitle)){
-      curr_ShortTitle<-gsub(short_title_pat,"\\1",gh_proj_name,perl=TRUE)
+      curr_ShortTitle<-gsub(short_title_pat,"\\1",curr_proj_name,perl=TRUE)
 
     }
     message("Guessing curr_ShortTitle from front-matter.yml: '",curr_ShortTitle,"'")
@@ -93,6 +88,24 @@ lesson_rename <- function(new_proj_name,
   if(is_empty(curr_ShortTitle)){
     stop("curr_ShortTitle cannot be empty ('')! This will change every file.")
   }
+
+
+# make assertions on names ------------------------------------------------
+  checkmate::assert_character(curr_ShortTitle,min.chars=2,any.missing=FALSE)
+  checkmate::assert_character(new_ShortTitle,min.chars=2,any.missing=FALSE)
+  checkmate::assert_character(new_proj_name,min.chars=2,any.missing=FALSE)
+
+
+    #Enforce initial capital letter in all names if requested
+  if(force_init_capital){
+    new_ShortTitle<-string_capitalize_first(new_ShortTitle)
+    new_proj_name <- string_capitalize_first(new_proj_name)
+  }
+
+
+  #Define project directory now we've settled on new_proj_name
+  #MUST follow capitalization logic of force_init_capital
+  new_proj_dir<-fs::path(path_parent_dir(WD),new_proj_name)
 
 message("\nCAREFUL!")
 message(
@@ -126,7 +139,6 @@ if(continue%in%c("N","n")){
   stop("Renaming Canceled")
 }
 
-browser()
 # 1. Rename top level folder & project name-------------------------------------------
 if(!just_files){
 test_folderRename <- file.rename(from=WD,to = new_proj_dir)
@@ -298,9 +310,9 @@ if(proceed){
     c(change_this,
       list(
         ShortTitle = new_ShortTitle,
-        GPCatalogURL = paste0("https://catalog.galacticpolymath.com/lessons/",new_proj_name,"/LESSON.json"),
+        GPCatalogURL = '',
         GdriveDirName = new_proj_name,
-        GitHubPath = paste0("git@github.com:galacticpolymath/", new_proj_name, ".git"),
+        GitHubPath = '',
         LastUpdated = Sys.time()
       ))
 
@@ -316,8 +328,9 @@ if(proceed){
 
 # 8.   Delete orphaned catalog entry if it exists -------------------------
 if(!just_files){
-test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(WD))
+test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(curr_proj_name))
 }else{test_cleanup_catalog<-NA}
+
 
 # 7.  Summarize results ---------------------------------------------------
 
@@ -331,7 +344,7 @@ if(proceed & test_update_fm){
           " \u2022 Client facing Roadmap and other docs\n"),
           "-------------------------------------------------------\n")
 }else{
-  warning("Project renaming failed somewhere for: ",gh_proj_name)
+  warning("Project renaming failed somewhere for: ",basename(WD))
 }
 tests<-c(
     test_check_wd,
