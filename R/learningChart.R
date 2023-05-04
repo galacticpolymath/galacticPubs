@@ -508,8 +508,9 @@ learningChart = function(WD = getwd(),
         res = dpi,
         ...
       )
-      grid::grid.draw(G)
-      grDevices::dev.off()
+
+      # grid::grid.draw(G)
+      # grDevices::dev.off()
 
       #output to user
       if (showPlot) {

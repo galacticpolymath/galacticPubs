@@ -2,7 +2,7 @@
 id: ''
 UniqueID: ''
 ShortTitle: ''
-PublicationStatus: Draft
+PublicationStatus: Proto
 Language: 'English'
 Country: 'United States'
 DefaultLanguage: 'English'
@@ -17,7 +17,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.4.9
+TemplateVer: 0.5.0
 galacticPubsVer: ''
 URL: ''
 GPCatalogURL: ''

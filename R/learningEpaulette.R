@@ -42,7 +42,7 @@ learningEpaulette <-
     # #test for NULL values being supplied; replace with defaults
     # a<-match.call(expand.dots=TRUE)[-1] %>% as.list()
     #
-    # browser()
+
 
     #if WD supplied that is not getwd(), append it to destFolder
     if (!identical(WD, getwd())) {
@@ -72,7 +72,7 @@ learningEpaulette <-
         )))
 
       # #install compact font
-      # sysfonts::font_add_google(name="Kanit",regular.wt=400,bold.wt=600)
+      # sysfonts::font_add_google(name="sans",regular.wt=400,bold.wt=600)
       # showtext::showtext_auto()
       ## PLOT Epaulette
 
@@ -115,7 +115,7 @@ learningEpaulette <-
 
       subject_labels <-
         subset(xlabels, xlabels$x.prop > 0) %>% ggplot2::ggplot() +
-        galacticEdTools::theme_galactic(font = "Kanit") +
+        galacticEdTools::theme_galactic(font = "sans") +
         ggrepel::geom_text_repel(
           ggplot2::aes_string(
             x = "x",
@@ -125,7 +125,7 @@ learningEpaulette <-
             segment.size = "stroke"
           ),
           seed = randomSeed,
-          family = "Kanit",
+          family = "sans",
           size = font_size,
           show.legend = FALSE,
           direction = "both",
@@ -209,7 +209,7 @@ learningEpaulette <-
 
       subject_labels_vert <-
         subset(xlabels, xlabels$x.prop > 0) %>% ggplot2::ggplot() +
-        galacticEdTools::theme_galactic(font = "Kanit") +
+        galacticEdTools::theme_galactic(font = "sans") +
         ggplot2::geom_text(
           ggplot2::aes_string(
             x = .1,
@@ -219,8 +219,8 @@ learningEpaulette <-
           ),
           hjust = 0,
           vjust = 1.2,
-          size = font_size,
-          family = "Kanit",
+          size = font_size*0.85,
+          family = "sans",
           show.legend = FALSE,
           col = gpColors("galactic black")
         ) +
@@ -233,10 +233,12 @@ learningEpaulette <-
         ggplot2::scale_x_continuous(expand = ggplot2::expansion(c(0, 0))) +
         ggplot2::scale_y_continuous(limits = c(0, 1),
                                     expand = ggplot2::expansion(c(0.001, 0.001))) +
-        ggplot2::theme_void()
+        ggplot2::theme_void()+
+        ggplot2::theme(plot.margin=ggplot2::margin(0,15,0,0))
 
       ###
       # VERTICAL EPAULETTE + LABELS
+
       G_vert <-
         epaulette_vert + subject_labels_vert + patchwork::plot_layout(ncol = 2, widths =
                                                                         c(0.2, 0.8)) &
@@ -266,9 +268,9 @@ learningEpaulette <-
 
       fileOutExt <-
         ifelse(is.na(givenExt), "png", givenExt) #provide png extension if not provided
-      output <- fs::path(destFolder, "/", fileOut, ext = fileOutExt)
+      output <- fs::path(destFolder, fileOut, ext = fileOutExt)
       output_vert <-
-        fs::path(destFolder, "/", fileOut_vert, ext = fileOutExt)
+        fs::path(destFolder,  fileOut_vert, ext = fileOutExt)
 
 
       #save the file
@@ -289,7 +291,7 @@ learningEpaulette <-
         plot = G_vert,
         path = fs::path_dir(output_vert),
         width = height * 1,
-        height = width * .6,
+        height = width * .5,
         dpi = dpi,
         bg = "transparent"
       )

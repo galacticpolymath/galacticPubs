@@ -583,10 +583,6 @@ server <- function(input, output, session) {
       }
 
 
-
-
-
-      browser()
       count_outOfDate <- nrow(outOfDate)
 
       #Check if template upgraded

@@ -29,12 +29,14 @@ compile_standards <- function(WD = getwd(),
       "Art",
       "Sustainability",
       "Technology")
-  #learning chart subject titles
+  #learning chart/learningEpaulette subject titles (<=5 char)
   ordered_subj_chart <-
-    c("Math", "ELA", "Sci"    , "SocStd",        "Art", "SDGs",          "Tech")
+    c("Math", "ELA", "Sci"    , "SocSt",        "Art", "SDGs",          "Tech")
   #here for legacy reasons
   ordered_subj <-
     c("math", "ela", "science", "socstudies",     "art", "sdgs",         "tech")
+
+
 
 
   #define paths
