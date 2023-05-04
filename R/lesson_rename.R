@@ -317,7 +317,8 @@ if(proceed){
       ))
 
   test_update_fm<-
-    catch_err(update_fm(WD=new_proj_dir,change_this = change_this2))
+    catch_err(update_fm(WD=new_proj_dir,change_this = change_this2,
+      drive_reconnect=TRUE))
 }else{
   test_update_fm<-FALSE
 }
@@ -357,6 +358,7 @@ tests<-c(
   )
 change_log<- dplyr::bind_rows(change_log)
 summ <- dplyr::tibble(result=convert_T_to_check(tests),test=c("Checked Working Directory","Renamed Project Folder","Renamed Rproj","Renamed GitHub Remote","Reset Local<->Remote Connection","Updated front-matter.yml","Remove orphaned gp-catalog entry"))
+message("You still need to run publish() to push the new project updates to the Catalog.")
 return(list(change_log = change_log, summary = summ))
 
 }

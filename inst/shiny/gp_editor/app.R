@@ -34,7 +34,13 @@ yaml_path <- fs::path(meta_path, "front-matter.yml")
 yaml_test <- file.exists(yaml_path)
 
 
-y <- safe_read_yaml(yaml_path, eval.expr = TRUE,auto_init = TRUE,standardize_NA = F)
+y <-
+  safe_read_yaml(
+    yaml_path,
+    eval.expr = TRUE,
+    auto_init = TRUE,
+    standardize_NA = F
+  )
 
 #Image storage is temporary, in the app working directory (force, so it gets set now in current wd)
 img_loc <- paste0(getwd(), "/www/", collapse = "/")
@@ -309,16 +315,16 @@ ui <- navbarPage(
       width = "100%"
     ),
     hr(class = "blhr"),
-  #Acknowledgments
-  h3("Acknowledgments"),
-  ediTable(id = "Acknowledgments"),
-  hr(class = "blhr"),
-  #Acknowledgments
-  h3("Version Info"),
-  ediTable(id = "Versions"),
-  hr(class = "blhr"),
-  div(class="spacer")
-),
+    #Acknowledgments
+    h3("Acknowledgments"),
+    ediTable(id = "Acknowledgments"),
+    hr(class = "blhr"),
+    #Acknowledgments
+    h3("Version Info"),
+    ediTable(id = "Versions"),
+    hr(class = "blhr"),
+    div(class = "spacer")
+  ),
   #End Setup Panel
 
   # TAB 2: COMPILE ----------------------------------------------------------
@@ -495,7 +501,7 @@ server <- function(input, output, session) {
     )
   })
 
-   # Server logic for Tab 1 modules ------------------------------------------
+  # Server logic for Tab 1 modules ------------------------------------------
   #initialize values
   #define initial reactive values for ediTable
   ack_data <- reactiveVal(y$Acknowledgments)
@@ -526,40 +532,61 @@ server <- function(input, output, session) {
         vals$saved_data <- data_check$saved_data
       })
 
-      outOfDate <-
-        if (!identical(length(data_check[[1]]), length(data_check[[2]]))) {
-          longer_list <- which.max(lengths(data_check))
-          longer_list_names <- names(data_check[[longer_list]])
-          shorter_list_names <- names(data_check[[-longer_list]])
-          probs_names <-
-            longer_list_names[is.na(match(longer_list_names, shorter_list_names))]
-          #Entries missing (probably in saved_data)
-          probs_names
-        } else{
-          # if out-of-date, each element of the list should not be identical
-          # (unlist necessary to avoid narrow issue w/ <NA> vs `NA` names)
-          #
-          probs <- lapply(1:length(data_check[[1]]), function(i) {
-            !(identical(
-              unlist(data_check[[1]][i], use.names = FALSE),
-              unlist(data_check[[2]][i], use.names = FALSE)
-            ) |
-              #or any variety of mismatched "", NULL, NA,etc (empties)
-              (is_empty(data_check[[1]][[i]]) &
-                 is_empty(data_check[[2]][[i]])))
-          }) %>% unlist() %>% which()
-          prob_names <- names(data_check[[1]])[probs]
-
-          if(length(prob_names)>0){
-          dplyr::tibble(item=prob_names,saved_data=data_check$saved_data[probs],
-                        current_data=data_check$current_data[probs])
-          }else{
-            dplyr::tibble(NULL)
-          }
-
-        }
 
 
+      if (!identical(length(data_check[[1]]), length(data_check[[2]]))) {
+        longer_list <- which.max(lengths(data_check))
+        longer_list_names <- names(data_check[[longer_list]])
+        shorter_list_names <- names(data_check[[-longer_list]])
+        prob_names <-
+          longer_list_names[is.na(match(longer_list_names, shorter_list_names))]
+        #Entries missing (probably in saved_data)
+        prob_names
+
+        longer_index <- which(longer_list_names%in%prob_names)
+        outOfDate <- dplyr::tibble(
+          item=prob_names,
+          #If saved is the longer one, output its extra data, otherwise NA
+          saved_data= ifelse(longer_list==1,unlist(data_check[[1]][longer_index]),NA),
+          #If current is the longer one, output its data, otherwise NA
+          current_data= ifelse(longer_list==2,unlist(data_check[[2]][longer_index]),NA)
+        )
+        #This is a little awkward, b/c we're storing a NULL value in 1 list as an NA
+        #But this only for internal purposes anyway checking if data has been saved.
+
+
+      } else{
+        # if out-of-date, each element of the list should not be identical
+        # (unlist necessary to avoid narrow issue w/ <NA> vs `NA` names)
+        #
+        probs <- lapply(1:length(data_check[[1]]), function(i) {
+          !(identical(
+            unlist(data_check[[1]][i], use.names = FALSE),
+            unlist(data_check[[2]][i], use.names = FALSE)
+          ) |
+            #or any variety of mismatched "", NULL, NA,etc (empties)
+            (is_empty(data_check[[1]][[i]]) &
+               is_empty(data_check[[2]][[i]])))
+        }) %>% unlist() %>% which()
+        prob_names <- names(data_check[[1]])[probs]
+
+        if (length(prob_names) > 0) {
+        outOfDate <-
+          dplyr::tibble(
+            item = prob_names,
+            saved_data = data_check$saved_data[probs],
+            current_data = data_check$current_data[probs]
+          )
+      } else{
+        outOfDate <- dplyr::tibble(NULL)
+      }
+      }
+
+
+
+
+
+      browser()
       count_outOfDate <- nrow(outOfDate)
 
       #Check if template upgraded
@@ -567,7 +594,6 @@ server <- function(input, output, session) {
         data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
 
       if (count_outOfDate > 0) {
-
         if (template_upgraded) {
           vals$yaml_update_txt <- paste0(
             "Save & Upgrade template:\n",
@@ -1206,7 +1232,11 @@ server <- function(input, output, session) {
     #we update the reactive value, which should supercede the now outdated input$LastUpdated
 
     vals$current_data <-
-      overwrite_matching(safe_read_yaml(fs::path(WD(), "meta", "front-matter.yml"),standardize_NA = F), vals$current_data)
+      overwrite_matching(safe_read_yaml(
+        fs::path(WD(), "meta", "front-matter.yml"),
+        standardize_NA = F
+      ),
+      vals$current_data)
 
     if (pub_status$SUCCESS == "\u2713") {
       output$publishReport <-

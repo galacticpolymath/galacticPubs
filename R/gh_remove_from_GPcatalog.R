@@ -25,7 +25,9 @@ gh_remove_from_GPcatalog <- function(gh_proj_name) {
   proj_in_cat <- gh_proj_name %in% current_cat_names
   if (!proj_in_cat) {
     message("Project '", gh_proj_name, "' not found in gp-catalog")
-    out <- NA
+    pull_success <-
+      test_proj_is_local <-
+      test_rm <- test_commit <- test_push <- FALSE
   } else{
     #Check for virtualized Google Drive catalog repo
     catalog_path <- Sys.getenv("galacticPubs_gdrive_catalog_dir")
@@ -43,7 +45,7 @@ gh_remove_from_GPcatalog <- function(gh_proj_name) {
     if (!loc_cat_exists) {
       message("Directory not found!\nMake sure you have access to:\n ",
               catalog_lessons_path)
-      out <- FALSE
+      pull_success <-  FALSE
     } else{
       #Pull latest
       message("Updating local gp-catalog")
@@ -52,7 +54,9 @@ gh_remove_from_GPcatalog <- function(gh_proj_name) {
         catch_err(gert::git_pull(repo = catalog_path), keep_results = T)
 
       #Try to recover from unsuccessful pull
-      if (!test_pull$success) {
+      if (test_pull$success) {
+        pull_success <- TRUE
+      } else{
         message("Git pull unsuccessful.")
         #Check for detached state
         is_detached <-
@@ -92,61 +96,68 @@ gh_remove_from_GPcatalog <- function(gh_proj_name) {
           pull_success <- FALSE
         }
       }
-
-      #If pull succeeded
-      if (pull_success) {
-        #Check again that the directory in question exists
-        local_proj_path <-
-          fs::path(catalog_lessons_path, gh_proj_name)
-        test_proj_is_local <- dir.exists(local_proj_path)
-
-        if (!test_proj_is_local) {
-          message("Project not found on virtualized folder: \n ",
-                  catalog_lessons_path)
-          out <- FALSE
-        } else{
-          #if the local github project in question exists, delete it
-          to_delete <- fs::dir_ls(local_proj_path, recurse = TRUE)
-          test_rm <- catch_err(fs::dir_delete(local_proj_path))
-
-          test_commit <-
-            catch_err(gert::git_commit_all(
-              message = paste0(
-                "galacticPubs::gh_remove_from_GPcatalog --*Delete gp-catalog entry: ",
-                gh_proj_name
-              ),
-              repo = catalog_lessons_path
-            ))
-
-          test_push <-
-            catch_err(gert::git_push(repo = catalog_lessons_path))
-
-          if (test_rm & test_commit & test_push) {
-            out <- TRUE
-          } else{
-            message("Something doesn't look right.")
-            out <- FALSE
-          }
-          print(dplyr::tibble(
-            Status = convert_T_to_check(
-              c(test_proj_is_local,
-                test_rm,
-                test_commit,
-                test_push)
-            ),
-            Test = c(
-              "Project found",
-              "Deleted locally",
-              "Committed",
-              "Pushed to the Web"
-            )
-          ))
-        }#End inner else
-        #end pull_success
-      } else{
-
-      }#end outer else
     }
 
-    out
+    #If pull didn't succeed, pass fail tests
+    if (!pull_success) {
+      test_proj_is_local <- test_rm <- test_commit <- test_push <- FALSE
+    } else{
+      #Check again that the directory in question exists
+      local_proj_path <-
+        fs::path(catalog_lessons_path, gh_proj_name)
+      test_proj_is_local <- dir.exists(local_proj_path)
+
+      if (!test_proj_is_local) {
+        message("Project not found on virtualized folder: \n ",
+                catalog_lessons_path)
+        test_rm <- test_commit <- test_push <- FALSE
+      } else{
+
+        #if the local github project in question exists, delete it
+        to_delete <- fs::dir_ls(local_proj_path, recurse = TRUE)
+        test_rm <- catch_err(fs::dir_delete(local_proj_path))
+
+        test_commit <-
+          catch_err(gert::git_commit_all(
+            message = paste0(
+              "galacticPubs::gh_remove_from_GPcatalog --*Delete gp-catalog entry: ",
+              gh_proj_name
+            ),
+            repo = catalog_lessons_path
+          ))
+
+        test_push <-
+          catch_err(gert::git_push(repo = catalog_lessons_path))
+      }
+    }
   }
+
+  if (test_rm & test_commit & test_push) {
+    out <- TRUE
+  } else{
+    message("Something doesn't look right.")
+    out <- FALSE
+  }
+  print(dplyr::tibble(
+    Status = convert_T_to_check(
+      c(
+        pull_success,
+        test_proj_is_local,
+        test_rm,
+        test_commit,
+        test_push
+      )
+    ),
+    Test = c(
+      "Catalog pulled latest from web",
+      "Project found",
+      "Deleted locally",
+      "Committed",
+      "Pushed to the Web"
+    )
+  ))
+
+
+  #output TRUE/FALSE success
+  out
+}

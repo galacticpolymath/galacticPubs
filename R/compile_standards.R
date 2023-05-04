@@ -451,9 +451,7 @@ compile_standards <- function(WD = getwd(),
               #Get parts assignments for this standard
               uniq_parts <-
                 strsplit(unique(d_gr$part), split = ",") %>% unlist() %>% trimws() %>% unique() %>% sort()
-              if (d_gr$code == "SL.6.2") {
 
-              }
               list(
                 parts = as.list(uniq_parts),
                 codes = unique(d_gr$code),

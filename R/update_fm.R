@@ -54,8 +54,9 @@ update_fm <-
           paste0(change_keys[!valid_names], collapse = "\n  -")
         )
       }
-
-      test_changes <- sapply(1:length(change_this), \(i) {
+      #Gotta do a for loop b/c I'm assigning things outside the loop
+      test_changes <- vector()
+      for (i in 1:length(change_this)) {
         element_i <- change_keys[i]
 
         if (identical(new_yaml[[element_i]], change_this[[i]])) {
@@ -64,15 +65,22 @@ update_fm <-
           new_yaml[[element_i]] <- change_this[[i]]
           test_changes[i] <- TRUE
         }
-      })
-browser()
+      }
+
 
       message("The following keys were changed in front-matter: ")
       # Gotta handle scenario where new template keys were added and don't exist in old data
       old_vals <-  old_yaml[change_keys]
       names(old_vals) <- change_keys
       #Gotta switch NULL values to NA to keep them in vector output
-      old_vals2 <- lapply(old_vals,\(x){if(is.null(x)){NA}else{x}}) %>% unlist()
+      old_vals2 <-
+        lapply(old_vals, \(x) {
+          if (is.null(x)) {
+            NA
+          } else{
+            x
+          }
+        }) %>% unlist()
 
       print(
         dplyr::tibble(
@@ -163,9 +171,6 @@ browser()
       is_empty(new_yaml$GdriveDirName) |
       is_empty(new_yaml$GdriveDirID) |
       is_empty(new_yaml$GdriveDirURL) |
-      # is_empty(new_yaml$GdriveMetaID) |
-      # is_empty(new_yaml$GdrivePublishedID) |
-      # is_empty(new_yaml$GdriveTeachItID) |
       drive_reconnect
     ) &
     !is_gPubs) {
@@ -289,6 +294,7 @@ browser()
     # All refer to teaching-materials/ but are found and named different things depending
     # on PublicationStatus; IDs are Gdrive IDs for the Drive API; Path is a local, virtualized path
     # Draft teaching materials are found on GP-Studio
+
     if (is_empty(new_yaml$GdriveTeachMatPath) |
         drive_reconnect) {
       if ((new_yaml$PublicationStatus %in% c("Proto", "Draft")) |
