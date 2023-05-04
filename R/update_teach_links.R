@@ -46,7 +46,7 @@ update_teach_links <- function(WD = getwd(),
   }
 
   med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
-  short_title <- get_fm("ShortTitle",WD=WD,checkWD = F)
+  short_title <- get_fm("ShortTitle", WD = WD, checkWD = F)
   GdriveHome <- get_fm("GdriveHome", WD = WD, checkWD = F)
   status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
 
@@ -60,22 +60,28 @@ update_teach_links <- function(WD = getwd(),
     checkmate::check_character(med_title, min.chars = 2),
     checkmate::check_character(short_title, min.chars = 2),
     checkmate::check_character(GdriveHome, min.chars = 6),
-    checkmate::check_choice(status,c("Live","Draft")),
+    checkmate::check_choice(status, c("Live", "Draft")),
     combine = "and"
   )
 
 
-# Set up ability to save folder state after update --------
+  # Set up ability to save folder state after update --------
   #Get local path to teaching materials
   #If PublicationStatus=="Draft", found on 'GP-Studio'
   #Else, found on 'GalacticPolymath'
-  tm_local <- ifelse(status=="Draft"|status=="Proto",fs::path(WD,"teaching-materials"),fs::path(lessons_get_path("gp"),med_title) )
-  checkmate::assert(fs::is_dir(tm_local),.var.name = "fs::is_dir()")
-  save_path <- fs::path(WD,"meta","save-state_teach-it.RDS")
-  checkmate::assert_path_for_output(save_path,overwrite=TRUE)
+  tm_local <-
+    ifelse(
+      status == "Draft" |
+        status == "Proto",
+      fs::path(WD, "teaching-materials"),
+      fs::path(lessons_get_path("gp"), med_title)
+    )
+  checkmate::assert(fs::is_dir(tm_local), .var.name = "fs::is_dir()")
+  save_path <- fs::path(WD, "meta", "save-state_teach-it.RDS")
+  checkmate::assert_path_for_output(save_path, overwrite = TRUE)
   teach_it_path <- fs::path(WD,
-                              "meta",
-                              paste_valid("teach-it", short_title),ext= "gsheet")
+                            "meta",
+                            paste_valid("teach-it", short_title), ext = "gsheet")
 
   #Find Gdrive web equivalent
   teach_dir <-
@@ -169,7 +175,11 @@ update_teach_links <- function(WD = getwd(),
                                         variant_info) %>%
     dplyr::select(-"shortTitle", -"short_title") %>%
     #filter out ignoredinfo
-    dplyr::filter(!grepl(ignore, .data$filename))
+    dplyr::filter(!grepl(ignore, .data$filename)) %>%
+    #filter out shortcuts
+    dplyr::filter(.data$fileType != "shortcut")
+
+
   #Format directory filenames to stand out from files
   #with ../dir/ formatting
   hier_dots <-
@@ -195,10 +205,10 @@ update_teach_links <- function(WD = getwd(),
 
 
 
-  #most recent modTime
-  last_teach_it_change_time <- max(inferred_teach_it$modTime)
-  last_teach_it_change_item <-
-    inferred_teach_it$filename[which.max(inferred_teach_it$modTime)]
+  # #most recent modTime
+  # last_teach_it_change_time <- max(inferred_teach_it$modTime)
+  # last_teach_it_change_item <-
+  #   inferred_teach_it$filename[which.max(inferred_teach_it$modTime)]
 
 
   # Check if the teach-it.gsheet up to date -----------------------
@@ -207,7 +217,7 @@ update_teach_links <- function(WD = getwd(),
 
   # teach-it.gsheet dribble (not the actual file, but a pointer)
   teach_id <- get_fm("GdriveTeachItID", WD = WD)
-  checkmate::assert_character(teach_id, all.missing = FALSE)
+  checkmate::assert_character(teach_id, min.chars = 6, all.missing = FALSE)
   teach_it_drib <-
     drive_find_path(teach_id)
   #make sure the teaching-materials dribble is valid
@@ -301,9 +311,8 @@ update_teach_links <- function(WD = getwd(),
                      by =
                        "filename",
                      as_char = TRUE) %>%
-      # #just adding this var for compatibility with downstream code
-      # dplyr::mutate(f_g_e = paste(.data$filename, .data$grades, .data$envir, sep =
-      #                               "---")) %>%
+      #filter out shortcuts
+      dplyr::filter(.data$fileType != "shortcut") %>%
       catch_err(keep_results = TRUE)
 
 
@@ -323,8 +332,10 @@ update_teach_links <- function(WD = getwd(),
       by = "LINKS",
       df1_cols_to_keep = c("title", "description", "extLink"),
       as_char = TRUE
-    ) %>% dplyr::select(-c("LINKS"))  %>% catch_err(keep_results =
-                                                      TRUE)
+    ) %>% dplyr::select(-c("LINKS")) %>%
+      #filter out shortcuts
+      dplyr::filter(.data$fileType != "shortcut")   %>%
+      catch_err(keep_results = TRUE)
 
 
 
@@ -365,16 +376,7 @@ update_teach_links <- function(WD = getwd(),
 
       # Remove temporary id variable,arrange, & put lesson folder at top --------
       merged_teach_it <- merged_teach_it %>%
-        dplyr::select(-dplyr::starts_with("...")) %>%
-        dplyr::arrange(
-          !.data$itemType == "teachMatDir",
-          .data$envir,
-          .data$grades,
-          .data$itemType != "variantDir",
-          #put variantDir link above all the parts
-          .data$part,
-          .data$fileType
-        )
+        dplyr::select(-dplyr::starts_with("..."))
 
     }#End !is.null(merged_teach_it) logic for formatting merged merged_teach_it
 
@@ -445,7 +447,8 @@ update_teach_links <- function(WD = getwd(),
                           is_empty(d_i$part),
                           "",
                           paste0("(Part ", d_i$part, ")")
-                        ),collapse=" ") %>%
+                        ),
+                        collapse = " ") %>%
               stringr::str_to_title()
           } else{
             d_i$filename
@@ -484,6 +487,20 @@ update_teach_links <- function(WD = getwd(),
           )
         }) %>% unlist()
     }
+
+
+    # Arrange for final export ------------------------------------------------
+    merged_teach_it <- merged_teach_it %>%
+        dplyr::arrange(
+          !.data$itemType == "teachMatDir",
+          .data$envir,
+          .data$grades,
+          .data$itemType != "variantDir",
+          #put variantDir link above all the parts
+          .data$part,
+          .data$fileType
+        )
+
 
     # Write new data to TeachMatLinks tab ----------------------------------------
     skip_rows <- 2
@@ -528,11 +545,13 @@ update_teach_links <- function(WD = getwd(),
 
   # save directory state information for use by compile_lesson() ------------
   # Save state for both teach_it.gsheet AND teaching-materials contents
-  test_savestate <- get_state(path=c(teach_it_path, tm_local),save_path = save_path) %>% catch_err()
-  if(test_savestate){
-    message("@ Saved /teaching-materials/ state to: \n '",save_path,"'")
-  }else{
-    warning("Failed to save update state: ",save_path)
+  test_savestate <-
+    get_state(path = c(teach_it_path, tm_local),
+              save_path = save_path) %>% catch_err()
+  if (test_savestate) {
+    message("@ Saved /teaching-materials/ state to: \n '", save_path, "'")
+  } else{
+    warning("Failed to save update state: ", save_path)
   }
 
 

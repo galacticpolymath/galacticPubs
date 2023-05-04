@@ -65,13 +65,28 @@ zget_procedure <- \(proc,
     vocab_vec <-
       proc %>% dplyr::filter(!is.na(.data$Vocab)) %>% dplyr::pull("Vocab")
 
-    vocab_df <- vocab_vec %>% purrr::map(., \(x_i) {
+    #turn each entry separated by line return into a row of a tibble
+    vocab_df0 <- vocab_vec %>% purrr::map(., \(x_i) {
       dplyr::tibble(x = strsplit(x_i, split = "\n")[[1]])
-    }) %>% dplyr::bind_rows() %>% tidyr::separate_wider_delim(
+    }) %>%
+      dplyr::bind_rows()
+
+    #make sure each row has an = sign
+    has_equal <- grepl(pattern = "=",vocab_df0$x)
+
+    if(sum(!has_equal)>0){
+      stop("The following vocab entries don't have an = sign:\n -",
+           paste0(vocab_df0[!has_equal,"x"]))
+    }
+
+    vocab_df <- vocab_df0 %>%
+      tidyr::separate_wider_delim(
       cols = 1,
       delim = stringr::regex(" *= *"),
       names = c("term", "definition")
-    ) %>% dplyr::distinct(.data$term, .keep_all = T)#remove repeated definitions, in case repeated in procedure
+    ) %>%
+      #remove repeated definitions, in case repeated in procedure
+      dplyr::distinct(.data$term, .keep_all = T)
 
     #Parse vocab for Procedure section (change shorthand into reasonably formatted markdown with bullets)
     proc$Vocab <- formatVocab(proc$Vocab)

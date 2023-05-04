@@ -14,6 +14,7 @@
 #' - grades
 #' - itemType
 #' - fileType
+#' @param all_info logical; keep the full drive_resources list with all the dribble meta info for each row item? default=FALSE
 #'
 #' @returns a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
 #' @examples
@@ -22,7 +23,7 @@
 #' @family Google Drive Functions
 #' @export
 
-drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=FALSE) {
+drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=FALSE, all_info=FALSE) {
   #Make sure a dribble
   checkmate::assert(checkmate::check_class(dribble, "dribble"))
 
@@ -156,7 +157,7 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     modTime<-dribble$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
     checkmate::assert_posixct(modTime,any.missing = FALSE)
       #output
-    dplyr::tibble(
+    row_i_out <- dplyr::tibble(
       shortTitle = shortTitle,
       short_title = short_title,
       title=NA,
@@ -172,6 +173,10 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
       modTime= modTime
 
     )
+    if(all_info){
+      row_i_out$drive_resource <- list(dribble$drive_resource[[1]])
+    }
+    return(row_i_out)
 
   }) %>% dplyr::bind_rows()
 

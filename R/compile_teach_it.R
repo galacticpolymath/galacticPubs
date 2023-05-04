@@ -12,13 +12,13 @@
 
 compile_teach_it <- function(WD = getwd(),
                              teach_it_drib = NULL,
-                             rename_parts=TRUE,
-                             prompt_rename=TRUE) {
+                             rename_parts = TRUE,
+                             prompt_rename = TRUE) {
   WD <- parse_wd(WD)
 
   . = NULL #to avoid errors with dplyr syntax
   #Keep teaching-materials/ folder tidy
-  sweep_teaching_materials(WD=WD)
+  sweep_teaching_materials(WD = WD)
 
   #Get front matter from the project working directory
   fm <- get_fm(WD = WD)
@@ -51,6 +51,37 @@ compile_teach_it <- function(WD = getwd(),
 
     )
 
+  # Handle materials for multiple parts (e.g. P1&2) -------------------------
+  # Want to break up P1&2 entries and repeat data for 1 and 2, so parts
+  # get the shared info
+  multipart_material <-
+    grepl("&", tlinks0$part) %>% which()
+
+  if (length(multipart_material) > 0) {
+    multi_df <- tlinks0[multipart_material, ]
+    nonmulti_df <- tlinks0[-multipart_material, ]
+    parts <- stringr::str_split(multi_df$part, "&")
+    expanded_multi <- lapply(1:length(parts), \(i) {
+      parts_i <- parts[[i]]
+      multi_df_i <- multi_df[rep(i, length(parts_i)), ] %>%
+        dplyr::mutate(part = parts_i)
+    }) %>% dplyr::bind_rows()
+    #combine expanded (repeated) data with previous data
+    tlinks0 <-
+      dplyr::bind_rows(nonmulti_df, expanded_multi)%>%
+      #rearrange to preserve order of output
+        dplyr::arrange(
+          !.data$itemType == "teachMatDir",
+          .data$envir,
+          .data$grades,
+          .data$itemType != "variantDir",
+          #put variantDir link above all the parts
+          .data$part,
+          .data$fileType
+        )
+  }
+
+
   mlinks <-
     googlesheets4::read_sheet(
       teach_it_drib,
@@ -78,10 +109,6 @@ compile_teach_it <- function(WD = getwd(),
     ) %>% dplyr::filter(`REF(Is_initiatialized)` == TRUE &
                           !is.na(.data$ItemTitle)) %>%
     dplyr::select("Part", "Order", "ItemTitle", "Description", "Link")
-
-
-
-
 
   #bring in procedure
   proc <-
@@ -120,7 +147,7 @@ compile_teach_it <- function(WD = getwd(),
   # Report uninitialized data -----------------------------------------------
 
   if (!pext_initialized) {
-    pext <- pext[0, ]
+    pext <- pext[0,]
     message("No valid items found on PartExt tab of `teach-it.gsheet`.")
   }
 
@@ -171,8 +198,8 @@ compile_teach_it <- function(WD = getwd(),
   #Add part title and preface to proc tlinks info for convenience
   if (pinfo_titles_initialized) {
     # rename Part folders -----------------------------------------------------
-    if(rename_parts){
-    zrename_parts(pinfo, tmID,prompt_rename=prompt_rename)
+    if (rename_parts) {
+      zrename_parts(pinfo, tmID, prompt_rename = prompt_rename)
     }
 
     tlinks <-
@@ -194,7 +221,7 @@ compile_teach_it <- function(WD = getwd(),
       )
   }
 
- # Multimedia --------------------------------------------------------------
+  # Multimedia --------------------------------------------------------------
   # Outputs to separate multimedia JSON
   # if "by" is left blank, add Galactic Polymath by default
   if (!mlinks_initialized) {
@@ -213,7 +240,7 @@ compile_teach_it <- function(WD = getwd(),
       )
 
     multimedia <- lapply(1:nrow(m), function(i) {
-      d <- m[i,]
+      d <- m[i, ]
 
       mainLink <- zYTembed(d$mainLink) %>%
         expand_md_links(repo = whichRepo(WD = WD))
