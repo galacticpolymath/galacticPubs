@@ -487,6 +487,7 @@ learningChart = function(WD = getwd(),
 
 
       # output PNG of learning chart --------------------------------------------
+      if(saveFile){
       dir.create(destFolder,
                  showWarnings = FALSE,
                  recursive = TRUE)
@@ -509,8 +510,10 @@ learningChart = function(WD = getwd(),
         ...
       )
 
-      # grid::grid.draw(G)
-      # grDevices::dev.off()
+      grid::grid.draw(G)
+      grDevices::dev.off()
+
+      }
 
       #output to user
       if (showPlot) {
