@@ -5,13 +5,13 @@
 #' 2. Output standards.RDS file with the alignment info (this will be read in by [learningEpaulette()] and [learningChart()])
 
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); If you put "?", it will invoke [pick_lesson()]
-#' @param learningplot_correction do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=T; this will scale proportions of subjects by the relative total proportions of standards in each subject. If FALSE, the proportions will just be raw proportions of each subject out of total standards aligned.
+#' @param learningplot_correction do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=F, the proportions will just be raw proportions of each subject out of total standards aligned. If TRUE, this will scale proportions of subjects by the relative total proportions of standards in each subject.
 #' @param targetSubj which subject(s) are the focus of the lesson? opts= "math","ela","science","social studies"; default=NULL
 #' @return list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 #' @export
 #'
 compile_standards <- function(WD = getwd(),
-                              learningplot_correction = TRUE,
+                              learningplot_correction = FALSE,
                               targetSubj = NULL) {
   . = NULL #to avoid errors with dplyr syntax
   message("compiling standards...")
@@ -67,6 +67,8 @@ compile_standards <- function(WD = getwd(),
 
     # Import standards alignment--------------------------------------------------------
     # get standards from supplied file, tab 2
+    # Note if you change these import calls, there's retry logic below, so you need to
+    # change it there, as well.
 
     stnds_drib <- drive_find_path(stnds_id)
     checkmate::assert_data_frame(stnds_drib)
@@ -75,25 +77,28 @@ compile_standards <- function(WD = getwd(),
       stnds_drib$id,
       sheet = 1,
       skip = 1,
-      col_types = "c"
-    ) %>% dplyr::filter(!is.na(.data$`LO#`))
+      col_types = "c",
+      .name_repair = "minimal"
+    ) %>%
+      #Blank column is just used as a flexible marker
+      dplyr::select(1:"blank") %>%
+      dplyr::select(-"blank") %>%
+      dplyr::filter(!is.na(.data$`LO#`))
 
+      a_master <- googlesheets4::read_sheet(
+        stnds_drib$id,
+        sheet = "2.Standard-Selection",
+        skip = 1,
+        col_types = "c"
+      ) %>% dplyr::filter(!is.na(.data$Code))
 
-
-    a_master <- googlesheets4::read_sheet(
-      stnds_drib$id,
-      sheet = 2,
-      skip = 1,
-      col_types = "c"
-    ) %>% dplyr::filter(!is.na(.data$Code))
-
-
-    a0 <- googlesheets4::read_sheet(
-      stnds_drib$id,
-      sheet = 4,
-      skip = 1,
-      col_types = "c"
-    ) %>% dplyr::filter(!is.na(.data$Code))
+      # a0 is the "Finalize" tab
+      a0 <- googlesheets4::read_sheet(
+        stnds_drib$id,
+        sheet = "4.Finalize",
+        skip = 1,
+        col_types = "c"
+      ) %>% dplyr::filter(!is.na(.data$Code))
 
     is_valid_tab1 <- checkmate::test_data_frame(LOs, min.rows = 1)
     is_valid_tab2 <-
@@ -112,22 +117,28 @@ compile_standards <- function(WD = getwd(),
       stnds_drib <- drive_find_path(stnds_id)
 
       LOs <-    googlesheets4::read_sheet(
-        stnds_drib$id,
-        sheet = 1,
-        skip = 1,
-        col_types = "c"
-      ) %>% dplyr::filter(!is.na(.data$`LO#`))
+      stnds_drib$id,
+      sheet = 1,
+      skip = 1,
+      col_types = "c",
+      .name_repair = "minimal"
+    ) %>%
+      #Blank column is just used as a flexible marker
+      dplyr::select(1:"blank") %>%
+      dplyr::select(-"blank") %>%
+      dplyr::filter(!is.na(.data$`LO#`))
 
       a_master <- googlesheets4::read_sheet(
         stnds_drib$id,
-        sheet = 2,
+        sheet = "2.Standard-Selection",
         skip = 1,
         col_types = "c"
       ) %>% dplyr::filter(!is.na(.data$Code))
 
+      # a0 is the "Finalize" tab
       a0 <- googlesheets4::read_sheet(
         stnds_drib$id,
-        sheet = 4,
+        sheet = "4.Finalize",
         skip = 1,
         col_types = "c"
       ) %>% dplyr::filter(!is.na(.data$Code))
@@ -214,7 +225,7 @@ compile_standards <- function(WD = getwd(),
                         "Science",
                         "Social Studies")
 
-    #supported sets of standards for generating learning chart
+      #supported sets of standards for generating learning chart
       supported_sets <-
         c("Common Core Math", "Common Core ELA", "NGSS", "C3")
 
@@ -256,9 +267,12 @@ compile_standards <- function(WD = getwd(),
           paste0(a0$code[tbds], collapse = "\n\t\u2022"),
           "\n"
         )
+      } else{
+        tbds <- rep(FALSE, nrow(a0))
       }
 
       #undocumented alignments
+      #target says "skip" or no "how this lesson aligns"
       undoc <-
         (is.na(a0$how) &
            is.na(a0$grp)) |
@@ -271,9 +285,11 @@ compile_standards <- function(WD = getwd(),
           paste0(a0$code[undoc], collapse = "\n\t\u2022"),
           "\n"
         )
+      } else{
+        undoc <- rep(FALSE, nrow(a0))
       }
 
-      a1 <- a0[!undoc & !tbds,]
+      a1 <- a0[!undoc & !tbds, ]
 
       # a2 has markdown bullets ("- ") added if missing
       # Add markdown bullet to front of lines that don't start with it
@@ -532,10 +548,12 @@ compile_standards <- function(WD = getwd(),
       # Prep learningEpaulette data ---------------------------------------------
       #create an empty matrix to merge in, in case some subjects are missing
       a_template <-
-        a_master %>% dplyr::select("subject", "dimension") %>%
-        dplyr::distinct() %>% dplyr::mutate(n = 0) %>%
-        #Get rid of subjects not included in the alignment, but also required subjects
-        dplyr::filter(.data$subject %in% c(unique(A$subject), req_subjects))
+        a_master %>%
+        #Get rid of sets not included in the alignment
+        dplyr::filter(.data$set %in% c(unique(A$set))) %>%
+        dplyr::select("subject", "dimension") %>%
+        dplyr::distinct() %>% dplyr::mutate(n = 0)
+
 
       #super important to refactor subject on the imported data to ensure order
 
@@ -545,8 +563,8 @@ compile_standards <- function(WD = getwd(),
 
       a_summ <-
         A %>% dplyr::group_by(.data$subject, .data$dimension) %>%
-         # filter out unsupported subjects
-        dplyr::filter(.data$set %in% supported_sets) %>%
+        # filter out unsupported subjects
+        # dplyr::filter(.data$set %in% supported_sets) %>%
         dplyr::tally()
 
       #gotta combine missing rows, sort, & repeat the entries N times
@@ -554,7 +572,7 @@ compile_standards <- function(WD = getwd(),
         dplyr::anti_join(a_template, a_summ, by = "dimension") %>%
         dplyr::bind_rows(a_summ) %>%
         dplyr::arrange(.data$subject, .data$dimension) %>%
-        dplyr::mutate(binary =ifelse(.data$n > 0, 1, 0))
+        dplyr::mutate(binary = ifelse(.data$n > 0, 1, 0))
 
 
 
@@ -564,13 +582,15 @@ compile_standards <- function(WD = getwd(),
       #Account for bias in the number of standards
       bias <-
         a_master %>%
+        #Get rid of sets not included in the alignment
+        dplyr::filter(.data$set %in% unique(A$set)) %>%
         dplyr::group_by(.data$subject, .data$dimension) %>%
-        dplyr::summarise(n = dplyr::n()) %>%
-        #Get rid of subjects not included in the alignment
-        dplyr::filter(.data$subject %in% unique(A$subject))
+        dplyr::summarise(n = dplyr::n())
+
 
       bias_by_subj <-
-        bias %>% dplyr::summarise(tot_n_subj = sum(.data$n), .groups = "drop")
+        bias %>% dplyr::summarise(tot_n_subj = sum(.data$n, na.rm = T),
+                                  .groups = "drop")
       a_combined <-
         dplyr::left_join(a_combined,
                          (bias %>% dplyr::rename("tot_n_dim" = "n")),
@@ -583,7 +603,8 @@ compile_standards <- function(WD = getwd(),
       #*So to make the correction, we'll weight the proportions by total N for subject
       a_combined$id = 1:nrow(a_combined)
       a_combined$n_adj <- a_combined$n / a_combined$tot_n_subj
-      a_combined$n_prop <- a_combined$n / sum(a_combined$n, na.rm = T)
+      a_combined$n_prop <-
+        a_combined$n / sum(a_combined$n, na.rm = T)
       a_combined$n_prop_adj <-
         a_combined$n_adj / sum(a_combined$n_adj, na.rm = T)
 
@@ -753,7 +774,7 @@ compile_standards <- function(WD = getwd(),
         data = list(
           input = dplyr::as_tibble(a0),
           compiled = dplyr::as_tibble(A),
-          problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
+          problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0,]),
           gradeBand = gradeBand,
           list_for_json = out
         ),
@@ -768,11 +789,12 @@ compile_standards <- function(WD = getwd(),
       message("Saving compiled standards data to '", rds_saveFile, "'")
       saveRDS(toSave, file = rds_saveFile)
 
-      json_saveFile <- fs::path(WD, "meta", "JSON", "standards.json")
+      json_saveFile <-
+        fs::path(WD, "meta", "JSON", "standards.json")
       message("Saving web-formatted standards to '", json_saveFile, "'")
       save_json(out, json_saveFile)
 
-      problem_entries <- dplyr::as_tibble(a0[(tbds + undoc) > 0, ])
+      problem_entries <- dplyr::as_tibble(a0[(tbds + undoc) > 0,])
       #need to build better checks than this
       success = TRUE
     }

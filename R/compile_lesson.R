@@ -132,6 +132,7 @@ compile_lesson <-
                               ext =  "gsheet")
 
     #compiled standards should be newer than standards gsheet
+
     stnds_out_of_date <- !inSync(compiled_standards_path,
                                  standards_gsheet_path,
                                  newer = TRUE)
@@ -139,6 +140,7 @@ compile_lesson <-
     # Compile standards if out of date or missing or rebuild==T ----------------
     if ("Standards Alignment" %in% choices &
         (stnds_out_of_date | rebuild)) {
+      message("Recompiling standards to reflect newer 'teach_it*.gsheet'")
       compile_standards_output <- compile_standards(
         WD = WD,
         targetSubj = current_data$TargetSubject,

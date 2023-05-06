@@ -19,6 +19,7 @@
 #' @param exact_match logical; Do you want an exact match for the file name of the path? (only applies to the final FILENAME part of the path; i.e  'folder/folder/FILENAME_w_different_suffix'); default=TRUE
 #' @param single_result logical; do you want to force a single result (i.e. throw an error if there is more than one match)?; default=TRUE
 #' @param checkWD  do you want to run [check_wd()]? default=TRUE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory
+#' @param raw_results logical; used for error checking on path resolution. If T, will export the full list of results of found paths, rather than just a tibble of the final target result. Default=FALSE
 #' @examples
 #' \dontrun{
 #' #ABSOLUTE PATHS
@@ -42,7 +43,8 @@ drive_find_path <- function(drive_path,
                             drive_root = NULL,
                             exact_match = TRUE,
                             single_result = TRUE,
-                            checkWD = TRUE) {
+                            checkWD = TRUE,
+                            raw_results= FALSE) {
   is_drib <- googledrive::is_dribble(drive_path)
 
 
@@ -182,12 +184,17 @@ drive_find_path <- function(drive_path,
             qtoggle <-  "name= '"
           }
 
+          #don't includent 'in parents' clause if target is flat sharedDrive. Annoying, but necessary
+          parents_clause <- ifelse(p[1]==sharedDrive,"'",
+                                   paste0("' and '", prev_result_id , "' in parents"))
+
           results[[i]] <-
             googledrive::drive_find(
-              q = paste0(qtoggle, p[i], "' and '", prev_result_id , "' in parents"),
+              q = paste0(qtoggle, p[i], parents_clause),
               shared_drive = sharedDrive
             )
           #error handling
+
           if (nrow(results[[i]]) == 0) {
             warning("Make sure path starts with '~' or Shared Drive Name")
             stop("\nPath Not Found: '",
@@ -201,10 +208,10 @@ drive_find_path <- function(drive_path,
 
     }
 
-    #output
+    #output last result
     out <- results[[length(results)]] %>% dplyr::bind_rows()
 
-    #if we've looked
+
     if (single_result & nrow(out) > 1) {
       print(out)
       out
@@ -212,6 +219,11 @@ drive_find_path <- function(drive_path,
 
     }
   }#end !is_drib logic
+
+  #reassign to list (avoiding mishaps with previous step) if raw_results requested
+  if(raw_results){
+    out <- results
+  }
 
   out
 
