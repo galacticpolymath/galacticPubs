@@ -58,27 +58,27 @@ compile_teach_it <- function(WD = getwd(),
     grepl("&", tlinks0$part) %>% which()
 
   if (length(multipart_material) > 0) {
-    multi_df <- tlinks0[multipart_material, ]
-    nonmulti_df <- tlinks0[-multipart_material, ]
+    multi_df <- tlinks0[multipart_material,]
+    nonmulti_df <- tlinks0[-multipart_material,]
     parts <- stringr::str_split(multi_df$part, "&")
     expanded_multi <- lapply(1:length(parts), \(i) {
       parts_i <- parts[[i]]
-      multi_df_i <- multi_df[rep(i, length(parts_i)), ] %>%
+      multi_df_i <- multi_df[rep(i, length(parts_i)),] %>%
         dplyr::mutate(part = parts_i)
     }) %>% dplyr::bind_rows()
     #combine expanded (repeated) data with previous data
     tlinks0 <-
-      dplyr::bind_rows(nonmulti_df, expanded_multi)%>%
+      dplyr::bind_rows(nonmulti_df, expanded_multi) %>%
       #rearrange to preserve order of output
-        dplyr::arrange(
-          !.data$itemType == "teachMatDir",
-          .data$envir,
-          .data$grades,
-          .data$itemType != "variantDir",
-          #put variantDir link above all the parts
-          .data$part,
-          .data$fileType
-        )
+      dplyr::arrange(
+        !.data$itemType == "teachMatDir",
+        .data$envir,
+        .data$grades,
+        .data$itemType != "variantDir",
+        #put variantDir link above all the parts
+        .data$part,
+        .data$fileType
+      )
   }
 
 
@@ -147,7 +147,7 @@ compile_teach_it <- function(WD = getwd(),
   # Report uninitialized data -----------------------------------------------
 
   if (!pext_initialized) {
-    pext <- pext[0,]
+    pext <- pext[0, ]
     message("No valid items found on PartExt tab of `teach-it.gsheet`.")
   }
 
@@ -240,12 +240,41 @@ compile_teach_it <- function(WD = getwd(),
       )
 
     multimedia <- lapply(1:nrow(m), function(i) {
-      d <- m[i, ]
+      d <- m[i,]
 
       mainLink <- zYTembed(d$mainLink) %>%
         expand_md_links(repo = whichRepo(WD = WD))
-      #if a drive file is supplied, change /edit?... to /preview
-      mainLink <- gsub("/edit?.*$", "/preview?rm=minimal", mainLink)
+      #if a drive file is supplied, change /edit? or /view? ... to /preview
+      #should probably switch all this logic to a function and use urltools
+      mainLink_dec <- urltools::url_parse(mainLink)
+      if (mainLink_dec$domain == "drive.google.com") {
+        #remove edit/
+        mainLink_dec$path <-
+          gsub("/edit.*|/view.*|/preview.*|/$",
+               "/preview",
+               mainLink_dec$path)
+        #if bare url supplied (with no /), add preview suffix
+        if (!grepl("/preview", mainLink_dec$path) &
+            substring(mainLink_dec$path,
+                      nchar(mainLink_dec$path),
+                      nchar(mainLink_dec$path)) != "/") {
+          mainLink_dec$path <- paste0(mainLink_dec$path, "/preview")
+        }
+        mainLink_dec$parameter <- "rm=minimal"
+        mainLink <- urltools::url_compose(mainLink_dec)
+
+      }
+      mainLink <-
+        gsub("\\/edit?.*$", "\\/preview?rm=minimal", mainLink) %>%
+        gsub("\\/view?.*$", "\\/preview?rm=minimal", .) %>%
+        #if path ends with / (or not) and is a drive URL and doesn't have preview,
+        #add the preview suffix
+        gsub(
+          "(?<=drive.google.com)(?!<!\\/preview?rm=minimal)/?$",
+          "\\/preview?rm=minimal",
+          .,
+          perl = T
+        )
 
       list(
         order = d$order,
