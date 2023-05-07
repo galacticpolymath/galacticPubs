@@ -160,8 +160,8 @@ update_fm <-
 
     # Add missing Github info -------------------------------------------------
 
-    if (is_empty(new_yaml$GitHubPath)) {
-      new_yaml$GitHubPath <- whichRepo(WD = WD, fullPath = TRUE)
+    if (is_empty(new_yaml$GitHubURL)) {
+      new_yaml$GitHubURL <- whichRepo(WD = WD, fullPath = TRUE)
     }
 
     # Update missing GdriveIDs ------------------------------------------------

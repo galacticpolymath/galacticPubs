@@ -5,7 +5,7 @@
 #' 2. Finds and renames all file names to found in the project folder e.g. OldShortTitle_yadayada.* -> NewShortTitle_yadayada. This is done locally using Google Drive for Desktop virtualization of the Lessons Folder
 #' 3. Changes name of GitHub Repo at galacticpolymath/ and galacticpolymath/catalog to "new_proj_name"
 #' 4. Reassociates lesson folder to new GitHub name with [gh_reset_remote()]
-#' 5. Changes the ShortTitle and GPCatalogURL and GitHubPath items in front-matter.yml using [update_fm()].
+#' 5. Changes the ShortTitle and GPCatalogURL and GitHubURL items in front-matter.yml using [update_fm()].
 #'
 #' Assumes that you have Google Drive for Desktop set up with access to Lessons/ folder; github and gh CLI set up with proper permissions with GP GitHub. Will ignore case to account for different user behaviors.
 #' @param new_proj_name The new name you want to give the selected project
@@ -263,10 +263,9 @@ if(!just_files){
 test_rename_remote <- catch_err(
   #Need to rewire this function to work by just taking the WD parameter and scrapping the gh_proj_name
   gh_rename_repo(
-    new_proj_name = new_proj_name,
+    WD=WD,
     gh_proj_name = basename(WD),
-    prompt_user = FALSE,
-    lessons_dir = lessons_get_path()
+    prompt_user = FALSE
   )
 )
 }else{
@@ -289,7 +288,7 @@ test_reset_remote <- catch_err(
 
 
 
-# 5. Change the ShortTitle and GPCatalogURL and GitHubPath items  --------
+# 5. Change the ShortTitle and GPCatalogURL and GitHubURL items  --------
 #only update front-matter.yml if previous steps succeeded
 
 
@@ -312,7 +311,7 @@ if(proceed){
         ShortTitle = new_ShortTitle,
         GPCatalogURL = '',
         GdriveDirName = new_proj_name,
-        GitHubPath = '',
+        GitHubURL = '',
         LastUpdated = Sys.time()
       ))
 
@@ -328,7 +327,7 @@ if(proceed){
 #'
 
 # 8.   Delete orphaned catalog entry if it exists -------------------------
-if(!just_files){
+if(!just_files & newstr_is_oldstr){
 test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(curr_proj_name))
 }else{test_cleanup_catalog<-NA}
 

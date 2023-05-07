@@ -290,9 +290,9 @@ compile_lesson <-
 
 
     if ("Teaching Materials" %in% choices) {
-      if (is.na(current_data$GitHubPath)) {
+      if (is.na(current_data$GitHubURL)) {
         warning(
-          "GitHubPath is missing from front-matter.yml...if this doesn't work, try running update_fm()."
+          "GitHubURL is missing from front-matter.yml...if this doesn't work, try running update_fm()."
         )
       } else{
         #check if previous save file exists

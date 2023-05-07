@@ -13,7 +13,7 @@ check_fm(WD = getwd(), skip = NULL, throw_error = TRUE)
 Options:
 \itemize{
 \item locale: Check for existence of locale entry in front-matter.yml
-\item gh: Check for existence of GitHubPath entry in front-matter.yml
+\item gh: Check for existence of GitHubURL entry in front-matter.yml
 }}
 
 \item{throw_error}{logical; Do you want to stop code if error (T) or just throw a warning (F)? default=T}

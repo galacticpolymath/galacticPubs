@@ -16,7 +16,7 @@ gh_reset_remote(
 
 \item{WD}{working directory; default= getwd()}
 
-\item{check_current_gh}{do you want to check whether the current listed GitHubPath in the front-matter.yml is good? If T, will throw an error and stop if a current GitHub connection does not exist. default=F}
+\item{check_current_gh}{do you want to check whether the current listed GitHubURL in the front-matter.yml is good? If T, will throw an error and stop if a current GitHub connection does not exist. default=F}
 
 \item{run_check_wd}{logical; do you want to run \code{\link[=check_wd]{check_wd()}}? Basically looks for files and folders you expect in a valid lesson project. default=TRUE}
 }

@@ -16,15 +16,18 @@ gh_remove_from_GPcatalog <- function(gh_proj_name) {
 
   #Get catalog info from latest Catalog build
   current_catalog <-
-    jsonlite::read_json("https://catalog.galacticpolymath.com/index.json")
+    jsonlite::read_json("https://gp-catalog.vercel.app/index.json")
   current_cat_names <-
     sapply(1:length(current_catalog), function(i) {
-      gsub("^.*/(.*)\\.git$", "\\1", current_catalog[[i]]$GitHubPath)
+      gsub("^.*/(.*)\\.git$", "\\1", current_catalog[[i]]$GitHubURL)
     })
   #Is the current project in the catalog?
+  #This function is currently questionable...need to walk through it next time I use it
+  browser()
   proj_in_cat <- gh_proj_name %in% current_cat_names
   if (!proj_in_cat) {
-    message("Project '", gh_proj_name, "' not found in gp-catalog")
+    message("Project '", gh_proj_name, "' not found in gp-catalog\n\nHere are the listings:\n -",paste0(sort(current_cat_names),collapse="\n -"))
+
     pull_success <-
       test_proj_is_local <-
       test_rm <- test_commit <- test_push <- FALSE

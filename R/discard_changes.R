@@ -2,7 +2,7 @@
 #'
 #' This will revert local changes for a lesson project folder. Does not *currently* include files that are not watched (e.g. in assets/ or assembled-lesson-materials/ folders)
 #'
-#' @param gh_proj_name The unique project title of this lesson as it is named on [https://github.com/galacticpolymath](https://github.com/galacticpolymath). Not *necessarily* the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.
+#' @param gh_proj_name The unique project title of this lesson as it is named on [https://github.com/galacticpolymath](https://github.com/galacticpolymath). Not *necessarily* the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. If left off, will try to get this info from the GitHubURL if available in the front-matter.yml.
 #' @param commit_msg string of commit message explaining why you're discarding changes.
 #' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"
 #' @param include_untracked logical; Stash (discard) changes to untracked files? Passed to [gert::git_stash_save()]. default=FALSE

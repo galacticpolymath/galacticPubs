@@ -6,7 +6,7 @@
 #' @param skip a character vector of items you want to skip validation for. default=NULL.
 #' Options:
 #' - locale: Check for existence of locale entry in front-matter.yml
-#' - gh: Check for existence of GitHubPath entry in front-matter.yml
+#' - gh: Check for existence of GitHubURL entry in front-matter.yml
 #' @param throw_error logical; Do you want to stop code if error (T) or just throw a warning (F)? default=T
 #' @export
 #'
@@ -51,9 +51,9 @@ check_fm <- function(WD = getwd(),
 
   #optional github path check
   if (!"gh" %in% skip) {
-    git_initialized <- !is_empty(y$GitHubPath)
+    git_initialized <- !is_empty(y$GitHubURL)
     if (!git_initialized) {
-      msg3 <- ("GitHubPath is currently blank in front-matter.yml. Run update_fm().")
+      msg3 <- ("GitHubURL is currently blank in front-matter.yml. Run update_fm().")
        if (throw_error) {
         stop(msg3)
       } else{
@@ -73,7 +73,7 @@ check_fm <- function(WD = getwd(),
     test = c(
       "'front-matter.yml' exists",
       "'locale' initialized",
-      "'GitHubPath' set"
+      "'GitHubURL' set"
     )
   ))
   return(results)

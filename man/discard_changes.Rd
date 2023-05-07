@@ -12,7 +12,7 @@ discard_changes(
 )
 }
 \arguments{
-\item{gh_proj_name}{The unique project title of this lesson as it is named on \url{https://github.com/galacticpolymath}. Not \emph{necessarily} the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.}
+\item{gh_proj_name}{The unique project title of this lesson as it is named on \url{https://github.com/galacticpolymath}. Not \emph{necessarily} the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. If left off, will try to get this info from the GitHubURL if available in the front-matter.yml.}
 
 \item{commit_msg}{string of commit message explaining why you're discarding changes.}
 

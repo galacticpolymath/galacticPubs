@@ -5,7 +5,7 @@
 #' Will run some validation checks and let you know whether the new_proj_name repo exists on the web. May also prompt to run [editor()] to initialize some fields.
 #' @param new_proj_name The name of the new (empty) repo you want to connect to (should be exactly as it is named on <https://github.com/galacticpolymath>); It's just the project name--a full URL is not expected.
 #' @param WD working directory; default= getwd()
-#' @param check_current_gh do you want to check whether the current listed GitHubPath in the front-matter.yml is good? If T, will throw an error and stop if a current GitHub connection does not exist. default=F
+#' @param check_current_gh do you want to check whether the current listed GitHubURL in the front-matter.yml is good? If T, will throw an error and stop if a current GitHub connection does not exist. default=F
 #' @param run_check_wd logical; do you want to run [check_wd()]? Basically looks for files and folders you expect in a valid lesson project. default=TRUE
 #' @export
 #' @family GitHub Functions
@@ -59,8 +59,8 @@ gh_reset_remote<-function(new_proj_name,
 
   if(!git_connected2){
     stop("Something went wrong trying to connect to your repo with 'git ls-remote'\nMake sure the repo you're connecting to exists online:\n\n  > ",new_git_url,"\n\n*You may need to rename the repo through the github.com interface.\n")}else{
-    message("\nSuccessfully updated repo connection!:\n OLD > ",y$GitHubPath,"\n NEW > ",new_git_url,"\n")
-    y$GitHubPath <- new_git_url
+    message("\nSuccessfully updated repo connection!:\n OLD > ",y$GitHubURL,"\n NEW > ",new_git_url,"\n")
+    y$GitHubURL <- new_git_url
     yaml::write_yaml(y,yaml_path)
     message("\n@ meta/front-matter.yml updated\n")
     }

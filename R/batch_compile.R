@@ -4,7 +4,7 @@
 #'
 #' This assumes that you have Google Drive for Desktop set up and have permissions to access the lesson files.
 #'
-#' @param gh_proj_name The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubPath if available in the front-matter.yml.
+#' @param gh_proj_name The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubURL if available in the front-matter.yml.
 #' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default=NULL
 #' @param stage do you want to call [stage_assets()] to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE
 #' @param change_this A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If gh_proj_name=="all", make sure you set this to something you want to change for everything.

@@ -608,9 +608,9 @@ server <- function(input, output, session) {
 
       #       #Check if Github link is present
       #       ## Add github URL if missing in yaml
-      if (is_empty(data_check$saved_data$GitHubPath)) {
+      if (is_empty(data_check$saved_data$GitHubURL)) {
         isolate({
-          vals$current_data$GitHubPath <-
+          vals$current_data$GitHubURL <-
             whichRepo(WD = WD(), fullPath = TRUE)
           # #write current data
           yaml::write_yaml(data_check$current_data,
@@ -618,7 +618,7 @@ server <- function(input, output, session) {
 
           vals$yaml_update_txt <-
             txt <- paste0("Save to attach GitHubRepo:\n",
-                          basename(vals$current_data$GitHubPath))
+                          basename(vals$current_data$GitHubURL))
         })
       }
       #

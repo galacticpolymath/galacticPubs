@@ -151,7 +151,7 @@ lesson_new_locale <-
                 ReleaseDate = "",
                 LastUpdated = Sys.time(),
                 URL = "",
-                GitHubPath = "",
+                GitHubURL = "",
                 GPCatalogURL = "",
                 LearningEpaulette = "",
                 LearningChart = "",
