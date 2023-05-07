@@ -157,6 +157,17 @@ update_fm <-
       new_yaml$GPCatalogURL <- catalogURL("LESSON.json", repo)
     }
 
+    # remove the following deprecated variables -------------------------------
+
+    deprecated <- c("GitHubPath","GPCatalogPath","test")
+    remove_deez <- which(names(new_yaml)%in% deprecated)
+    if(length(remove_deez)>0){
+      message("The following deprecated entries were removed from your front-matter.yml:\n -",paste0(names(new_yaml)[remove_deez]))
+      new_yaml <- new_yaml[-remove_deez]
+
+    }
+
+
 
     # Add missing Github info -------------------------------------------------
 

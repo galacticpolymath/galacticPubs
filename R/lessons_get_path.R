@@ -3,8 +3,8 @@
 #' Retrieves an environmental variable set with [set_drive_local_credentials()]
 #'
 #' @param shared_drive which shared drive do you want to find the lessons in? default= "s" Options:
-#' - "s" = GP-Studio (draft working directory, many users with access)
-#' - "l" = GP-Live (private, admin only)
+#' - "s" or "?" = GP-Studio (draft working directory, many users with access)
+#' - "l" or "??" = GP-Live (private, admin only)
 #' - "gp"= GalacticPolymath (public-facing read-only)
 #' @export
 #'
@@ -12,6 +12,8 @@ lessons_get_path <- function(shared_drive = "s") {
   which_path <-
     switch(shared_drive,
            s = "galacticPubs_gdrive_studio_lessons_dir",
+           "?"= "galacticPubs_gdrive_studio_lessons_dir",
+           "??"= "galacticPubs_gdrive_live_lessons_dir",
            l = "galacticPubs_gdrive_live_lessons_dir",
            gp = "galacticPubs_gdrive_gp_lessons_dir",
            NA)

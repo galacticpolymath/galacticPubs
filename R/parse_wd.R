@@ -10,22 +10,33 @@
 #' @export
 #'
 
-parse_wd <- \(str=NULL){
-
-  if(is.null(str)){
+parse_wd <- \(str = NULL) {
+  if (is.null(str)) {
     stop("Must supply a valid working directory path or '?'")
-  }else{
-    if(str=="?"|str=="?s"){
-      out <- pick_lesson("s")
-    }else if(str=="??"|str=="?l"){
-      out <- pick_lesson("l")
-    }else if (str=="???"| str=="?g" | str=="?gp"){
-       out <- pick_lesson("gp")
-    }else{
-      out <- str
+  } else{
+    if (str == "?" | str == "?s") {
+      user_choice <- pick_lesson("s")
+    } else if (str == "??" | str == "?l") {
+      user_choice <- pick_lesson("l")
+    } else if (str == "???" | str == "?g" | str == "?gp") {
+      user_choice <- pick_lesson("gp")
+    } else{
+      user_choice <- str
     }
   }
-  checkmate::assert_character(out, all.missing = FALSE,min.chars = 10)
+  checkmate::assert_character(user_choice, all.missing = FALSE, min.chars = 3)
+
+
+  # handle "all" choice -----------------------------------------------------
+  if (identical(user_choice, "all")) {
+    out0 <- fs::dir_ls(get_lessons_path(str), type = "directory")
+    #Filter out some patterns for things we don't want to not process
+    out <-
+      out0[which(!grepl("^.*Lessons[\\/]~", out0) &
+                        !grepl("^old_", tolower(out0)))]
+
+  }else{out <- user_choice}
+
   checkmate::assert_directory_exists(out)
   out
 }

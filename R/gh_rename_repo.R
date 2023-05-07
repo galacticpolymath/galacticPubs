@@ -23,7 +23,7 @@ gh_rename_repo <- function(WD, gh_proj_name, prompt_user = TRUE) {
     paste0("https://github.com/galacticpolymath/", new_proj_name)
 
   #check existence of gh_proj_name on GitHub
-  old_proj_url <-curl::
+  old_proj_url <-
     paste0("https://github.com/galacticpolymath/", gh_proj_name)
   test_exists <-
     catch_err(gert::git_remote_ls(remote = old_proj_url, repo = WD))
