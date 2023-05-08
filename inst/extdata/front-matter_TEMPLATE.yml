@@ -17,8 +17,9 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.5.1
+TemplateVer: 0.5.2
 galacticPubsVer: ''
+isTestRepo: false
 URL: ''
 GPCatalogURL: ''
 GitHubURL: ''

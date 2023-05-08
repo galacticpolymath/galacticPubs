@@ -12,8 +12,8 @@ get_lessons_path(shared_drive = "s")
 \arguments{
 \item{shared_drive}{which shared drive do you want to find the lessons in? default= "s" Options:
 \itemize{
-\item "s" = GP-Studio (draft working directory, many users with access)
-\item "l" = GP-Live (private, admin only)
+\item "s" or "?" = GP-Studio (draft working directory, many users with access)
+\item "l" or "??" = GP-Live (private, admin only)
 \item "gp"= GalacticPolymath (public-facing read-only)
 }}
 }

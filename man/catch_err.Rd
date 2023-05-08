@@ -15,7 +15,7 @@ catch_err(
 \arguments{
 \item{expr}{the expression to be evaluated}
 
-\item{keep_results}{Affects output. See returns.}
+\item{keep_results}{Affects output. See returns. default=FALSE}
 
 \item{add_values}{This will concatenate named values to output. Only works for keep_results==TRUE. Default=NULL.}
 

@@ -10,7 +10,8 @@ drive_find_path(
   drive_root = NULL,
   exact_match = TRUE,
   single_result = TRUE,
-  checkWD = TRUE
+  checkWD = TRUE,
+  raw_results = FALSE
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ drive_find_path(
 \item{single_result}{logical; do you want to force a single result (i.e. throw an error if there is more than one match)?; default=TRUE}
 
 \item{checkWD}{do you want to run \code{\link[=check_wd]{check_wd()}}? default=TRUE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory}
+
+\item{raw_results}{logical; used for error checking on path resolution. If T, will export the full list of results of found paths, rather than just a tibble of the final target result. Default=FALSE}
 }
 \description{
 Simulates Finder/File Explorer functionality by repeated calls to \code{\link[googledrive:drive_find]{googledrive::drive_find()}}. Allows relative paths via hybrid navigation of local virtualized Google Drive for Desktop paths by going to a local lesson directory, pulling up the front-matter.yml and finding the Google ID in order to access the relative path you requested through the Drive API.

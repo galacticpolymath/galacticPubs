@@ -98,7 +98,7 @@ learningChart = function(WD = getwd(),
       subjPal <- gpColors(c("math", "ela", "science", "socstudies"))
       #Need to rename to agree with named subjects
 
-      names(subjPal) <- c("Math","ELA","Science","Social Studies")
+      names(subjPal) <- c("Math", "ELA", "Science", "Social Studies")
 
       # Make a proportional Learning Chart --------------------------------------
 
@@ -129,7 +129,7 @@ learningChart = function(WD = getwd(),
         )
 
       targetRows <- which(bgRec2$subject %in% tolower(targetSubj))
-      outerFill <- bgRec2[targetRows, ]
+      outerFill <- bgRec2[targetRows,]
       outerFill$ymin <- smidge(.1)
       outerFill$ymax <- 10
 
@@ -206,7 +206,7 @@ learningChart = function(WD = getwd(),
       #Make target rectangle(s) where necessary
       #because of a stupid clipping thing with aesthetics I need to add rectangles for out-of bounds blocks highlighting target quadrant(s)
       if (length(targetSubj) > 0) {
-        g_outerFill <- lapply(1:nrow(outerFill),\(i){
+        g_outerFill <- lapply(1:nrow(outerFill), \(i) {
           ggplot2::geom_rect(
             xmin = outerFill$xmin[i],
             xmax = outerFill$xmax[i],
@@ -219,13 +219,16 @@ learningChart = function(WD = getwd(),
           )
         })
 
-      }else{g_outerFill <- {}}
+      } else{
+        g_outerFill <- {
+        }
+      }
 
       #Because \ gets escaped at some point, let's remove that and allow user to add newlines in centralText
       centralText <- gsub("\\n", "\n", centralText, fixed = T)
 
       (
-        badge_prop <- badge_prop0 + g_outerFill+
+        badge_prop <- badge_prop0 + g_outerFill +
           #white background at center of circle
           ggplot2::geom_rect(
             data = NULL,
@@ -487,31 +490,31 @@ learningChart = function(WD = getwd(),
 
 
       # output PNG of learning chart --------------------------------------------
-      if(saveFile){
-      dir.create(destFolder,
-                 showWarnings = FALSE,
-                 recursive = TRUE)
-      outFile <-
-        fs::path(destFolder, paste0(
-          sub(
-            pattern = "(.*?)\\..*$",
-            replacement = "\\1",
-            x = basename(fileName)
-          ),
-          collapse = ""
-        ), ext = "png")
+      if (saveFile) {
+        dir.create(destFolder,
+                   showWarnings = FALSE,
+                   recursive = TRUE)
+        outFile <-
+          fs::path(destFolder, paste0(
+            sub(
+              pattern = "(.*?)\\..*$",
+              replacement = "\\1",
+              x = basename(fileName)
+            ),
+            collapse = ""
+          ), ext = "png")
 
-      grDevices::png(
-        outFile,
-        width = 7,
-        height = 4.5,
-        units = "in",
-        res = dpi,
-        ...
-      )
+        grDevices::png(
+          outFile,
+          width = 7,
+          height = 4.5,
+          units = "in",
+          res = dpi,
+          ...
+        )
 
-      grid::grid.draw(G)
-      grDevices::dev.off()
+        grid::grid.draw(G)
+        grDevices::dev.off()
 
       }
 

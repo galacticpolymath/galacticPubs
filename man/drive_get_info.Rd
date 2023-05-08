@@ -4,7 +4,13 @@
 \alias{drive_get_info}
 \title{drive_get_info}
 \usage{
-drive_get_info(dribble, set_envir = NULL, set_grades = NULL, validate = FALSE)
+drive_get_info(
+  dribble,
+  set_envir = NULL,
+  set_grades = NULL,
+  validate = FALSE,
+  all_info = FALSE
+)
 }
 \arguments{
 \item{dribble}{a dribble input (e.g. piped from \code{\link[googledrive:drive_get]{googledrive::drive_get()}}) for a single file}
@@ -22,6 +28,8 @@ drive_get_info(dribble, set_envir = NULL, set_grades = NULL, validate = FALSE)
 \item itemType
 \item fileType
 }}
+
+\item{all_info}{logical; keep the full drive_resources list with all the dribble meta info for each row item? default=FALSE}
 }
 \value{
 a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename

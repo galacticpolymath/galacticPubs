@@ -4,17 +4,18 @@
 \alias{gh_rename_repo}
 \title{Rename a Galactic Polymath lesson GitHub repository online}
 \usage{
-gh_rename_repo(new_proj_name, gh_proj_name, lessons_dir, prompt_user = TRUE)
+gh_rename_repo(WD, gh_proj_name, prompt_user = TRUE)
 }
 \arguments{
-\item{new_proj_name}{The NEW (recently renamed) folder name you want to update on GitHub}
+\item{WD}{a virtualized path to the lesson you want to rename. Easiest to specify "?" which will invoke \code{\link[=pick_lesson]{pick_lesson()}}. MUST be the same as the lesson project is named on \url{https://github.com/galacticpolymath}.}
 
 \item{gh_proj_name}{The (OLD) unique project title of this lesson as it is named on \url{https://github.com/galacticpolymath}. Not \emph{necessarily} the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores. No default.}
-
-\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
 
 \item{prompt_user}{do you want to ask user if they def want to rename this before doing so? default=TRUE}
 }
 \description{
-This is for renaming the GitHub remote repository \strong{after} you've renamed the project folder locally. Uses the gh command line interface (which needs to be set up) and \code{\link[gh:gh]{gh::gh()}} to check existence of the repo and change it online.
+Helper function for \code{\link[=lesson_rename]{lesson_rename()}}. This function is to catch GitHub up to speed with a locally renamed project. Uses the gh command line interface (which needs to be set up) and \code{\link[gh:gh]{gh::gh()}} to check existence of the repo and change it online.
+}
+\details{
+This function doesn't give you a free parameter for the new name. It will use the WD folder name to make sure the remote GitHub repo has the same name. Think of this as syncing local and GitHub remote names of the project.
 }

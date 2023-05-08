@@ -4,17 +4,12 @@
 \alias{batch_publish}
 \title{batch_publish}
 \usage{
-batch_publish(
-  commit_msg = NULL,
-  gh_proj_name = NULL,
-  try_harder = FALSE,
-  lessons_dir = NULL
-)
+batch_publish(commit_msg = NULL, WD, try_harder = FALSE, lessons_dir = NULL)
 }
 \arguments{
 \item{commit_msg}{What do you want to say about this update? Default=NULL, i.e. "automated galacticPubs::publish()"}
 
-\item{gh_proj_name}{The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubURL if available in the front-matter.yml.}
+\item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default is WD=getwd()}
 
 \item{try_harder}{Do you want the function to retry if it fails? A bit experimental. Gets passed to \code{\link[=catch_err]{catch_err()}}; default=FALSE}
 
