@@ -141,7 +141,7 @@ learningChart = function(WD = getwd(),
             ggplot2::aes_string(x = "as.factor(id)", y = "n_prop_adj", fill = "subject"),
             col = gpColors("galactic black")
           ) +
-          galacticEdTools::theme_galactic() +
+          galacticEdTools::theme_galactic(font="sans") +
           ggplot2::theme(
             plot.margin = ggplot2::margin(
               t = 0,

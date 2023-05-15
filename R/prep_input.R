@@ -64,7 +64,10 @@ prep_input <- function(input,
       ## This will avoid issues of saved_data and current_data not being identical for
       ## saved check in editor()
       saved[[fm_key]] <- saved[[fm_key]] %>% as.data.frame()
-      table_i <- rhandsontable::hot_to_r(Y0[[hot_names[i]]])
+      table_i <- rhandsontable::hot_to_r(Y0[[hot_names[i]]]) %>% dplyr::as_tibble()
+      #make call columns characters to avoid NA being interpreted as logical, annoyingly
+      table_i <- table_i %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+
       Y0[[fm_key]] <- if(is_empty(table_i)){NULL}else{table_i}
     }
   }
