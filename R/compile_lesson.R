@@ -147,6 +147,9 @@ compile_lesson <-
         learningplot_correction = current_data$LearningPlotCorrection
       ) %>% catch_err(keep_results = T)
 
+      if(!compile_standards_output$success){
+        stop("Standards were not compiled successfully.")
+      }
       alignment <- compile_standards_output$result
       current_data$LearningChartFriendly <-
         alignment$learning_chart_friendly

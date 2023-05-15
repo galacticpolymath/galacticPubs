@@ -680,10 +680,11 @@ compile_standards <- function(WD = getwd(),
 
       epaulette_names <-
         ordered_subj_chart[match(proportions$subject, ordered_subjects)]
+
       rectangles <-
         dplyr::tibble(
           proportion = proportions$proportion,
-          xmin = c(0, cumsum(proportions$proportion)[-4]),
+          xmin = c(0, cumsum(proportions$proportion)[-length(proportions$proportion)]),
           xmax = cumsum(proportions$proportion),
           ymin = 1 - thickness,
           ymax = 1,
@@ -745,25 +746,36 @@ compile_standards <- function(WD = getwd(),
 
 
 
+        #Make a custom dimAbbrev tibble for sets supported for learning Chart
+        supported_dims <- a_master %>% dplyr::select(subject,dimension) %>% dplyr::distinct(.data$dimension,.keep_all = T) %>% dplyr::arrange(.data$subject,.data$dimension)
 
-        a_combined$dimAbbrev <-
-          c(
-            " Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math",
-            " Measurement, Data,\n Probability, Statistics",
-            " Number Systems, Operations,\n Symbolic Representation",
-            " Language, Speaking,\n Listening",
-            " Reading",
-            " Writing",
-            " Cross-Cutting \n Concepts ",
-            " Disciplinary\n Core Ideas",
-            " Science & Engineering\n Practices",
-            " Civics, Economics,\n Geography, History",
-            " Develop Questions,\n Plan Inquiries",
-            " Evaluate, \n Communicate, \n Take Action "
-          )
+        #Manual abbreviations for long dimensions
+        supported_dims$dimAbbrev <-sapply(supported_dims$dimension,function(x) switch(x,
+            #CCSS Math
+            "Algebra, Geometry, Trig, Calculus & Higher Level Thinking"= " Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math",
+            "Measurement, Data, Probability & Statistics"= " Measurement, Data,\n Probability, Statistics",
+            "Number Systems, Operations & Abstract Representation" =" Number Systems, Operations,\n Symbolic Representation",
+            #CCSS ELA
+            "Language, Speaking & Listening"= " Language, Speaking,\n Listening",
+            "Reading"= " Reading",
+            "Writing" = " Writing",
+            #NGSS
+            "Cross-Cutting Concepts"=" Cross-Cutting \n Concepts ",
+            "Disciplinary Core ideas"= " Disciplinary\n Core Ideas",
+            "Science & Engineering Practices"= " Science & Engineering\n Practices",
+            #C3 Soc Studies
+            "Civics, Economics, Geography & History" = " Civics, Economics,\n Geography, History",
+            "Developing Questions & Planning Inquiries" = " Develop Questions,\n Plan Inquiries",
+            "Evaluating Sources, Communicating Conclusions & Taking Action" = " Evaluate, \n Communicate, \n Take Action ",
+            #else
+            x
+            ))
+
       }
 
-
+      #Add abbrev to a_combined output
+      a_out <- a_combined %>% dplyr::left_join(.,
+                                      supported_dims %>% dplyr::filter(.data$dimension %in% unique(a_combined$dimension)))
 
 
 
@@ -778,7 +790,7 @@ compile_standards <- function(WD = getwd(),
           gradeBand = gradeBand,
           list_for_json = out
         ),
-        a_combined = a_combined,
+        a_combined = a_out,
         xlabels = xlabels,
         rectangles = rectangles,
         targetSubj = targetSubj,

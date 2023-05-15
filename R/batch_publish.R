@@ -14,6 +14,7 @@
 #'
 batch_publish <- function(commit_msg = NULL, WD, try_harder=FALSE, lessons_dir=NULL) {
   timer <- FALSE
+  if(grepl("\\?",commit_msg)){stop("commit_msg comes before WD")}
   WD0 <- WD
   WD <- parse_wd(WD)
 
