@@ -752,30 +752,32 @@ compile_standards <- function(WD = getwd(),
         #Manual abbreviations for long dimensions
         supported_dims$dimAbbrev <-sapply(supported_dims$dimension,function(x) switch(x,
             #CCSS Math
-            "Algebra, Geometry, Trig, Calculus & Higher Level Thinking"= " Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math",
-            "Measurement, Data, Probability & Statistics"= " Measurement, Data,\n Probability, Statistics",
-            "Number Systems, Operations & Abstract Representation" =" Number Systems, Operations,\n Symbolic Representation",
+            "Algebra, Geometry, Trig, Calculus & Higher Level Thinking"= "Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math",
+            "Measurement, Data, Probability & Statistics"= "Measurement, Data,\n Probability, Statistics",
+            "Number Systems, Operations & Abstract Representation" ="Number Systems, Operations,\n Symbolic Representation",
             #CCSS ELA
-            "Language, Speaking & Listening"= " Language, Speaking,\n Listening",
-            "Reading"= " Reading",
-            "Writing" = " Writing",
+            "Language, Speaking & Listening"= "Language, Speaking,\n Listening",
+            "Reading"= "Reading",
+            "Writing" = "Writing",
             #NGSS
-            "Cross-Cutting Concepts"=" Cross-Cutting \n Concepts ",
-            "Disciplinary Core ideas"= " Disciplinary\n Core Ideas",
-            "Science & Engineering Practices"= " Science & Engineering\n Practices",
+            "Cross-Cutting Concepts"="Cross-Cutting \n Concepts ",
+            "Disciplinary Core ideas"= "Disciplinary\n Core Ideas",
+            "Science & Engineering Practices"= "Science & Engineering\n Practices",
             #C3 Soc Studies
-            "Civics, Economics, Geography & History" = " Civics, Economics,\n Geography, History",
-            "Developing Questions & Planning Inquiries" = " Develop Questions,\n Plan Inquiries",
-            "Evaluating Sources, Communicating Conclusions & Taking Action" = " Evaluate, \n Communicate, \n Take Action ",
+            "Civics, Economics, Geography & History" = "Civics, Economics,\n Geography, History",
+            "Developing Questions & Planning Inquiries" = "Develop Questions,\n Plan Inquiries",
+            "Evaluating Sources, Communicating Conclusions & Taking Action" = "Evaluate, \n Communicate, \n Take Action ",
             #else
             x
-            ))
+            )) %>%
+          paste0(" ",.) #pad labels with space for alignment
 
       }
 
+
       #Add abbrev to a_combined output
-      a_out <- a_combined %>% dplyr::left_join(.,
-                                      supported_dims %>% dplyr::filter(.data$dimension %in% unique(a_combined$dimension)))
+      a_out <- a_combined %>% dplyr::full_join(.,
+                                      supported_dims )
 
 
 

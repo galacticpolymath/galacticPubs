@@ -37,6 +37,17 @@ learningChart = function(WD = getwd(),
     destFolder <- fs::path(WD, "assets", "_learning-plots")
   }
 
+
+  # Define preference order of subjects -------------------------------------
+
+  supported_subjects <- factor(c("ELA",
+                                 "Math",
+                                 "Science",
+                                 "Social Studies",
+                                 "Sustainability"),
+                               ordered = T)
+
+
   ShortTitle <- get_fm("ShortTitle", WD)
 
   if (is_empty(quotedTitle)) {
@@ -98,7 +109,8 @@ learningChart = function(WD = getwd(),
       subjPal <- gpColors(c("math", "ela", "science", "socstudies"))
       #Need to rename to agree with named subjects
 
-      names(subjPal) <- c("Math", "ELA", "Science", "Social Studies")
+      names(subjPal) <-
+        c("Math", "ELA", "Science", "Social Studies")
 
       # Make a proportional Learning Chart --------------------------------------
 
@@ -110,7 +122,29 @@ learningChart = function(WD = getwd(),
         barScale + (amt * barScale / 10)
       }
 
+
+      # Filter out certain incomplete subjects ----------------------------------
+      # iteratively add subjects in order of preference if they are missing until we get 4 subjects
+      n_subj <- unique(a_combined$subject) %>% length()
+      if (n_subj > 4) {
+        #a_combined %>%dplyr::group_by(.data$subject) %>%  dplyr::summarize(n_sum =sum(.data$n,na.rm=T))
+        #Man, I can't figure out a way to do what I want to do, so I'm just gonna remove sustainability if it's there
+        to_remove <- "Sustainability"
+        a_combined <-
+          a_combined %>% dplyr::filter(!.data$subject %in% to_remove)
+      }
+
+
+      # Make sure a_combined proportions have no NA -----------------------------
+      a_combined <-
+        a_combined %>% dplyr::mutate(dplyr::across(dplyr::starts_with("n_prop"),  ~
+                                                     ifelse(is.na(.), 0, .)))
+      #Overwrite data (bit messy, but controls for NAs in incoming data)
+      a_combined$id <- 1:nrow(a_combined)
+
+
       label_data2 <- a_combined
+
       label_data2$hjust <-
         ifelse(360 * (label_data2$id - 0.5) / nrow(label_data2) < 180 , 0, 1)
       label_data2$y <- smidge(2)
@@ -129,19 +163,22 @@ learningChart = function(WD = getwd(),
         )
 
       targetRows <- which(bgRec2$subject %in% tolower(targetSubj))
-      outerFill <- bgRec2[targetRows,]
+      outerFill <- bgRec2[targetRows, ]
       outerFill$ymin <- smidge(.1)
       outerFill$ymax <- 10
 
-      #make the badge!
-      (
+
+      # make the badge! ---------------------------------------------------------
+
+
+      suppressWarnings(
         badge_prop0 <-
           ggplot2::ggplot(
             a_combined,
             ggplot2::aes_string(x = "as.factor(id)", y = "n_prop_adj", fill = "subject"),
             col = gpColors("galactic black")
           ) +
-          galacticEdTools::theme_galactic(font="sans") +
+          galacticEdTools::theme_galactic(font = "sans") +
           ggplot2::theme(
             plot.margin = ggplot2::margin(
               t = 0,
@@ -201,7 +238,8 @@ learningChart = function(WD = getwd(),
             col = "transparent",
             inherit.aes = F
           )
-      )#End badge_prop0
+        #suppress NA row warnings
+      ) #End badge_prop0 &
 
       #Make target rectangle(s) where necessary
       #because of a stupid clipping thing with aesthetics I need to add rectangles for out-of bounds blocks highlighting target quadrant(s)
@@ -221,13 +259,14 @@ learningChart = function(WD = getwd(),
 
       } else{
         g_outerFill <- {
+
         }
       }
 
       #Because \ gets escaped at some point, let's remove that and allow user to add newlines in centralText
       centralText <- gsub("\\n", "\n", centralText, fixed = T)
 
-      (
+      suppressWarnings(
         badge_prop <- badge_prop0 + g_outerFill +
           #white background at center of circle
           ggplot2::geom_rect(
