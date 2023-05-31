@@ -140,7 +140,7 @@ ui <- navbarPage(
         selected = y$DefaultCountry,
         options = list(create = TRUE),
         width = "200"
-      ),
+      )
     ),
     textInput(
       inputId = "Title",
@@ -157,7 +157,7 @@ ui <- navbarPage(
 
     #These things need to access WD, which is subject to change and needs to be
     #in the server-side reactive environment
-    htmlOutput("banner_and_logos"),
+    uiOutput("banner_and_logos"),
 
     checkboxGroupInput(
       "LessonEnvir",
@@ -228,7 +228,7 @@ ui <- navbarPage(
 
     textAreaInput(
       "Description",
-      label = "Lesson Description:",
+      label = "Lesson Description: (DEPRECATED)",
       placeholder = "Try to keep it as short as possible",
       value = y$Description,
       height = "300px",
@@ -408,7 +408,7 @@ server <- function(input, output, session) {
 
   # Some UI elements that need access to the reactive WD()
   # working directory that may change
-  output$banners_and_logos <- renderUI({
+  output$banner_and_logos <- renderUI({
     tagList(
       checkboxGroupInput(
         "LessonBanner",
@@ -478,7 +478,7 @@ server <- function(input, output, session) {
       textAreaInput(
         "LearningSummary",
         paste0(
-          'Learning Summary (Concise, jargon-free lesson summary. i.e. "The Tweet" )'
+          'The Gist (Concise, jargon-free lesson summary. i.e. "The Tweet" )'
         ),
         y$LearningSummary,
         height = 150,
@@ -1102,7 +1102,7 @@ server <- function(input, output, session) {
                 span(class = "keyword", x)
               }))
         },
-        md_txt('Description', current_data$Description),
+
         ## 2. LESSON PREVIEW
         div(class = "section", h3("2. Lesson Preview")),
         md_txt('"Teach It in 15" Quick Prep', current_data$QuickPrep),

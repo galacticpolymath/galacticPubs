@@ -81,10 +81,9 @@ compile_fm <- \(WD = getwd()) {
       is.na(fm$LearningEpaulette_vert[1]),
       NA,
       catalogURL(basename(fm$LearningEpaulette_vert[1]), repo)
-    )),
+    ))
     #might want to add more complex image handling later),
-    Description = fm$Description  %>% fixAnchorLinks()
-  ) #allow smooth-scrolling to in-page references
+  )
 
 
   save_json(overview,
