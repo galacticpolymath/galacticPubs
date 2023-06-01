@@ -29,7 +29,7 @@ learningEpaulette <-
            saveFile = TRUE,
            destFolder,
            fileName = "GP-Learning-Epaulette",
-           font_size = 20,
+           font_size = 10,
            width = 11,
            height = 1.6,
            dpi = 200,
@@ -297,7 +297,6 @@ learningEpaulette <-
       )
       #,
       #               ...)
-
 
       #output object if they want to modify further
       message("GP Learning Epaulette saved\n@ ", output)

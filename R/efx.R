@@ -9,6 +9,7 @@
 #'
 efx <- function(function_name){
   isGalacticPubs<-grepl("galacticPubs",rstudioapi::getActiveProject(),fixed = TRUE)
+  if(!library(usethis,logical.return = TRUE,quietly=TRUE)){stop("You need the usethis package. Run install.packages('usethis').")}
   if(isGalacticPubs){
     if(length(fs::dir_ls(fs::path("R"),type="file",regexp = substitute(function_name)))==0 ){
       resp<-readline(paste0("Do you want to create a new function called ",substitute(function_name),"? (y/n) >"))

@@ -986,7 +986,6 @@ server <- function(input, output, session) {
       }
 
       #return learning chart figure
-
       output$chart_fig <- renderPlot(grid::grid.draw(lc))
     }#end if/else
   }) %>% bindEvent(input$remake_chart,
