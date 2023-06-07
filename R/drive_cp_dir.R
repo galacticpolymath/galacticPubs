@@ -22,7 +22,7 @@ drive_cp_dir<-function(new_dir_name,
   if(missing(new_dir_name)){stop("\n* Must supply new_dir_name")}
   timer <- FALSE
   # If Suggested tictoc package is available, time how long the rebuild takes
-  if (require("tictoc")) {
+  if (library("tictoc",logical.return = T)) {
     tictoc::tic()
     timer <- TRUE
   }
@@ -32,7 +32,7 @@ drive_cp_dir<-function(new_dir_name,
   #if directories are input as paths, send to helper function
   if(is.character(source_dir)){
 
-    source_dir<-drive_find_path("../",WD=source_dir0)
+    source_dir<-drive_find_path(source_dir0)
   }
 
 

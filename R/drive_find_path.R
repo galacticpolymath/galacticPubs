@@ -184,8 +184,8 @@ drive_find_path <- function(drive_path,
             qtoggle <-  "name= '"
           }
 
-          #don't includent 'in parents' clause if target is flat sharedDrive. Annoying, but necessary
-          parents_clause <- ifelse(p[1]==sharedDrive,"'",
+          #don't include 'in parents' clause if target is flat sharedDrive. Annoying, but necessary
+          parents_clause <- ifelse(identical(p[1],sharedDrive),"'",
                                    paste0("' and '", prev_result_id , "' in parents"))
 
           results[[i]] <-
