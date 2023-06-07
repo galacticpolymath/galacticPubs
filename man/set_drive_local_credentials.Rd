@@ -6,6 +6,9 @@
 \usage{
 set_drive_local_credentials()
 }
+\value{
+table of galacticPubs-related environmental variables, their values, and whether they were successfully set
+}
 \description{
 Sets environmental variables used to locate the Edu/lessons folder that is emulated by \href{https://www.google.com/drive/download}{Google Drive for Desktop}
 }
