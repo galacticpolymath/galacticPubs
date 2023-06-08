@@ -9,6 +9,9 @@ upload_assets(WD = getwd(), bucket = "gp-cloud")
 \arguments{
 \item{WD}{WD working directory, passed to \code{\link[=parse_wd]{parse_wd()}}}
 }
+\value{
+a Tibble with success, filenames and download links
+}
 \description{
 Upload lesson assets to galacticPubs Google Cloud Storage bucket
 }

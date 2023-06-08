@@ -18,7 +18,7 @@ get_lessons_path(shared_drive = "s")
 }}
 }
 \description{
-Retrieves an environmental variable set with \code{\link[=set_drive_local_credentials]{set_drive_local_credentials()}}
+Retrieves an environmental variable set with \code{\link[=init_galacticPubs]{init_galacticPubs()}}
 }
 \section{Functions}{
 \itemize{

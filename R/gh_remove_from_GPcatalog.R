@@ -35,8 +35,8 @@ gh_remove_from_GPcatalog <- function(gh_proj_name) {
     #Check for virtualized Google Drive catalog repo
     catalog_path <- Sys.getenv("galacticPubs_gdrive_catalog_dir")
     if (is_empty(catalog_path)) {
-      message("\nGP Catalog path not set. Calling set_drive_local_credentials().")
-      set_drive_local_credentials()
+      message("\nGP Catalog path not set. Calling init_galacticPubs().")
+      init_galacticPubs()
       catalog_path <- Sys.getenv("galacticPubs_gdrive_catalog_dir")
     }
     checkmate::assert_character(catalog_path,

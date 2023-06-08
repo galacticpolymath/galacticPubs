@@ -1,6 +1,6 @@
 #' Get path to Edu/Lessons folder containing GP projects
 #'
-#' Retrieves an environmental variable set with [set_drive_local_credentials()]
+#' Retrieves an environmental variable set with [init_galacticPubs()]
 #'
 #' @param shared_drive which shared drive do you want to find the lessons in? default= "s" Options:
 #' - "s" or "?" = GP-Studio (draft working directory, many users with access)
@@ -24,8 +24,8 @@ lessons_get_path <- function(shared_drive = "s") {
 
   lessons_dir <- Sys.getenv(which_path)
   if (is_empty(lessons_dir)) {
-    message("\nLessons path not set. Calling set_drive_local_credentials().")
-    set_drive_local_credentials()
+    message("\nLessons path not set. Calling init_galacticPubs().")
+    init_galacticPubs()
     lessons_dir <- lessons_get_path(shared_drive=shared_drive)
   }
   lessons_dir
