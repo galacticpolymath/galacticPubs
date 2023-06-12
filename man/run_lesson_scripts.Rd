@@ -4,7 +4,7 @@
 \alias{run_lesson_scripts}
 \title{run_lesson_scripts}
 \usage{
-run_lesson_scripts(scripts, skip = NULL, WD = getwd())
+run_lesson_scripts(scripts, skip = NULL, WD = "?")
 }
 \arguments{
 \item{scripts}{a vector of scripts (no path needed, just basenames)}

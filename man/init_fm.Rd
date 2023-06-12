@@ -4,7 +4,7 @@
 \alias{init_fm}
 \title{Initialize Front Matter}
 \usage{
-init_fm(WD = getwd())
+init_fm(WD = "?")
 }
 \arguments{
 \item{WD}{the working directory of the lesson project; default=getwd()}

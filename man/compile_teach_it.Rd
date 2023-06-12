@@ -5,7 +5,7 @@
 \title{compile_teach_it}
 \usage{
 compile_teach_it(
-  WD = getwd(),
+  WD = "?",
   teach_it_drib = NULL,
   rename_parts = TRUE,
   prompt_rename = TRUE

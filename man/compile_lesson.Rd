@@ -6,7 +6,7 @@
 \title{compile_lesson}
 \usage{
 compile_lesson(
-  WD = getwd(),
+  WD = "?",
   choices,
   current_data,
   destFolder,
@@ -16,7 +16,7 @@ compile_lesson(
 )
 
 lesson_compile(
-  WD = getwd(),
+  WD = "?",
   choices,
   current_data,
   destFolder,

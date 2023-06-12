@@ -7,7 +7,7 @@
 #'
 #' @export
 
-publish <- function(commit_msg = NULL, WD = getwd()) {
+publish <- function(commit_msg = NULL, WD = "?") {
   if(grepl("\\?",commit_msg)){stop("commit_msg comes before WD")}
   WD <- parse_wd(WD)
 

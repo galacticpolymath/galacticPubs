@@ -4,7 +4,7 @@
 \alias{publish}
 \title{publish}
 \usage{
-publish(commit_msg = NULL, WD = getwd())
+publish(commit_msg = NULL, WD = "?")
 }
 \arguments{
 \item{commit_msg}{What do you want to say about this update? Default= "automated galacticPubs::publish()"}

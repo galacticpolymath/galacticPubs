@@ -15,7 +15,7 @@
 #'
 
 update_fm <-
-  function(WD = getwd(),
+  function(WD = "?",
            save_output = TRUE,
            return_fm = FALSE,
            reorder = TRUE,
@@ -23,14 +23,17 @@ update_fm <-
            drive_reconnect = FALSE) {
     WD <- parse_wd(WD)
     . = NULL
-    #In galacticPubs dev mode, don't do certain things
-    is_gPubs <- basename(WD) == "galacticPubs"
 
-    yaml_path <- fs::path(WD, "meta", "front-matter.yml")
+    proj <- basename(WD)
+    #In galacticPubs dev mode, don't do certain things
+    is_gPubs <- proj == "galacticPubs"
+
+
 
     #safe_read_yaml will create yaml if it's missing
     old_yaml <-
-      safe_read_yaml(yaml_path, checkWD = ifelse(is_gPubs, FALSE, TRUE))
+      safe_read_yaml(WD=WD,
+                     checkWD = ifelse(is_gPubs, FALSE, TRUE))
 
     galacticPubs_template <-
       safe_read_yaml(
@@ -39,6 +42,7 @@ update_fm <-
                                 package = "galacticPubs"),
         checkWD = FALSE
       )
+
     new_yaml <-
       add_missing_fields(old_yaml, galacticPubs_template, reorder = reorder)
 
@@ -54,6 +58,7 @@ update_fm <-
           paste0(change_keys[!valid_names], collapse = "\n  -")
         )
       }
+
       #Gotta do a for loop b/c I'm assigning things outside the loop
       test_changes <- vector()
       for (i in 1:length(change_this)) {
@@ -159,10 +164,13 @@ update_fm <-
 
     # remove the following deprecated variables -------------------------------
 
-    deprecated <- c("GitHubPath","GPCatalogPath","test")
-    remove_deez <- which(names(new_yaml)%in% deprecated)
-    if(length(remove_deez)>0){
-      message("The following deprecated entries were removed from your front-matter.yml:\n -",paste0(names(new_yaml)[remove_deez]))
+    deprecated <- c("GitHubPath", "GPCatalogPath", "test")
+    remove_deez <- which(names(new_yaml) %in% deprecated)
+    if (length(remove_deez) > 0) {
+      message(
+        "The following deprecated entries were removed from your front-matter.yml:\n -",
+        paste0(names(new_yaml)[remove_deez])
+      )
       new_yaml <- new_yaml[-remove_deez]
 
     }
@@ -171,7 +179,7 @@ update_fm <-
 
     # Add missing Github info -------------------------------------------------
 
-    if (is_empty(new_yaml$GitHubURL)& !new_yaml$isTestRepo) {
+    if (is_empty(new_yaml$GitHubURL) & !new_yaml$isTestRepo) {
       new_yaml$GitHubURL <- whichRepo(WD = WD, fullPath = TRUE)
     }
 
@@ -408,8 +416,13 @@ update_fm <-
     if (save_output) {
       #Change LastUpdated field
       new_yaml$LastUpdated <- Sys.time() %>% as.character()
+          # need to find yaml_path in git hub gp-lessons folder
+    gp_lessons_dir <- get_git_gp_lessons_path()
+    yaml_write_path <-
+      fs::path(gp_lessons_dir, "Lessons", proj, "front-matter.yml")
+
       test_write <-
-        yaml::write_yaml(new_yaml, yaml_path) %>% catch_err()
+        yaml::write_yaml(new_yaml, yaml_write_path) %>% catch_err()
 
       if (test_write) {
         success <- TRUE

@@ -5,9 +5,9 @@
 \alias{fm_compile}
 \title{compile_fm}
 \usage{
-compile_fm(WD = getwd())
+compile_fm(WD = "?")
 
-fm_compile(WD = getwd())
+fm_compile(WD = "?")
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}}}

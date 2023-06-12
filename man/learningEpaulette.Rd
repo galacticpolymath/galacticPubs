@@ -5,7 +5,7 @@
 \title{learningEpaulette}
 \usage{
 learningEpaulette(
-  WD = getwd(),
+  WD = "?",
   heightScalar = 0.5,
   epauletteHeight = 0.2,
   randomSeed = 101,

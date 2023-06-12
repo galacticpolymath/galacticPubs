@@ -4,7 +4,7 @@
 \alias{check_wd}
 \title{Check if Working Directory Looks Good}
 \usage{
-check_wd(WD = getwd(), simple_out = TRUE, throw_error = TRUE)
+check_wd(WD = "?", simple_out = TRUE, throw_error = TRUE)
 }
 \arguments{
 \item{WD}{Working directory you want to check. default=getwd()}

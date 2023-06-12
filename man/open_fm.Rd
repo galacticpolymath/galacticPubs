@@ -5,9 +5,9 @@
 \alias{fm_open}
 \title{open_fm}
 \usage{
-open_fm(WD = getwd())
+open_fm(WD = "?")
 
-fm_open(WD = getwd())
+fm_open(WD = "?")
 }
 \arguments{
 \item{WD}{the working directory; passed to \code{\link[=parse_wd]{parse_wd()}}; default= \code{\link[base:getwd]{base::getwd()}}}

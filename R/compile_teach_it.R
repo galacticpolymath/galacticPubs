@@ -10,7 +10,7 @@
 #' @importFrom rlang .data
 #' @export
 
-compile_teach_it <- function(WD = getwd(),
+compile_teach_it <- function(WD = "?",
                              teach_it_drib = NULL,
                              rename_parts = TRUE,
                              prompt_rename = TRUE) {

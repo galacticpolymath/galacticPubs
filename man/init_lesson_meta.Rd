@@ -5,9 +5,9 @@
 \alias{lesson_init_meta}
 \title{init_lesson_meta()}
 \usage{
-init_lesson_meta(WD = getwd(), overwrite = FALSE)
+init_lesson_meta(WD = "?", overwrite = FALSE)
 
-lesson_init_meta(WD = getwd(), overwrite = FALSE)
+lesson_init_meta(WD = "?", overwrite = FALSE)
 }
 \arguments{
 \item{WD}{the working directory for the virtualized lesson path; default=getwd() if you're working in the lesson's .Rproj. If "?" is supplied, it will invoke \code{\link[=pick_lesson]{pick_lesson()}}}

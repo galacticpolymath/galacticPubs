@@ -11,7 +11,7 @@
 #' @family GitHub Functions
 
 gh_reset_remote<-function(new_proj_name,
-                          WD = getwd(),
+                          WD = "?",
                           check_current_gh = FALSE,
                           run_check_wd = TRUE) {
    WD <- parse_wd(WD)

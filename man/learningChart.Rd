@@ -5,7 +5,7 @@
 \title{learningChart}
 \usage{
 learningChart(
-  WD = getwd(),
+  WD = "?",
   caption = NA,
   captionN = TRUE,
   centralText = NA,

@@ -17,7 +17,7 @@ inSync <- function(path1,
                    newer = TRUE,
                    ...,
                    verbose = FALSE,
-                   WD = getwd()
+                   WD = "?"
 ) {
  WD <- parse_wd(WD)
 

@@ -6,7 +6,7 @@
 #' @returns a Tibble with success, filenames and download links
 #' @export
 
-upload_assets <- \(WD = getwd(),
+upload_assets <- \(WD = "?",
                    bucket = "gp-cloud") {
   WD <- parse_wd(WD)
   init_gcs()

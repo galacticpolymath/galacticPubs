@@ -5,7 +5,7 @@
 \title{update_fm (Update Front Matter)}
 \usage{
 update_fm(
-  WD = getwd(),
+  WD = "?",
   save_output = TRUE,
   return_fm = FALSE,
   reorder = TRUE,

@@ -5,7 +5,7 @@
 \title{compile_standards}
 \usage{
 compile_standards(
-  WD = getwd(),
+  WD = "?",
   learningplot_correction = FALSE,
   targetSubj = NULL
 )

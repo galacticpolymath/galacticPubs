@@ -1,4 +1,4 @@
-#' get_shared_drive_path
+#' get_git_gp_lessons_path
 #'
 #' Gets a virtualized path to Google Shared Drives. Uses environmental variables set by [init_galacticPubs()]
 #'
@@ -6,13 +6,13 @@
 #'
 #' @export
 
-get_shared_drive_path <- \(){
-  sd_path <- Sys.getenv("galacticPubs_gdrive_shared_drives_dir")
+get_git_gp_lessons_path <- \(){
+  x_path <- Sys.getenv("galacticPubs_git_gp_lessons_dir")
 
-  if(is_empty(sd_path)){
+  if(is_empty(x_path)){
     message("Shared Drive path not set. Calling init_galacticPubs().")
     init_galacticPubs()
-    sd_path <- Sys.getenv("galacticPubs_gdrive_shared_drives_dir")
+    x_path <- Sys.getenv("galacticPubs_git_gp_lessons_dir")
   }
-  sd_path
+  x_path
 }

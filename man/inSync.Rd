@@ -4,7 +4,7 @@
 \alias{inSync}
 \title{inSync}
 \usage{
-inSync(path1, path2, newer = TRUE, ..., verbose = FALSE, WD = getwd())
+inSync(path1, path2, newer = TRUE, ..., verbose = FALSE, WD = "?")
 }
 \arguments{
 \item{path1}{path to file of interest (e.g. that is created from the other paths, for newer=T logic)}

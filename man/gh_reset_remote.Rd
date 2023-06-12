@@ -6,7 +6,7 @@
 \usage{
 gh_reset_remote(
   new_proj_name,
-  WD = getwd(),
+  WD = "?",
   check_current_gh = FALSE,
   run_check_wd = TRUE
 )

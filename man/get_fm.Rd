@@ -6,7 +6,7 @@
 \usage{
 get_fm(
   key = NULL,
-  WD = getwd(),
+  WD = "?",
   checkWD = FALSE,
   auto_init = FALSE,
   check = NULL,

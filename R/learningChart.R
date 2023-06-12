@@ -19,7 +19,7 @@
 #' @importFrom rlang .data
 
 
-learningChart = function(WD = getwd(),
+learningChart = function(WD = "?",
                          caption = NA,
                          captionN = TRUE,
                          centralText = NA,

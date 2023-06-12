@@ -219,7 +219,7 @@ if(test_git_gp_lessons_dir){
         "GCS_AUTH_FILE"
       ),
       Value = c(
-        test_git_gp_lessons_dir,
+        git_gp_lessons_dir,
         gdrive_user,
         gdrive_userdir,
         gdrive_root_dir,

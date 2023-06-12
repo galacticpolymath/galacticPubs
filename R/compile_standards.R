@@ -10,7 +10,7 @@
 #' @return list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 #' @export
 #'
-compile_standards <- function(WD = getwd(),
+compile_standards <- function(WD = "?",
                               learningplot_correction = FALSE,
                               targetSubj = NULL) {
   . = NULL #to avoid errors with dplyr syntax

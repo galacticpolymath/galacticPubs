@@ -6,7 +6,7 @@
 #' @returns logical of success; T= exists or created; F= not found and not created
 #' @export
 
-init_fm <- function(WD = getwd()) {
+init_fm <- function(WD = "?") {
    WD <- parse_wd(WD)
   test_check_fm <-
     suppressWarnings(check_fm(

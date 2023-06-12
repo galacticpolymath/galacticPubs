@@ -5,7 +5,7 @@
 \title{update_teach_links}
 \usage{
 update_teach_links(
-  WD = getwd(),
+  WD = "?",
   rebuild = NULL,
   rm_missing = TRUE,
   clean = FALSE,

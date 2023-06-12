@@ -14,7 +14,7 @@
 #' @export
 #' @return logical of success
 
-compile_fm <- \(WD = getwd()) {
+compile_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
   json_dir <- fs::path(WD, "meta", "JSON")
   fm <- get_fm(WD = WD)

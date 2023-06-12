@@ -21,7 +21,7 @@
 #' @export
 #' @family Google Drive Functions
 
-update_teach_links <- function(WD = getwd(),
+update_teach_links <- function(WD = "?",
                                rebuild = NULL,
                                rm_missing = TRUE,
                                clean = FALSE,

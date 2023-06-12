@@ -30,17 +30,10 @@ if (is_empty(.GlobalEnv$.editor_path)) {
   WD0 <- .GlobalEnv$.editor_path
 }
 meta_path <- fs::path(WD0, "meta/")
-yaml_path <- fs::path(meta_path, "front-matter.yml")
-yaml_test <- file.exists(yaml_path)
 
 
-y <-
-  safe_read_yaml(
-    yaml_path,
-    eval.expr = TRUE,
-    auto_init = TRUE,
-    standardize_NA = F
-  )
+y <- get_fm(WD=WD0)
+
 
 #Image storage is temporary, in the app working directory (force, so it gets set now in current wd)
 img_loc <- paste0(getwd(), "/www/", collapse = "/")

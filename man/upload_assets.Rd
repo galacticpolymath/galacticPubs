@@ -4,7 +4,7 @@
 \alias{upload_assets}
 \title{upload_assets()}
 \usage{
-upload_assets(WD = getwd(), bucket = "gp-cloud")
+upload_assets(WD = "?", bucket = "gp-cloud")
 }
 \arguments{
 \item{WD}{WD working directory, passed to \code{\link[=parse_wd]{parse_wd()}}}

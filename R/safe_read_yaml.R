@@ -2,8 +2,8 @@
 #'
 #' Wrapper for [read_yaml][yaml::read_yaml()] that simplifies all null and missing data to NA. Creates front-matter.yml if not found
 #'
-#' @param yaml_path full path to the front-matter.yml file (usually in format '/users/lotsaSubfolders/WorkingDirectory/meta/front-matter.yml')
-#' @param WD alternate way to specify location. e.g. use "?" to invoke [pick_lesson()]
+#' @param yaml_path full path to the front-matter.yml file (usually in format '/users/lotsaSubfolders/gp-lessons/front-matter.yml')
+#' @param WD Google Drive Working Directory. Can use "?" to pass to [parse_wd()]
 #' @param eval.expr boolean; do you want to evaluate expression in yaml prepended with '!expr '? Default=TRUE
 #' @param checkWD do you want to run [check_wd()] which will produce warning messages if working directory assumptions aren't met?; default= TRUE
 #' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=TRUE
@@ -21,15 +21,25 @@ safe_read_yaml <- function(yaml_path = NULL,
   }
 
 
-  #If yaml_path supplied, but not WD, need to work up to project directory
-  if (is.null(WD)) {
-    WD <- path_parent_dir(yaml_path, n_levels = 2)
-  }
-  #shorthand for picking the lesson to get a path
+
+  if (!is.null(WD)) {
+      #shorthand for picking the lesson to get a path
+      #WD is the Google Drive working directory (i.e. on GP-Studio shared drive)
   WD <- parse_wd(WD)
+  proj <- basename(WD)
+  # if WD supplied, need to find yaml_path in git hub gp-lessons folder
+  gp_lessons_dir <- get_git_gp_lessons_path()
+  yaml_path <- fs::path(gp_lessons_dir,"Lessons",proj,"front-matter.yml")
+
+  }
+
 
   #validate that WD is ok
   if (checkWD) {
+    if(is.null(WD)){
+      stop("Must supply WD with checkWD=T")
+    }
+
     check_wd(WD = WD, throw_error = F)
   }
 

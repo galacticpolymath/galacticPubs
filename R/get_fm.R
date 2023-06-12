@@ -22,17 +22,30 @@
 
 get_fm <-
   function(key = NULL,
-           WD = getwd(),
+           WD = "?",
            checkWD = FALSE,
            auto_init = FALSE,
            check = NULL,
            always_list = FALSE,
            standardize_NA = TRUE,
            ...) {
+
+    if(!is.null(key) & identical(TRUE, key%in%c("?","??"))){
+      WD=key
+      key=NULL
+    }
+    #WD is for the google drive side of things (not the gp-lessons dir)
     WD <- parse_wd(WD)
 
+    #Basename must always match b/w Google Drive & gp-lessons
+    WD_git_root <- get_git_gp_lessons_path()
+    WD_git <- fs::path(WD_git_root,"Lessons",basename(WD))
+
+    checkmate::assert_directory_exists(WD_git,.var.name = paste0("Check for 'gp-lessons' folder matching Gdrive lesson project: '",basename(WD),"'"))
+
+
     y <- safe_read_yaml(
-      WD = WD,
+      WD = WD_git,
       checkWD = checkWD,
       auto_init = auto_init,
       standardize_NA = standardize_NA

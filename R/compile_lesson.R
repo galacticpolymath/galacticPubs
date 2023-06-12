@@ -23,7 +23,7 @@
 #' @export
 #'
 compile_lesson <-
-  function(WD = getwd(),
+  function(WD = "?",
            choices,
            current_data,
            destFolder ,

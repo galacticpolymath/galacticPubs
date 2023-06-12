@@ -22,7 +22,7 @@
 ### GP Learning Mosaic Plot/Epaulet graphic
 
 learningEpaulette <-
-  function(WD = getwd(),
+  function(WD = "?",
            heightScalar = 0.5,
            epauletteHeight = 0.2,
            randomSeed = 101,

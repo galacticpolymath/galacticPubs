@@ -10,7 +10,7 @@
 #' @returns logical of success; T=template gsheets copied to meta/ and front-matter updated with [update_fm()]
 #' @export
 
-init_lesson_meta <- function(WD = getwd(), overwrite = FALSE) {
+init_lesson_meta <- function(WD = "?", overwrite = FALSE) {
   WD <- parse_wd(WD)
 
   #GdriveID for lesson templates (must have access to '/GP-Studio/Templates_BE_CAREFUL/lesson-meta-templates/')
