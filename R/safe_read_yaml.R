@@ -43,10 +43,6 @@ safe_read_yaml <- function(yaml_path = NULL,
     check_wd(WD = WD, throw_error = F)
   }
 
-  #define yaml_path if only WD provided
-  if (is.null(yaml_path)) {
-    yaml_path <- fs::path(WD, "meta", "front-matter.yml")
-  }
 
   #see if yaml_path exists
   yaml_exists <- checkmate::test_file_exists(yaml_path)

@@ -309,9 +309,7 @@ if(proceed){
     c(change_this,
       list(
         ShortTitle = new_ShortTitle,
-        GPCatalogURL = '',
         GdriveDirName = new_proj_name,
-        GitHubURL = '',
         LastUpdated = Sys.time()
       ))
 

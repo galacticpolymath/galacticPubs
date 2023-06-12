@@ -32,7 +32,7 @@ if (is_empty(.GlobalEnv$.editor_path)) {
 meta_path <- fs::path(WD0, "meta/")
 
 
-y <- get_fm(WD=WD0)
+y <- get_fm(WD = WD0)
 
 
 #Image storage is temporary, in the app working directory (force, so it gets set now in current wd)
@@ -201,14 +201,6 @@ ui <- navbarPage(
     ),
     #text block (Driving Questions, etc.)
     htmlOutput("overview_text_block"),
-    textAreaInput(
-      "LearningObj",
-      "Learning Objectives (this will appear in the Standards Section)",
-      value = y$LearningObj,
-      placeholder = "format= '3 x 45 min'",
-      width = "100%",
-      height = 200
-    ),
     selectizeInput(
       "Tags",
       label = "Keywords (Tags):",
@@ -219,14 +211,14 @@ ui <- navbarPage(
       width = "100%"
     ),
 
-    textAreaInput(
-      "Description",
-      label = "Lesson Description: (DEPRECATED)",
-      placeholder = "Try to keep it as short as possible",
-      value = y$Description,
-      height = "300px",
-      width = "100%"
-    ),
+    # textAreaInput(
+    #   "Description",
+    #   label = "Lesson Description: (DEPRECATED)",
+    #   placeholder = "Try to keep it as short as possible",
+    #   value = y$Description,
+    #   height = "300px",
+    #   width = "100%"
+    # ),
     hr(class = "blhr"),
     h3("Lesson Preview"),
     textAreaInput(
@@ -440,56 +432,61 @@ server <- function(input, output, session) {
   })
 
   output$overview_text_block <- renderUI({
-    div(
-      class = "text-block",
-      p(
-        class = "text-block-title",
-        strong("These sections combined in JSON output as 'Text'")
-      ),
-      textAreaInput(
-        "DrivingQ",
-        "Driving question(s) (What scientific problem(s) are we trying to solve?)",
-        y$DrivingQ,
-        width = "100%",
-        height = 100
-      ),
-      textAreaInput(
-        "EssentialQ",
-        a("Essential question(s) (What's the broader point?)",
-          href = "https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
-        y$EssentialQ,
-        width = "100%",
-        height = 100
-      ),
-      textAreaInput(
-        "Hooks",
-        "Hook(s) i.e. How will students be engaged in the lesson?:",
-        y$Hooks,
-        height = "100px",
-        width = "100%"
-      ),
-      textAreaInput(
-        "LearningSummary",
-        paste0(
-          'The Gist (Concise, jargon-free lesson summary. i.e. "The Tweet" )'
+    tagList(
+      div(
+        class = "text-block",
+        textAreaInput(
+          "LearningSummary",
+          paste0(
+            'The Gist (Concise, jargon-free lesson summary. i.e. "The Tweet" )'
+          ),
+          y$LearningSummary,
+          height = 150,
+          width = "100%"
         ),
-        y$LearningSummary,
-        height = 150,
-        width = "100%"
+        div(class = "char-count",
+            renderText(
+              paste0(
+                "Character Count= ",
+                nchar(input$LearningSummary),
+                " of 280 characters"
+              )
+            ))
       ),
-      div(class = "char-count",
-          renderText(
-            paste0(
-              "Character Count= ",
-              nchar(input$LearningSummary),
-              " of 280 characters"
-            )
-          )),
-      textAreaInput(
-        "MiscMD",
-        "Additional text to be added to Overview. (Create header with '#### Header Title:' & start with '- First point' on new line for bullets",
-        y$MiscMD,
-        width = "100%"
+      div(
+        class = "text-block",
+        p(
+          class = "text-block-title",
+          strong("These sections combined in JSON output as 'Text'")
+        ),
+        textAreaInput(
+          "DrivingQ",
+          "Driving question(s) (What scientific problem(s) are we trying to solve?)",
+          y$DrivingQ,
+          width = "100%",
+          height = 100
+        ),
+        textAreaInput(
+          "EssentialQ",
+          a("Essential question(s) (What's the broader point?)",
+            href = "https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
+          y$EssentialQ,
+          width = "100%",
+          height = 100
+        ),
+        textAreaInput(
+          "Hooks",
+          "Hook(s) i.e. How will students be engaged in the lesson?:",
+          y$Hooks,
+          height = "100px",
+          width = "100%"
+        ),
+        textAreaInput(
+          "MiscMD",
+          "Additional text to be added to Overview. (Create header with '#### Header Title:' & start with '- First point' on new line for bullets",
+          y$MiscMD,
+          width = "100%"
+        )
       )
     )
   })
@@ -536,13 +533,13 @@ server <- function(input, output, session) {
         #Entries missing (probably in saved_data)
         prob_names
 
-        longer_index <- which(longer_list_names%in%prob_names)
+        longer_index <- which(longer_list_names %in% prob_names)
         outOfDate <- dplyr::tibble(
-          item=prob_names,
+          item = prob_names,
           #If saved is the longer one, output its extra data, otherwise NA
-          saved_data= ifelse(longer_list==1,unlist(data_check[[1]][longer_index]),NA),
+          saved_data = ifelse(longer_list == 1, unlist(data_check[[1]][longer_index]), NA),
           #If current is the longer one, output its data, otherwise NA
-          current_data= ifelse(longer_list==2,unlist(data_check[[2]][longer_index]),NA)
+          current_data = ifelse(longer_list == 2, unlist(data_check[[2]][longer_index]), NA)
         )
         #This is a little awkward, b/c we're storing a NULL value in 1 list as an NA
         #But this only for internal purposes anyway checking if data has been saved.
@@ -564,15 +561,15 @@ server <- function(input, output, session) {
         prob_names <- names(data_check[[1]])[probs]
 
         if (length(prob_names) > 0) {
-        outOfDate <-
-          dplyr::tibble(
-            item = prob_names,
-            saved_data = data_check$saved_data[probs],
-            current_data = data_check$current_data[probs]
-          )
-      } else{
-        outOfDate <- dplyr::tibble(NULL)
-      }
+          outOfDate <-
+            dplyr::tibble(
+              item = prob_names,
+              saved_data = data_check$saved_data[probs],
+              current_data = data_check$current_data[probs]
+            )
+        } else{
+          outOfDate <- dplyr::tibble(NULL)
+        }
       }
 
 
@@ -1077,7 +1074,6 @@ server <- function(input, output, session) {
 
         md_txt('Driving Question(s)', current_data$DrivingQ),
         md_txt('Essential Question(s)', current_data$EssentialQ),
-        md_txt('Learning Objective(s)', current_data$LearningObj),
         if (!is_empty(current_data$MiscMD)) {
           md_txt('', current_data$MiscMD, required = FALSE)
         } else{

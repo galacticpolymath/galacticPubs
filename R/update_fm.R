@@ -152,15 +152,15 @@ update_fm <-
     )
 
 
-    #Add URL to this lesson for once it's published to gp-catalog (if it doesn't exist)
-    if (is_empty(new_yaml$GPCatalogURL) |
-        is_empty(new_yaml$GdriveDirName)) {
-      repo <- whichRepo(WD = WD)
-
-      checkmate::assert_character(repo, any.missing = FALSE)
-
-      new_yaml$GPCatalogURL <- catalogURL("LESSON.json", repo)
-    }
+    # #Add URL to this lesson for once it's published to gp-catalog (if it doesn't exist)
+    # if (is_empty(new_yaml$GPCatalogURL) |
+    #     is_empty(new_yaml$GdriveDirName)) {
+    #   repo <- whichRepo(WD = WD)
+    #
+    #   checkmate::assert_character(repo, any.missing = FALSE)
+    #
+    #   new_yaml$GPCatalogURL <- catalogURL("LESSON.json", repo)
+    # }
 
     # remove the following deprecated variables -------------------------------
 

@@ -2,16 +2,19 @@
 #'
 #' open the front-matter.yml for a project
 #'
-#' @param WD the working directory; passed to [parse_wd()]; default= [base::getwd()]
+#' @param WD the working directory; passed to [parse_wd()]; default= "?"
 #' @export
 
-open_fm <- \(WD=getwd()){
-
+open_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
+  proj <- basename(WD)
+  # if WD supplied, need to find yaml_path in git hub gp-lessons folder
+  gp_lessons_dir <- get_git_gp_lessons_path()
+  yaml_path <-
+    fs::path(gp_lessons_dir, "Lessons", proj, "front-matter.yml")
 
-  yaml_path <- fs::path(WD,"meta","front-matter.yml")
   checkmate::assert_file_exists(yaml_path)
-   usethis::edit_file(yaml_path)
+  usethis::edit_file(yaml_path)
 
 }
 

@@ -235,7 +235,15 @@ box{   width:350px;padding:10px 10px 0px 10px;
   padding-top: 10px;
 }
 
-.text-block{border: 2px solid #a6a6a6; border-radius:6px;padding:1rem;background-color:#f2f2f2;}
+.text-block{
+  border: 2px solid #a6a6a6;
+  border-radius:6px;
+  padding:1rem;
+  background-color:#f2f2f2;
+  padding-bottom: 1.5rem;
+
+}
+
 .text-block-title{color: gray;}
 .keyword-cloud{margin: 0.75rem 0;}
 .keyword{

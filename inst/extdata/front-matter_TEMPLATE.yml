@@ -17,12 +17,10 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.5.2
+TemplateVer: 0.5.3
 galacticPubsVer: ''
 isTestRepo: false
 URL: ''
-GPCatalogURL: ''
-GitHubURL: ''
 GdriveHome: 'GP-Studio'
 GdriveDirName: ''
 GdriveTeachMatPath: ''
@@ -61,11 +59,12 @@ LearningChart_params_centralText: NULL
 LearningChart_params_caption: NULL
 LearningChart_params_captionN: !expr formals(learningChart)$captionN
 SupportingMedia: ''
+# The Gist of the lesson
+LearningSummary: ''
 #---> These are combined into "text" overview section in JSON output
 DrivingQ: ''
 EssentialQ: ''
 Hooks: ''
-LearningSummary: ''
 MiscMD: ''
 # <---
 #LearningObj will go in standards section on the web
