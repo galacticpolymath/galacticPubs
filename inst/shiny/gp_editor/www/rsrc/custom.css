@@ -3,6 +3,10 @@ box{   width:350px;padding:10px 10px 0px 10px;
             margin:5px;vertical-align:middle;text-align:center;
     }
 
+body{
+  font-family: Courier,courier,monospace, Sans-Serif;
+}
+
 .blhr{
   border: 3px solid #ECECE2;
 }
@@ -83,8 +87,8 @@ box{   width:350px;padding:10px 10px 0px 10px;
 .header_save img{max-height: 15px;margin-top:auto; margin-bottom:auto;}
 .header_save p{padding-left: 0.75rem;margin-top:auto; margin-bottom:auto;}
 
-.yaml_saved{color: gray;position: fixed;top:.35rem ;right: 10%; z-index:3001;max-width:200px;}
-.yaml_unsaved{color: cyan;position: fixed;top:.35rem ;right: 10%; z-index:3001;;max-width:200px;}
+.yaml_saved{color: gray;position: fixed;top:.35rem ;right: 10%; z-index:3001;max-width:220px;}
+.yaml_unsaved{color: cyan;position: fixed;top:.35rem ;right: 10%; z-index:3001;;max-width:220px;}
 
 
 /* COMPILE TAB STYLE */
@@ -240,7 +244,7 @@ box{   width:350px;padding:10px 10px 0px 10px;
   border-radius:6px;
   padding:1rem;
   background-color:#f2f2f2;
-  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
 
 }
 

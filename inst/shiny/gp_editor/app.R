@@ -31,6 +31,13 @@ if (is_empty(.GlobalEnv$.editor_path)) {
 }
 meta_path <- fs::path(WD0, "meta/")
 
+  #Get path to front-matter path
+  proj <- basename(WD0)
+  # need to find paired yaml_path in github gp-lessons folder
+  WD_git <- get_git_gp_lessons_path(WD=WD0)
+
+  yaml_path <- fs::path(WD_git,"front-matter.yml")
+
 
 y <- get_fm(WD = WD0)
 
@@ -604,7 +611,7 @@ server <- function(input, output, session) {
             whichRepo(WD = WD(), fullPath = TRUE)
           # #write current data
           yaml::write_yaml(data_check$current_data,
-                           fs::path(WD(), "meta", "front-matter.yml"))
+                           yaml_path)
 
           vals$yaml_update_txt <-
             txt <- paste0("Save to attach GitHubRepo:\n",
@@ -638,7 +645,7 @@ server <- function(input, output, session) {
 
     #write current data
     yaml::write_yaml(vals$current_data,
-                     fs::path(WD(), "meta", "front-matter.yml"))
+                     yaml_path)
     vals$saved <- TRUE
     #synchronize saved and current_data
     vals$saved_data <-
@@ -766,7 +773,7 @@ server <- function(input, output, session) {
       column(width = 8, {
         #test if standards alignment ready & has already been compiled b4 trying to render images
         stndrds_saved <-
-          file.exists(fs::path(meta_path, "standards.RDS"))
+          file.exists(fs::path(WD_git,"saves", "standards.RDS"))
 
         #Begin conditional pane
         if ("Standards Alignment" %in% isolate(vals$current_data$ReadyToCompile) &
@@ -859,7 +866,7 @@ server <- function(input, output, session) {
     isolate({
       #Save selections
       current_data <- prep_input(input,  WD = WD())$current_data
-      yaml::write_yaml(current_data, fs::path(WD(), "meta", "front-matter.yml"))
+      yaml::write_yaml(current_data, yaml_path)
 
       scripts <-
         list.files(fs::path(WD(), "scripts"), pattern = ".R")
@@ -874,12 +881,12 @@ server <- function(input, output, session) {
     vals$current_data <-
       prep_input(input,  WD = WD())$current_data
     yaml::write_yaml(vals$current_data,
-                     fs::path(meta_path, "front-matter.yml"))
+                     yaml_path)
     vals$current_data <-
       compile_lesson(choices = input$ReadyToCompile, WD = WD())
     #resave
     yaml::write_yaml(vals$current_data,
-                     fs::path(meta_path, "front-matter.yml"))
+                     yaml_path)
   }) %>% bindEvent(input$compile)
 
 
@@ -1141,7 +1148,7 @@ server <- function(input, output, session) {
     #Reconcile input and yaml saved data before finalizing
     current_data <-
       prep_input(input,  vals$current_data, WD = WD())$current_data
-    yaml::write_yaml(current_data, fs::path(WD(), "meta", "front-matter.yml"))
+    yaml::write_yaml(current_data, yaml_path)
 
     #If a change in location has been selected, trigger the appropriate function
     if (input$dummy_PublicationStatus != vals$current_data$PublicationStatus) {
@@ -1217,7 +1224,7 @@ server <- function(input, output, session) {
 
     vals$current_data <-
       overwrite_matching(safe_read_yaml(
-        fs::path(WD(), "meta", "front-matter.yml"),
+        yaml_path,
         standardize_NA = F
       ),
       vals$current_data)
