@@ -14,7 +14,6 @@
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke [pick_lesson()]
 #' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All". If missing, will compile things in the ReadyToCompile entry in front-matter.yml for the WD folder.
 #' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
-#' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
 #' @param clean delete all JSON files in meta/ and start over? default=FALSE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
 #' @return current_data; also the lesson JSON is saved to `meta/JSON/LESSON.json`
@@ -25,7 +24,6 @@ compile_lesson <-
   function(WD = "?",
            choices,
            current_data,
-           destFolder ,
            clean = FALSE,
            rebuild = NULL) {
     WD <- parse_wd(WD)
@@ -358,16 +356,18 @@ compile_lesson <-
     # Compile all JSONs ----------------------------------------------
     compileJSON(WD = WD)
 
-    #after run, reset rebuild all trigger
+    #after run, reset rebuild-all trigger
     if (rebuild) {
       current_data$RebuildAllMaterials <- FALSE
     }
 
     #Save updated YAML
-    yaml::write_yaml(current_data, fs::path(WD, "meta", "front-matter.yml"))
+    yaml::write_yaml(current_data, fs::path(WD_git, "front-matter.yml"))
 
     invisible(current_data)
   }
+
+#alias
 
 #' lesson_compile
 #'

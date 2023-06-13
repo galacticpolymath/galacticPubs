@@ -2,7 +2,7 @@
 % Please edit documentation in R/gh_reset_remote.R
 \name{gh_reset_remote}
 \alias{gh_reset_remote}
-\title{Reset Remote GitHub Remote Repository}
+\title{Reset Remote GitHub Remote Repository (Deprecated function)}
 \usage{
 gh_reset_remote(
   new_proj_name,

@@ -14,7 +14,8 @@ init_fm <- function(WD = "?") {
       skip = c("gh", "locale"),
       throw_error = FALSE
     ))
-  fm_path <- fs::path(WD, "meta", "front-matter.yml")
+  WD_git <- get_git_gp_lessons_path(WD=WD)
+  fm_path <- fs::path(WD_git, "front-matter.yml")
   if (!test_check_fm) {
     message("\nFront matter not found. Trying to create it...")
     #use the front matter template supplied with galacticPubs as a starting point

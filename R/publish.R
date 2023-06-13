@@ -10,7 +10,7 @@
 publish <- function(commit_msg = NULL, WD = "?") {
   if(grepl("\\?",commit_msg)){stop("commit_msg comes before WD")}
   WD <- parse_wd(WD)
-
+  WD_git <- get_git_gp_lessons_path(WD=WD)
   #if not run through the editor app,
   #test that WD is in the root directory with the R Project,
   #but don't throw an error (e.g. if run from galacticPubs)
@@ -149,16 +149,13 @@ publish <- function(commit_msg = NULL, WD = "?") {
     #always update LastUpdated timestamp
     saved_data$LastUpdated <- lesson$LastUpdated <- time_stamp
     #Save time stamp changes
-    yaml::write_yaml(saved_data, fs::path(meta_path, "front-matter.yml"))
+    yaml::write_yaml(saved_data, fs::path(WD_git, "front-matter.yml"))
 
     #rewrite it before pushing to cloud
     save_json(out = lesson,
-              filename = fs::path(published_path, "LESSON.json")
+              filename = fs::path(WD_git, "LESSON.json")
               )
-    #also update the copy in the meta folder
-    save_json(out = lesson,
-              filename = fs::path(meta_path, "JSON", "LESSON.json")
-              )
+
 
 
     test_commit <-
