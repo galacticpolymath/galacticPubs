@@ -15,7 +15,6 @@
 #' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All". If missing, will compile things in the ReadyToCompile entry in front-matter.yml for the WD folder.
 #' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
 #' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
-#' @param outputFileName output file name; default= "processedProcedure.json"
 #' @param clean delete all JSON files in meta/ and start over? default=FALSE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
 #' @return current_data; also the lesson JSON is saved to `meta/JSON/LESSON.json`
@@ -27,7 +26,6 @@ compile_lesson <-
            choices,
            current_data,
            destFolder ,
-           outputFileName = "LESSON.json",
            clean = FALSE,
            rebuild = NULL) {
     WD <- parse_wd(WD)
@@ -47,9 +45,12 @@ compile_lesson <-
     if (missing(choices)) {
       choices <- current_data$ReadyToCompile
     }
-    if (missing(destFolder)) {
-      destFolder <- fs::path(WD, "meta", "JSON")
-    }
+
+
+    # Find the path for the GitHub gp-lessons working dir ---------------------
+    WD_git <- get_git_gp_lessons_path(WD = WD)
+
+    destFolder <- fs::path(WD_git, "JSONs")
 
     if (!dir.exists(destFolder)) {
       stop("Directory not found: ", destFolder)
@@ -70,7 +71,7 @@ compile_lesson <-
       to_delete <-
         list.files(destFolder, pattern = "*\\.json", full.names = TRUE)
       unlink(to_delete)
-      message("\nFolder cleared: ", destFolder, "\n")
+      message("\nJSONs folder cleared: ", destFolder, "\n")
     }
 
 
@@ -95,7 +96,7 @@ compile_lesson <-
     status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
     med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
 
-    checkmate::assert_choice(status, c("Live", "Draft"))
+    checkmate::assert_choice(status, c("Proto", "Draft", "Live"))
     checkmate::assert_character(med_title, min.chars = 2)
 
     # local path to teaching material
@@ -103,12 +104,14 @@ compile_lesson <-
     # Else, found on 'GalacticPolymath'
     #****To do::: need to construct this from shared_drive_path, GdriveTeachMatPath
 
-    tm_path_full <-fs::path(get_shared_drive_path(),get_fm("GdriveTeachMatPath",WD=WD,checkWD=F))
+    tm_path_full <-
+      fs::path(get_shared_drive_path(),
+               get_fm("GdriveTeachMatPath", WD = WD, checkWD = F))
 
     #make sure we know local directory path to this lesson's teaching-materials
     #In case we're waiting on Google Drive for desktop to update, let's repeat this assertion after it fails, increasing wait time
     checkmate::assert_directory_exists(tm_path_full, .var.name = "GdriveTeachMatPath") %>%
-      catch_err(try_harder = T, waits = c(2, 5, 10, 15))
+      catch_err(try_harder = T, waits = c(2, 5, 10, 15, 5))
 
 
 
@@ -116,7 +119,9 @@ compile_lesson <-
     # test if learningEpaulette is up-to-date with the 'standards_ShortTitle.gsheet' file, or if any of these files is missing.
 
     compiled_standards_path <-
-      fs::path(WD, "meta", "standards.RDS")
+      fs::path(WD_git, "saves", "standards.RDS")
+
+    checkmate::assert_file_exists(compiled_standards_path)
 
     standards_gsheet_path <- fs::path(WD,
                                       "meta",
@@ -124,7 +129,7 @@ compile_lesson <-
                                       ext = "gsheet")
 
     compiled_standards_json_path <-
-      fs::path(WD, "meta", "json",  "standards.json")
+      fs::path(destFolder,  "standards.json")
 
     teach_it_path <- fs::path(WD,
                               "meta",
@@ -133,9 +138,12 @@ compile_lesson <-
 
     #compiled standards should be newer than standards gsheet
 
-    stnds_out_of_date <- !inSync(compiled_standards_path,
-                                 standards_gsheet_path,
-                                 newer = TRUE)
+    stnds_out_of_date <- !inSync(
+      compiled_standards_json_path,
+      compiled_standards_path,
+      standards_gsheet_path,
+      newer = TRUE
+    )
 
     # Compile standards if out of date or missing or rebuild==T ----------------
     if ("Standards Alignment" %in% choices &
@@ -147,16 +155,17 @@ compile_lesson <-
         learningplot_correction = current_data$LearningPlotCorrection
       ) %>% catch_err(keep_results = T)
 
-      if(!compile_standards_output$success){
+      if (!compile_standards_output$success) {
         stop("Standards were not compiled successfully.")
+      } else{
+        alignment <- compile_standards_output$result
+        current_data$LearningChartFriendly <-
+          alignment$learning_chart_friendly
+        if (is.na(current_data$TargetSubject)) {
+          warning("Run editor() for this lesson and enter a Target Subject on the Edit tab and try again.")
+        }
+        message("\nGenerating Learning Chart\n")
       }
-      alignment <- compile_standards_output$result
-      current_data$LearningChartFriendly <-
-        alignment$learning_chart_friendly
-      if (is.na(current_data$TargetSubject)) {
-        warning("Enter a Target Subject on the Edit tab and try again.")
-      }
-      message("\nGenerating Learning Chart\n")
     }
 
 
@@ -177,7 +186,7 @@ compile_lesson <-
 
         save_json(
           saved_standards$data$list_for_json,
-          fs::path(WD, "meta", "JSON", "standards.json")
+          fs::path(destFolder, "standards.json")
         )
       }
       #Only proceed to generate learningChart if compatible...
@@ -237,13 +246,9 @@ compile_lesson <-
         )
 
         #write learning chart section before standards section
-        jsonlite::write_json(
+        save_json(
           lc,
-          fs::path(destFolder, "learning-chart.json"),
-          pretty = TRUE,
-          auto_unbox = TRUE,
-          na = "null",
-          null = "null"
+          fs::path(destFolder, "learning-chart.json")
         )
       }
 
@@ -299,9 +304,9 @@ compile_lesson <-
         )
       } else{
         #check if previous save file exists
-        save_path <- fs::path(WD, "meta", "save-state_teach-it.RDS")
-        save_exists <- file.exists(save_path)
-        if (save_exists) {
+        save_path <- fs::path(WD_git, "saves", "save-state_teach-it.RDS")
+        test_save_exists <- file.exists(save_path)
+        if (test_save_exists) {
           #compare current timestamps and file counts from last update to current
           prev_update_state <- readRDS(save_path)
           #get state for teach-it.gsheet AND all teaching-materials/ contents
@@ -319,8 +324,10 @@ compile_lesson <-
           message("Changes to `../teaching-materials/` detected...")
           message("Running update_teach_links() and compile_teach-it()")
 
-          test_update_teach_it <- update_teach_links(WD = WD) %>% catch_err()
-          test_compile_teach_it <- compile_teach_it(WD = WD) %>% catch_err()
+          test_update_teach_it <-
+            update_teach_links(WD = WD) %>% catch_err()
+          test_compile_teach_it <-
+            compile_teach_it(WD = WD) %>% catch_err()
           #update the cache of the teaching-material state of things
           get_state(path = c(teach_it_path, tm_path_full),
                     save_path = save_path)

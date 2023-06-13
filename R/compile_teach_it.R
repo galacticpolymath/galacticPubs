@@ -25,7 +25,7 @@ compile_teach_it <- function(WD = "?",
 
 
   status <- fm$PublicationStatus
-  checkmate::assert_choice(status, c("Live", "Draft"))
+  checkmate::assert_choice(status, c("Proto", "Draft", "Live"))
   if (status == "Draft") {
     tmID <- fm$GdriveTeachMatID
   } else{

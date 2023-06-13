@@ -17,7 +17,7 @@
 compile_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
   WD_git <- get_git_gp_lessons_path(WD=WD)
-  json_dir <- fs::path(WD, "JSONs")
+  json_dir <- fs::path(WD_git, "JSONs")
   fm <- get_fm(WD_git = WD_git)
   fm_keys <- fm %>% names()
   header <- fm[1:which(fm_keys == "GradesOrYears")]
@@ -27,7 +27,7 @@ compile_fm <- \(WD = "?") {
   checkmate::assert_character(fm$ShortTitle,
                               min.chars = 2,
                               any.missing = F)
-  checkmate::assert_choice(fm$PublicationStatus, c("Draft", "Live"))
+  checkmate::assert_choice(fm$PublicationStatus, c("Proto", "Draft", "Live"))
   checkmate::assert_character(fm$Title, min.chars = 4, any.missing = F)
   checkmate::assert_character(fm$locale, n.chars = 5, any.missing = F)
 

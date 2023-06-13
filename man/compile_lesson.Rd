@@ -10,7 +10,6 @@ compile_lesson(
   choices,
   current_data,
   destFolder,
-  outputFileName = "LESSON.json",
   clean = FALSE,
   rebuild = NULL
 )
@@ -20,7 +19,6 @@ lesson_compile(
   choices,
   current_data,
   destFolder,
-  outputFileName = "LESSON.json",
   clean = FALSE,
   rebuild = NULL
 )
@@ -33,8 +31,6 @@ lesson_compile(
 \item{current_data}{the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml}
 
 \item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
-
-\item{outputFileName}{output file name; default= "processedProcedure.json"}
 
 \item{clean}{delete all JSON files in meta/ and start over? default=FALSE}
 

@@ -38,7 +38,7 @@ update_teach_links <- function(WD = "?",
   status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
   #teaching materials are located in different shared drives depending
   #on PublicationStatus
-  checkmate::assert_choice(status, choices = c("Live", "Draft"))
+  checkmate::assert_choice(status, choices = c("Proto", "Draft", "Live"))
   if (status == "Draft") {
     tm_dir_id <- get_fm("GdriveTeachMatID", WD = WD, checkWD = F)
   } else{
