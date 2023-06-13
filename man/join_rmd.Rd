@@ -4,7 +4,7 @@
 \alias{join_rmd}
 \title{join_rmd}
 \usage{
-join_rmd(dir, WD = "?", filename = "lesson_plan.Rmd")
+join_rmd(dir, WD = getwd(), filename = "lesson_plan.Rmd")
 }
 \arguments{
 \item{dir}{relative path to the directory}

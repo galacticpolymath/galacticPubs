@@ -4,11 +4,17 @@
 \alias{get_git_gp_lessons_path}
 \title{get_git_gp_lessons_path}
 \usage{
-get_git_gp_lessons_path()
+get_git_gp_lessons_path(WD = NULL)
+}
+\arguments{
+\item{WD}{default=NULL; this is}
 }
 \value{
 virtualized path to Google Shared Drives location
 }
 \description{
-Gets a virtualized path to Google Shared Drives. Uses environmental variables set by \code{\link[=init_galacticPubs]{init_galacticPubs()}}
+Gets a virtualized path to Google Shared Drives. Uses environmental variables set by \code{\link[=init_galacticPubs]{init_galacticPubs()}}.
+}
+\details{
+Also checks the assertion that directory exists. before outputting.
 }

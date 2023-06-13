@@ -15,7 +15,11 @@ compile_standards <- function(WD = "?",
                               targetSubj = NULL) {
   . = NULL #to avoid errors with dplyr syntax
   message("compiling standards...")
+  #The google drive working directory for the project assets
   WD <- parse_wd(WD)
+
+  #The github gp-lessons directory for the code
+  WD_git <- get_git_gp_lessons_path(WD=WD)
 
   #############
   # IMPORTANT: Add Subjects here if you need to align new ones --------------
@@ -40,7 +44,7 @@ compile_standards <- function(WD = "?",
 
 
   #define paths
-  destFolder <- fs::path(WD, "meta", "JSON")
+  destFolder <- fs::path(WD_git, "JSONs")
   standardsFile <-
     fs::path(WD, "meta", "standards_GSheetsOnly.xlsx")
 
@@ -799,12 +803,13 @@ compile_standards <- function(WD = "?",
         learning_chart_friendly = learning_chart_friendly
       )
       #
-      rds_saveFile <- fs::path(WD, "meta", "standards.RDS")
+
+      rds_saveFile <- fs::path(WD_git, "saves", "standards.RDS")
       message("Saving compiled standards data to '", rds_saveFile, "'")
       saveRDS(toSave, file = rds_saveFile)
 
       json_saveFile <-
-        fs::path(WD, "meta", "JSON", "standards.json")
+        fs::path(WD_git, "JSONs", "standards.json")
       message("Saving web-formatted standards to '", json_saveFile, "'")
       save_json(out, json_saveFile)
 

@@ -708,7 +708,7 @@ server <- function(input, output, session) {
   output$compile <- renderUI({
     #prep stuff
     scriptFiles <-
-      list.files(path = fs::path(WD(), "scripts"),
+      list.files(path = fs::path(WD_git, "code"),
                  pattern = ".R")
 
 

@@ -10,7 +10,7 @@ open_fm(WD = "?")
 fm_open(WD = "?")
 }
 \arguments{
-\item{WD}{the working directory; passed to \code{\link[=parse_wd]{parse_wd()}}; default= \code{\link[base:getwd]{base::getwd()}}}
+\item{WD}{the working directory; passed to \code{\link[=parse_wd]{parse_wd()}}; default= "?"}
 }
 \description{
 open the front-matter.yml for a project

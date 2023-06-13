@@ -6,23 +6,26 @@
 \usage{
 update_fm(
   WD = "?",
+  WD_git = NULL,
+  change_this = NULL,
   save_output = TRUE,
   return_fm = FALSE,
   reorder = TRUE,
-  change_this = NULL,
   drive_reconnect = FALSE
 )
 }
 \arguments{
-\item{WD}{Working drive; default=getwd()}
+\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling \code{\link[=get_git_gp_lessons_path]{get_git_gp_lessons_path()}}. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.}
+
+\item{WD_git}{default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.}
+
+\item{change_this}{A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when \code{\link[=compile_lesson]{compile_lesson()}} is run and change the Language and locale.}
 
 \item{save_output}{do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE}
 
 \item{return_fm}{logical; if TRUE, returns the the updated front-matter; if FALSE (default), returns TRUE/FALSE of success}
 
 \item{reorder}{do you want to reorder the resulting list, based on template order? default=TRUE}
-
-\item{change_this}{A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when \code{\link[=compile_lesson]{compile_lesson()}} is run and change the Language and locale.}
 
 \item{drive_reconnect}{logical; do you want to re-look-up all \verb{Gdrive*} keys? (might be useful if old files have been replaced instead of updated and \verb{Gdrive*} keys point to a trashed file); default=F}
 }

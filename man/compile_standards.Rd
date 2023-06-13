@@ -4,11 +4,7 @@
 \alias{compile_standards}
 \title{compile_standards}
 \usage{
-compile_standards(
-  WD = "?",
-  learningplot_correction = FALSE,
-  targetSubj = NULL
-)
+compile_standards(WD = "?", learningplot_correction = FALSE, targetSubj = NULL)
 }
 \arguments{
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); If you put "?", it will invoke \code{\link[=pick_lesson]{pick_lesson()}}}

@@ -2,6 +2,8 @@
 #'
 #' Gets a virtualized path to Google Shared Drives. Uses environmental variables set by [init_galacticPubs()].
 #'
+#' Also checks the assertion that directory exists. before outputting.
+#'
 #' @param WD default=NULL; this is
 #' @return virtualized path to Google Shared Drives location
 #'
@@ -15,6 +17,7 @@ get_git_gp_lessons_path <- \(WD = NULL) {
     init_galacticPubs()
     gp_lessons_dir <- Sys.getenv("galacticPubs_git_gp_lessons_dir")
   }
+
   checkmate::assert_directory_exists(gp_lessons_dir)
 
   if (is.null(WD)) {
@@ -26,7 +29,7 @@ get_git_gp_lessons_path <- \(WD = NULL) {
     WD_git <- fs::path(gp_lessons_dir, "Lessons", proj)
     WD_git <-
       checkmate::assert_directory_exists(WD_git, .var.name = "Search for paired WD folder name in github gp-lessons structure")
-    WD_git <- out
+    out <- WD_git
   }
   out
 }

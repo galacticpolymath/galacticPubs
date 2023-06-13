@@ -5,7 +5,7 @@
 \title{make_printable}
 \usage{
 make_printable(
-  WD = "?",
+  WD = getwd(),
   dest_folder,
   rebuild = NULL,
   showframe = FALSE,

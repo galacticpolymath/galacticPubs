@@ -4,7 +4,7 @@
 \alias{gh_push_forked_repo}
 \title{Push new "forked" gh_proj_name to GitHub}
 \usage{
-gh_push_forked_repo(WD = "?")
+gh_push_forked_repo(WD = getwd())
 }
 \arguments{
 \item{WD}{working directory (path to top level folder of the project on virtualized Google Drive for Desktop)}

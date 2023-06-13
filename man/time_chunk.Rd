@@ -4,7 +4,7 @@
 \alias{time_chunk}
 \title{Make a "Time Chunking" Graphic}
 \usage{
-time_chunk(WD = "?")
+time_chunk(WD = getwd())
 }
 \arguments{
 \item{WD}{is working directory of the project; default= getwd()}

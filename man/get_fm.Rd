@@ -7,6 +7,7 @@
 get_fm(
   key = NULL,
   WD = "?",
+  WD_git = NULL,
   checkWD = FALSE,
   auto_init = FALSE,
   check = NULL,
@@ -18,7 +19,9 @@ get_fm(
 \arguments{
 \item{key}{which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'}
 
-\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
+\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling \code{\link[=get_git_gp_lessons_path]{get_git_gp_lessons_path()}}. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.}
+
+\item{WD_git}{default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.}
 
 \item{checkWD}{passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory}
 

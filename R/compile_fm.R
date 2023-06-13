@@ -2,7 +2,7 @@
 #'
 #' compile front-matter found in /meta/front-matter.yml
 #'
-#' Produces the following json outputs in /meta/JSON/:
+#' Produces the following json outputs in github project `gp-lessons/Lessons/[PROJ_NAME]/JSONs`:
 #' - header.json
 #' - overview.json
 #' - background.json
@@ -16,8 +16,9 @@
 
 compile_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
-  json_dir <- fs::path(WD, "meta", "JSON")
-  fm <- get_fm(WD = WD)
+  WD_git <- get_git_gp_lessons_path(WD=WD)
+  json_dir <- fs::path(WD, "JSONs")
+  fm <- get_fm(WD_git = WD_git)
   fm_keys <- fm %>% names()
   header <- fm[1:which(fm_keys == "GradesOrYears")]
   #used for constructing catalog paths

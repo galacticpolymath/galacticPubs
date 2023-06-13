@@ -4,7 +4,7 @@
 \alias{compileJSON}
 \title{compileJSON}
 \usage{
-compileJSON(WD = "?", outputFileName = "LESSON.json", destFolder)
+compileJSON(WD = getwd(), outputFileName = "LESSON.json", destFolder)
 }
 \arguments{
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}

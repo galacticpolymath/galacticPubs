@@ -4,11 +4,12 @@
 #'
 #' If meta/front-matter.yml not found, it is created from the template. Will also combine language and country info to create locale, and add GPCatalogURL if those fields are blank. Attempts to find the lesson on Google Drive in GP-Studio and add GdriveDirID if missing.
 #'
-#' @param WD Working drive; default=getwd()
+#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_git_gp_lessons_path()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
+#' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when [compile_lesson()] is run and change the Language and locale.
+#' @param WD_git default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.
 #' @param save_output do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE
 #' @param return_fm logical; if TRUE, returns the the updated front-matter; if FALSE (default), returns TRUE/FALSE of success
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
-#' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when [compile_lesson()] is run and change the Language and locale.
 #' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=F
 #' @return returns logical of success
 #' @export
@@ -16,10 +17,11 @@
 
 update_fm <-
   function(WD = "?",
+           WD_git = NULL,
+           change_this = NULL,
            save_output = TRUE,
            return_fm = FALSE,
            reorder = TRUE,
-           change_this = NULL,
            drive_reconnect = FALSE) {
     WD <- parse_wd(WD)
     . = NULL
@@ -32,7 +34,7 @@ update_fm <-
 
     #safe_read_yaml will create yaml if it's missing
     old_yaml <-
-      safe_read_yaml(WD=WD,
+      safe_read_yaml(WD = WD,
                      checkWD = ifelse(is_gPubs, FALSE, TRUE))
 
     galacticPubs_template <-
@@ -416,10 +418,14 @@ update_fm <-
     if (save_output) {
       #Change LastUpdated field
       new_yaml$LastUpdated <- Sys.time() %>% as.character()
-          # need to find yaml_path in git hub gp-lessons folder
-    gp_lessons_dir <- get_git_gp_lessons_path()
-    yaml_write_path <-
-      fs::path(gp_lessons_dir, "Lessons", proj, "front-matter.yml")
+      # need to find yaml_path in git hub gp-lessons folder
+      if (is.null(WD_git)) {
+        WD_git <- get_git_gp_lessons_path(WD = WD)
+      }
+      checkmate::assert_directory_exists(WD_git)
+
+      yaml_write_path <-
+        fs::path(WD_git, "front-matter.yml")
 
       test_write <-
         yaml::write_yaml(new_yaml, yaml_write_path) %>% catch_err()

@@ -5,7 +5,8 @@
 #' If you ask for only one key, output will be a vector, rather than a list
 #'
 #' @param key which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'
-#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]
+#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_git_gp_lessons_path()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
+#' @param WD_git default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.
 #' @param checkWD passed to [safe_read_yaml()]; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory
 #' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=FALSE
 #' @param check string referring to a check function(x) to pass to [checkmate::assert()]; e.g. check="checkmate::check_character(x,min.chars=10)" will throw an error if an output is not a string of at least 10 characters. default=NULL
@@ -23,25 +24,34 @@
 get_fm <-
   function(key = NULL,
            WD = "?",
+           WD_git= NULL,
            checkWD = FALSE,
            auto_init = FALSE,
            check = NULL,
            always_list = FALSE,
            standardize_NA = TRUE,
            ...) {
-
-    if(!is.null(key) & identical(TRUE, key%in%c("?","??"))){
-      WD=key
-      key=NULL
+    if (!is.null(key) & identical(TRUE, key %in% c("?", "??"))) {
+      WD = key
+      key = NULL
     }
-    #WD is for the google drive side of things (not the gp-lessons dir)
-    WD <- parse_wd(WD)
 
-    #Basename must always match b/w Google Drive & gp-lessons
-    WD_git_root <- get_git_gp_lessons_path()
-    WD_git <- fs::path(WD_git_root,"Lessons",basename(WD))
+    if (is.null(WD_git)) {
+      #WD is for the google drive side of things (not the gp-lessons dir)
+      WD <- parse_wd(WD)
+      #Basename must always match b/w Google Drive & gp-lessons
+      WD_git_root <- get_git_gp_lessons_path()
+      WD_git <- fs::path(WD_git_root, "Lessons", basename(WD))
+    }
 
-    checkmate::assert_directory_exists(WD_git,.var.name = paste0("Check for 'gp-lessons' folder matching Gdrive lesson project: '",basename(WD),"'"))
+    checkmate::assert_directory_exists(
+      WD_git,
+      .var.name = paste0(
+        "Check for 'gp-lessons' folder matching Gdrive lesson project: '",
+        basename(WD_git),
+        "'"
+      )
+    )
 
 
     y <- safe_read_yaml(

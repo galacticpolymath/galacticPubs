@@ -6,7 +6,7 @@
 \usage{
 stage_assets(
   current_data = NULL,
-  WD = "?",
+  WD = getwd(),
   dest_folder = NULL,
   clear = TRUE,
   status = NULL
