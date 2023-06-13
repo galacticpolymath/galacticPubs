@@ -16,27 +16,26 @@ safe_read_yaml <- function(yaml_path = NULL,
                            checkWD = TRUE,
                            auto_init = TRUE,
                            standardize_NA = FALSE) {
-  if (!is.null(WD) & !is.null(yaml_path)) {
-    stop("Only supply 'yaml_path' OR 'WD', not both.")
-  }
-
-
+  # if (!is.null(WD) & !is.null(yaml_path)) {
+  #   stop("Only supply 'yaml_path' OR 'WD', not both.")
+  # }
 
   if (!is.null(WD)) {
-      #shorthand for picking the lesson to get a path
-      #WD is the Google Drive working directory (i.e. on GP-Studio shared drive)
-  WD <- parse_wd(WD)
-  proj <- basename(WD)
-  # if WD supplied, need to find yaml_path in git hub gp-lessons folder
-  gp_lessons_dir <- get_git_gp_lessons_path()
-  yaml_path <- fs::path(gp_lessons_dir,"Lessons",proj,"front-matter.yml")
+    WD <- parse_wd(WD)
+    if (is.null(yaml_path)) {
+      proj <- basename(WD)
+      # if WD supplied, need to find yaml_path in git hub gp-lessons folder
+      gp_lessons_dir <- get_git_gp_lessons_path()
+      yaml_path <-
+        fs::path(gp_lessons_dir, "Lessons", proj, "front-matter.yml")
 
+    }
   }
 
 
   #validate that WD is ok
   if (checkWD) {
-    if(is.null(WD)){
+    if (is.null(WD)) {
       stop("Must supply WD with checkWD=T")
     }
 
@@ -73,26 +72,26 @@ safe_read_yaml <- function(yaml_path = NULL,
   standardize_na <- function(x) {
     out <- lapply(1:length(x), function(i) {
       if (is.list(x)) {
-        if(is_empty(x,names_meaningful = FALSE)){
+        if (is_empty(x, names_meaningful = FALSE)) {
           xi <- NA
-        }else{
-        xi <- x[[i]]
+        } else{
+          xi <- x[[i]]
         }
       } else{
         xi <- x[i]
       }
 
       #run recursively to clean up sub-lists and vectors
-      if(length(xi)>1){
-        unlist_after=!is.list(xi)
+      if (length(xi) > 1) {
+        unlist_after = !is.list(xi)
         xi <- standardize_na(xi)
-        if(unlist_after){
+        if (unlist_after) {
           xi <- xi %>% unlist()
         }
       }
       #Length>1 necessary to keep long NAs
-      if (is_empty(xi,names_meaningful=TRUE)  ) {
-        xi <- rep(NA,length(xi))
+      if (is_empty(xi, names_meaningful = TRUE)) {
+        xi <- rep(NA, length(xi))
       } else{
         xi
       }
@@ -102,9 +101,9 @@ safe_read_yaml <- function(yaml_path = NULL,
   }
 
   #standardize first level data if requested
-  if(standardize_NA){
+  if (standardize_NA) {
     standardize_na(y)
-  }else{
+  } else{
     y
   }
 

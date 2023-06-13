@@ -95,8 +95,8 @@ update_fm <-
       }
 
 
-
-      # Gotta handle scenario where new template keys were added and don't exist in old data
+      if(sum(test_changes,na.rm=T)>0){
+      # Set up output of changes
       old_data <- purrr::map(1:length(change_keys), \(i) {
         key_i <- change_keys[i]
         element_i <- old_yaml[[key_i]]
@@ -136,6 +136,9 @@ update_fm <-
 
       message("The following keys were changed in front-matter: ")
       print(summary)
+      }else{
+        message("Nothing to change. 'change_this' list ignored")
+      }
     }
 
 
