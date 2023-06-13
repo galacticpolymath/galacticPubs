@@ -2,7 +2,7 @@
 id: ''
 UniqueID: ''
 ShortTitle: ''
-PublicationStatus: Proto
+PublicationStatus: 'Proto'
 Language: 'English'
 Country: 'United States'
 DefaultLanguage: 'English'
@@ -17,7 +17,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.5.3
+TemplateVer: 0.5.4
 galacticPubsVer: ''
 isTestRepo: false
 URL: ''
@@ -114,5 +114,16 @@ Versions:
   ver_acknowledgments:
   - ''
 ScriptsToRun: ''
+GoogleCloudStorage:
+  filename:
+  - NA
+  WD_rel_path:
+  - NA
+  cloud_path:
+  - NA
+  mod_time:
+  - NA
+  last_uploaded:
+  - NA
 ReadyToCompile:
 - Front Matter

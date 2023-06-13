@@ -30,15 +30,22 @@ update_fm <-
     #In galacticPubs dev mode, don't do certain things
     is_gPubs <- proj == "galacticPubs"
 
-
+    #these are keys we want to handle as dataframes
+    df_keys <-
+      c("Versions",
+        "Authors",
+        "Credits",
+        #deprecated
+        "Acknowledgments",
+        "GoogleCloudStorage")
 
     #safe_read_yaml will create yaml if it's missing
     old_yaml <-
-      safe_read_yaml(WD = WD,
-                     checkWD = ifelse(is_gPubs, FALSE, TRUE))
+      get_fm(WD = WD,
+             checkWD = ifelse(is_gPubs, FALSE, TRUE))
 
     galacticPubs_template <-
-      safe_read_yaml(
+      get_fm(
         yaml_path = system.file("extdata",
                                 "front-matter_TEMPLATE.yml",
                                 package = "galacticPubs"),
@@ -48,7 +55,7 @@ update_fm <-
     new_yaml <-
       add_missing_fields(old_yaml, galacticPubs_template, reorder = reorder)
 
-    # Make manual changes if requested ----------------------------------------
+    # change_this: Make manual changes if requested ----------------------------------------
     if (!is.null(change_this)) {
       checkmate::assert_list(change_this, .var.name = "change_this")
       change_keys <- names(change_this)
@@ -65,38 +72,70 @@ update_fm <-
       test_changes <- vector()
       for (i in 1:length(change_this)) {
         element_i <- change_keys[i]
+        # Differentiate b/w normal and dataframe keys for defining "incoming changes"----------------
 
-        if (identical(new_yaml[[element_i]], change_this[[i]])) {
+        if (element_i %in% df_keys) {
+          #incoming should already be a tibble, but why not?
+          incoming_i <- dplyr::as_tibble(change_this[[element_i]])
+          current_i <- dplyr::as_tibble(new_yaml[[element_i]])
+
+        } else{
+          incoming_i <- change_this[[element_i]]
+          current_i <- new_yaml[[element_i]]
+
+        }
+
+        #Assign new values if they're different
+        if (identical(current_i, incoming_i)) {
           test_changes[i] <- NA
         } else{
-          new_yaml[[element_i]] <- change_this[[i]]
+          new_yaml[[element_i]] <- incoming_i
           test_changes[i] <- TRUE
         }
       }
 
 
-      message("The following keys were changed in front-matter: ")
-      # Gotta handle scenario where new template keys were added and don't exist in old data
-      old_vals <-  old_yaml[change_keys]
-      names(old_vals) <- change_keys
-      #Gotta switch NULL values to NA to keep them in vector output
-      old_vals2 <-
-        lapply(old_vals, \(x) {
-          if (is.null(x)) {
-            NA
-          } else{
-            x
-          }
-        }) %>% unlist()
 
-      print(
-        dplyr::tibble(
-          key = change_keys,
-          old_value = old_vals2,
-          new_value = new_yaml[change_keys] %>% unlist(),
-          `renamed?` = convert_T_to_check(test_changes)
-        )
-      )
+      # Gotta handle scenario where new template keys were added and don't exist in old data
+      old_data <- purrr::map(1:length(change_keys), \(i) {
+        key_i <- change_keys[i]
+        element_i <- old_yaml[[key_i]]
+        if (!is.data.frame(element_i)) {
+          #
+          old_i <- dplyr::tibble(key = key_i, old_value = element_i)
+        } else{
+          #To combine simple
+          old_i <-
+            tidyr::pivot_longer(element_i, dplyr::everything()) %>%
+            dplyr::rename(key = "name", old_value = "value") %>%
+            dplyr::mutate(key = paste0(key_i, "$", .data$key))
+        }
+
+      }) %>% dplyr::bind_rows()
+
+
+      new_data <- purrr::map(1:length(change_keys), \(i) {
+        key_i <- change_keys[i]
+        element_i <- new_yaml[[key_i]]
+        if (!is.data.frame(element_i)) {
+          #
+          new_i <- dplyr::tibble(key = key_i, new_value = element_i)
+        } else{
+          #To combine simple
+          new_i <-
+            tidyr::pivot_longer(element_i, dplyr::everything()) %>%
+            dplyr::rename(key = "name", new_value = "value") %>%
+            dplyr::mutate(key = paste0(key_i, "$", .data$key))
+        }
+      }) %>%
+        dplyr::bind_rows()
+
+      summary <- dplyr::full_join(old_data,new_data,by="key",keep=F) %>%
+                dplyr::mutate(changed=convert_T_to_check(.data$old_value!=.data$new_value)) %>%
+        dplyr::relocate(changed)
+
+      message("The following keys were changed in front-matter: ")
+      print(summary)
     }
 
 
@@ -311,7 +350,7 @@ update_fm <-
     }
 
 
-    # Fill in GdriveTeachMatPath and GdriveTeachMatID or GdrivePublicID if BOTH are missing---------------------------
+    # Fill in GdriveTeachMatPath and GdriveTeachMatID or GdrivePublicID if BOTH are missing------------
     # All refer to teaching-materials/ but are found and named different things depending
     # on PublicationStatus; IDs are Gdrive IDs for the Drive API; Path is a local, virtualized path
     # Draft teaching materials are found on GP-Studio
