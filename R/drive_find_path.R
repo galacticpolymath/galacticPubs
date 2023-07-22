@@ -135,7 +135,7 @@ drive_find_path <- function(drive_path,
               #drive_root can be an ID character string or a dribble
               checkmate::assert(
                 checkmate::check_class(drive_root, "dribble"),
-                checkmate::check_class(drive_root, "character")
+                checkmate::check_class(drive_root, "character"),
               )
               #only look up drive_root to get its shared Drive association if dribble not supplied
               if (inherits(drive_root, "dribble")) {

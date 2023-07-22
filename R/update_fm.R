@@ -23,6 +23,7 @@ update_fm <-
            return_fm = FALSE,
            reorder = TRUE,
            drive_reconnect = FALSE) {
+
     WD <- parse_wd(WD)
     . = NULL
 
@@ -42,7 +43,7 @@ update_fm <-
     #safe_read_yaml will create yaml if it's missing
     old_yaml <-
       get_fm(WD = WD,
-             checkWD = ifelse(is_gPubs, FALSE, TRUE))
+             checkWD = FALSE)
 
     galacticPubs_template <-
       get_fm(
@@ -54,6 +55,8 @@ update_fm <-
 
     new_yaml <-
       add_missing_fields(old_yaml, galacticPubs_template, reorder = reorder)
+
+    new_yaml$GdriveDirName <- basename(WD)
 
     # change_this: Make manual changes if requested ----------------------------------------
     if (!is.null(change_this)) {
@@ -220,18 +223,10 @@ update_fm <-
     }
 
 
-
-    # Add missing Github info -------------------------------------------------
-
-    if (is_empty(new_yaml$GitHubURL) & !new_yaml$isTestRepo) {
-      new_yaml$GitHubURL <- whichRepo(WD = WD, fullPath = TRUE)
-    }
-
     # Update missing GdriveIDs ------------------------------------------------
     #Initialize variable
     output_gdrive_summ <- FALSE
     if ((
-      is_empty(new_yaml$GdriveDirName) |
       is_empty(new_yaml$GdriveDirID) |
       is_empty(new_yaml$GdriveDirURL) |
       drive_reconnect
@@ -243,8 +238,6 @@ update_fm <-
         new_yaml$GdriveDirName,
         "' to its cloud Google Drive IDs...\n"
       )
-
-      new_yaml$GdriveDirName <- basename(WD)
 
       proj_dribble_test <-
         drive_find_path(fs::path(

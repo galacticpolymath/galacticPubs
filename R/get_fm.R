@@ -60,7 +60,6 @@ get_fm <-
 
 
       y <- safe_read_yaml(
-        WD = WD,
         yaml_path = fs::path(WD_git,"front-matter.yml"),
         checkWD = checkWD,
         auto_init = auto_init,

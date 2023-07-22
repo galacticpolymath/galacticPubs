@@ -8,8 +8,8 @@ library(shiny)
 ui <- fluidPage(
   titlePanel("Initialize a new Galactic Polymath Mini-Unit"),
   textInput(
-    "ShortName",
-    label = "ShortName prefix for project",
+    "ShortTitle",
+    label = "ShortTitle prefix for project",
     value = "",
     width = 200
   ),
@@ -102,7 +102,7 @@ ui <- fluidPage(
       # .GlobalEnv$galacticPubs_setLanguage<-input$Language
       # .GlobalEnv$galacticPubs_setCountry<-input$Country
       result <- list(
-        ShortName = input$ShortName,
+        ShortTitle = input$ShortTitle,
         Language = input$Language,
         Country = input$Country,
         min_grade = input$min_grade,
