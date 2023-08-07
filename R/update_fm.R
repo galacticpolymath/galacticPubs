@@ -4,7 +4,7 @@
 #'
 #' If meta/front-matter.yml not found, it is created from the template. Will also combine language and country info to create locale, and add GPCatalogURL if those fields are blank. Attempts to find the lesson on Google Drive in GP-Studio and add GdriveDirID if missing.
 #'
-#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_git_gp_lessons_path()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
+#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_wd_git()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
 #' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when [compile_lesson()] is run and change the Language and locale.
 #' @param WD_git default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.
 #' @param save_output do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE
@@ -455,7 +455,7 @@ update_fm <-
       new_yaml$LastUpdated <- Sys.time() %>% as.character()
       # need to find yaml_path in git hub gp-lessons folder
       if (is.null(WD_git)) {
-        WD_git <- get_git_gp_lessons_path(WD = WD)
+        WD_git <- get_wd_git(WD = WD)
       }
       checkmate::assert_directory_exists(WD_git)
 

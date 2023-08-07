@@ -16,7 +16,7 @@
 
 compile_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
-  WD_git <- get_git_gp_lessons_path(WD=WD)
+  WD_git <- get_wd_git(WD=WD)
   json_dir <- fs::path(WD_git, "JSONs")
   fm <- get_fm(WD_git = WD_git)
   fm_keys <- fm %>% names()

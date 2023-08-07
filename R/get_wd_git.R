@@ -1,4 +1,4 @@
-#' get_git_gp_lessons_path
+#' get_wd_git
 #'
 #' Gets a virtualized path to Google Shared Drives. Uses environmental variables set by [init_galacticPubs()].
 #'
@@ -9,7 +9,7 @@
 #'
 #' @export
 
-get_git_gp_lessons_path <- \(WD = NULL) {
+get_wd_git <- \(WD = NULL) {
   gp_lessons_dir <- Sys.getenv("galacticPubs_git_gp_lessons_dir")
 
   if (is_empty(gp_lessons_dir)) {
@@ -27,8 +27,18 @@ get_git_gp_lessons_path <- \(WD = NULL) {
     proj <- basename(WD)
     # need to find paired yaml_path in github gp-lessons folder
     WD_git <- fs::path(gp_lessons_dir, "Lessons", proj)
-    WD_git <-
-      checkmate::assert_directory_exists(WD_git, .var.name = "Search for paired WD folder name in github gp-lessons structure")
+    WD_git_test<-
+      checkmate::test_directory_exists(WD_git)
+    if(!WD_git_test){
+      message("No project folder found at: \n ",WD_git,"\nDo you want to create this folder?")
+      response <- readline(prompt = "y/n > ")
+      if(response!="y"){
+        stop("get_wd_git() aborted")
+      }else{
+        fs::dir_create(WD_git)
+        checkmate::assert_directory_exists(WD_git, .var.name = "Search for paired WD folder name in github gp-lessons structure")
+      }
+    }
     out <- WD_git
   }
   out

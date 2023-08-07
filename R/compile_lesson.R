@@ -46,7 +46,7 @@ compile_lesson <-
 
 
     # Find the path for the GitHub gp-lessons working dir ---------------------
-    WD_git <- get_git_gp_lessons_path(WD = WD)
+    WD_git <- get_wd_git(WD = WD)
 
     destFolder <- fs::path(WD_git, "JSONs")
 

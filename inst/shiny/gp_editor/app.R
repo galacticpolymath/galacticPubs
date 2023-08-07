@@ -34,7 +34,7 @@ meta_path <- fs::path(WD0, "meta/")
   #Get path to front-matter path
   proj <- basename(WD0)
   # need to find paired yaml_path in github gp-lessons folder
-  WD_git <- get_git_gp_lessons_path(WD=WD0)
+  WD_git <- get_wd_git(WD=WD0)
 
   yaml_path <- fs::path(WD_git,"front-matter.yml")
 

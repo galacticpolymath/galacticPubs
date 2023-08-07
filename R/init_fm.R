@@ -10,7 +10,7 @@
 init_fm <- function(WD = "?",WD_git=NULL) {
   if(is.null(WD_git) ){
   WD <- parse_wd(WD)
-  WD_git <- get_git_gp_lessons_path(WD=WD)
+  WD_git <- get_wd_git(WD=WD)
   }
 
   fm_path <- fs::path(WD_git, "front-matter.yml")

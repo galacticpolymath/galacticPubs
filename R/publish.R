@@ -10,7 +10,7 @@
 publish <- function(commit_msg = NULL, WD = "?") {
   if(grepl("\\?",commit_msg)){stop("commit_msg comes before WD")}
   WD <- parse_wd(WD)
-  WD_git <- get_git_gp_lessons_path(WD=WD)
+  WD_git <- get_wd_git(WD=WD)
   #if not run through the editor app,
   #test that WD is in the root directory with the R Project,
   #but don't throw an error (e.g. if run from galacticPubs)

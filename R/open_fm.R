@@ -9,7 +9,7 @@ open_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
   proj <- basename(WD)
   # if WD supplied, need to find yaml_path in git hub gp-lessons folder
-  gp_lessons_dir <- get_git_gp_lessons_path()
+  gp_lessons_dir <- get_wd_git()
   yaml_path <-
     fs::path(gp_lessons_dir, "Lessons", proj, "front-matter.yml")
 

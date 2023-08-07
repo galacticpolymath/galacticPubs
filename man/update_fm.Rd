@@ -15,7 +15,7 @@ update_fm(
 )
 }
 \arguments{
-\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling \code{\link[=get_git_gp_lessons_path]{get_git_gp_lessons_path()}}. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.}
+\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling \code{\link[=get_wd_git]{get_wd_git()}}. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.}
 
 \item{WD_git}{default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.}
 

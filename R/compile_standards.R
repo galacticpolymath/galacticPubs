@@ -19,7 +19,7 @@ compile_standards <- function(WD = "?",
   WD <- parse_wd(WD)
 
   #The github gp-lessons directory for the code
-  WD_git <- get_git_gp_lessons_path(WD=WD)
+  WD_git <- get_wd_git(WD=WD)
 
   #############
   # IMPORTANT: Add Subjects here if you need to align new ones --------------

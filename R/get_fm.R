@@ -5,7 +5,7 @@
 #' If you ask for only one key, output will be a vector, rather than a list
 #'
 #' @param key which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'
-#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_git_gp_lessons_path()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
+#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_wd_git()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
 #' @param WD_git default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.
 #' @param yaml_path default=NULL. An alternate way to just provide a full path to read in a yml file.
 #' @param checkWD passed to [safe_read_yaml()]; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory
@@ -45,7 +45,7 @@ get_fm <-
         #WD is for the google drive side of things (not the gp-lessons dir)
         WD <- parse_wd(WD)
         #Basename must always match b/w Google Drive & gp-lessons
-        WD_git_root <- get_git_gp_lessons_path()
+        WD_git_root <- get_wd_git()
         WD_git <- fs::path(WD_git_root, "Lessons", basename(WD))
       }
 

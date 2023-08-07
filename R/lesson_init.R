@@ -28,7 +28,7 @@ lesson_init <- \(ShortTitle) {
   )
 
   #location of gp-lessons git project (not a google drive folder)
-  gp_lessons_dir <- fs::path(get_git_gp_lessons_path(), "Lessons")
+  gp_lessons_dir <- fs::path(get_wd_git(), "Lessons")
   checkmate::assert_directory_exists(gp_lessons_dir, access = "w")
 
   #location of GP-Studio Google Shared Drive /Edu/Lessons folder (where proj will go)
