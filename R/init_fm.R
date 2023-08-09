@@ -7,18 +7,27 @@
 #' @returns logical of success; T= exists or created; F= not found and not created
 #' @export
 
-init_fm <- function(WD = "?",WD_git=NULL) {
-  if(is.null(WD_git) ){
-  WD <- parse_wd(WD)
-  WD_git <- get_wd_git(WD=WD)
+init_fm <- function(WD = "?", WD_git = NULL) {
+  if (is.null(WD_git)) {
+    WD <- parse_wd(WD)
+    WD_git <- get_wd_git(WD = WD)
   }
 
   fm_path <- fs::path(WD_git, "front-matter.yml")
 
-  test_check_fm <- file.exists(fm_path)
+  #Check that JSONs folder exists
+  json_path <- fs::path(WD_git, "JSONs")
+  test_json_dir <- dir.exists(json_path)
+  if (!test_json_dir) {
+    message("JSON path for project not found. Creating: \n ", json_path)
+    fs::dir_create(json_path, recurse = TRUE)
+  }
 
+  #Check for front-matter.yml
+  test_check_fm <- file.exists(fm_path)
   if (!test_check_fm) {
     message("\nFront matter not found. Trying to create it...")
+
     #use the front matter template supplied with galacticPubs as a starting point
     y <-
       safe_read_yaml(

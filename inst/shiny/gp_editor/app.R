@@ -29,7 +29,7 @@ if (is_empty(.GlobalEnv$.editor_path)) {
 } else{
   WD0 <- .GlobalEnv$.editor_path
 }
-meta_path <- fs::path(WD0, "meta/")
+meta_path <- fs::path(WD0, "meta")
 
   #Get path to front-matter path
   proj <- basename(WD0)
@@ -519,16 +519,15 @@ server <- function(input, output, session) {
   # Monitor whether there are unsaved changes -------------------------------
   observe({
     #don't run until full page rendered
-    if (!is.null(input$DrivingQ)) {
+
+    if (!is.null(input$Feedback)) {
       data_check <-
         prep_input(input,
                    WD = WD())
       #save updated current_data and saved_data to reactive values
-      isolate({
+
         vals$current_data <- data_check$current_data
         vals$saved_data <- data_check$saved_data
-      })
-
 
 
       if (!identical(length(data_check[[1]]), length(data_check[[2]]))) {
@@ -579,7 +578,6 @@ server <- function(input, output, session) {
         }
       }
 
-
       count_outOfDate <- nrow(outOfDate)
 
       #Check if template upgraded
@@ -603,21 +601,22 @@ server <- function(input, output, session) {
         vals$saved <- TRUE
       }
 
-      #       #Check if Github link is present
-      #       ## Add github URL if missing in yaml
-      if (is_empty(data_check$saved_data$GitHubURL)) {
-        isolate({
-          vals$current_data$GitHubURL <-
-            whichRepo(WD = WD(), fullPath = TRUE)
-          # #write current data
-          yaml::write_yaml(data_check$current_data,
-                           yaml_path)
 
-          vals$yaml_update_txt <-
-            txt <- paste0("Save to attach GitHubRepo:\n",
-                          basename(vals$current_data$GitHubURL))
-        })
-      }
+      # #       #Check if Github link is present
+      # #       ## Add github URL if missing in yaml
+      # if (is_empty(data_check$saved_data$GitHubURL)) {
+      #   isolate({
+      #     vals$current_data$GitHubURL <-
+      #       whichRepo(WD = WD(), fullPath = TRUE)
+      #     # #write current data
+      #     yaml::write_yaml(data_check$current_data,
+      #                      yaml_path)
+      #
+      #     vals$yaml_update_txt <-
+      #       txt <- paste0("Save to attach GitHubRepo:\n",
+      #                     basename(vals$current_data$GitHubURL))
+      #   })
+      # }
       #
     }
 
@@ -639,6 +638,7 @@ server <- function(input, output, session) {
     template_upgraded <-
       vals$current_data$TemplateVer > vals$saved_data$TemplateVer
     # if template upgraded, trigger rebuild of all materials in compile_lesson
+
     if (template_upgraded) {
       vals$current_data$RebuildAllMaterials <- TRUE
     }
@@ -646,6 +646,7 @@ server <- function(input, output, session) {
     #write current data
     yaml::write_yaml(vals$current_data,
                      yaml_path)
+
     vals$saved <- TRUE
     #synchronize saved and current_data
     vals$saved_data <-
@@ -655,6 +656,7 @@ server <- function(input, output, session) {
         "front-matter.yml updated:<br>",
         format(Sys.time(), "%Y-%b-%d %r")
       ))
+
 
   }) %>% bindEvent(input$save)
 

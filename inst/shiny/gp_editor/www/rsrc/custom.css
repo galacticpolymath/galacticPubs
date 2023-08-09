@@ -87,7 +87,7 @@ body{
 .header_save img{max-height: 15px;margin-top:auto; margin-bottom:auto;}
 .header_save p{padding-left: 0.75rem;margin-top:auto; margin-bottom:auto;}
 
-.yaml_saved{color: gray;position: fixed;top:.35rem ;right: 10%; z-index:3001;max-width:220px;}
+.yaml_saved{color: gray;position: fixed;top:.35rem ;right: 10%; z-index:3001;max-width:300px;}
 .yaml_unsaved{color: cyan;position: fixed;top:.35rem ;right: 10%; z-index:3001;;max-width:220px;}
 
 
