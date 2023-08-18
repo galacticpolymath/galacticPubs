@@ -89,19 +89,19 @@ Feedback: |
 Credits: ''
 Acknowledgments:
   Role:
-  - ''
+  - .na
   Role_def:
-  - ''
+  - .na
   Name:
-  - ''
+  - .na
   Title:
-  - ''
+  - .na
   Affiliation:
-  - ''
+  - .na
   Location:
-  - ''
+  - .na
   Link:
-  - ''
+  - .na
 Versions:
   ver_num:
   - '0.1.0'
@@ -110,9 +110,9 @@ Versions:
   ver_summary:
   - 'Lesson initialized'
   ver_notes:
-  - ''
+  - .na
   ver_acknowledgments:
-  - ''
+  - .na
 ScriptsToRun: ''
 GoogleCloudStorage:
   filename:

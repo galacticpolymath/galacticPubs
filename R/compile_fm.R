@@ -104,12 +104,15 @@ compile_fm <- \(WD = "?") {
     mm <-
       jsonlite::read_json(fs::path(json_dir, "multimedia.json"), null =
                             "null")
-  }
-
-  if (!mmExists | is_empty(mm)) {
+    if(is_empty(mm)){
+      message("No multimedia found.")
+    }
+  }else{
     mm <- NULL
     message("No multimedia found.")
   }
+
+
 
 
 
