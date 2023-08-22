@@ -58,6 +58,17 @@ update_fm <-
 
     new_yaml$GdriveDirName <- basename(WD)
 
+
+# TEMP: Migrate some old names to new key names ---------------------------------
+  if("id" %in% names(old_yaml)){
+    new_yaml$numID <- old_yaml$id
+  }
+
+  if("UniqueID" %in% names(old_yaml)){
+    new_yaml$`_id` <- old_yaml$UniqueID
+  }
+
+
     # change_this: Make manual changes if requested ----------------------------------------
     if (!is.null(change_this)) {
       checkmate::assert_list(change_this, .var.name = "change_this")
@@ -150,9 +161,14 @@ update_fm <-
     #Add/Update the locale and lang fields with a nonexported internal function parse_locale()
     # overwrites existing lang and locale fields and returns the modified current_data list
     new_yaml <- new_yaml %>% parse_locale()
+
+    #make a unique `_id` combining numID & locale
+    if(!is_empty(new_yaml$numID)){
+      new_yaml$`_id` <- paste0(c("lesson",new_yaml$numID,new_yaml$locale),collapse="_")
+    }
+
     # overwrite MediumTitle used for sensible folder naming in public-facing GalacticPolymath network drive
     # Format: 'Title of Lesson'_Sci_G5-9 (en-US)
-
     new_yaml$MediumTitle <- paste_valid(
       paste0(
         "'",
@@ -178,6 +194,7 @@ update_fm <-
              ")"),
       collapse = ""
     )
+
 
 
     #add galacticPubsVer
@@ -211,12 +228,12 @@ update_fm <-
 
     # remove the following deprecated variables -------------------------------
 
-    deprecated <- c("GitHubPath", "GPCatalogPath", "test")
+    deprecated <- c("GitHubPath", "GPCatalogPath", "test","id","UniqueID","GdriveTeachMat")
     remove_deez <- which(names(new_yaml) %in% deprecated)
     if (length(remove_deez) > 0) {
       message(
         "The following deprecated entries were removed from your front-matter.yml:\n -",
-        paste0(names(new_yaml)[remove_deez])
+        paste0(names(new_yaml)[remove_deez],collapse="\n -")
       )
       new_yaml <- new_yaml[-remove_deez]
 

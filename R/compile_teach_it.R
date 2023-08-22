@@ -143,7 +143,6 @@ compile_teach_it <- function(WD = "?",
   pext_initialized <- !grepl("^URL", pext$Link[1])
   mlinks_initialized <- nrow(mlinks) > 0
 
-
   # Report uninitialized data -----------------------------------------------
 
   if (!pext_initialized) {
@@ -243,7 +242,7 @@ compile_teach_it <- function(WD = "?",
       d <- m[i, ]
 
       mainLink <- zYTembed(d$mainLink) %>%
-        expand_md_links(repo = whichRepo(WD = WD))
+        expand_md_links(WD = WD)
       #if a drive file is supplied, change /edit? or /view? ... to /preview
       #should probably switch all this logic to a function and use urltools
       mainLink_dec <- urltools::url_parse(mainLink)

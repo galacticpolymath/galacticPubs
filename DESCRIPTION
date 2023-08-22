@@ -24,6 +24,7 @@ Imports:
     googledrive (>= 2.0.0),
     googlesheets4 (>= 1.0.1),
     grid (>= 4.1.1),
+    httr2,
     jsonlite (>= 1.8.0),
     magrittr (>= 2.0.1),
     patchwork (>= 1.1.1),

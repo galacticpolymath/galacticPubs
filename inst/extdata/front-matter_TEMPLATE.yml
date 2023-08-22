@@ -1,6 +1,6 @@
 #DEFAULT VALUES FOR front-matter.
-id: ''
-UniqueID: ''
+numID: ''
+_id: ''
 ShortTitle: ''
 PublicationStatus: 'Proto'
 Language: 'English'
@@ -17,7 +17,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.5.4
+TemplateVer: 0.5.6
 galacticPubsVer: ''
 isTestRepo: false
 URL: ''

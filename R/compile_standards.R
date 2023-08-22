@@ -85,8 +85,8 @@ compile_standards <- function(WD = "?",
       .name_repair = "minimal"
     ) %>%
       #Blank column is just used as a flexible marker
-      dplyr::select(1:"blank") %>%
-      dplyr::select(-"blank") %>%
+      dplyr::select(1:"Notes") %>%
+      dplyr::select(-"Notes") %>%
       dplyr::filter(!is.na(.data$`LO#`))
 
       a_master <- googlesheets4::read_sheet(
@@ -103,6 +103,7 @@ compile_standards <- function(WD = "?",
         skip = 1,
         col_types = "c"
       ) %>% dplyr::filter(!is.na(.data$Code))
+
 
     is_valid_tab1 <- checkmate::test_data_frame(LOs, min.rows = 1)
     is_valid_tab2 <-
@@ -163,7 +164,10 @@ compile_standards <- function(WD = "?",
     # Test if imported standards are initiated --------------------------------
     message("Checking if standards gsheet has been initialized...")
     #check that "Help Text" does not occur anywhere in the Learning Objective statement column in Tab1
-    names(LOs)[2] <- "lo_statement"
+
+    #Rename learning statement to be friendlier, but in a way that's robust to changing the header title
+    lo_col <- stringr::str_detect(names(LOs),"Objective") %>% which()
+    names(LOs)[loc_col] <- "lo_statement"
     tab1_initiated <-
       (LOs %>% dplyr::pull("lo_statement") %>% grepl("^[Hh]elp [Tt]ext", .) %>% sum()) == 0
     #Expect some LO#s

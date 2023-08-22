@@ -4,12 +4,12 @@
 \alias{expand_md_links}
 \title{expand_md_links}
 \usage{
-expand_md_links(md, repo)
+expand_md_links(md, WD)
 }
 \arguments{
 \item{md}{a markdown string or vector}
 
-\item{repo}{the name of the current repository e.g. from \code{\link{whichRepo}}}
+\item{WD}{the Working Directory}
 }
 \description{
 Make markdown links into full paths to GP catalog. Supports 2 types of links:
@@ -22,10 +22,10 @@ Make markdown links into full paths to GP catalog. Supports 2 types of links:
 Ex:
 \itemize{
 \item "See \verb{![image1](img.png)} for details" becomes ->
-\item "See \verb{![image1](https://catalog.galacticpolymath.com/ThisRepository/img.png)} for details"
+\item "See \verb{![image1](https://catalog.galacticpolymath.com/ThisProject/img.png)} for details"
 Ex: 2:
 \item "\code{{img.png}}" becomes ->
-\item \verb{\{https://catalog.galacticpolymath.com/ThisRepository/img.png\}}
+\item \verb{\{https://catalog.galacticpolymath.com/ThisProject/img.png\}}
 }
 }
 \seealso{

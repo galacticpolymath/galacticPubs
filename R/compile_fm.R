@@ -21,8 +21,7 @@ compile_fm <- \(WD = "?") {
   fm <- get_fm(WD_git = WD_git)
   fm_keys <- fm %>% names()
   header <- fm[1:which(fm_keys == "GradesOrYears")]
-  #used for constructing catalog paths
-  repo <- whichRepo(WD = WD)
+
   # Make a few assertions to require minimally functional header ------------
   checkmate::assert_character(fm$ShortTitle,
                               min.chars = 2,
@@ -36,10 +35,10 @@ compile_fm <- \(WD = "?") {
   # make full catalog paths following naming conventions the frontend --------
   header$SponsorImage = list(url = ifelse(is.na(fm$SponsorLogo),
                                           NA,
-                                          catalogURL(basename(fm$SponsorLogo), repo)))
+                                          catalogURL(basename(fm$SponsorLogo), WD=WD)))
   header$CoverImage = list(url = ifelse(is.na(fm$LessonBanner),
                                         NA,
-                                        catalogURL(basename(fm$LessonBanner), repo)))
+                                        catalogURL(basename(fm$LessonBanner), WD=WD)))
 
   #output header.json
   save_json(header,
@@ -75,13 +74,13 @@ compile_fm <- \(WD = "?") {
     SteamEpaulette = list(url = ifelse(
       is.na(fm$LearningEpaulette[1]),
       NA,
-      catalogURL(basename(fm$LearningEpaulette[1]), repo)
+      catalogURL(basename(fm$LearningEpaulette[1]), WD=WD)
     )),
     #might want to add more complex image handling later),
     SteamEpaulette_vert = list(url = ifelse(
       is.na(fm$LearningEpaulette_vert[1]),
       NA,
-      catalogURL(basename(fm$LearningEpaulette_vert[1]), repo)
+      catalogURL(basename(fm$LearningEpaulette_vert[1]), WD=WD)
     ))
     #might want to add more complex image handling later),
   )
@@ -139,7 +138,7 @@ compile_fm <- \(WD = "?") {
   bonus_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Bonus Content",
-      Content = expand_md_links(Bonus, repo) %>% fixAnchorLinks(),
+      Content = expand_md_links(Bonus, WD=WD) %>% fixAnchorLinks(),
       #allow smooth-scrolling to in-page references
       InitiallyExpanded = TRUE
     )
@@ -159,7 +158,7 @@ compile_fm <- \(WD = "?") {
     extensions_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Extensions",
-      Content = expand_md_links(Extensions, repo) %>% fixAnchorLinks(),
+      Content = expand_md_links(Extensions, WD=WD) %>% fixAnchorLinks(),
       #allow smooth-scrolling to in-page references
       InitiallyExpanded = TRUE
     )
@@ -189,7 +188,7 @@ compile_fm <- \(WD = "?") {
             "\n#### Research Background\n",
             Background
           )
-        ) %>% expand_md_links(repo = repo) %>%
+        ) %>% expand_md_links(WD = WD) %>%
           fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
         InitiallyExpanded = TRUE
       )
@@ -209,7 +208,7 @@ compile_fm <- \(WD = "?") {
         `__component` = "lesson-plan.collapsible-text-section",
         SectionTitle = "Feedback",
         Content = expand_md_links(Feedback,
-                                  repo) %>% fixAnchorLinks(),
+                                  WD=WD) %>% fixAnchorLinks(),
         InitiallyExpanded = TRUE
       )
 
@@ -227,7 +226,7 @@ compile_fm <- \(WD = "?") {
         `__component` = "lesson-plan.collapsible-text-section",
         SectionTitle = "Credits",
         Content = expand_md_links(Credits,
-                                  repo) %>% fixAnchorLinks(),
+                                  WD=WD) %>% fixAnchorLinks(),
         InitiallyExpanded = TRUE
       )
 
@@ -252,12 +251,13 @@ compile_fm <- \(WD = "?") {
     for (i in 1:length(roles)) {
       #Also allow {vid} shortcodes
       role_i <-
-        roles[i] %>% parseGPmarkdown(WD = WD) %>% expand_md_links(repo = whichRepo(WD =
-                                                                                     WD))
+        roles[i] %>% parseGPmarkdown(WD = WD) %>%
+        expand_md_links(WD =WD)
       ack_i <- subset(ack, ack$Role == role_i)
       def_i <-
-        ack_i$Role_def[1] %>% parseGPmarkdown(WD = WD) %>% expand_md_links(repo =
-                                                                             whichRepo(WD = WD))
+        ack_i$Role_def[1] %>%
+        parseGPmarkdown(WD = WD) %>%
+        expand_md_links(WD = WD)
       #capitalize first letter if necessary
       if (!substr(def_i, 1, 1) %in% LETTERS) {
         substr(def_i, 1, 1) <- toupper(substr(def_i, 1, 1))

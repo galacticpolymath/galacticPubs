@@ -49,6 +49,7 @@ get_fm <-
         WD_git <- fs::path(WD_git_root, "Lessons", basename(WD))
       }
 
+      if(checkWD){
       checkmate::assert_directory_exists(
         WD_git,
         .var.name = paste0(
@@ -57,6 +58,7 @@ get_fm <-
           "'"
         )
       )
+      }
 
 
       y <- safe_read_yaml(

@@ -3,7 +3,7 @@
 #' @param relative_ref relative path in the current environment (i.e. the filename of a file in the 'assets/_other-media-to-publish' folder)
 #' @examples
 #' \dontrun{ catalogURL("help.txt")}
-#' @param repo the name of the current repository e.g. from \code{\link{whichRepo}}
+#' @param WD the working directory
 #' @export
 
 catalogURL<-function(relative_ref,WD){
