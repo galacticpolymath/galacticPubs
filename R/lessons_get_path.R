@@ -6,6 +6,7 @@
 #' - "s" or "?" = GP-Studio (draft working directory, many users with access)
 #' - "l" or "??" = GP-Live (private, admin only)
 #' - "gp"= GalacticPolymath (public-facing read-only)
+#' - "git" = wd_git (i.e. the github repository for the gp-lessons project)
 #' @export
 #'
 lessons_get_path <- function(shared_drive = "s") {
@@ -15,7 +16,8 @@ lessons_get_path <- function(shared_drive = "s") {
            "?"= "galacticPubs_gdrive_studio_lessons_dir",
            "??"= "galacticPubs_gdrive_live_lessons_dir",
            l = "galacticPubs_gdrive_live_lessons_dir",
-           gp = "galacticPubs_gdrive_gp_lessons_dir",
+           gp = "galacticPubs_gdrive_galacticpolymath_lessons_dir",
+           git= "galacticPubs_git_gp_lessons_dir",
            NA)
 
   if (is.na(which_path)) {

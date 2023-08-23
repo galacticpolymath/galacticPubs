@@ -373,6 +373,7 @@ update_fm <-
       if ((new_yaml$PublicationStatus %in% c("Proto", "Draft")) |
           new_yaml$GdriveHome == "GP-Studio") {
         #Full local path to teaching-materials/folder
+
         tm_path_full <-
           fs::path(lessons_get_path("s"),
                    new_yaml$GdriveDirName,
@@ -392,6 +393,11 @@ update_fm <-
             fm_key = "GdriveTeachMatID"
           )
         pubID <- NA
+
+
+# Differential logic for paths of LIVE projects ---------------------------
+
+
         #Live teaching materials found on GalacticPolymath shared drive,
         #renamed with MediumTitle
       } else{
