@@ -7,31 +7,35 @@
 \usage{
 pick_lesson(
   shared_drive = "s",
+  show_all = FALSE,
   full_path = TRUE,
-  lessons_dir = NULL,
-  sort_az = FALSE
+  sort_az = FALSE,
+  lessons_dir = NULL
 )
 
 lesson_pick(
   shared_drive = "s",
+  show_all = FALSE,
   full_path = TRUE,
-  lessons_dir = NULL,
-  sort_az = FALSE
+  sort_az = FALSE,
+  lessons_dir = NULL
 )
 }
 \arguments{
 \item{shared_drive}{which shared drive do you want to find the lessons in? default= "s" Options:
 \itemize{
-\item "s" = GP-Studio (draft working directory, many users with access)
-\item "l" = GP-Live (private, admin only)
+\item "s" or "?" = GP-Studio (draft working directory, many users with access)
+\item "l" or "??" = GP-Live (private, admin only)
 \item "gp"= GalacticPolymath (public-facing read-only)
 }}
 
+\item{show_all}{show an 'all' option? default=FALSE}
+
 \item{full_path}{do you want a full path to the chosen lesson? default= TRUE}
 
-\item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling \code{\link[=lessons_get_path]{lessons_get_path()}}}
-
 \item{sort_az}{logical; sort alphabetically? default =F sorts by last modified}
+
+\item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling \code{\link[=lessons_get_path]{lessons_get_path()}}}
 }
 \value{
 the selected lesson name

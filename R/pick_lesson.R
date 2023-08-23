@@ -3,19 +3,21 @@
 #' Interactively lets you pick from a list of published Galactic Polymath lessons and will out put a virtualized Google Drive for Desktop path
 #'
 #' @param shared_drive which shared drive do you want to find the lessons in? default= "s" Options:
-#' - "s" = GP-Studio (draft working directory, many users with access)
-#' - "l" = GP-Live (private, admin only)
+#' - "s" or "?" = GP-Studio (draft working directory, many users with access)
+#' - "l" or "??" = GP-Live (private, admin only)
 #' - "gp"= GalacticPolymath (public-facing read-only)
+#' @param show_all show an 'all' option? default=FALSE
 #' @param full_path do you want a full path to the chosen lesson? default= TRUE
-#' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling [lessons_get_path()]
 #' @param sort_az logical; sort alphabetically? default =F sorts by last modified
+#' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling [lessons_get_path()]
 #' @return the selected lesson name
 #' @export
 
 pick_lesson <- function(shared_drive = "s",
+                        show_all = FALSE,
                         full_path = TRUE,
-                        lessons_dir = NULL,
-                        sort_az = FALSE) {
+                        sort_az = FALSE,
+                        lessons_dir = NULL) {
   if (is.null(lessons_dir)) {
     lessons_dir <- lessons_get_path(shared_drive = shared_drive)
   }
@@ -40,7 +42,9 @@ pick_lesson <- function(shared_drive = "s",
   }
 
   d <- data.frame(PROJECT = projects, CHOICE = 1:length(projects))
+  if(show_all){
   d <- rbind(d, c(PROJECT = "all", CHOICE = 0))
+  }
   message("Available lessons at: /", switch(
     shared_drive,
     s = "GP-Studio",
@@ -58,10 +62,12 @@ pick_lesson <- function(shared_drive = "s",
     d$PROJECT[match(x, d$CHOICE)]
   })
 
-  if (full_path & choice != "all") {
+  if (full_path & !identical(choice, "all")) {
     return(fs::path(lessons_dir, choice))
 
-  } else{
+  } else if (choice=="all"){
+    return(fs::path(lessons_dir, projects))
+  }else{
     return(choice)
   }
 

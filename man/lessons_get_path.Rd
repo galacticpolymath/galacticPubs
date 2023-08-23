@@ -15,6 +15,7 @@ get_lessons_path(shared_drive = "s")
 \item "s" or "?" = GP-Studio (draft working directory, many users with access)
 \item "l" or "??" = GP-Live (private, admin only)
 \item "gp"= GalacticPolymath (public-facing read-only)
+\item "git" = wd_git (i.e. the github repository for the gp-lessons project)
 }}
 }
 \description{
