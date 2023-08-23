@@ -44,7 +44,7 @@ init_lesson_meta <- function(WD = "?",
 
   meta_template_files <-
     googledrive::drive_get(id = googledrive::as_id("1Faa1RCf6zRbvIn1ek6jLsvp3nOip12me")) %>% drive_contents
-browser()
+
   #validate dribble object
   checkmate::assert_data_frame(meta_template_files, min.rows = 2) #should have at least 2 rows
 

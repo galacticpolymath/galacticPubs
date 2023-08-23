@@ -128,8 +128,7 @@ upgrade_meta_spreadsheet <- \(WD = "?",
         old_workbook$`1` %>%
           dplyr::select(1:.data$Notes),
         by = overlapping_names
-      )%>%
-        dplyr::mutate(dplyr::across(1:2,~as.numeric(.)))
+      )
 
       #Now read in tab 2
       template_tab2 <-
@@ -150,8 +149,8 @@ upgrade_meta_spreadsheet <- \(WD = "?",
       #Merge and remove temporary id column
       #To be super careful, we should only keep LO# and Lsn columns
       merged_tab2_orig <-
-        hard_left_join(template_tab2, old_tab2, by = "id") %>%
-        dplyr::mutate(dplyr::across(1:2,~as.numeric(.)))
+        hard_left_join(template_tab2, old_tab2, by = "id")
+
       merged_tab2 <- merged_tab2_orig %>% dplyr::select(1:2)
       checkmate::assert_data_frame(merged_tab2)
       checkmate::assert_set_equal(nrow(merged_tab2), nrow(template_tab2))
@@ -193,6 +192,9 @@ upgrade_meta_spreadsheet <- \(WD = "?",
 
 
       # Trash old file and re-initialize the template --------------------------------------------------
+      # Rename file before deleting to simplify finding it if you need to undelete
+      googledrive::drive_rename(googledrive::as_id(old_sheet_id),
+                                paste0("OLD",old_sheet_info$name))
       googledrive::drive_trash(googledrive::as_id(old_sheet_id))
 
       test_reinit <-
@@ -201,8 +203,11 @@ upgrade_meta_spreadsheet <- \(WD = "?",
 
       # Overwrite reinitialized template with merged data -----------------------
       if (test_reinit) {
+        message("New Template Initialized! Opening it...")
+
         #Test new association with standards.gsheet
         new_sheet_id <- get_fm(expected_gdriveID_key, WD = WD)
+        drive_open(new_sheet_id)
         new_sheet <- drive_find_path(new_sheet_id)
         checkmate::assert_data_frame(new_sheet, nrows = 1, .var.name = "New Gsheet dribble")
 
@@ -236,12 +241,12 @@ upgrade_meta_spreadsheet <- \(WD = "?",
                 sheet = tab_i,
                 data = merged_df_i,
                 range = write_range,
-                reformat = FALSE,
+                reformat = TRUE,
                 col_names = FALSE
               ) %>% catch_err()
 
-            overall_success <- clear_success & write_success
-            overall_success
+            i_success <- clear_success & write_success
+            i_success
 
           }) %>% unlist()
         test_write_success <- sum(test_write)==length(test_write)

@@ -228,7 +228,7 @@ update_fm <-
 
     # remove the following deprecated variables -------------------------------
 
-    deprecated <- c("GitHubPath", "GPCatalogPath", "test","id","UniqueID","GdriveTeachMat")
+    deprecated <- c("GitHubPath", "GPCatalogPath", "test","id","UniqueID","GdriveTeachMat","numID")
     remove_deez <- which(names(new_yaml) %in% deprecated)
     if (length(remove_deez) > 0) {
       message(

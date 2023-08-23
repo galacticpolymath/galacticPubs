@@ -1,5 +1,5 @@
 #DEFAULT VALUES FOR front-matter.
-numID: ''
+numId: ''
 _id: ''
 ShortTitle: ''
 PublicationStatus: 'Proto'
