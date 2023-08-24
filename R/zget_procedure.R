@@ -97,8 +97,8 @@ zget_procedure <- \(proc,
 
   ####
   #Add Chunk Start Times
-  proc$ChunkStart <- sapply(unique_sans_na(proc$Lsn), function(p) {
-    p_i <- subset(proc, proc$Lsn == p)
+  proc$ChunkStart <- sapply(unique_sans_na(proc$lsn), function(p) {
+    p_i <- subset(proc, proc$lsn == p)
     newChunkIndx <-
       sapply(1:nrow(p_i), function(i)
         which.max(p_i$Chunk[1:i])) %>% unique()
@@ -113,7 +113,7 @@ zget_procedure <- \(proc,
   ####
   #Figure out lesson duration string
   lsnDurations <-
-    proc_w_prep$LsnDur[which(proc_w_prep$LsnDur != "")] %>% as.numeric()
+    proc_w_prep$lsnDur[which(proc_w_prep$lsnDur != "")] %>% as.numeric()
   lessonDur <-
     if (length(lsnDurations) == 1) {
       paste0(lsnDurations, " min") #if just 1 lsn listed, do X min
@@ -136,13 +136,13 @@ zget_procedure <- \(proc,
   out$lessonDur = lessonDur
 
 
-  nlsns <- max(unique(proc$Lsn), na.rm = T)
+  nlsns <- max(unique(proc$lsn), na.rm = T)
 
-  #Filter out NAs for placeholder text in Lsn Info if still present
-  ptitles <- uinfo$LsnTitle[!is.na(uinfo$LsnTitle)]
-  pprefs <- uinfo$LsnPreface[!is.na(uinfo$LsnPreface)]
+  #Filter out NAs for placeholder text in lsn Info if still present
+  ptitles <- uinfo$lsnTitle[!is.na(uinfo$lsnTitle)]
+  pprefs <- uinfo$lsnPreface[!is.na(uinfo$lsnPreface)]
   pgradevar <-
-    uinfo$LsnGradeVarNotes[!is.na(uinfo$LsnGradeVarNotes)]
+    uinfo$lsnGradeVarNotes[!is.na(uinfo$lsnGradeVarNotes)]
 
 
   # Output data for each lsn -----------------------------------------------
@@ -150,12 +150,12 @@ zget_procedure <- \(proc,
   out$lessons <- lapply(1:nlsns, function(i) {
     lsnNum <- i
     lsnTitle <- ifelse(length(ptitles) < i, NA, ptitles[i])
-    lsnDur <- proc$LsnDur[i]
+    lsnDur <- proc$lsnDur[i]
     lsnPreface <- ifelse(length(pprefs) < i, NA, pprefs[i])
 
-    proc_df_i <- subset(proc, proc$Lsn == i)
+    proc_df_i <- subset(proc, proc$lsn == i)
     prep_row <-
-      subset(proc_w_prep, proc_w_prep$Lsn == i & proc_w_prep$Step == 0)
+      subset(proc_w_prep, proc_w_prep$lsn == i & proc_w_prep$Step == 0)
     #If prep missing for lsn i, nullify it
     if (nrow(prep_row) == 0) {
       lsnPrep <- NULL
@@ -179,7 +179,7 @@ zget_procedure <- \(proc,
 
     #Get chunk info for this lsn
     chunks <- lapply(unique(proc_df_i$Chunk), function(chunk_i) {
-      d <- subset(proc, proc$Lsn == i & proc$Chunk == chunk_i)
+      d <- subset(proc, proc$lsn == i & proc$Chunk == chunk_i)
       chunkTitle <- d$ChunkTitle[1]
       chunkStart <- d$ChunkStart[1]
       chunkDur <- d$ChunkDur[1]
@@ -205,7 +205,7 @@ zget_procedure <- \(proc,
     # Extract relevant lext ("Going Further") links ---------------------------
 
     lext_df_i <-
-      lext %>% dplyr::filter(Lsn == i) %>% dplyr::arrange(.data$Order)
+      lext %>% dplyr::filter(lsn == i) %>% dplyr::arrange(.data$Order)
 
     #Remove []() markdown links to get bare links in case somebody used shorthand to grab the YouTube link
     lext_df_i$Link <- ifelse(
