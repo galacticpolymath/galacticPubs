@@ -108,20 +108,20 @@ compile_teach_it <- function(WD = "?",
       col_types = "c"
     ) %>% dplyr::filter(`REF(Is_initiatialized)` == TRUE &
                           !is.na(.data$ItemTitle)) %>%
-    dplyr::select("Lsn", "Order", "ItemTitle", "Description", "Link")
+    dplyr::select("lsn", "order", "itemTitle", "description", "link")
 
   #bring in procedure
   proc <-
     googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip =
                                 1) %>%
-    dplyr::select(1:.data$LsnDur) %>%
+    dplyr::select(1:.data$lsnDur) %>%
     dplyr::mutate(
-      Lsn = as.integer(.data$Lsn),
+      lsn = as.integer(.data$lsn),
       Chunk = as.integer(.data$Chunk),
       ChunkDur = as.integer(.data$ChunkDur),
       Step = as.integer(.data$Step),
-      LsnN = as.integer(.data$LsnN),
-      LsnDur = as.integer(.data$LsnDur)
+      lsnN = as.integer(.data$lsnN),
+      lsnDur = as.integer(.data$lsnDur)
     )
 
   # Check and Validate Data Import--------------------------------------------------
@@ -134,13 +134,13 @@ compile_teach_it <- function(WD = "?",
 
   # Check for template text (uninitialized data) ----------------------------
   uinfo_titles_initialized <-
-    !grepl("^Lesson Title", uinfo$LsnTitle[1])
+    !grepl("^Lesson Title", uinfo$lsnTitle[1])
   uinfo_preface_initialized <-
-    !grepl("^Overall description", uinfo$UnitPreface[1])
+    !grepl("^Overall description", uinfo$unitPreface[1])
   proc_initialized <-
     !grepl("^\\*", proc$ChunkTitle[1]) &
     !grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
-  pext_initialized <- !grepl("^URL", pext$Link[1])
+  pext_initialized <- !grepl("^URL", pext$link[1])
   mlinks_initialized <- nrow(mlinks) > 0
 
   # Report uninitialized data -----------------------------------------------
@@ -202,21 +202,21 @@ compile_teach_it <- function(WD = "?",
     }
 
     tlinks <-
-      dplyr::left_join(tlinks0, uinfo[, c("Lsn",
-                                          "LsnTitle",
-                                          "LsnPreface",
-                                          "LsnGradeVarNotes",
-                                          "ActTags")], by = c("lsn" = "Lsn"))
+      dplyr::left_join(tlinks0, uinfo[, c("lsn",
+                                          "lsnTitle",
+                                          "lsnPreface",
+                                          "lsnGradeVarNotes",
+                                          "actTags")], by = "lsn")
 
 
   } else{
     tlinks <-
       tlinks0 %>% dplyr::mutate(
-        Lsn = NA,
-        LsnTitle = NA,
-        LsnPreface = NA,
-        LsnGradeVarNotes = NA,
-        ActTags = NA
+        lsn = NA,
+        lsnTitle = NA,
+        lsnPreface = NA,
+        lsnGradeVarNotes = NA,
+        actTags = NA
       )
   }
 
@@ -303,7 +303,7 @@ compile_teach_it <- function(WD = "?",
         lsnTitle = paste0("Procedure not documented yet"),
         lsnDur = NULL,
         lsnPreface = NULL,
-        chunks = NULL,
+        Chunks = NULL,
         lsnExtension = NULL
       )
     })
