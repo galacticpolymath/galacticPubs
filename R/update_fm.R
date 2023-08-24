@@ -401,6 +401,7 @@ update_fm <-
         #Live teaching materials found on GalacticPolymath shared drive,
         #renamed with MediumTitle
       } else{
+
         tm_path <-
           fs::path("GalacticPolymath", new_yaml$MediumTitle)
         tm_path_full <-

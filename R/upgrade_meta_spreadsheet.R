@@ -31,7 +31,7 @@ upgrade_meta_spreadsheet <- \(WD = "?",
                              lower = 1,
                              upper = nrow(template_options))
 
-    template <- template_options[as.numeric(selection),]
+    template <- template_options[as.numeric(selection), ]
   }
   checkmate::assert_class(template, "dribble")
 
@@ -151,9 +151,28 @@ upgrade_meta_spreadsheet <- \(WD = "?",
       merged_tab2_orig <-
         hard_left_join(template_tab2, old_tab2, by = "id")
 
-      merged_tab2 <- merged_tab2_orig %>% dplyr::select(1:2)
+      #This is the "normal" i.e. US-aligned standard sheet
+      merged_tab2_idmatched <- merged_tab2_orig %>%
+        dplyr::filter(.data$id %in% template_tab2$id)
+
+      #These are in the order of the template, so we'll just paste
+      #the first 2 columns in (and preserve any changes to standards statements, etc.)
+      merged_tab2 <- merged_tab2_idmatched %>% dplyr::select(1:2)
       checkmate::assert_data_frame(merged_tab2)
-      checkmate::assert_set_equal(nrow(merged_tab2), nrow(template_tab2))
+
+      #We also have to tack on custom standards (with full info) at the
+      #bottom of the sheet (which have no match to the template)
+      unmatched_entries <- old_workbook$`2` %>%
+        dplyr::mutate(id = paste(.data$Code, .data$Set, .data$Dim)) %>%
+        dplyr::filter(!.data$id %in% template_tab2$id)
+
+      ##last column to write should be GradeBand
+      last_col <-
+        which(names(unmatched_entries) == "GradeBand")
+      unmatched_entries <- rmNArows(unmatched_entries[,1:last_col])
+
+      merged_tab2_cust <-
+        hard_left_join(template_tab2[0, ], unmatched_entries, by = "id")
 
       #Now read in tab 4 (but here we just want to merge with headers)
       template_tab4_headers <-
@@ -171,8 +190,11 @@ upgrade_meta_spreadsheet <- \(WD = "?",
       #Check if this looks good before proceeding
       message("Here's the merged Tab 1")
       print(merged_tab1)
-      message("Here's the merged Tab 2 (filtered)")
-      print(merged_tab2_orig %>% dplyr::filter(!is.na(`LO#`)))
+      message("Here's the merged Tab 2, filtered by LO# that matched template")
+      print(merged_tab2_idmatched %>% dplyr::filter(!is.na(`LO#`)))
+      message("<--If the above tibble is empty, the data from the template will still copy over.")
+      message("\nCustom entries on Tab 2 to be added to bottom-->")
+      print(merged_tab2_cust)
       message("Here's the merged Tab 4 (selected columns)")
       print(
         merged_tab4 %>% dplyr::select(
@@ -194,11 +216,13 @@ upgrade_meta_spreadsheet <- \(WD = "?",
       # Trash old file and re-initialize the template --------------------------------------------------
       # Rename file before deleting to simplify finding it if you need to undelete
       googledrive::drive_rename(googledrive::as_id(old_sheet_id),
-                                paste0("OLD",old_sheet_info$name))
+                                paste0("OLD", old_sheet_info$name))
       googledrive::drive_trash(googledrive::as_id(old_sheet_id))
 
       test_reinit <-
-        init_lesson_meta(WD = WD, template = "standards",override = TRUE) %>% catch_err()
+        init_lesson_meta(WD = WD,
+                         template = "standards",
+                         override = TRUE) %>% catch_err()
 
 
       # Overwrite reinitialized template with merged data -----------------------
@@ -221,18 +245,23 @@ upgrade_meta_spreadsheet <- \(WD = "?",
           pbapply::pblapply(1:length(merged_list), \(i) {
             tab_i <- tabs_to_use[i]
             merged_df_i <- merged_list[[i]]
+
+            #Define extended LETTERS for columns beyond Z
+            AABC <- c(LETTERS, paste0("A", LETTERS))
+
             clear_range <- paste0("A3:",
-                                  LETTERS[ncol(merged_df_i)],
+                                  AABC[ncol(merged_df_i)],
                                   nrow(merged_df_i) + 3000)
-            clear_success <- googlesheets4::range_clear(new_sheet$id,
-                                                        sheet = tab_i,
-                                                        range = clear_range) %>% catch_err()
+            clear_success <-
+              googlesheets4::range_clear(new_sheet$id,
+                                         sheet = tab_i,
+                                         range = clear_range) %>% catch_err()
 
             # A peculiarity here is that we can only clear and write continuous
             # segments from top left to bottom right
             write_range <-
               paste0("A3:",
-                     LETTERS[ncol(merged_df_i)],
+                     AABC[ncol(merged_df_i)],
                      2 + nrow(merged_df_i))
 
             write_success <-
@@ -245,11 +274,49 @@ upgrade_meta_spreadsheet <- \(WD = "?",
                 col_names = FALSE
               ) %>% catch_err()
 
+            #Add custom entries to bottom of tab2
+            if (i == 2 & nrow(merged_tab2_cust) > 0) {
+              #Figure out range to write to
+              #It's annoyingly discontinuous b/c of Auto column C we don't want to overwrite
+              custom_df <-
+                merged_tab2_cust %>% dplyr::select(1:2, -3, 4:ncol(merged_tab2_cust))
+              start_row = nrow(merged_tab2_idmatched) + 2 + 1
+              end_row = start_row + nrow(custom_df)
+
+              write_rangeA <- paste0("A", start_row, ":", "B", end_row)
+              write_rangeD <- paste0("D", start_row, ":",
+                                     AABC[ncol(custom_df) + 1], end_row)
+              #googlesheets doesn't support {A1:B4,D1:F4} notation,
+              #so we do it in 2 chunks
+              appendA_success <-
+                googlesheets4::range_write(
+                  new_sheet$id,
+                  sheet = 2,
+                  data = custom_df[, 1:2],
+                  range = write_rangeA,
+                  reformat = TRUE,
+                  col_names = FALSE
+                ) %>% catch_err()
+
+              appendD_success <-
+                googlesheets4::range_write(
+                  new_sheet$id,
+                  sheet = 2,
+                  data = custom_df[, 3:ncol(custom_df)],
+                  range = write_rangeD,
+                  reformat = TRUE,
+                  col_names = FALSE
+                ) %>% catch_err()
+
+              write_success <-
+                write_success & appendA_success & appendD_success
+            }
+
             i_success <- clear_success & write_success
             i_success
 
           }) %>% unlist()
-        test_write_success <- sum(test_write)==length(test_write)
+        test_write_success <- sum(test_write) == length(test_write)
 
 
       }#end overwrite reinitialized template
@@ -262,11 +329,17 @@ upgrade_meta_spreadsheet <- \(WD = "?",
 
   }#end upgrade spreadsheet
 
-  tests <- c(needs_upgrade,test_reinit, test_write_success)
-  labels <- c("Upgrade Needed","Upgraded to latest spreadsheet format","Merged data added to blank template")
-  output <- dplyr::tibble(success=convert_T_to_check(tests),task=labels)
+  tests <- c(needs_upgrade, test_reinit, test_write_success)
+  labels <-
+    c(
+      "Upgrade Needed",
+      "Upgraded to latest spreadsheet format",
+      "Merged data added to blank template"
+    )
+  output <-
+    dplyr::tibble(success = convert_T_to_check(tests), task = labels)
   print(output)
 
-  success <- identical(prod(tests,na.rm=TRUE),1)
+  success <- identical(prod(tests, na.rm = TRUE), 1)
   success
 }

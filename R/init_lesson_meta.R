@@ -15,7 +15,7 @@
 init_lesson_meta <- function(WD = "?",
                              overwrite = FALSE,
                              template = NULL,
-                             override=FALSE) {
+                             override = FALSE) {
   WD <- parse_wd(WD)
 
   if (!is.null(template)) {
@@ -103,7 +103,7 @@ init_lesson_meta <- function(WD = "?",
   }
 
   # Copy template files -----------------------------------------------------
-  if (nrow(meta_to_copy) == 0) {
+  if (nrow(meta_to_copy) == 0 & !override) {
     message("Templates already in directory")
     success <- NA
   } else{
@@ -112,14 +112,18 @@ init_lesson_meta <- function(WD = "?",
       drive_new_from_template(meta_to_copy,
                               GdriveMetaID,
                               #unname necessary to avoid annoying concat.enation of varNames
-                              new_name_gsub = c("TEMPLATE" = unname(ShortTitle))) %>% catch_err(keep_results = T)
+                              new_name_gsub = c("TEMPLATE" = unname(ShortTitle))) %>%
+      catch_err(keep_results = T)
 
 
 
     # Check for duplications of templates -------------------------------------
     # Get template basenames (excluding suffixes which might be renamed)
     loc_templates <-
-      fs::dir_ls(locpath_meta) %>% basename() %>% tools::file_path_sans_ext() %>% stringr::str_extract(., "^[^_]*?(?=_)")
+      fs::dir_ls(locpath_meta) %>%
+      basename() %>%
+      tools::file_path_sans_ext() %>%
+      stringr::str_extract(., "^[^_]*?(?=_)")
     dupes <-
       loc_templates[!is.na(loc_templates) &
                       duplicated(loc_templates)]
