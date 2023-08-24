@@ -1,6 +1,6 @@
 #' drive_get_info
 #'
-#' Extract galacticPubs-relevant information from a GP lesson file, with an expected format of *ShortTitle_P1_G5-9_wksht (TEACHER)*
+#' Extract galacticPubs-relevant information from a GP lesson file, with an expected format of *ShortTitle_L1_G5-9_wksht (TEACHER)*
 #'
 #' Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match TeachMatLinks fields, though they cannot be populated automatically.
 #'
@@ -10,7 +10,7 @@
 #' @param validate logical; do you want to throw an error if any of the following are missing? default= FALSE
 #' - shortTitle
 #' - title
-#' - part
+#' - lsn
 #' - grades
 #' - itemType
 #' - fileType
@@ -38,17 +38,17 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     #All names must have a short title in the first location before_
     shortTitle <- nom_split[1] %>% gsub(" ", "", .)
     short_title = string_parseCamel(shortTitle) %>% catch_err(keep_results = TRUE) %>% .$result
-    #Most will have a part in the 2nd place (that starts with "P").
-    #Will just supply the number if a P is found in this spot, OR there is no - here indicating grade range; otherwise NA
-    part = ifelse(
-      substr(tolower(nom_split[2]), 1, 1) == "p" |
+    #Most will have a lesson number in the 2nd place (that starts with "L").
+    #Will just supply the number if an l is found in this spot, OR there is no - here indicating grade range; otherwise NA
+    lsn = ifelse(
+      substr(tolower(nom_split[2]), 1, 1) == "l" |
         !grepl("-", nom_split[2], fixed = TRUE),
       gsub("[a-zA-Z]", "", nom_split[2]),
       NA
     )
 
-    #Grades should be found in the 3rd spot, unless there is only one part (and no P1). We won't test for G b/c of multilanguage variants on Grade, Year, Etapa, etc
-    if (is.na(part)) {
+    #Grades should be found in the 3rd spot, unless there is only one lsn (and no L1). We won't test for G b/c of multilanguage variants on Grade, Year, Etapa, etc
+    if (is.na(lsn)) {
       grade_str <- nom_split[2]
       remaining_str <-
         paste0(nom_split[3:length(nom_split)], collapse = "")
@@ -140,7 +140,7 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     checkmate::assert(
       checkmate::check_character(shortTitle, any.missing = FALSE),
       checkmate::check_character(short_title, any.missing = FALSE),
-      checkmate::check_character(part, any.missing = FALSE),
+      checkmate::check_character(lsn, any.missing = FALSE),
       checkmate::check_character(grades, any.missing = FALSE),
       checkmate::check_character(itemType, any.missing = FALSE),
       checkmate::check_character(fileType, any.missing = FALSE),
@@ -149,7 +149,7 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     ) %>% invisible() #only show warning messages for failed assertions
     }
 
-    #Get Link (removing the edit? or view? part)
+    #Get Link (removing the edit? or view? lsn)
     link<-googledrive::drive_link(dribble_i) %>% gsub("(.*)/edit?.*$","\\1",.) %>% gsub("(.*)/view?.*$","\\1",.)
     checkmate::assert_character(link,any.missing=F)
 
@@ -166,7 +166,7 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
       fileType = fileType,
       envir = envir,
       grades = grades,
-      part = part,
+      lsn = lsn,
       SvT= SvT,
       description=NA,
       link = link,
