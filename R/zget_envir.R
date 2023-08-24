@@ -13,7 +13,7 @@
 zget_envir <- \(df, fm) {
   envirs <-
     unique_sans_na(df$envir) %>% tolower() %>% sort()
-  #Assessments aren't a real environment; we want to concat this info to the end of parts for each envir
+  #Assessments aren't a real environment; we want to concat this info to the end of lsns for each envir
   if ("assessments" %in% envirs) {
     df_assess <- df %>% dplyr::filter(.data$envir == "assessments",.data$fileType!="folder")
     if(!nrow(df_assess)>0){
@@ -21,7 +21,7 @@ zget_envir <- \(df, fm) {
     } else{
 
       assess <- list(
-        part = "last",
+        lsn = "last",
         title = "Assessments",
         preface = "",
         itemList = zget_items(df_assess, fm = fm)
@@ -61,17 +61,17 @@ zget_envir <- \(df, fm) {
 #' @family Internal helper functions
 #'
 zget_grade_var_notes <- \(df){
-  parts<-unique_sans_na(df$part)
-  grade_var_notes_initialized <- !grepl("^Overall",df$PartGradeVarNotes[1])
+  lessons<-unique_sans_na(df$lsn)
+  grade_var_notes_initialized <- !grepl("^Overall",df$lsnGradeVarNotes[1])
   if(!grade_var_notes_initialized){
-   df$PartGradeVarNotes<-NA #Effectively delete the placeholder text that was found
+   df$lsnGradeVarNotes<-NA #Effectively delete the placeholder text that was found
   }
   #output data (whether empty or not)
-  purrr::map(parts,\(i){
-  df_i <- df %>% dplyr::filter(part==i) %>% dplyr::slice(1)
+  purrr::map(lessons,\(i){
+  df_i <- df %>% dplyr::filter(lsn==i) %>% dplyr::slice(1)
   list(
-    part=df_i$part,
-    partGradeVarNotes=df_i$PartGradeVarNotes
+    lsn=df_i$lsn,
+    lsnGradeVarNotes=df_i$lsnGradeVarNotes
   )
   })
 }
@@ -104,12 +104,12 @@ zget_grade_bands <- \(df, fm, assess) {
                                grades == grade_band_i)
       g_pref_i <- paste0(substr(grade_yr_term, 1, 1), grade_band_i)
 
-      #Get data for each part
-      PART_DATA<-zget_parts(df_materials, fm = fm)
+      #Get data for each lsn
+      LSN_DATA<-zget_lessons(df_materials, fm = fm)
 
       #Add assessment data to the end if it's not null
       if(!is_empty(assess)){
-        PART_DATA<-c(PART_DATA,assess)
+        LSN_DATA<-c(LSN_DATA,assess)
       }
 
 
@@ -121,7 +121,7 @@ zget_grade_bands <- \(df, fm, assess) {
           linkText = paste("Browse & Download All", g_pref_i, "Materials"),
           url = df_variantDir$link
         ),
-        parts = PART_DATA
+        lessons = LSN_DATA
       )
 
     })
@@ -131,40 +131,40 @@ zget_grade_bands <- \(df, fm, assess) {
 
 }
 
-#' zget_parts
+#' zget_lessons
 #'
 #' @describeIn zget_envir
 #'
 #' @export
 #' @family Internal helper functions
 #'
-zget_parts <- \(df, fm) {
-  parts <- unique_sans_na(df$part)
-  if (length(parts) == 0) {
-    #make it resilient if there's only 1 implied part
-    parts <- "1"
+zget_lessons <- \(df, fm) {
+  lessons <- unique_sans_na(df$lsn)
+  if (length(lessons) == 0) {
+    #make it resilient if there's only 1 implied lsn
+    lessons <- "1"
   }
-  out <- parts %>%
-    #map across all parts
-    purrr::map(., \(part_i) {
+  out <- lessons %>%
+    #map across all lessons
+    purrr::map(., \(lsn_i) {
       #Get info for the subfolder
-      df_part_i <- df %>% dplyr::filter(part == part_i)
+      df_lsn_i <- df %>% dplyr::filter(lsn == lsn_i)
 
       #parse tags
-      part_i_tags0 <- df_part_i$ActTags[1]
-      if(is_empty(part_i_tags0)) {
-        part_i_tags<-NULL
+      lsn_i_tags0 <- df_lsn_i$ActTags[1]
+      if(is_empty(lsn_i_tags0)) {
+        lsn_i_tags<-NULL
       } else{
-        part_i_tags<-stringr::str_split(part_i_tags0, ",") %>% unlist() %>% stringr::str_trim()
+        lsn_i_tags<-stringr::str_split(lsn_i_tags0, ",") %>% unlist() %>% stringr::str_trim()
       }
 
-      #output for this part
+      #output for this lesson
       list(
-        part = part_i,
-        title = df_part_i$LsnTitle[1],
-        tags= list(part_i_tags),
-        preface = df_part_i$PartPreface[1],
-        itemList = zget_items(df_part_i, fm = fm)
+        lsn = lsn_i,
+        title = df_lsn_i$lsnTitle[1],
+        tags= list(lsn_i_tags),
+        preface = df_lsn_i$lsnPreface[1],
+        itemList = zget_items(df_lsn_i, fm = fm)
       )
 
 
@@ -190,7 +190,7 @@ zget_items <- \(df, fm) {
   item_counter <- 1:nrow(df)
   status <- fm$PublicationStatus
 
-  #map across all parts
+  #map across all lsns
   out <-  purrr::map(item_counter, \(i) {
     #Get info for the subfolder
     df_item_i <- df[i,]
@@ -247,7 +247,7 @@ zget_items <- \(df, fm) {
       )
 
     drive_share_txt <- paste_valid("Copy/Edit in Google Docs",disclaimer, collapse=" ")
-    #output for this part
+    #output for this lsn
     list(
       itemTitle = df_item_i$title,
       itemDescription = df_item_i$description,
