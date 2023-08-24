@@ -103,7 +103,7 @@ compile_teach_it <- function(WD = "?",
   lext <-
     googlesheets4::read_sheet(
       teach_it_drib,
-      sheet = "LsnExt",
+      sheet = "lsnExt",
       skip = 1,
       col_types = "c"
     ) %>% dplyr::filter(`REF(Is_initiatialized)` == TRUE &

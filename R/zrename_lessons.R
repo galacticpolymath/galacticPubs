@@ -23,7 +23,7 @@ zrename_lessons <- \(uinfo,
       uinfo %>%
       dplyr::rowwise() %>%
       dplyr::mutate(new_name =
-                      paste_valid(paste0("L", .data$Lsn), .data$LsnTitle, collapse =
+                      paste_valid(paste0("L", .data$lsn), .data$lsnTitle, collapse =
                                     "_")) %>%
       dplyr::select(Lesson, new_name)
 
@@ -42,7 +42,7 @@ zrename_lessons <- \(uinfo,
           dir_i %>% drive_contents() %>%
           dplyr::mutate(dir = dir_i$name) %>%
           dplyr::rowwise() %>%
-          dplyr::mutate(Lsn =
+          dplyr::mutate(lsn =
                           stringr::str_extract(.data$name,
                                                pattern = "^[a-zA-Z]*(\\d*)_?",
                                                group = 1))
@@ -51,7 +51,7 @@ zrename_lessons <- \(uinfo,
         # Do names match the expected new_names? -----------------------------------
         mismatching <- dplyr::left_join(dir_i_ls,
                                         target_names,
-                                        by = "Lsn") %>% dplyr::filter(.data$name !=
+                                        by = "lsn") %>% dplyr::filter(.data$name !=
                                                                          .data$new_name)
 
         # Ask user if want to rename ----------------------------------------------
