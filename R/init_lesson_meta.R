@@ -113,8 +113,11 @@ init_lesson_meta <- function(WD = "?",
                               GdriveMetaID,
                               #unname necessary to avoid annoying concat.enation of varNames
                               new_name_gsub = c("TEMPLATE" = unname(ShortTitle))) %>%
-      catch_err(keep_results = T)
-
+      catch_err(keep_results = T,try_harder = T)
+    if(!res$success){
+      message("Template copying failed... browsing")
+      browser()
+    }
 
 
     # Check for duplications of templates -------------------------------------

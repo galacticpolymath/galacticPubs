@@ -320,8 +320,9 @@ upgrade_meta_spreadsheet <- \(WD = "?",
         test_write_success <- sum(test_write) == length(test_write)
 
 
-      }#end overwrite reinitialized template
-
+      }else{#end overwrite reinitialized template
+      test_write_sucess <- FALSE
+      }
 
 
 
