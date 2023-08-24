@@ -219,10 +219,11 @@ upgrade_meta_spreadsheet <- \(WD = "?",
                                 paste0("OLD", old_sheet_info$name))
       googledrive::drive_trash(googledrive::as_id(old_sheet_id))
 
+
       test_reinit <-
         init_lesson_meta(WD = WD,
                          template = "standards",
-                         override = TRUE) %>% catch_err()
+                         override = TRUE)
 
 
       # Overwrite reinitialized template with merged data -----------------------

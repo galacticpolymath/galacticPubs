@@ -96,7 +96,7 @@ init_lesson_meta <- function(WD = "?",
     if (test_delete) {
       message("Deletion successful")
     } else{
-      warning("Something went wrong deleting: \n -",
+      stop("Something went wrong deleting: \n -",
               paste0(to_delete$full, collapse = "\n -"))
     }
     meta_to_copy <- meta_matching
