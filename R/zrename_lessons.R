@@ -1,30 +1,31 @@
-#' zrename_parts
+#' zrename_lessons
 #'
-#' Helper function for [compile_teach_it()]. Renames part folders based on information found in the project teach_it_*.gsheet!Titles.
+#' Helper function for [compile_teach_it()]. Renames lesson folders based on information found in the project teach_it_*.gsheet!Titles.
 #'
-#' @param pinfo pinfo object passed from compile_teach_it()
+#' @param uinfo pinfo object passed from compile_teach_it()
 #' @param tmID Google Drive ID for the folder where we'll find teaching materials. Depends on PublicationStatus. If it's "Draft", teaching-materials/ is found on GP-Studio; if "Live", it'll be on GalacticPolymath/ and view only
-#' @param prompt_rename logical, do you want to promput user about whether to rename parts? default=T
+#' @param prompt_rename logical, do you want to promput user about whether to rename lessons? default=T
+#'
 #' @return logical of success of renaming; NA if nothing to change or no valid pinfo
 #' @export
 
-zrename_parts <- \(pinfo,
+zrename_lessons <- \(uinfo,
                    tmID,
                    prompt_rename = TRUE) {
-  pinfo_valid <-
-    checkmate::test_data_frame(pinfo[, 1:2], min.rows = 1, all.missing = F)
-  if (!pinfo_valid) {
-    message("No valid Part Info found")
+  uinfo_valid <-
+    checkmate::test_data_frame(uinfo[, 1:2], min.rows = 1, all.missing = F)
+  if (!uinfo_valid) {
+    message("No valid Lesson Info found")
     success <- NA
   } else{
-    # Figure out what part names we want --------------------------------------
+    # Figure out what lesson names we want --------------------------------------
     target_names <-
-      pinfo %>%
+      uinfo %>%
       dplyr::rowwise() %>%
       dplyr::mutate(new_name =
-                      paste_valid(paste0("P", .data$Part), .data$LsnTitle, collapse =
+                      paste_valid(paste0("L", .data$Lsn), .data$LsnTitle, collapse =
                                     "_")) %>%
-      dplyr::select(Part, new_name)
+      dplyr::select(Lesson, new_name)
 
 
     tmdrib <- drive_find_path(tmID)
@@ -34,14 +35,14 @@ zrename_parts <- \(pinfo,
       message("No Teaching Materials Found")
       success <- NA
     } else{
-      #Iterate renaming through parts of all environments found
+      #Iterate renaming through lessons of all environments found
       test_rename <- purrr::map(1:nrow(tm_ls), \(i) {
         dir_i <- tm_ls[i,]
         dir_i_ls <-
           dir_i %>% drive_contents() %>%
           dplyr::mutate(dir = dir_i$name) %>%
           dplyr::rowwise() %>%
-          dplyr::mutate(Part =
+          dplyr::mutate(Lsn =
                           stringr::str_extract(.data$name,
                                                pattern = "^[a-zA-Z]*(\\d*)_?",
                                                group = 1))
@@ -50,13 +51,13 @@ zrename_parts <- \(pinfo,
         # Do names match the expected new_names? -----------------------------------
         mismatching <- dplyr::left_join(dir_i_ls,
                                         target_names,
-                                        by = "Part") %>% dplyr::filter(.data$name !=
+                                        by = "Lsn") %>% dplyr::filter(.data$name !=
                                                                          .data$new_name)
 
         # Ask user if want to rename ----------------------------------------------
         if (nrow(mismatching) > 0) {
           if (prompt_rename) {
-            message("\nDo you want to rename parts as follows?")
+            message("\nDo you want to rename lessons as follows?")
             print(mismatching[, c("name", "new_name")])
             continue <- readline("(y/n) > ")
           } else{
@@ -64,10 +65,10 @@ zrename_parts <- \(pinfo,
           }
 
           if (continue != "y") {
-            message("Part renaming canceled.")
+            message("Lesson renaming canceled.")
             success <- NA
           } else{
-            message("\nRenaming parts...")
+            message("\nRenaming lessons...")
             purrr::map(1:nrow(mismatching), \(ii) {
               file_i <- mismatching[ii, ]
               test_i <-
@@ -87,14 +88,14 @@ zrename_parts <- \(pinfo,
 
 
         } else{
-          message("\nPart names look good for: /", dir_i$name, "/")
+          message("\nLesson names look good for: /", dir_i$name, "/")
 
           NULL
         }
 
       }) %>% dplyr::bind_rows() %>% catch_err(keep_results = T)
 
-      #Output results of all part renaming
+      #Output results of all lesson renaming
 
       print(test_rename$result)
       success <- test_rename$success

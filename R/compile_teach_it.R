@@ -4,7 +4,7 @@
 #'
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [parse_wd()]; default is WD=getwd()
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
-#' @param rename_parts logical; do you want to rename part folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_parts()]
+#' @param rename_lessons logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_parts()]
 #' @param prompt_rename logical, do you want to promput user about whether to rename parts? default=T
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 #' @importFrom rlang .data
@@ -92,7 +92,7 @@ compile_teach_it <- function(WD = "?",
     ) %>% dplyr::filter(!is.na(.data$code)) %>%
     dplyr::select(1:dplyr::starts_with("otherLink"))
 
-  pinfo <-
+  uinfo <-
     googlesheets4::read_sheet(
       teach_it_drib,
       sheet = "Titles",
@@ -100,15 +100,15 @@ compile_teach_it <- function(WD = "?",
       col_types = "c"
     )
 
-  pext <-
+  lext <-
     googlesheets4::read_sheet(
       teach_it_drib,
-      sheet = "PartExt",
+      sheet = "LsnExt",
       skip = 1,
       col_types = "c"
     ) %>% dplyr::filter(`REF(Is_initiatialized)` == TRUE &
                           !is.na(.data$ItemTitle)) %>%
-    dplyr::select("Part", "Order", "ItemTitle", "Description", "Link")
+    dplyr::select("Lsn", "Order", "ItemTitle", "Description", "Link")
 
   #bring in procedure
   proc <-
@@ -127,16 +127,16 @@ compile_teach_it <- function(WD = "?",
   # Check and Validate Data Import--------------------------------------------------
   checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!TeachMatLinks")
   checkmate::assert_data_frame(mlinks, min.rows = 0, .var.name = "teach-it.gsheet!Multimedia")#multimedia might be 0 rows
-  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
-  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
+  checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
+  checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
   checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!Procedure")
   checkmate::assert_data_frame(pext, min.rows = 0, .var.name = "teach-it.gsheet!PartExt")
 
   # Check for template text (uninitialized data) ----------------------------
-  pinfo_titles_initialized <-
-    !grepl("^Lesson Title", pinfo$LsnTitle[1])
-  pinfo_preface_initialized <-
-    !grepl("^Overall description", pinfo$UnitPreface[1])
+  uinfo_titles_initialized <-
+    !grepl("^Lesson Title", uinfo$LsnTitle[1])
+  uinfo_preface_initialized <-
+    !grepl("^Overall description", uinfo$UnitPreface[1])
   proc_initialized <-
     !grepl("^\\*", proc$ChunkTitle[1]) &
     !grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
@@ -150,23 +150,23 @@ compile_teach_it <- function(WD = "?",
     message("No valid items found on PartExt tab of `teach-it.gsheet`.")
   }
 
-  if (!pinfo_titles_initialized) {
+  if (!uinfo_titles_initialized) {
     warning(
       "Seems you haven't added Part Titles to `teach-it.gsheet!Titles` for `",
       fm$ShortTitle,
       "`"
     )
     #Delete filler text
-    pinfo[1:nrow(pinfo), 1:5] <- NA
+    uinfo[1:nrow(uinfo), 1:5] <- NA
   }
-  if (!pinfo_preface_initialized) {
+  if (!uinfo_preface_initialized) {
     warning(
       "Either add LessonPreface or delete example text from `teach-it.gsheet!Titles` for `",
       fm$ShortTitle,
       "`"
     )
     #Delete filler text
-    pinfo[1:nrow(pinfo), "LessonPreface"] <- NA
+    uinfo[1:nrow(uinfo), "LessonPreface"] <- NA
   }
   if (!proc_initialized) {
     warning(
@@ -195,14 +195,14 @@ compile_teach_it <- function(WD = "?",
 
 
   #Add part title and preface to proc tlinks info for convenience
-  if (pinfo_titles_initialized) {
+  if (uinfo_titles_initialized) {
     # rename Part folders -----------------------------------------------------
     if (rename_parts) {
-      zrename_parts(pinfo, tmID, prompt_rename = prompt_rename)
+      zrename_parts(uinfo, tmID, prompt_rename = prompt_rename)
     }
 
     tlinks <-
-      dplyr::left_join(tlinks0, pinfo[, c("Part",
+      dplyr::left_join(tlinks0, uinfo[, c("Part",
                                           "LsnTitle",
                                           "PartPreface",
                                           "PartGradeVarNotes",
@@ -312,8 +312,8 @@ compile_teach_it <- function(WD = "?",
     proc_data <-
       zget_procedure(
         proc = proc,
-        pext = pext,
-        pinfo = pinfo,
+        lext = lext,
+        uinfo = uinfo,
         mlinks = mlinks
       )
 
@@ -340,7 +340,7 @@ compile_teach_it <- function(WD = "?",
     lessonPreface = pinfo$LessonPreface[1],
     lessonDur = proc_data$lessonDur,
     teach_mat_data,
-    parts = list(proc_data$parts),
+    lesson = list(proc_data$lessons),
     gatheredVocab = list(proc_data$vocab)
   )
 
