@@ -31,7 +31,7 @@ upgrade_meta_spreadsheet <- \(WD = "?",
                              lower = 1,
                              upper = nrow(template_options))
 
-    template <- template_options[as.numeric(selection), ]
+    template <- template_options[as.numeric(selection),]
   }
   checkmate::assert_class(template, "dribble")
 
@@ -44,8 +44,10 @@ upgrade_meta_spreadsheet <- \(WD = "?",
   )
 
   #Guess matching gdrive entry
-  expected_gdriveID_key <-
-    paste0("Gdrive", stringr::str_to_title(root_word), "ID")
+  expected_gdriveID_key <- switch(root_word,
+                                  "standards" = "GdriveStandardsID",
+                                  "teach-it" = "GdriveTeachItID")
+
   checkmate::assert_choice(expected_gdriveID_key, names(get_fm(WD = WD)))
 
   old_sheet_id <- get_fm(expected_gdriveID_key, WD = WD)
@@ -169,10 +171,10 @@ upgrade_meta_spreadsheet <- \(WD = "?",
       ##last column to write should be GradeBand
       last_col <-
         which(names(unmatched_entries) == "GradeBand")
-      unmatched_entries <- rmNArows(unmatched_entries[,1:last_col])
+      unmatched_entries <- rmNArows(unmatched_entries[, 1:last_col])
 
       merged_tab2_cust <-
-        hard_left_join(template_tab2[0, ], unmatched_entries, by = "id")
+        hard_left_join(template_tab2[0,], unmatched_entries, by = "id")
 
       #Now read in tab 4 (but here we just want to merge with headers)
       template_tab4_headers <-
@@ -284,7 +286,8 @@ upgrade_meta_spreadsheet <- \(WD = "?",
               start_row = nrow(merged_tab2_idmatched) + 2 + 1
               end_row = start_row + nrow(custom_df)
 
-              write_rangeA <- paste0("A", start_row, ":", "B", end_row)
+              write_rangeA <-
+                paste0("A", start_row, ":", "B", end_row)
               write_rangeD <- paste0("D", start_row, ":",
                                      AABC[ncol(custom_df) + 1], end_row)
               #googlesheets doesn't support {A1:B4,D1:F4} notation,
@@ -320,13 +323,154 @@ upgrade_meta_spreadsheet <- \(WD = "?",
         test_write_success <- sum(test_write) == length(test_write)
 
 
-      }else{#end overwrite reinitialized template
-      test_write_sucess <- FALSE
+      } else{
+        #end overwrite reinitialized template
+        test_write_sucess <- FALSE
       }
 
 
+      #End update standards.gsheet logic
+    } else if (root_word == "teach-it") {
+      # Logic for teach-it -----------------------------------------------------
 
-    }#End update standards.gsheet logic
+      message("Reading workbook tabs for: '", old_sheet_info$name, "'")
+      tabs_to_use <- c(1:5)
+      #read in 5 tabs on workbook to be updated
+      old_workbook <- pbapply::pblapply(tabs_to_use, \(i) {
+        googlesheets4::read_sheet(
+          old_sheet_id,
+          sheet = i,
+          skip = 1,
+          col_types = "c"
+        )
+      })
+      names(old_workbook) <- tabs_to_use
+
+
+
+      # Make some changes so we don't overwrite formulas in workbook ------------
+      #Titles tab
+      old_workbook$`1`$`_nchar1` <- old_workbook$`1`$`_nchar2` <- NA
+
+      #Proc tab
+      old_workbook$`2`$`_Step` <- NA
+      ## unselect hidden columns & format integer columns as integers so as not to F up formulas
+      old_workbook$`2` <-
+        old_workbook$`2` %>% dplyr::select(1:"TeachingTips") %>%
+        dplyr::mutate(dplyr::across(c("lsn","Chunk","ChunkDur","_Step"),as.integer))
+
+      #LsnExt tab
+      old_workbook$`3` <-
+        old_workbook$`3` %>% dplyr::select(1:"extra2")
+      #Multimedia tab
+      #On this page, _code is important...keep it
+      old_workbook$`4`$`_nchar1` <- old_workbook$`4`$`_nchar2` <- NA
+      old_workbook$`4` <-
+        old_workbook$`4` %>% dplyr::select(1:"extra")
+      #TeachMatLinks tab
+      #nothin needed here; no hidden formulas or anything
+
+
+      # Remove NA rows now that we've gotten rid of some hidden formulas --------
+      old_workbook <-
+        old_workbook %>%  purrr::set_names(tabs_to_use) %>% purrr::map(rmNArows)
+
+
+
+      #
+      # #read in template tabs
+      # template_workbook <- pbapply::pblapply(tabs_to_use, \(i) {
+      #   googlesheets4::read_sheet(
+      #     template$id,
+      #     sheet = i,
+      #     skip = 1,
+      #     col_types = "c"
+      #   )
+      # })
+
+
+      # Now just overwrite the teach-mat template tabs --------------------------
+      # No merging needed...
+      #Check if this looks good before proceeding
+      message("Here's Tab 1")
+      print(old_workbook$`1` %>% dplyr::select(-dplyr::starts_with("_"), -"blank"))
+      message("Here's Tab 2, step should be NA")
+      print(old_workbook$`2`)
+      message("Here's Tab 3")
+      print(old_workbook$`3`)
+      message("Here's Tab 4")
+      print(old_workbook$`4`)
+      message("Here's Tab 5")
+      print(old_workbook$`5`)
+
+      message("Does this all look right? (scroll up)")
+      response <- readline("(y/n) > ")
+      if (response != "y") {
+        stop("upgrade aborted")
+      }
+
+      # Trash old file and re-initialize the template --------------------------------------------------
+      # Rename file before deleting to simplify finding it if you need to undelete
+      googledrive::drive_rename(googledrive::as_id(old_sheet_id),
+                                paste0("OLD", old_sheet_info$name))
+      googledrive::drive_trash(googledrive::as_id(old_sheet_id))
+
+
+      test_reinit <-
+        init_lesson_meta(WD = WD,
+                         template = "teach-it",
+                         override = TRUE)
+
+
+      # Overwrite reinitialized template with old data -----------------------
+      if (test_reinit) {
+        message("New Template Initialized! Opening it...")
+
+        #Test new association with standards.gsheet
+        new_sheet_id <- get_fm(expected_gdriveID_key, WD = WD)
+        drive_open(new_sheet_id)
+        new_sheet <- drive_find_path(new_sheet_id)
+        checkmate::assert_data_frame(new_sheet, nrows = 1, .var.name = "New Gsheet dribble")
+
+        message("Writing your data to the upgraded teach-it.gsheet.")
+        test_write <-
+          pbapply::pblapply(1:length(old_workbook), \(i) {
+            tab_i <- tabs_to_use[i]
+            df_i <- old_workbook[[i]]
+            if (nrow(df_i) > 0) {
+              #Define extended LETTERS for columns beyond Z
+              AABC <- c(LETTERS, paste0("A", LETTERS))
+
+              write_range <-
+                paste0("A3:",
+                       AABC[ncol(df_i)],
+                       2 + nrow(df_i))
+
+              write_success <-
+                googlesheets4::range_write(
+                  new_sheet$id,
+                  sheet = tab_i,
+                  data = df_i,
+                  range = write_range,
+                  reformat = TRUE,
+                  col_names = FALSE
+                ) %>% catch_err()
+            } else{
+              write_success = TRUE
+            }
+
+          }) %>% unlist()
+        test_write_success <-
+          sum(test_write) == length(test_write)
+      } else{
+        #end overwrite reinitialized template
+        test_write_sucess <- FALSE
+      }
+
+      #end teach-it logic
+    } else{
+      stop("no upgrade logic for:", root_word)
+    }
 
 
   }#end upgrade spreadsheet

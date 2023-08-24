@@ -502,6 +502,17 @@ update_teach_links <- function(WD = "?",
         )
 
 
+# add _ prefix to auto columns to match spreadsheet -----------------------
+  browser()
+    merged_teach_it <- merged_teach_it %>% dplyr::rename(
+      `_envir`="envir",`_grades`="grades",`_lsn`="lsn",
+      `_filename`="filename",`_itemType`="itemType",
+      `_SvT`="SvT",`_sharedDrive`=sharedDrive,
+      `_link`="link",`_modTime`="modTime"
+    )
+
+
+
     # Write new data to TeachMatLinks tab ----------------------------------------
     skip_rows <- 2
     #delete 500 rows of data

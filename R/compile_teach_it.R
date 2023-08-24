@@ -71,13 +71,13 @@ compile_teach_it <- function(WD = "?",
       dplyr::bind_rows(nonmulti_df, expanded_multi) %>%
       #rearrange to preserve order of output
       dplyr::arrange(
-        !.data$itemType == "teachMatDir",
-        .data$envir,
-        .data$grades,
-        .data$itemType != "variantDir",
+        !.data$`_itemType` == "teachMatDir",
+        .data$`_envir`,
+        .data$`_grades`,
+        .data$`_itemType` != "variantDir",
         #put variantDir link above all the lessons
-        .data$lsn,
-        .data$fileType
+        .data$`_lsn`,
+        .data$`_fileType`
       )
   }
 
@@ -89,7 +89,7 @@ compile_teach_it <- function(WD = "?",
       skip = 1,
       col_types = "c",
 
-    ) %>% dplyr::filter(!is.na(.data$code)) %>%
+    ) %>% dplyr::filter(!is.na(.data$`_code`)) %>%
     dplyr::select(1:dplyr::starts_with("otherLink"))
 
   uinfo <-
@@ -103,11 +103,11 @@ compile_teach_it <- function(WD = "?",
   lext <-
     googlesheets4::read_sheet(
       teach_it_drib,
-      sheet = "lsnExt",
+      sheet = "LsnExt",
       skip = 1,
       col_types = "c"
     ) %>% dplyr::filter(`REF(Is_initiatialized)` == TRUE &
-                          !is.na(.data$ItemTitle)) %>%
+                          !is.na(.data$itemTitle)) %>%
     dplyr::select("lsn", "order", "itemTitle", "description", "link")
 
   #bring in procedure
@@ -119,7 +119,7 @@ compile_teach_it <- function(WD = "?",
       lsn = as.integer(.data$lsn),
       Chunk = as.integer(.data$Chunk),
       ChunkDur = as.integer(.data$ChunkDur),
-      Step = as.integer(.data$Step),
+      Step = as.integer(.data$`_Step`),
       lsnN = as.integer(.data$lsnN),
       lsnDur = as.integer(.data$lsnDur)
     )
