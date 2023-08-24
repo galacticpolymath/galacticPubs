@@ -208,7 +208,7 @@ compile_standards <- function(WD = "?",
           "lo_stmnt",
           "set",
           "dim",
-          "part",
+          "lsn",
           "target",
           "grp",
           "how"
@@ -366,7 +366,7 @@ compile_standards <- function(WD = "?",
       }
 
       #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standardsRef)
-      #Remove "Part from a_master to avoid conflicts with changes made in tab 4.Finalize"
+      #Remove "lsn from a_master to avoid conflicts with changes made in tab 4.Finalize"
       A0 <-
         dplyr::left_join(a3[, c("code_set",
                                 "lo",
@@ -375,8 +375,8 @@ compile_standards <- function(WD = "?",
                                 "grp",
                                 "grouping",
                                 "how",
-                                "part")], a_master[-which(tolower(names(a_master)) ==
-                                                            "part")], by = "code_set")
+                                "lsn")], a_master[-which(tolower(names(a_master)) ==
+                                                            "lsn")], by = "code_set")
 
 
       #factor subjects for desired order
@@ -480,12 +480,12 @@ compile_standards <- function(WD = "?",
                   aNotes = paste0(unique(d_gr$how), collapse = "\n")
                 }
 
-                #Get parts assignments for this standard
-                uniq_parts <-
-                  strsplit(unique(d_gr$part), split = ",") %>% unlist() %>% trimws() %>% unique() %>% sort()
+                #Get lessons assignments for this standard
+                uniq_lessons <-
+                  strsplit(unique(d_gr$lsn), split = ",") %>% unlist() %>% trimws() %>% unique() %>% sort()
 
                 list(
-                  parts = as.list(uniq_parts),
+                  lessons = as.list(uniq_lessons),
                   codes = unique(d_gr$code),
                   #make sure grade is never changed to grades in spreadsheet...
 
