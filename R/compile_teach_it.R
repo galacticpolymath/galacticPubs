@@ -134,9 +134,9 @@ compile_teach_it <- function(WD = "?",
 
   # Check for template text (uninitialized data) ----------------------------
   pinfo_titles_initialized <-
-    !grepl("^Part Title", pinfo$PartTitle[1])
+    !grepl("^Lesson Title", pinfo$LsnTitle[1])
   pinfo_preface_initialized <-
-    !grepl("^Lesson description", pinfo$LessonPreface[1])
+    !grepl("^Overall description", pinfo$UnitPreface[1])
   proc_initialized <-
     !grepl("^\\*", proc$ChunkTitle[1]) &
     !grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
@@ -203,7 +203,7 @@ compile_teach_it <- function(WD = "?",
 
     tlinks <-
       dplyr::left_join(tlinks0, pinfo[, c("Part",
-                                          "PartTitle",
+                                          "LsnTitle",
                                           "PartPreface",
                                           "PartGradeVarNotes",
                                           "ActTags")], by = c("part" = "Part"))
@@ -213,7 +213,7 @@ compile_teach_it <- function(WD = "?",
     tlinks <-
       tlinks0 %>% dplyr::mutate(
         Part = NA,
-        PartTitle = NA,
+        LsnTitle = NA,
         PartPreface = NA,
         PartGradeVarNotes = NA,
         ActTags = NA
@@ -300,7 +300,7 @@ compile_teach_it <- function(WD = "?",
     proc_data$parts <- purrr::map(1:nparts, \(i) {
       list(
         partNum = i,
-        partTitle = paste0("Procedure not documented yet"),
+        LsnTitle = paste0("Procedure not documented yet"),
         partDur = NULL,
         partPreface = NULL,
         chunks = NULL,

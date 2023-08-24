@@ -139,7 +139,7 @@ zget_procedure <- \(proc,
   nparts <- max(unique(proc$Part), na.rm = T)
 
   #Filter out NAs for placeholder text in Part Info if still present
-  ptitles <- pinfo$PartTitle[!is.na(pinfo$PartTitle)]
+  ptitles <- pinfo$LsnTitle[!is.na(pinfo$LsnTitle)]
   pprefs <- pinfo$PartPreface[!is.na(pinfo$PartPreface)]
   pgradevar <-
     pinfo$PartGradeVarNotes[!is.na(pinfo$PartGradeVarNotes)]
@@ -149,7 +149,7 @@ zget_procedure <- \(proc,
 
   out$parts <- lapply(1:nparts, function(i) {
     partNum <- i
-    partTitle <- ifelse(length(ptitles) < i, NA, ptitles[i])
+    LsnTitle <- ifelse(length(ptitles) < i, NA, ptitles[i])
     partDur <- proc$PartDur[i]
     partPreface <- ifelse(length(pprefs) < i, NA, pprefs[i])
 
@@ -238,7 +238,7 @@ zget_procedure <- \(proc,
     #output data for this part
     c(
       partNum = partNum,
-      partTitle = partTitle,
+      LsnTitle = LsnTitle,
       partDur = partDur,
       partPreface = partPreface,
       partPrep = list(partPrep),

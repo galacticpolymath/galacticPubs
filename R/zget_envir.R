@@ -161,7 +161,7 @@ zget_parts <- \(df, fm) {
       #output for this part
       list(
         part = part_i,
-        title = df_part_i$PartTitle[1],
+        title = df_part_i$LsnTitle[1],
         tags= list(part_i_tags),
         preface = df_part_i$PartPreface[1],
         itemList = zget_items(df_part_i, fm = fm)

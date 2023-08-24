@@ -22,7 +22,7 @@ zrename_parts <- \(pinfo,
       pinfo %>%
       dplyr::rowwise() %>%
       dplyr::mutate(new_name =
-                      paste_valid(paste0("P", .data$Part), .data$PartTitle, collapse =
+                      paste_valid(paste0("P", .data$Part), .data$LsnTitle, collapse =
                                     "_")) %>%
       dplyr::select(Part, new_name)
 
