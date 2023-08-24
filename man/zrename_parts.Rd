@@ -17,5 +17,5 @@ zrename_parts(pinfo, tmID, prompt_rename = TRUE)
 logical of success of renaming; NA if nothing to change or no valid pinfo
 }
 \description{
-Helper function for \code{\link[=compile_teach_it]{compile_teach_it()}}. Renames part folders based on information found in the project teach_it_*.gsheet!PartTitles.
+Helper function for \code{\link[=compile_teach_it]{compile_teach_it()}}. Renames part folders based on information found in the project teach_it_*.gsheet!Titles.
 }

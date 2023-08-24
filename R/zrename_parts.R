@@ -1,6 +1,6 @@
 #' zrename_parts
 #'
-#' Helper function for [compile_teach_it()]. Renames part folders based on information found in the project teach_it_*.gsheet!PartTitles.
+#' Helper function for [compile_teach_it()]. Renames part folders based on information found in the project teach_it_*.gsheet!Titles.
 #'
 #' @param pinfo pinfo object passed from compile_teach_it()
 #' @param tmID Google Drive ID for the folder where we'll find teaching materials. Depends on PublicationStatus. If it's "Draft", teaching-materials/ is found on GP-Studio; if "Live", it'll be on GalacticPolymath/ and view only

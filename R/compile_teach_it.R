@@ -1,10 +1,10 @@
 #' compile_teach_it
 #'
-#' Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the PartTitles tab and invokes [sweep_teaching_materials()] to relocate scrap working files.
+#' Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the Titles tab and invokes [sweep_teaching_materials()] to relocate scrap working files.
 #'
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [parse_wd()]; default is WD=getwd()
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
-#' @param rename_parts logical; do you want to rename part folders based on PartTitles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_parts()]
+#' @param rename_parts logical; do you want to rename part folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_parts()]
 #' @param prompt_rename logical, do you want to promput user about whether to rename parts? default=T
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 #' @importFrom rlang .data
@@ -95,7 +95,7 @@ compile_teach_it <- function(WD = "?",
   pinfo <-
     googlesheets4::read_sheet(
       teach_it_drib,
-      sheet = "PartTitles",
+      sheet = "Titles",
       skip = 1,
       col_types = "c"
     )
@@ -127,8 +127,8 @@ compile_teach_it <- function(WD = "?",
   # Check and Validate Data Import--------------------------------------------------
   checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!TeachMatLinks")
   checkmate::assert_data_frame(mlinks, min.rows = 0, .var.name = "teach-it.gsheet!Multimedia")#multimedia might be 0 rows
-  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!PartTitles")
-  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!PartTitles")
+  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
+  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
   checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!Procedure")
   checkmate::assert_data_frame(pext, min.rows = 0, .var.name = "teach-it.gsheet!PartExt")
 
@@ -152,7 +152,7 @@ compile_teach_it <- function(WD = "?",
 
   if (!pinfo_titles_initialized) {
     warning(
-      "Seems you haven't added Part Titles to `teach-it.gsheet!PartTitles` for `",
+      "Seems you haven't added Part Titles to `teach-it.gsheet!Titles` for `",
       fm$ShortTitle,
       "`"
     )
@@ -161,7 +161,7 @@ compile_teach_it <- function(WD = "?",
   }
   if (!pinfo_preface_initialized) {
     warning(
-      "Either add LessonPreface or delete example text from `teach-it.gsheet!PartTitles` for `",
+      "Either add LessonPreface or delete example text from `teach-it.gsheet!Titles` for `",
       fm$ShortTitle,
       "`"
     )
