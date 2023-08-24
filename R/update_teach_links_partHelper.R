@@ -1,14 +1,14 @@
-#' update_teach_links_partHelper
+#' update_teach_links_lsnHelper
 #'
-#' Helper function for [update_teach_links()] that extracts information for each part (if found). Only intended for internal use in update_teach_links. Might eventually have it rename parts according titles in meta/teach-it.gsheet
+#' Helper function for [update_teach_links()] that extracts information for each lesson (if found). Only intended for internal use in update_teach_links.
 #'
-#' @param dribble the dribble for a "Part" subfolder of a lesson
+#' @param dribble the dribble for a "lesson" subfolder of a lesson
 #' @param set_grades passed to[drive_get_info()]
 #' @param set_envir passed to [drive_get_info()]
 #'
 #' @export
 
-update_teach_links_partHelper<-function(dribble,set_grades=NULL,set_envir=NULL){
+update_teach_links_lsnHelper<-function(dribble,set_grades=NULL,set_envir=NULL){
   P_ls<-dribble %>% drive_contents
 
   test_P_ls <-

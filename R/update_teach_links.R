@@ -125,7 +125,7 @@ update_teach_links <- function(WD = "?",
       dir_i_info <-
         dir_i %>% drive_get_info  %>% dplyr::mutate(itemType = item_type, envir = envir_type)
 
-      #Go into Part subfolders if they exist
+      #Go into Lesson subfolders if they exist
       dir_i_ls <- dir_i %>% drive_contents()
 
       #get subfolder list, ignore scrap(s) folders
@@ -152,7 +152,7 @@ update_teach_links <- function(WD = "?",
       if (nrow(dir_i_subfolders) > 0) {
         dir_i_subfolders_info <-
           lapply(1:nrow(dir_i_subfolders), function(ii) {
-            update_teach_links_partHelper(
+            update_teach_links_lsnHelper(
               dribble = dir_i_subfolders[ii, ],
               set_grades = dir_i_info$grades,
               set_envir = envir_type
@@ -438,15 +438,15 @@ update_teach_links <- function(WD = "?",
           test_valid_inferred_info <-
             sum(!is_empty(d_i$SvT),
                 !is_empty(d_i$itemType),
-                !is_empty(d_i$part)) > 1
+                !is_empty(d_i$lsn)) > 1
           #Only guess title if we have at least 2 bits of inferred info; otherwise put filename as title
           if (test_valid_inferred_info) {
             paste_valid(d_i$SvT,
                         d_i$itemType,
                         ifelse(
-                          is_empty(d_i$part),
+                          is_empty(d_i$lsn),
                           "",
-                          paste0("(Part ", d_i$part, ")")
+                          paste0("(Part ", d_i$lsn, ")")
                         ),
                         collapse = " ") %>%
               stringr::str_to_title()
@@ -496,8 +496,8 @@ update_teach_links <- function(WD = "?",
           .data$envir,
           .data$grades,
           .data$itemType != "variantDir",
-          #put variantDir link above all the parts
-          .data$part,
+          #put variantDir link above all the lsns
+          .data$lsn,
           .data$fileType
         )
 

@@ -23,7 +23,7 @@ drive_get_info(
 \itemize{
 \item shortTitle
 \item title
-\item part
+\item lsn
 \item grades
 \item itemType
 \item fileType
@@ -35,7 +35,7 @@ drive_get_info(
 a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
 }
 \description{
-Extract galacticPubs-relevant information from a GP lesson file, with an expected format of \emph{ShortTitle_P1_G5-9_wksht (TEACHER)}
+Extract galacticPubs-relevant information from a GP lesson file, with an expected format of \emph{ShortTitle_L1_G5-9_wksht (TEACHER)}
 }
 \details{
 Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match TeachMatLinks fields, though they cannot be populated automatically.

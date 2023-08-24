@@ -7,7 +7,7 @@
 compile_teach_it(
   WD = "?",
   teach_it_drib = NULL,
-  rename_parts = TRUE,
+  rename_lessons = TRUE,
   prompt_rename = TRUE
 )
 }
@@ -16,9 +16,9 @@ compile_teach_it(
 
 \item{teach_it_drib}{if you already have the teach-it.gsheet dribble looked up from \code{\link[=drive_find_path]{drive_find_path()}}, passing this object can can save some time; default = NULL}
 
-\item{prompt_rename}{logical, do you want to promput user about whether to rename parts? default=T}
-
 \item{rename_lessons}{logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function \code{\link[=zrename_lessons]{zrename_lessons()}}}
+
+\item{prompt_rename}{logical, do you want to prompt user about whether to rename lessons? default=T}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json

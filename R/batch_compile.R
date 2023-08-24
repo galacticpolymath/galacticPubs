@@ -62,7 +62,7 @@ batch_compile<-
       #1. update front matter
       update_fm(WD, change_this = change_this)
 
-      #2. compile all parts of the lesson
+      #2. compile all lessons of the unit
       compile_success <-
         catch_err(compile_lesson(
           WD = WD,

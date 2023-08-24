@@ -24,7 +24,7 @@ time_chunk <- function(WD=getwd()){
 
 
   #define plot function
-  chunk_graf <- function(partDur,
+  chunk_graf <- function(lsnDur,
                          chunkTitle,
                          chunkStart,
                          chunkDur,
@@ -36,8 +36,8 @@ time_chunk <- function(WD=getwd()){
     chunkMid<-mean(c(chunkStart,chunkEnd))
     df<- data.frame(x=seq(chunkStart+0.5,chunkEnd+0.5,1))
     df_faded=if(chunkStart==0){NULL}else{data.frame(x=seq(0.5,chunkStart-.5,1))}
-    cust_labels=rep("",partDur+1)
-    cust_labels[seq(1,partDur+1,5)]<-seq(0,partDur,5)
+    cust_labels=rep("",lsnDur+1)
+    cust_labels[seq(1,lsnDur+1,5)]<-seq(0,lsnDur,5)
 
     bottomMargin<-ifelse(chunkStart==0,-26,-26) #relic..not using xlab anymore
 
@@ -72,9 +72,9 @@ time_chunk <- function(WD=getwd()){
       )}} +
       ggplot2::scale_y_continuous(limits=c(0,1),expand = c(0, 0)) +
       ggplot2::scale_x_continuous(
-        breaks = seq(0, partDur, 1),
+        breaks = seq(0, lsnDur, 1),
         labels = cust_labels,
-        limits = c(0, partDur + .5),
+        limits = c(0, lsnDur + .5),
         expand = ggplot2::expansion(add = .6, mult = 0)
       ) + ggplot2::labs(y="",
                         title=chunkTitle) +
@@ -117,12 +117,12 @@ time_chunk <- function(WD=getwd()){
       )
   }
 
-#part loop
+#lsn loop
 message("Generating 'Time Chunking Plots'")
-graf_successes<-pbapply::pblapply(1:length(proc_json$Data$parts),function(i){
+graf_successes<-pbapply::pblapply(1:length(proc_json$Data$lessons),function(i){
 
-  part<-paste0("P",i)
-  p_df<-proc_json$Data$parts[[i]]
+  lsn<-paste0("L",i)
+  p_df<-proc_json$Data$lessons[[i]]
 
   #chunk loop
   p_i_results<-lapply(1:length(p_df$chunks),function(ii){
@@ -130,7 +130,7 @@ graf_successes<-pbapply::pblapply(1:length(proc_json$Data$parts),function(i){
     #Draw the graph
     chunk_graf_ii<-catch_err(
       chunk_graf(
-        partDur = p_df$partDur,
+        lsnDur = p_df$lsnDur,
         chunkTitle = c_df$chunkTitle,
         chunkStart = c_df$chunkStart,
         chunkDur = c_df$chunkDur
