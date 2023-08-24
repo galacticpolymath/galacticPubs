@@ -18,7 +18,7 @@ compile_teach_it(
 
 \item{prompt_rename}{logical, do you want to promput user about whether to rename parts? default=T}
 
-\item{rename_lessons}{logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function \code{\link[=zrename_parts]{zrename_parts()}}}
+\item{rename_lessons}{logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function \code{\link[=zrename_lessons]{zrename_lessons()}}}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json

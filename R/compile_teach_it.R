@@ -4,15 +4,15 @@
 #'
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [parse_wd()]; default is WD=getwd()
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
-#' @param rename_lessons logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_parts()]
-#' @param prompt_rename logical, do you want to promput user about whether to rename parts? default=T
+#' @param rename_lessons logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_lessons()]
+#' @param prompt_rename logical, do you want to prompt user about whether to rename lessons? default=T
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 #' @importFrom rlang .data
 #' @export
 
 compile_teach_it <- function(WD = "?",
                              teach_it_drib = NULL,
-                             rename_parts = TRUE,
+                             rename_lessons = TRUE,
                              prompt_rename = TRUE) {
   WD <- parse_wd(WD)
 
@@ -51,20 +51,20 @@ compile_teach_it <- function(WD = "?",
 
     )
 
-  # Handle materials for multiple parts (e.g. P1&2) -------------------------
-  # Want to break up P1&2 entries and repeat data for 1 and 2, so parts
+  # Handle materials for multiple lessons (e.g. P1&2) -------------------------
+  # Want to break up L1&2 entries and repeat data for 1 and 2, so lessons
   # get the shared info
   multipart_material <-
-    grepl("&", tlinks0$part) %>% which()
+    grepl("&", tlinks0$lesson) %>% which()
 
   if (length(multipart_material) > 0) {
     multi_df <- tlinks0[multipart_material, ]
     nonmulti_df <- tlinks0[-multipart_material, ]
-    parts <- stringr::str_split(multi_df$part, "&")
-    expanded_multi <- lapply(1:length(parts), \(i) {
-      parts_i <- parts[[i]]
-      multi_df_i <- multi_df[rep(i, length(parts_i)), ] %>%
-        dplyr::mutate(part = parts_i)
+    lessons <- stringr::str_split(multi_df$lsn, "&")
+    expanded_multi <- lapply(1:length(lessons), \(i) {
+      lsn_i <- lessons[[i]]
+      multi_df_i <- multi_df[rep(i, length(lsn_i)), ] %>%
+        dplyr::mutate(lsn = lsn_i)
     }) %>% dplyr::bind_rows()
     #combine expanded (repeated) data with previous data
     tlinks0 <-
@@ -75,8 +75,8 @@ compile_teach_it <- function(WD = "?",
         .data$envir,
         .data$grades,
         .data$itemType != "variantDir",
-        #put variantDir link above all the parts
-        .data$part,
+        #put variantDir link above all the lessons
+        .data$lsn,
         .data$fileType
       )
   }
@@ -114,14 +114,14 @@ compile_teach_it <- function(WD = "?",
   proc <-
     googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip =
                                 1) %>%
-    dplyr::select(1:.data$PartDur) %>%
+    dplyr::select(1:.data$LsnDur) %>%
     dplyr::mutate(
-      Part = as.integer(.data$Part),
+      Lsn = as.integer(.data$Lsn),
       Chunk = as.integer(.data$Chunk),
       ChunkDur = as.integer(.data$ChunkDur),
       Step = as.integer(.data$Step),
-      PartN = as.integer(.data$PartN),
-      PartDur = as.integer(.data$PartDur)
+      LsnN = as.integer(.data$LsnN),
+      LsnDur = as.integer(.data$LsnDur)
     )
 
   # Check and Validate Data Import--------------------------------------------------
@@ -130,7 +130,7 @@ compile_teach_it <- function(WD = "?",
   checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
   checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
   checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!Procedure")
-  checkmate::assert_data_frame(pext, min.rows = 0, .var.name = "teach-it.gsheet!PartExt")
+  checkmate::assert_data_frame(pext, min.rows = 0, .var.name = "teach-it.gsheet!LsnExt")
 
   # Check for template text (uninitialized data) ----------------------------
   uinfo_titles_initialized <-
@@ -147,12 +147,12 @@ compile_teach_it <- function(WD = "?",
 
   if (!pext_initialized) {
     pext <- pext[0,]
-    message("No valid items found on PartExt tab of `teach-it.gsheet`.")
+    message("No valid items found on LsnExt tab of `teach-it.gsheet`.")
   }
 
   if (!uinfo_titles_initialized) {
     warning(
-      "Seems you haven't added Part Titles to `teach-it.gsheet!Titles` for `",
+      "Seems you haven't added Lsn Titles to `teach-it.gsheet!Titles` for `",
       fm$ShortTitle,
       "`"
     )
@@ -186,36 +186,36 @@ compile_teach_it <- function(WD = "?",
   ####
 
   # Figure out lesson duration string ---------------------------------------
-  nparts <-
-    max(1, max(tlinks0$part, na.rm = TRUE), na.rm = TRUE) #how many parts are there in teaching mat? (1 by default)
+  nlessons <-
+    max(1, max(tlinks0$lsn, na.rm = TRUE), na.rm = TRUE) #how many lessons are there in teaching mat? (1 by default)
 
 
 
   # Build Classroom Resources List------------------------------------------------
 
 
-  #Add part title and preface to proc tlinks info for convenience
+  #Add lesson title and preface to proc tlinks info for convenience
   if (uinfo_titles_initialized) {
-    # rename Part folders -----------------------------------------------------
-    if (rename_parts) {
-      zrename_parts(uinfo, tmID, prompt_rename = prompt_rename)
+    # rename Lsn folders -----------------------------------------------------
+    if (rename_lessons) {
+      zrename_lessons(uinfo, tmID, prompt_rename = prompt_rename)
     }
 
     tlinks <-
-      dplyr::left_join(tlinks0, uinfo[, c("Part",
+      dplyr::left_join(tlinks0, uinfo[, c("Lsn",
                                           "LsnTitle",
-                                          "PartPreface",
-                                          "PartGradeVarNotes",
-                                          "ActTags")], by = c("part" = "Part"))
+                                          "LsnPreface",
+                                          "LsnGradeVarNotes",
+                                          "ActTags")], by = c("lsn" = "Lsn"))
 
 
   } else{
     tlinks <-
       tlinks0 %>% dplyr::mutate(
-        Part = NA,
+        Lsn = NA,
         LsnTitle = NA,
-        PartPreface = NA,
-        PartGradeVarNotes = NA,
+        LsnPreface = NA,
+        LsnGradeVarNotes = NA,
         ActTags = NA
       )
   }
@@ -274,7 +274,7 @@ compile_teach_it <- function(WD = "?",
       list(
         order = d$order,
         type = d$type,
-        forPart = d$forPart,
+        forLsn = d$forLsn,
         title = d$title,
         description = d$description,
         lessonRelevance = d$lessonRelevance,
@@ -293,18 +293,18 @@ compile_teach_it <- function(WD = "?",
   teach_mat_data <- zget_envir(tlinks, fm = fm)
 
   if (!proc_initialized) {
-    #should change 'parts' to something more like 'procedure'
+    #should change 'lessons' to something more like 'procedure'
     #output NULL structure paralleling real data
     proc_data <- list()
     proc_data$lessonDur <- NULL
-    proc_data$parts <- purrr::map(1:nparts, \(i) {
+    proc_data$lessons <- purrr::map(1:nlessons, \(i) {
       list(
-        partNum = i,
-        LsnTitle = paste0("Procedure not documented yet"),
-        partDur = NULL,
-        partPreface = NULL,
+        lsnNum = i,
+        lsnTitle = paste0("Procedure not documented yet"),
+        lsnDur = NULL,
+        lsnPreface = NULL,
         chunks = NULL,
-        partExtension = NULL
+        lsnExtension = NULL
       )
     })
     proc_data$vocab <- NULL
