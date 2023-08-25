@@ -31,7 +31,7 @@ upgrade_meta_spreadsheet <- \(WD = "?",
                              lower = 1,
                              upper = nrow(template_options))
 
-    template <- template_options[as.numeric(selection),]
+    template <- template_options[as.numeric(selection), ]
   }
   checkmate::assert_class(template, "dribble")
 
@@ -174,7 +174,7 @@ upgrade_meta_spreadsheet <- \(WD = "?",
       unmatched_entries <- rmNArows(unmatched_entries[, 1:last_col])
 
       merged_tab2_cust <-
-        hard_left_join(template_tab2[0,], unmatched_entries, by = "id")
+        hard_left_join(template_tab2[0, ], unmatched_entries, by = "id")
 
       #Now read in tab 4 (but here we just want to merge with headers)
       template_tab4_headers <-
@@ -331,24 +331,28 @@ upgrade_meta_spreadsheet <- \(WD = "?",
 
       #End update standards.gsheet logic
     } else if (root_word == "teach-it") {
+      ###########################################################################
       # Logic for teach-it -----------------------------------------------------
 
       message("Reading workbook tabs for: '", old_sheet_info$name, "'")
       tabs_to_use <- c(1:5)
       #read in 5 tabs on workbook to be updated
       old_workbook <- pbapply::pblapply(tabs_to_use, \(i) {
-        googlesheets4::read_sheet(
+        sheet <- googlesheets4::read_sheet(
           old_sheet_id,
           sheet = i,
           skip = 1,
           col_types = "c"
         )
+        #Remove any #REF error columns
+        sheet <-
+          sheet %>% dplyr::select(-dplyr::starts_with("#REF"))
       })
       names(old_workbook) <- tabs_to_use
 
 
 
-      # Make some changes so we don't overwrite formulas in workbook ------------
+      # Make some changes to old data so we don't overwrite formulas in workbook ------------
       #Titles tab
       old_workbook$`1`$`_nchar1` <- old_workbook$`1`$`_nchar2` <- NA
 
@@ -357,7 +361,7 @@ upgrade_meta_spreadsheet <- \(WD = "?",
       ## unselect hidden columns & format integer columns as integers so as not to F up formulas
       old_workbook$`2` <-
         old_workbook$`2` %>% dplyr::select(1:"TeachingTips") %>%
-        dplyr::mutate(dplyr::across(c("lsn","Chunk","ChunkDur","_Step"),as.integer))
+        dplyr::mutate(dplyr::across(c("lsn", "Chunk", "ChunkDur", "_Step"), as.integer))
 
       #LsnExt tab
       old_workbook$`3` <-
@@ -377,31 +381,73 @@ upgrade_meta_spreadsheet <- \(WD = "?",
 
 
 
-      #
-      # #read in template tabs
-      # template_workbook <- pbapply::pblapply(tabs_to_use, \(i) {
-      #   googlesheets4::read_sheet(
-      #     template$id,
-      #     sheet = i,
-      #     skip = 1,
-      #     col_types = "c"
-      #   )
-      # })
+
+      #read in template tabs
+      template_workbook <- pbapply::pblapply(tabs_to_use, \(i) {
+        googlesheets4::read_sheet(
+          template$id,
+          sheet = i,
+          skip = 1,
+          col_types = "c"
+        )
+      })
+      names(template_workbook) <- tabs_to_use
 
 
-      # Now just overwrite the teach-mat template tabs --------------------------
-      # No merging needed...
-      #Check if this looks good before proceeding
-      message("Here's Tab 1")
-      print(old_workbook$`1` %>% dplyr::select(-dplyr::starts_with("_"), -"blank"))
+      # On Template, select certain columns in both to make merging easy ---------------------
+      # Particularly, remove formula REF columns after data columns
+      template_workbook$`2` <- template_workbook$`2` %>%
+        dplyr::select(1:"TeachingTips") %>%
+        dplyr::mutate(dplyr::across(c("lsn", "Chunk", "ChunkDur", "_Step"), as.integer))
+
+      #LsnExt tab
+      template_workbook$`3` <-
+        template_workbook$`3` %>% dplyr::select(1:"extra2")
+      #Multimedia tab
+      #On this page, _code is important...keep it
+      template_workbook$`4` <-
+        template_workbook$`4` %>% dplyr::select(1:"extra")
+
+
+
+      # Merge old data with the structure of template ---------------------------
+      merged_workbook <- lapply(1:length(template_workbook), \(i) {
+        print(i)
+        #we're just using the empty tibble of template in case there were column
+        #movements or renaming
+        old_df_i <- old_workbook[[i]]
+        template_df_i <- template_workbook[[i]]
+        template_names <- names(template_df_i)
+        #assert that every name is found in the template
+        lapply(names(old_df_i), \(x) {
+          err.varname <-
+            paste0("Col '", x, "' on Tab ", i, " not found in Template")
+          checkmate::assert_choice(x, choices = template_names, .var.name = err.varname)
+        })
+        #Hard left join will fill in NAs and take shape of
+        out <-
+          hard_left_join(template_df_i[0,], old_df_i, by = template_names[1])
+
+      })
+      names(merged_workbook) <- tabs_to_use
+
+
+
+
+      # Check if this looks good before proceeding ------------------------------
+
+
+      message("Here's Tab 1,skipping 'blank' column")
+
+      print(merged_workbook$`1` %>% dplyr::select(-dplyr::starts_with("_"), -"blank"))
       message("Here's Tab 2, step should be NA")
-      print(old_workbook$`2`)
+      print(merged_workbook$`2`)
       message("Here's Tab 3")
-      print(old_workbook$`3`)
+      print(merged_workbook$`3`)
       message("Here's Tab 4")
-      print(old_workbook$`4`)
+      print(merged_workbook$`4`)
       message("Here's Tab 5")
-      print(old_workbook$`5`)
+      print(merged_workbook$`5`)
 
       message("Does this all look right? (scroll up)")
       response <- readline("(y/n) > ")
@@ -434,9 +480,9 @@ upgrade_meta_spreadsheet <- \(WD = "?",
 
         message("Writing your data to the upgraded teach-it.gsheet.")
         test_write <-
-          pbapply::pblapply(1:length(old_workbook), \(i) {
+          pbapply::pblapply(1:length(merged_workbook), \(i) {
             tab_i <- tabs_to_use[i]
-            df_i <- old_workbook[[i]]
+            df_i <- merged_workbook[[i]]
             if (nrow(df_i) > 0) {
               #Define extended LETTERS for columns beyond Z
               AABC <- c(LETTERS, paste0("A", LETTERS))

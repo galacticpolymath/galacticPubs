@@ -63,6 +63,9 @@ update_fm <-
   if("id" %in% names(old_yaml)){
     new_yaml$numID <- old_yaml$id
   }
+    if("numId" %in% names(old_yaml)){
+    new_yaml$numID <- old_yaml$numId
+  }
 
   if("UniqueID" %in% names(old_yaml)){
     new_yaml$`_id` <- old_yaml$UniqueID
@@ -228,7 +231,7 @@ update_fm <-
 
     # remove the following deprecated variables -------------------------------
 
-    deprecated <- c("GitHubPath", "GPCatalogPath", "test","id","UniqueID","GdriveTeachMat","numID")
+    deprecated <- c("GitHubPath", "GPCatalogPath", "test","id","UniqueID","GdriveTeachMat")
     remove_deez <- which(names(new_yaml) %in% deprecated)
     if (length(remove_deez) > 0) {
       message(
