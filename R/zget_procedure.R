@@ -175,9 +175,11 @@ if(is.null(WD_git)){
     lsnTitle <- ifelse(length(ptitles) < i, NA, ptitles[i])
     lsnDur <- proc$lsnDur[i]
     lsnPreface <- ifelse(length(pprefs) < i, NA, pprefs[i])
-    if(is.null(learningObj)){
+    if(length(learningObj[[1]])==0){
       learningObj_i <- NULL
+      warning("No learning objectives found.")
     }else{
+
       learningObj_i <- learningObj[[i]]
     }
     proc_df_i <- subset(proc, proc$lsn == i)
