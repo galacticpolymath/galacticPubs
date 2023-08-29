@@ -15,17 +15,17 @@ compile_teach_it <- function(WD = "?",
                              rename_lessons = TRUE,
                              prompt_rename = TRUE) {
   WD <- parse_wd(WD)
-
+  WD_git <- get_wd_git(WD=WD)
   . = NULL #to avoid errors with dplyr syntax
   #Keep teaching-materials/ folder tidy
   sweep_teaching_materials(WD = WD)
 
   #Get front matter from the project working directory
-  fm <- get_fm(WD = WD)
+  fm <- get_fm(WD_git=WD_git)
 
   status <- fm$PublicationStatus
   checkmate::assert_choice(status, c("Proto", "Draft", "Live"))
-  if (status %in% c("Proto","Draft")) {
+  if (status %in% c("Proto", "Draft")) {
     tmID <- fm$GdriveTeachMatID
   } else{
     tmID <- fm$GdrivePublicID
@@ -50,6 +50,12 @@ compile_teach_it <- function(WD = "?",
 
     )
 
+  #****
+  #It's annoying, but I want to keep the _lsn on the links page
+  #because it distinguishes where the user of the teach-it.gsheet
+  #should type in the lsn number (lsn) and when they should not, b/c it's auto (_lsn)
+
+
   # Handle materials for multiple lessons (e.g. P1&2) -------------------------
   # Want to break up L1&2 entries and repeat data for 1 and 2, so lessons
   # get the shared info
@@ -57,12 +63,12 @@ compile_teach_it <- function(WD = "?",
     grepl("&", tlinks0$`_lsn`) %>% which()
 
   if (length(multipart_material) > 0) {
-    multi_df <- tlinks0[multipart_material, ]
-    nonmulti_df <- tlinks0[-multipart_material, ]
+    multi_df <- tlinks0[multipart_material,]
+    nonmulti_df <- tlinks0[-multipart_material,]
     lessons <- stringr::str_split(multi_df$`_lsn`, "&")
     expanded_multi <- lapply(1:length(lessons), \(i) {
       lsn_i <- lessons[[i]]
-      multi_df_i <- multi_df[rep(i, length(lsn_i)), ] %>%
+      multi_df_i <- multi_df[rep(i, length(lsn_i)),] %>%
         dplyr::mutate(`_lsn` = lsn_i)
     }) %>% dplyr::bind_rows()
     #combine expanded (repeated) data with previous data
@@ -80,7 +86,8 @@ compile_teach_it <- function(WD = "?",
       )
   }
 
-
+  #rename `_code` to code for ease
+  #and b/c we're not rewriting data to spreadsheet
   mlinks <-
     googlesheets4::read_sheet(
       teach_it_drib,
@@ -88,7 +95,9 @@ compile_teach_it <- function(WD = "?",
       skip = 1,
       col_types = "c",
 
-    ) %>% dplyr::filter(!is.na(.data$`_code`)) %>%
+    ) %>%
+    dplyr::rename(code=.data$`_code`) %>%
+    dplyr::filter(!is.na(.data$code)) %>%
     dplyr::select(1:dplyr::starts_with("otherLink"))
 
   uinfo <-
@@ -110,19 +119,19 @@ compile_teach_it <- function(WD = "?",
     dplyr::select("lsn", "order", "itemTitle", "description", "link")
 
   #bring in procedure
+  #Rename _Step, again, b/c we're not overwriting to spreadsheet
   proc <-
     googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip =
-                                1)%>%
+                                1) %>%
+    dplyr::rename(Step=.data$`_Step`) %>%
     dplyr::mutate(
       lsn = as.integer(.data$lsn),
       Chunk = as.integer(.data$Chunk),
       ChunkDur = as.integer(.data$ChunkDur),
-      Step = as.integer(.data$`_Step`),
+      Step = as.integer(.data$`Step`),
       lsnN = as.integer(.data$`_lsnN`),
       lsnDur = as.integer(.data$lsnDur)
     ) %>%
-    dplyr::relocate("Step",.before="_Step") %>%
-    dplyr::select(-"_Step") %>%
     dplyr::select(1:.data$lsnDur)
 
 
@@ -148,7 +157,7 @@ compile_teach_it <- function(WD = "?",
   # Report uninitialized data -----------------------------------------------
 
   if (!lext_initialized) {
-    lext <- lext[0,]
+    lext <- lext[0, ]
     message("No valid items found on LsnExt tab of `teach-it.gsheet`.")
   }
 
@@ -198,7 +207,6 @@ compile_teach_it <- function(WD = "?",
 
   #Add lesson title and preface to proc tlinks info for convenience
   if (uinfo_titles_initialized) {
-    browser()
     # rename Lsn folders -----------------------------------------------------
     if (rename_lessons) {
       zrename_lessons(uinfo, tmID, prompt_rename = prompt_rename)
@@ -209,13 +217,13 @@ compile_teach_it <- function(WD = "?",
                                           "lsnTitle",
                                           "lsnPreface",
                                           "lsnGradeVarNotes",
-                                          "actTags")], by = "lsn")
+                                          "actTags")], by = c("_lsn" = "lsn"))
 
 
   } else{
     tlinks <-
       tlinks0 %>% dplyr::mutate(
-        lsn = NA,
+        `_lsn` = NA,
         lsnTitle = NA,
         lsnPreface = NA,
         lsnGradeVarNotes = NA,
@@ -242,7 +250,7 @@ compile_teach_it <- function(WD = "?",
       )
 
     multimedia <- lapply(1:nrow(m), function(i) {
-      d <- m[i, ]
+      d <- m[i,]
 
       mainLink <- zYTembed(d$mainLink) %>%
         expand_md_links(WD = WD)
@@ -312,12 +320,14 @@ compile_teach_it <- function(WD = "?",
     })
     proc_data$vocab <- NULL
   } else{
+
     proc_data <-
       zget_procedure(
         proc = proc,
         lext = lext,
         uinfo = uinfo,
-        mlinks = mlinks
+        mlinks = mlinks,
+        WD_git=WD_git
       )
 
     #output gathered vocab as csv
@@ -340,7 +350,7 @@ compile_teach_it <- function(WD = "?",
   }
 
   Data <- c(
-    lessonPreface = pinfo$LessonPreface[1],
+    lessonPreface = uinfo$unitPreface[1],
     lessonDur = proc_data$lessonDur,
     teach_mat_data,
     lesson = list(proc_data$lessons),
@@ -367,7 +377,7 @@ compile_teach_it <- function(WD = "?",
   outFile <-
     fs::path(destFolder, "teaching-materials", ext = "json")
 
-  save_json(out, outFile)
+  success <- save_json(out, outFile) %>% catch_err()
   save_json(multimedia, fs::path(destFolder, "multimedia", ext = "json"))
 
 
@@ -379,5 +389,7 @@ compile_teach_it <- function(WD = "?",
   message(" JSON file saved\n @ ",
           fs::path(destFolder, "multimedia.json"),
           "\n")
+  message(" Success: ",success)
   message(" ", rep("-", 30))
+
 }

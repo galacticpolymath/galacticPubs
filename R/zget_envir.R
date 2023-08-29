@@ -12,10 +12,10 @@
 # Define f(x)s for extracting nested teach-mat info -----------------------
 zget_envir <- \(df, fm) {
   envirs <-
-    unique_sans_na(df$envir) %>% tolower() %>% sort()
+    unique_sans_na(df$`_envir`) %>% tolower() %>% sort()
   #Assessments aren't a real environment; we want to concat this info to the end of lsns for each envir
   if ("assessments" %in% envirs) {
-    df_assess <- df %>% dplyr::filter(.data$envir == "assessments",.data$fileType!="folder")
+    df_assess <- df %>% dplyr::filter(.data$`_envir` == "assessments",.data$`_fileType`!="folder")
     if(!nrow(df_assess)>0){
       assess <- list(NULL)
     } else{
@@ -37,7 +37,7 @@ zget_envir <- \(df, fm) {
     #map across learning environments (classroom/remote)
     purrr::map(., \(envir_i) {
       df_i <- df %>%
-        dplyr::filter(.data$envir == envir_i)
+        dplyr::filter(.data$`_envir` == envir_i)
 
         list(
           gradeVariantNotes=zget_grade_var_notes(df_i),
@@ -61,16 +61,16 @@ zget_envir <- \(df, fm) {
 #' @family Internal helper functions
 #'
 zget_grade_var_notes <- \(df){
-  lessons<-unique_sans_na(df$lsn)
+  lessons<-unique_sans_na(df$`_lsn`)
   grade_var_notes_initialized <- !grepl("^Overall",df$lsnGradeVarNotes[1])
   if(!grade_var_notes_initialized){
    df$lsnGradeVarNotes<-NA #Effectively delete the placeholder text that was found
   }
   #output data (whether empty or not)
   purrr::map(lessons,\(i){
-  df_i <- df %>% dplyr::filter(lsn==i) %>% dplyr::slice(1)
+  df_i <- df %>% dplyr::filter(`_lsn`==i) %>% dplyr::slice(1)
   list(
-    lsn=df_i$lsn,
+    lsn=df_i$`_lsn`,
     lsnGradeVarNotes=df_i$lsnGradeVarNotes
   )
   })
@@ -87,7 +87,7 @@ zget_grade_var_notes <- \(df){
 #' @family Internal helper functions
 #'
 zget_grade_bands <- \(df, fm, assess) {
-  coveredGrades <- unique_sans_na(df$grades)
+  coveredGrades <- unique_sans_na(df$`_grades`)
 
   grade_yr_term <- fm$GradesOrYears
   out <- coveredGrades %>%
@@ -96,12 +96,12 @@ zget_grade_bands <- \(df, fm, assess) {
     purrr::map(., \(grade_band_i) {
       #Get info for the subfolder
       df_variantDir <-
-        df %>% dplyr::filter(itemType == "variantDir" &
-                               grades == grade_band_i)
+        df %>% dplyr::filter(`_itemType` == "variantDir" &
+                               `_grades` == grade_band_i)
 
       df_materials <-
-        df %>% dplyr::filter(fileType != "folder" &
-                               grades == grade_band_i)
+        df %>% dplyr::filter(`_fileType` != "folder" &
+                               `_grades` == grade_band_i)
       g_pref_i <- paste0(substr(grade_yr_term, 1, 1), grade_band_i)
 
       #Get data for each lsn
@@ -119,7 +119,7 @@ zget_grade_bands <- \(df, fm, assess) {
         gradePrefix = g_pref_i,
         links = list(
           linkText = paste("Browse & Download All", g_pref_i, "Materials"),
-          url = df_variantDir$link
+          url = df_variantDir$`_link`
         ),
         lessons = LSN_DATA
       )
@@ -139,7 +139,7 @@ zget_grade_bands <- \(df, fm, assess) {
 #' @family Internal helper functions
 #'
 zget_lessons <- \(df, fm) {
-  lessons <- unique_sans_na(df$lsn)
+  lessons <- unique_sans_na(df$`_lsn`)
   if (length(lessons) == 0) {
     #make it resilient if there's only 1 implied lsn
     lessons <- "1"
@@ -148,10 +148,10 @@ zget_lessons <- \(df, fm) {
     #map across all lessons
     purrr::map(., \(lsn_i) {
       #Get info for the subfolder
-      df_lsn_i <- df %>% dplyr::filter(lsn == lsn_i)
+      df_lsn_i <- df %>% dplyr::filter(`_lsn` == lsn_i)
 
       #parse tags
-      lsn_i_tags0 <- df_lsn_i$ActTags[1]
+      lsn_i_tags0 <- df_lsn_i$actTags[1]
       if(is_empty(lsn_i_tags0)) {
         lsn_i_tags<-NULL
       } else{
@@ -186,7 +186,7 @@ zget_lessons <- \(df, fm) {
 #'
 zget_items <- \(df, fm) {
   #Sort so presentation is first
-  df <- df %>% dplyr::arrange(!.data$fileType == "presentation")
+  df <- df %>% dplyr::arrange(!.data$`_fileType` == "presentation")
   item_counter <- 1:nrow(df)
   status <- fm$PublicationStatus
 
@@ -195,7 +195,7 @@ zget_items <- \(df, fm) {
     #Get info for the subfolder
     df_item_i <- df[i,]
     #Add DRAFT FILE disclaimer to links if Draft status
-    cust_url <- df_item_i$link
+    cust_url <- df_item_i$`_link`
     if (status=="Draft") {
       disclaimer <- "(DRAFT FILE)"
     } else{
@@ -204,12 +204,12 @@ zget_items <- \(df, fm) {
 
     #Text to label the link on the teaching-materials section of lesson plan
     #allow for flexible item types extracted from file names (e.g. if somebody puts handout worksheet)
-    what_we_want <- if (grepl("handout", df_item_i$itemType) |
-                        grepl("worksheet", df_item_i$itemType) |
-                        grepl("card", df_item_i$itemType)|
-                        grepl("assess", df_item_i$itemType)) {
+    what_we_want <- if (grepl("handout", df_item_i$`_itemType`) |
+                        grepl("worksheet", df_item_i$`_itemType`) |
+                        grepl("card", df_item_i$`_itemType`)|
+                        grepl("assess", df_item_i$`_itemType`)) {
       "pdf"
-    } else if (grepl("presentation", df_item_i$itemType)) {
+    } else if (grepl("presentation", df_item_i$`_itemType`)) {
       "present"
     } else{
       "Download"
@@ -226,7 +226,7 @@ zget_items <- \(df, fm) {
     #Necessary b/c some handouts are presentations & exporting to PDF works differently for slides than docs
 
     cust_url2 <- switch(
-      paste(what_we_want, df_item_i$fileType, sep = "-"),
+      paste(what_we_want, df_item_i$`_fileType`, sep = "-"),
       "present-presentation" = paste0(cust_url, "/present"),
       #preview link for Slides presentation
       "pdf-presentation" = paste0(cust_url, "/export/pdf"),
@@ -241,7 +241,7 @@ zget_items <- \(df, fm) {
     #Now make custom Drive share links
     drive_share_link <-
       ifelse(
-        df_item_i$fileType %in% c("document", "presentation"),
+        df_item_i$`_fileType` %in% c("document", "presentation"),
         paste0(cust_url, "/template/preview"),
         cust_url
       )
@@ -251,7 +251,7 @@ zget_items <- \(df, fm) {
     list(
       itemTitle = df_item_i$title,
       itemDescription = df_item_i$description,
-      itemCat = df_item_i$fileType,
+      itemCat = df_item_i$`_fileType`,
       links = list(
         zcatchLinkNA(linkText = full_link_txt, #preview link
                      url = cust_url2),

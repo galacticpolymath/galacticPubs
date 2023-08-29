@@ -6,13 +6,34 @@
 #' @param lext the individual lesson extension info read from the teach-it.gsheet
 #' @param uinfo the unit info read in from the teach-it.gsheet
 #' @param mlinks multimedia info read in from the teach-it.gsheet!Titles tab
+#' @param WD_git location of gp-lessons github repo. Default=NULL will get this for the current workspace with [get_wd_git()]
 #' @returns a list of: the procedure chunks and Lesson-Extension links for each lesson and a compiled vocab dataframe
 #' @export
 #'
 zget_procedure <- \(proc,
                     lext,
                     uinfo,
-                    mlinks) {
+                    mlinks,
+                    WD_git=NULL) {
+
+
+
+# Import learning objectives (from standards save object) -----------------
+if(is.null(WD_git)){
+  WD_git <- get_wd_git()
+}
+  rds_saveFile <- fs::path(WD_git, "saves", "standards.RDS")
+  standards_saved <- file.exists(rds_saveFile)
+
+  if(standards_saved){
+    learningObj <- readRDS(rds_saveFile)$learningObj
+  }else{
+    warning("Couldn't retrieve Learning Objectives. Try running compile_standards().")
+    learningObj <- NULL
+  }
+
+
+
   #Function to change shorthand word=def into bulleted list with bold word ("- **word:** definition")
   formatVocab <- function(vocabTextVector) {
     sapply(1:length(vocabTextVector), function(i) {
@@ -47,10 +68,10 @@ zget_procedure <- \(proc,
   proc <- proc %>% dplyr::filter(.data$Step != 0)
 
   #Expand markdown for LessonExt section
-
+  if(nrow(lext)>0){
   lext <- lext %>%
-    dplyr::mutate(dplyr::across(c("Description","Link"),\(x){parseGPmarkdown(x,mlinks=mlinks)}))
-
+    dplyr::mutate(dplyr::across(c("description","link"),\(x){parseGPmarkdown(x,mlinks=mlinks)}))
+}
 
 
 
@@ -114,17 +135,17 @@ zget_procedure <- \(proc,
   #Figure out lesson duration string
   lsnDurations <-
     proc_w_prep$lsnDur[which(proc_w_prep$lsnDur != "")] %>% as.numeric()
-  lessonDur <-
+
     if (length(lsnDurations) == 1) {
-      paste0(lsnDurations, " min") #if just 1 lsn listed, do X min
+      lessonDur <-paste0(lsnDurations, " min") #if just 1 lsn listed, do X min
     } else{
       #if more than 1 lsn, but they're all the same, combine them
       if (length(unique(lsnDurations)) == 1) {
-        paste0(length(lsnDurations), " x ", lsnDurations[1], " min")
+        lessonDur <-paste0(length(lsnDurations), " x ", lsnDurations[1], " min")
       } else{
         #otherwise average, rounding to 5 min
         m <- mean(lsnDurations,na.rm=T)
-        paste0(length(lsnDurations)," x ~",5*round(m/5)," min")
+        lessonDur <-paste0(length(lsnDurations)," x ~",5*round(m/5)," min")
       }
     }
   lessonDur
@@ -145,6 +166,8 @@ zget_procedure <- \(proc,
     uinfo$lsnGradeVarNotes[!is.na(uinfo$lsnGradeVarNotes)]
 
 
+
+
   # Output data for each lsn -----------------------------------------------
 
   out$lessons <- lapply(1:nlsns, function(i) {
@@ -152,7 +175,11 @@ zget_procedure <- \(proc,
     lsnTitle <- ifelse(length(ptitles) < i, NA, ptitles[i])
     lsnDur <- proc$lsnDur[i]
     lsnPreface <- ifelse(length(pprefs) < i, NA, pprefs[i])
-
+    if(is.null(learningObj)){
+      learningObj_i <- NULL
+    }else{
+      learningObj_i <- learningObj[[i]]
+    }
     proc_df_i <- subset(proc, proc$lsn == i)
     prep_row <-
       subset(proc_w_prep, proc_w_prep$lsn == i & proc_w_prep$Step == 0)
@@ -167,13 +194,13 @@ zget_procedure <- \(proc,
       }
 
       #Extract prep info for lsn i
-      lessonPrep <- list(
-        PrepTitle = prep_row$StepTitle,
-        PrepDur = prep_row$ChunkDur,
-        PrepQuickDescription = prep_row$StepQuickDescription,
-        PrepDetails = prep_row$StepDetails,
-        PrepVariantNotes = prep_row$VariantNotes,
-        PrepTeachingTips = prep_row$TeachingTips
+      lsnPrep <- list(
+        prepTitle = prep_row$StepTitle,
+        prepDur = prep_row$ChunkDur,
+        prepQuickDescription = prep_row$StepQuickDescription,
+        prepDetails = prep_row$StepDetails,
+        prepVariantNotes = prep_row$VariantNotes,
+        prepTeachingTips = prep_row$TeachingTips
       )
     }
 
@@ -205,20 +232,20 @@ zget_procedure <- \(proc,
     # Extract relevant lext ("Going Further") links ---------------------------
 
     lext_df_i <-
-      lext %>% dplyr::filter(lsn == i) %>% dplyr::arrange(.data$Order)
+      lext %>% dplyr::filter(lsn == i) %>% dplyr::arrange(.data$order)
 
     #Remove []() markdown links to get bare links in case somebody used shorthand to grab the YouTube link
-    lext_df_i$Link <- ifelse(
-      grepl("\\[", lext_df_i$Link),
+    lext_df_i$link <- ifelse(
+      grepl("\\[", lext_df_i$link),
       #only do gsub if [ notation found in link
       gsub(
         pattern = "[^\\(]*\\(?([^\\)]*)\\)?$",
         replacement = "\\1",
-        lext_df_i$Link
+        lext_df_i$link
       ),
-      lext_df_i$Link
+      lext_df_i$link
     )
-    # stringr::str_extract(lext_df_i$Link,pattern = ".*\\(?([^\\)]*)\\)?$")
+    # stringr::str_extract(lext_df_i$link,pattern = ".*\\(?([^\\)]*)\\)?$")
 
     #Make NA row to avoid errors
     if (nrow(lext_df_i) == 0) {
@@ -229,7 +256,7 @@ zget_procedure <- \(proc,
           item = j,
           itemTitle = lext_df_i$ItemTitle[j] ,
           itemDescription = lext_df_i$Description[j],
-          itemLink = lext_df_i$Link[j]
+          itemLink = lext_df_i$link[j]
         )
       })
 
@@ -241,6 +268,7 @@ zget_procedure <- \(proc,
       lsnTitle = lsnTitle,
       lsnDur = lsnDur,
       lsnPreface = lsnPreface,
+      learningObj=list(learningObj_i),
       lsnPrep = list(lsnPrep),
       chunks = chunks,
       lsnExt = list(lsnExt)

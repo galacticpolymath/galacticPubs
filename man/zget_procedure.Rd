@@ -4,7 +4,7 @@
 \alias{zget_procedure}
 \title{zget_procedure}
 \usage{
-zget_procedure(proc, lext, uinfo, mlinks)
+zget_procedure(proc, lext, uinfo, mlinks, WD_git = NULL)
 }
 \arguments{
 \item{proc}{the procedure file that has already been read in from the teach-it.gsheet, i.e. via \code{\link[=compile_teach_it]{compile_teach_it()}}}
@@ -14,6 +14,8 @@ zget_procedure(proc, lext, uinfo, mlinks)
 \item{uinfo}{the unit info read in from the teach-it.gsheet}
 
 \item{mlinks}{multimedia info read in from the teach-it.gsheet!Titles tab}
+
+\item{WD_git}{location of gp-lessons github repo. Default=NULL will get this for the current workspace with \code{\link[=get_wd_git]{get_wd_git()}}}
 }
 \value{
 a list of: the procedure chunks and Lesson-Extension links for each lesson and a compiled vocab dataframe
