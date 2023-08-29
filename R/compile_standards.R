@@ -19,7 +19,7 @@ compile_standards <- function(WD = "?",
   WD <- parse_wd(WD)
 
   #The github gp-lessons directory for the code
-  WD_git <- get_wd_git(WD=WD)
+  WD_git <- get_wd_git(WD = WD)
 
   #############
   # IMPORTANT: Add Subjects here if you need to align new ones --------------
@@ -45,8 +45,6 @@ compile_standards <- function(WD = "?",
 
   #define paths
   destFolder <- fs::path(WD_git, "JSONs")
-  standardsFile <-
-    fs::path(WD, "meta", "standards_GSheetsOnly.xlsx")
 
   #Read in front-matter
   fm <- get_fm(WD = WD)
@@ -64,7 +62,7 @@ compile_standards <- function(WD = "?",
     #If targetSubj not provided, use front-matter.yml
     if (missing(targetSubj)) {
       tempSubj <- fm$TargetSubj
-      if (!galacticPubs::is_empty(tempSubj)) {
+      if (!is_empty(tempSubj)) {
         targetSubj <- tolower(tempSubj)
       }
     }
@@ -89,20 +87,20 @@ compile_standards <- function(WD = "?",
       dplyr::select(-"Notes") %>%
       dplyr::filter(!is.na(.data$`LO#`))
 
-      a_master <- googlesheets4::read_sheet(
-        stnds_drib$id,
-        sheet = "2.Standard-Selection",
-        skip = 1,
-        col_types = "c"
-      ) %>% dplyr::filter(!is.na(.data$Code))
+    a_master <- googlesheets4::read_sheet(
+      stnds_drib$id,
+      sheet = "2.Standard-Selection",
+      skip = 1,
+      col_types = "c"
+    ) %>% dplyr::filter(!is.na(.data$Code))
 
-      # a0 is the "Finalize" tab
-      a0 <- googlesheets4::read_sheet(
-        stnds_drib$id,
-        sheet = "4.Finalize",
-        skip = 1,
-        col_types = "c"
-      ) %>% dplyr::filter(!is.na(.data$Code))
+    # a0 is the "Finalize" tab
+    a0 <- googlesheets4::read_sheet(
+      stnds_drib$id,
+      sheet = "4.Finalize",
+      skip = 1,
+      col_types = "c"
+    ) %>% dplyr::filter(!is.na(.data$Code))
 
 
     is_valid_tab1 <- checkmate::test_data_frame(LOs, min.rows = 1)
@@ -122,16 +120,16 @@ compile_standards <- function(WD = "?",
       stnds_drib <- drive_find_path(stnds_id)
 
       LOs <-    googlesheets4::read_sheet(
-      stnds_drib$id,
-      sheet = 1,
-      skip = 1,
-      col_types = "c",
-      .name_repair = "minimal"
-    ) %>%
-      #Blank column is just used as a flexible marker
-      dplyr::select(1:"blank") %>%
-      dplyr::select(-"blank") %>%
-      dplyr::filter(!is.na(.data$`LO#`))
+        stnds_drib$id,
+        sheet = 1,
+        skip = 1,
+        col_types = "c",
+        .name_repair = "minimal"
+      ) %>%
+        #Blank column is just used as a flexible marker
+        dplyr::select(1:"blank") %>%
+        dplyr::select(-"blank") %>%
+        dplyr::filter(!is.na(.data$`LO#`))
 
       a_master <- googlesheets4::read_sheet(
         stnds_drib$id,
@@ -166,8 +164,9 @@ compile_standards <- function(WD = "?",
     #check that "Help Text" does not occur anywhere in the Learning Objective statement column in Tab1
 
     #Rename learning statement to be friendlier, but in a way that's robust to changing the header title
-    lo_col <- stringr::str_detect(names(LOs),"Objective") %>% which()
-    names(LOs)[loc_col] <- "lo_statement"
+    lo_col <-
+      stringr::str_detect(names(LOs), "Objective") %>% which()
+    names(LOs)[lo_col] <- "lo_statement"
     tab1_initiated <-
       (LOs %>% dplyr::pull("lo_statement") %>% grepl("^[Hh]elp [Tt]ext", .) %>% sum()) == 0
     #Expect some LO#s
@@ -193,7 +192,7 @@ compile_standards <- function(WD = "?",
 
     if (!tab1_initiated | !tab2_initiated | !tab4_initiated) {
       warning("compile_standards() aborted because some tab(s) have not been initiated.")
-      success <- FALSE
+      success <- test_json <- test_save <- FALSE
     } else{
       # Start processing standards ----------------------------------------------
 
@@ -217,6 +216,21 @@ compile_standards <- function(WD = "?",
       #for convenience, just make master columns (i.e. standards_*.gsheet!2.Standard-Selection) lower case
       names(a_master) <- tolower(names(a_master))
 
+
+
+      # Extract learning objectives by lesson -------------------------------------
+      LOs
+      if(nrow(LOs)>0){
+      LO_tib <- LOs %>%
+        dplyr::select("LO#", "Lsn", "lo_statement") %>%
+        tidyr::separate_longer_delim(cols = "Lsn", delim = ",") %>%
+        dplyr::arrange(.data$Lsn, .data$`LO#`) %>%
+        dplyr::select(-"LO#")
+      learningObj <- lapply(unique(LO_tib$Lsn),\(i){
+        LO_tib %>% dplyr::filter(.data$Lsn==i) %>% dplyr::pull("lo_statement")
+      })
+
+      }else{learningObj <- NULL}
 
 
       # Check supported subjects ------------------------------------------------
@@ -289,7 +303,7 @@ compile_standards <- function(WD = "?",
 
       if (sum(undoc) > 0) {
         message(
-          "\nThe following were removed because learning objective was blank or you said 'skip':\n\t\u2022",
+          "\nThe following were removed because 'How does lesson align...' was blank or you said 'skip':\n\t\u2022",
           paste0(a0$code[undoc], collapse = "\n\t\u2022"),
           "\n"
         )
@@ -376,7 +390,7 @@ compile_standards <- function(WD = "?",
                                 "grouping",
                                 "how",
                                 "lsn")], a_master[-which(tolower(names(a_master)) ==
-                                                            "lsn")], by = "code_set")
+                                                           "lsn")], by = "code_set")
 
 
       #factor subjects for desired order
@@ -532,11 +546,9 @@ compile_standards <- function(WD = "?",
       # Create JSON-style list, but only exported as JSON by compile_lesson() --------
       # Prefix with component and title, and nest output in Data if structuring for web deployment
       out <-
-        list(
-          `__component` = "lesson-plan.standards",
-          LearningObj =  fm$LearningObj,
-          Data = out0
-        )
+        list(`__component` = "lesson-plan.standards",
+             # LearningObj =  fm$LearningObj,
+             Data = out0)
 
 
       # return summary tibble --------------------------------------------------
@@ -755,37 +767,41 @@ compile_standards <- function(WD = "?",
 
 
         #Make a custom dimAbbrev tibble for sets supported for learning Chart
-        supported_dims <- a_master %>% dplyr::select(subject,dimension) %>% dplyr::distinct(.data$dimension,.keep_all = T) %>% dplyr::arrange(.data$subject,.data$dimension)
+        supported_dims <-
+          a_master %>% dplyr::select(subject, dimension) %>% dplyr::distinct(.data$dimension, .keep_all = T) %>% dplyr::arrange(.data$subject, .data$dimension)
 
         #Manual abbreviations for long dimensions
-        supported_dims$dimAbbrev <-sapply(supported_dims$dimension,function(x) switch(x,
-            #CCSS Math
-            "Algebra, Geometry, Trig, Calculus & Higher Level Thinking"= "Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math",
-            "Measurement, Data, Probability & Statistics"= "Measurement, Data,\n Probability, Statistics",
-            "Number Systems, Operations & Abstract Representation" ="Number Systems, Operations,\n Symbolic Representation",
-            #CCSS ELA
-            "Language, Speaking & Listening"= "Language, Speaking,\n Listening",
-            "Reading"= "Reading",
-            "Writing" = "Writing",
-            #NGSS
-            "Cross-Cutting Concepts"="Cross-Cutting \n Concepts ",
-            "Disciplinary Core ideas"= "Disciplinary\n Core Ideas",
-            "Science & Engineering Practices"= "Science & Engineering\n Practices",
-            #C3 Soc Studies
-            "Civics, Economics, Geography & History" = "Civics, Economics,\n Geography, History",
-            "Developing Questions & Planning Inquiries" = "Develop Questions,\n Plan Inquiries",
-            "Evaluating Sources, Communicating Conclusions & Taking Action" = "Evaluate, \n Communicate, \n Take Action ",
-            #else
-            x
+        supported_dims$dimAbbrev <-
+          sapply(supported_dims$dimension, function(x)
+            switch(
+              x,
+              #CCSS Math
+              "Algebra, Geometry, Trig, Calculus & Higher Level Thinking" = "Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math",
+              "Measurement, Data, Probability & Statistics" = "Measurement, Data,\n Probability, Statistics",
+              "Number Systems, Operations & Abstract Representation" = "Number Systems, Operations,\n Symbolic Representation",
+              #CCSS ELA
+              "Language, Speaking & Listening" = "Language, Speaking,\n Listening",
+              "Reading" = "Reading",
+              "Writing" = "Writing",
+              #NGSS
+              "Cross-Cutting Concepts" = "Cross-Cutting \n Concepts ",
+              "Disciplinary Core ideas" = "Disciplinary\n Core Ideas",
+              "Science & Engineering Practices" = "Science & Engineering\n Practices",
+              #C3 Soc Studies
+              "Civics, Economics, Geography & History" = "Civics, Economics,\n Geography, History",
+              "Developing Questions & Planning Inquiries" = "Develop Questions,\n Plan Inquiries",
+              "Evaluating Sources, Communicating Conclusions & Taking Action" = "Evaluate, \n Communicate, \n Take Action ",
+              #else
+              x
             )) %>%
-          paste0(" ",.) #pad labels with space for alignment
+          paste0(" ", .) #pad labels with space for alignment
 
       }
 
 
       #Add abbrev to a_combined output
       a_out <- a_combined %>% dplyr::full_join(.,
-                                      supported_dims )
+                                               supported_dims)
 
 
 
@@ -793,6 +809,7 @@ compile_standards <- function(WD = "?",
 
       # Save Standards Data -----------------------------------------------------
       toSave <- list(
+        learningObj=learningObj,
         data = list(
           input = dplyr::as_tibble(a0),
           compiled = dplyr::as_tibble(A),
@@ -810,28 +827,38 @@ compile_standards <- function(WD = "?",
 
       rds_saveFile <- fs::path(WD_git, "saves", "standards.RDS")
       message("Saving compiled standards data to '", rds_saveFile, "'")
-      saveRDS(toSave, file = rds_saveFile)
+      test_save <-
+        saveRDS(toSave, file = rds_saveFile) %>% catch_err()
 
-      json_saveFile <-
-        fs::path(WD_git, "JSONs", "standards.json")
-      message("Saving web-formatted standards to '", json_saveFile, "'")
-      save_json(out, json_saveFile)
+      if (!test_save) {
+        test_json <- FALSE
+        success <- FALSE
+      } else{
+        json_saveFile <-
+          fs::path(WD_git, "JSONs", "standards.json")
+        message("Saving web-formatted standards to '",
+                json_saveFile,
+                "'")
+        test_json <- save_json(out, json_saveFile) %>% catch_err()
 
-      problem_entries <- dplyr::as_tibble(a0[(tbds + undoc) > 0,])
-      #need to build better checks than this
-      success = TRUE
+        problem_entries <-
+          dplyr::as_tibble(a0[(tbds + undoc) > 0,])
+        #need to build better checks than this
+        success <-  TRUE
+      }
     }
   }#End Big else
 
+  message("Standards Compiled: ",success)
   #add grades information to output
-  return(
+  invisible(
     list(
       success = success,
       input = dplyr::as_tibble(a0),
       compiled = dplyr::as_tibble(A),
       problem_entries = problem_entries,
       gradeBand = gradeBand,
-      learningObj = fm$LearningObj,
+      learningObj = learningObj,
       targetSubj = targetSubj,
       subject_proportions = proportions,
       learning_chart_friendly = learning_chart_friendly

@@ -42,7 +42,7 @@ compile_lesson <-
     if (missing(choices)) {
       choices <- current_data$ReadyToCompile
     }
-
+browser()
 
     # Find the path for the GitHub gp-lessons working dir ---------------------
     WD_git <- get_wd_git(WD = WD)
@@ -70,8 +70,12 @@ compile_lesson <-
     if (clean) {
       to_delete <-
         list.files(destFolder, pattern = "*\\.json", full.names = TRUE)
+      if(length(to_delete)>0){
       unlink(to_delete)
       message("\nJSONs folder cleared: ", destFolder, "\n")
+      }else{
+        message("\nNo JSONs found at: ", destFolder, "\n")
+      }
     }
 
 
@@ -141,7 +145,8 @@ compile_lesson <-
       compiled_standards_json_path,
       compiled_standards_path,
       standards_gsheet_path,
-      newer = TRUE
+      newer = TRUE,
+      WD=WD
     )
 
     # Compile standards if out of date or missing or rebuild==T ----------------
