@@ -25,7 +25,7 @@ zrename_lessons <- \(uinfo,
       dplyr::mutate(new_name =
                       paste_valid(paste0("L", .data$lsn), .data$lsnTitle, collapse =
                                     "_")) %>%
-      dplyr::select(Lesson, new_name)
+      dplyr::select(.data$lsn, .data$new_name)
 
 
     tmdrib <- drive_find_path(tmID)

@@ -23,10 +23,9 @@ compile_teach_it <- function(WD = "?",
   #Get front matter from the project working directory
   fm <- get_fm(WD = WD)
 
-
   status <- fm$PublicationStatus
   checkmate::assert_choice(status, c("Proto", "Draft", "Live"))
-  if (status == "Draft") {
+  if (status %in% c("Proto","Draft")) {
     tmID <- fm$GdriveTeachMatID
   } else{
     tmID <- fm$GdrivePublicID
@@ -55,16 +54,16 @@ compile_teach_it <- function(WD = "?",
   # Want to break up L1&2 entries and repeat data for 1 and 2, so lessons
   # get the shared info
   multipart_material <-
-    grepl("&", tlinks0$lesson) %>% which()
+    grepl("&", tlinks0$`_lsn`) %>% which()
 
   if (length(multipart_material) > 0) {
     multi_df <- tlinks0[multipart_material, ]
     nonmulti_df <- tlinks0[-multipart_material, ]
-    lessons <- stringr::str_split(multi_df$lsn, "&")
+    lessons <- stringr::str_split(multi_df$`_lsn`, "&")
     expanded_multi <- lapply(1:length(lessons), \(i) {
       lsn_i <- lessons[[i]]
       multi_df_i <- multi_df[rep(i, length(lsn_i)), ] %>%
-        dplyr::mutate(lsn = lsn_i)
+        dplyr::mutate(`_lsn` = lsn_i)
     }) %>% dplyr::bind_rows()
     #combine expanded (repeated) data with previous data
     tlinks0 <-
@@ -113,16 +112,19 @@ compile_teach_it <- function(WD = "?",
   #bring in procedure
   proc <-
     googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip =
-                                1) %>%
-    dplyr::select(1:.data$lsnDur) %>%
+                                1)%>%
     dplyr::mutate(
       lsn = as.integer(.data$lsn),
       Chunk = as.integer(.data$Chunk),
       ChunkDur = as.integer(.data$ChunkDur),
       Step = as.integer(.data$`_Step`),
-      lsnN = as.integer(.data$lsnN),
+      lsnN = as.integer(.data$`_lsnN`),
       lsnDur = as.integer(.data$lsnDur)
-    )
+    ) %>%
+    dplyr::relocate("Step",.before="_Step") %>%
+    dplyr::select(-"_Step") %>%
+    dplyr::select(1:.data$lsnDur)
+
 
   # Check and Validate Data Import--------------------------------------------------
   checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!TeachMatLinks")
@@ -130,7 +132,7 @@ compile_teach_it <- function(WD = "?",
   checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
   checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
   checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!Procedure")
-  checkmate::assert_data_frame(pext, min.rows = 0, .var.name = "teach-it.gsheet!LsnExt")
+  checkmate::assert_data_frame(lext, min.rows = 0, .var.name = "teach-it.gsheet!LsnExt")
 
   # Check for template text (uninitialized data) ----------------------------
   uinfo_titles_initialized <-
@@ -140,13 +142,13 @@ compile_teach_it <- function(WD = "?",
   proc_initialized <-
     !grepl("^\\*", proc$ChunkTitle[1]) &
     !grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
-  pext_initialized <- !grepl("^URL", pext$link[1])
+  lext_initialized <- !grepl("^URL", lext$link[1])
   mlinks_initialized <- nrow(mlinks) > 0
 
   # Report uninitialized data -----------------------------------------------
 
-  if (!pext_initialized) {
-    pext <- pext[0,]
+  if (!lext_initialized) {
+    lext <- lext[0,]
     message("No valid items found on LsnExt tab of `teach-it.gsheet`.")
   }
 
@@ -187,7 +189,7 @@ compile_teach_it <- function(WD = "?",
 
   # Figure out lesson duration string ---------------------------------------
   nlessons <-
-    max(1, max(tlinks0$lsn, na.rm = TRUE), na.rm = TRUE) #how many lessons are there in teaching mat? (1 by default)
+    max(1, max(tlinks0$`_lsn`, na.rm = TRUE), na.rm = TRUE) #how many lessons are there in teaching mat? (1 by default)
 
 
 
@@ -196,6 +198,7 @@ compile_teach_it <- function(WD = "?",
 
   #Add lesson title and preface to proc tlinks info for convenience
   if (uinfo_titles_initialized) {
+    browser()
     # rename Lsn folders -----------------------------------------------------
     if (rename_lessons) {
       zrename_lessons(uinfo, tmID, prompt_rename = prompt_rename)
