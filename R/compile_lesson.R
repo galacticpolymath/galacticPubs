@@ -28,8 +28,7 @@ compile_lesson <-
            rebuild = NULL) {
     WD <- parse_wd(WD)
 
-    #figure out which repo we're connected to (to create full paths to catalog.galacticpolymath.com)
-    repo <- whichRepo(WD = WD)
+
 
 
     # Always update front-matter (in case of template updates) ----------------
@@ -49,6 +48,9 @@ compile_lesson <-
     WD_git <- get_wd_git(WD = WD)
 
     destFolder <- fs::path(WD_git, "JSONs")
+
+    proj_dir <- get_fm("GdriveDirName",WD=WD)
+    checkmate::assert_character(proj_dir,min.chars=5)
 
     if (!dir.exists(destFolder)) {
       stop("Directory not found: ", destFolder)
@@ -87,7 +89,7 @@ compile_lesson <-
     }
 
     #quell Rcheck
-    lumpItems <- whichRepo <- catalogURL <- expand_md_links <- NULL
+    lumpItems <- catalogURL <- expand_md_links <- NULL
 
 
     # Define some paths -------------------------------------------------------
@@ -119,7 +121,6 @@ compile_lesson <-
     compiled_standards_path <-
       fs::path(WD_git, "saves", "standards.RDS")
 
-    checkmate::assert_file_exists(compiled_standards_path)
 
     standards_gsheet_path <- fs::path(WD,
                                       "meta",
@@ -237,7 +238,7 @@ compile_lesson <-
           Badge = list(url = ifelse(
             is_empty(current_data$LearningChart[1]),
             NA,
-            catalogURL(basename(current_data$LearningChart[1]), repo)
+            catalogURL(basename(current_data$LearningChart[1]), proj)
           ))
 
 
