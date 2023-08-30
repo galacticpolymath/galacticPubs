@@ -373,7 +373,7 @@ compile_teach_it <- function(WD = "?",
 
   # write JSON outputs ------------------------------------------------------
 
-  destFolder <- fs::path(WD, "meta", "JSON")
+  destFolder <- fs::path(WD_git, "JSONs")
   outFile <-
     fs::path(destFolder, "teaching-materials", ext = "json")
 

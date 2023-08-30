@@ -1,19 +1,26 @@
-#' compileJSON
+#' Compile all the JSONs to create 1 file for the web
 #'
-#' Combine all JSON components into 1 compiledLesson.JSON
+#' Combine all JSON components into 1 LESSON.JSON
 #'
-#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
-#' @param destFolder where you want to save the folder; by default in the "meta/JSON/" folder
-#' @param outputFileName output file name; default= "processedProcedure.json"
+#' @param WD working directory, passed to [parse_wd()]
+#' @param WD_git location of gp-lessons github repo. Default=NULL will get this for the current workspace with [get_wd_git()]
+#' @param destFolder where you want to save the folder; by default in the "WD_git" folder
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/LESSON.json
 #' @importFrom rlang .data
 #' @export
 #'
-compileJSON <- function( WD=getwd(),outputFileName="LESSON.json",destFolder){
+compile_json<- function( WD=NULL, WD_git=NULL,destFolder){
 
-  WD=parse_wd(WD)
+  WD <- parse_wd(WD)
+  if(is.null(WD_git)){
+    WD_git <- get_wd_git(WD=WD)
+  }
+  checkmate::assert_directory_exists(WD_git)
 
-  if(missing(destFolder)){destFolder=fs::path(WD,"meta","JSON")}
+
+  if(missing(destFolder)){destFolder=WD_git}
+
+  srcFolder <- fs::path(WD_git,"JSONs")
 
   #   jsonNames should be ordered; this is telling which json files to look for and assemble them in this order
   jsonNames<-c("header","overview","preview","teaching-materials","extensions","bonus","background","standards-header","learning-chart","standards","feedback","job-viz","credits","acknowledgments","versions")
@@ -21,7 +28,7 @@ compileJSON <- function( WD=getwd(),outputFileName="LESSON.json",destFolder){
   potentialFilenames<-paste0(jsonNames,".json")
 
   #test for missings or duplicates
-  json_ls<-list.files(destFolder)
+  json_ls<-list.files(srcFolder)
 
   matches<-data.frame(file=potentialFilenames,found=potentialFilenames%in%json_ls)
   format(matches,justify="none")
@@ -36,7 +43,7 @@ compileJSON <- function( WD=getwd(),outputFileName="LESSON.json",destFolder){
   filenamez.df<-subset(matches,matches$found)
   #read in all the json pieces
   lesson_data<-lapply(filenamez.df$file,function(x){
-    jsonlite::read_json(fs::path(destFolder,x),na="null",null="null")
+    jsonlite::read_json(fs::path(srcFolder,x),na="null",null="null")
   })
   names(lesson_data)<-gsub("^(.*)\\..*","\\1", filenamez.df$file) #removes file extension
 
@@ -56,7 +63,7 @@ compileJSON <- function( WD=getwd(),outputFileName="LESSON.json",destFolder){
 
   # create directory if necessary & prep output filename --------------------
   dir.create(destFolder,showWarnings=FALSE,recursive=T)
-  outFile<-fs::path(destFolder,paste0(sub(pattern="(.*?)\\..*$",replacement="\\1",x=basename(outputFileName))),ext="json")
+  outFile<-fs::path(destFolder,"LESSON.json")
 
 
   # Write JSON for GP Simple Lesson Plan -----------------------------------

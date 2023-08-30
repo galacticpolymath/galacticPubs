@@ -23,10 +23,10 @@ drive_get_info(
 \itemize{
 \item shortTitle
 \item title
-\item lsn
-\item grades
-\item itemType
-\item fileType
+\item \verb{_lsn}
+\item \verb{_grades}
+\item \verb{_itemType}
+\item \verb{_fileType}
 }}
 
 \item{all_info}{logical; keep the full drive_resources list with all the dribble meta info for each row item? default=FALSE}

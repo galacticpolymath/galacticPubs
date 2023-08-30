@@ -149,7 +149,7 @@ compile_lesson <-
       newer = TRUE,
       WD = WD
     )
-    browser()
+
     # Compile standards if out of date or missing or rebuild==T ----------------
     if ("Standards Alignment" %in% choices &
         (stnds_out_of_date | rebuild)) {
