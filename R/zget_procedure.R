@@ -175,9 +175,10 @@ if(is.null(WD_git)){
     lsnTitle <- ifelse(length(ptitles) < i, NA, ptitles[i])
     lsnDur <- proc$lsnDur[i]
     lsnPreface <- ifelse(length(pprefs) < i, NA, pprefs[i])
+
     if(length(learningObj[[1]])==0){
       learningObj_i <- NULL
-      warning("No learning objectives found.")
+      warning("No learning objectives found for lesson: ",i)
     }else{
 
       learningObj_i <- learningObj[[i]]
