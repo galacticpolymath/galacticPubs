@@ -9,29 +9,54 @@
 #' @importFrom rlang .data
 #' @export
 #'
-compile_json<- function( WD=NULL, WD_git=NULL,destFolder){
+compile_json <- function(WD = NULL,
+                         WD_git = NULL,
+                         destFolder) {
+  if (!is.null(WD)) {
+    WD <- parse_wd(WD)
+  }
 
-  WD <- parse_wd(WD)
-  if(is.null(WD_git)){
-    WD_git <- get_wd_git(WD=WD)
+  if (is.null(WD_git)) {
+    WD_git <- get_wd_git(WD = WD)
   }
   checkmate::assert_directory_exists(WD_git)
 
+  LessonTitle <- get_fm("MediumTitle",WD_git = WD_git)
 
-  if(missing(destFolder)){destFolder=WD_git}
+  if (missing(destFolder)) {
+    destFolder = WD_git
+  }
 
-  srcFolder <- fs::path(WD_git,"JSONs")
+  srcFolder <- fs::path(WD_git, "JSONs")
 
   #   jsonNames should be ordered; this is telling which json files to look for and assemble them in this order
-  jsonNames<-c("header","overview","preview","teaching-materials","extensions","bonus","background","standards-header","learning-chart","standards","feedback","job-viz","credits","acknowledgments","versions")
+  jsonNames <-
+    c(
+      "header",
+      "overview",
+      "preview",
+      "teaching-materials",
+      "extensions",
+      "bonus",
+      "background",
+      "standards-header",
+      "learning-chart",
+      "standards",
+      "feedback",
+      "job-viz",
+      "credits",
+      "acknowledgments",
+      "versions"
+    )
 
-  potentialFilenames<-paste0(jsonNames,".json")
+  potentialFilenames <- paste0(jsonNames, ".json")
 
   #test for missings or duplicates
-  json_ls<-list.files(srcFolder)
+  json_ls <- list.files(srcFolder)
 
-  matches<-data.frame(file=potentialFilenames,found=potentialFilenames%in%json_ls)
-  format(matches,justify="none")
+  matches <-
+    data.frame(file = potentialFilenames, found = potentialFilenames %in% json_ls)
+  format(matches, justify = "none")
   #point out missing sections
   if (sum(matches$found) < length(jsonNames)) {
     missingJSON <- subset(matches, !matches$found)$file
@@ -40,41 +65,46 @@ compile_json<- function( WD=NULL, WD_git=NULL,destFolder){
             "\n")
   }
 
-  filenamez.df<-subset(matches,matches$found)
+  filenamez.df <- subset(matches, matches$found)
   #read in all the json pieces
-  lesson_data<-lapply(filenamez.df$file,function(x){
-    jsonlite::read_json(fs::path(srcFolder,x),na="null",null="null")
+  lesson_data <- lapply(filenamez.df$file, function(x) {
+    jsonlite::read_json(fs::path(srcFolder, x), na = "null", null = "null")
   })
-  names(lesson_data)<-gsub("^(.*)\\..*","\\1", filenamez.df$file) #removes file extension
+  names(lesson_data) <-
+    gsub("^(.*)\\..*", "\\1", filenamez.df$file) #removes file extension
 
 
   #body of the lesson plan (minus header)
-  lesson_body<-list(lapply(2:length(lesson_data),function(x){lesson_data[[x]]}))
+  lesson_body <-
+    list(lapply(2:length(lesson_data), function(x) {
+      lesson_data[[x]]
+    }))
 
   names(lesson_body[[1]]) <- names(lesson_data)[-1]
 
   #reorganize slightly to match legacy structure
-  lesson<-c(lesson_data[["header"]],
-               Section = lesson_body,
-               CoverImage = lesson_data[["images"]]$CoverImage,
-               SponsorImage = lesson_data[["images"]]$SponsorImage
-              )
+  lesson <- c(
+    lesson_data[["header"]],
+    Section = lesson_body,
+    CoverImage = lesson_data[["images"]]$CoverImage,
+    SponsorImage = lesson_data[["images"]]$SponsorImage
+  )
 
 
   # create directory if necessary & prep output filename --------------------
-  dir.create(destFolder,showWarnings=FALSE,recursive=T)
-  outFile<-fs::path(destFolder,"LESSON.json")
+  dir.create(destFolder, showWarnings = FALSE, recursive = T)
+  outFile <- fs::path(destFolder, "LESSON.json")
 
 
   # Write JSON for GP Simple Lesson Plan -----------------------------------
-  save_json(lesson,outFile)
+  save_json(lesson, outFile)
 
 
   # return compiled output --------------------------------------------------
-  message(" ",rep("-",30),"\n Lesson successfully compiled:")
+  message(" ", rep("-", 30), "\n Lesson successfully compiled:\n  ",LessonTitle)
   # print(printToScreenTable)
-  message("\n Combined JSON file saved\n @ ",outFile,"\n")
-  message(" ",rep("-",30))
+  message("\n Combined JSON file saved\n @ ", outFile, "\n")
+  message(" ", rep("-", 30))
 
 
 }

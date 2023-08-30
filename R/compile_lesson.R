@@ -357,7 +357,7 @@ compile_lesson <-
 
     ################################################################
     # Compile all JSONs ----------------------------------------------
-    compileJSON(WD = WD)
+    compile_json(WD_git = WD_git)
 
     #after run, reset rebuild-all trigger
     if (rebuild) {

@@ -7,5 +7,6 @@
 #
 fixAnchorLinks<-function(md){
   pat<- "\\[([^\\[]*?)\\]\\((#.*?)\\)"
+
   stringr::str_replace_all(string=md,pattern=pat,"<AnchorLink href=\"\\2\"> \\1 </AnchorLink>")
 }

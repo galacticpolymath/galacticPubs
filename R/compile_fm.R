@@ -172,6 +172,7 @@ compile_fm <- \(WD = "?") {
   # expand_md_links takes relative links in [](x.jpg) format and makes a full path to GP catalog
   # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
   # BACKGROUND
+
   Background <- get_fm("Background", WD = WD)
   C2R <- get_fm("ConnectionToResearch", WD = WD)
   if (!is_empty(Background)) {
@@ -225,7 +226,7 @@ compile_fm <- \(WD = "?") {
       list(
         `__component` = "lesson-plan.collapsible-text-section",
         SectionTitle = "Credits",
-        Content = expand_md_links(Credits,
+        Content = expand_md_links(unlist(Credits),
                                   WD=WD) %>% fixAnchorLinks(),
         InitiallyExpanded = TRUE
       )
