@@ -10,10 +10,10 @@
 #' @param validate logical; do you want to throw an error if any of the following are missing? default= FALSE
 #' - shortTitle
 #' - title
-#' - lsn
-#' - grades
-#' - itemType
-#' - fileType
+#' - `_lsn`
+#' - `_grades`
+#' - `_itemType`
+#' - `_fileType`
 #' @param all_info logical; keep the full drive_resources list with all the dribble meta info for each row item? default=FALSE
 #'
 #' @returns a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
@@ -40,16 +40,23 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     short_title = string_parseCamel(shortTitle) %>% catch_err(keep_results = TRUE) %>% .$result
     #Most will have a lesson number in the 2nd place (that starts with "L").
     #Will just supply the number if an l is found in this spot, OR there is no - here indicating grade range; otherwise NA
-    lsn = ifelse(
+    lsn <-  ifelse(
       substr(tolower(nom_split[2]), 1, 1) == "l" |
         !grepl("-", nom_split[2], fixed = TRUE),
       gsub("[a-zA-Z]", "", nom_split[2]),
       NA
     )
+    #remove lesson values that aren't numbers
+    lsn <- ifelse(!grepl("\\d",lsn),NA,lsn)
 
     #Grades should be found in the 3rd spot, unless there is only one lsn (and no L1). We won't test for G b/c of multilanguage variants on Grade, Year, Etapa, etc
     if (is.na(lsn)) {
       grade_str <- nom_split[2]
+      #if no digits in grade_str, try the next part of the string
+      if(!grepl("\\d",grade_str)){
+        grade_str <- nom_split[3]
+      }
+
       remaining_str <-
         paste0(nom_split[3:length(nom_split)], collapse = "")
     } else{
@@ -157,19 +164,21 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     modTime<-dribble$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
     checkmate::assert_posixct(modTime,any.missing = FALSE)
       #output
+      #* format using _item convention for items that are machine-read (not user-entered)
+      #* Specifically those that will go on teach_it.gsheet 'TeachMatLinks' tab
     row_i_out <- dplyr::tibble(
       shortTitle = shortTitle,
       short_title = short_title,
       title=NA,
-      filename=nom,
-      itemType = itemType,
-      fileType = fileType,
-      envir = envir,
-      grades = grades,
-      lsn = lsn,
-      SvT= SvT,
+      `_filename`=nom,
+      `_itemType` = itemType,
+      `_fileType` = fileType,
+      `_envir` = envir,
+      `_grades` = grades,
+      `_lsn` = lsn,
+      `_SvT`= SvT,
       description=NA,
-      link = link,
+      `_link` = link,
       modTime= modTime
 
     )

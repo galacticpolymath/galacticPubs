@@ -149,7 +149,7 @@ compile_lesson <-
       newer = TRUE,
       WD = WD
     )
-
+    browser()
     # Compile standards if out of date or missing or rebuild==T ----------------
     if ("Standards Alignment" %in% choices &
         (stnds_out_of_date | rebuild)) {
@@ -245,7 +245,7 @@ compile_lesson <-
           Badge = list(url = ifelse(
             is_empty(current_data$LearningChart[1]),
             NA,
-            catalogURL(basename(current_data$LearningChart[1]), proj)
+            catalogURL(basename(current_data$LearningChart[1]), proj_dir)
           ))
 
 
@@ -303,45 +303,40 @@ compile_lesson <-
 
 
     if ("Teaching Materials" %in% choices) {
-      if (is.na(current_data$GitHubURL)) {
-        warning(
-          "GitHubURL is missing from front-matter.yml...if this doesn't work, try running update_fm()."
-        )
+      #check if previous save file exists
+      save_path <-
+        fs::path(WD_git, "saves", "save-state_teach-it.RDS")
+      test_save_exists <- file.exists(save_path)
+      if (test_save_exists) {
+        #compare current timestamps and file counts from last update to current
+        prev_update_state <- readRDS(save_path)
+        #get state for teach-it.gsheet AND all teaching-materials/ contents
+        curr_update_state <-
+          get_state(c(teach_it_path, tm_path_full), save_path = NULL)
+
+        skip_update <-
+          identical(prev_update_state, curr_update_state)
       } else{
-        #check if previous save file exists
-        save_path <-
-          fs::path(WD_git, "saves", "save-state_teach-it.RDS")
-        test_save_exists <- file.exists(save_path)
-        if (test_save_exists) {
-          #compare current timestamps and file counts from last update to current
-          prev_update_state <- readRDS(save_path)
-          #get state for teach-it.gsheet AND all teaching-materials/ contents
-          curr_update_state <-
-            get_state(c(teach_it_path, tm_path_full), save_path = NULL)
-
-          skip_update <-
-            identical(prev_update_state, curr_update_state)
-        } else{
-          skip_update <- FALSE
-        }
-
-        if (!skip_update | rebuild) {
-          # update teach_it links and compile ---------------------------------------
-          message("Changes to `../teaching-materials/` detected...")
-          message("Running update_teach_links() and compile_teach-it()")
-
-          test_update_teach_it <-
-            update_teach_links(WD = WD) %>% catch_err()
-          test_compile_teach_it <-
-            compile_teach_it(WD = WD) %>% catch_err()
-          #update the cache of the teaching-material state of things
-          get_state(path = c(teach_it_path, tm_path_full),
-                    save_path = save_path)
-        } else{
-          message("No changes to `../teaching-materials/` detected...")
-          message("Skipping update_teach_links() and compile_teach-it()")
-        }
+        skip_update <- FALSE
       }
+
+      if (!skip_update | rebuild) {
+        # update teach_it links and compile ---------------------------------------
+        message("Changes to `../teaching-materials/` detected...")
+        message("Running update_teach_links() and compile_teach-it()")
+
+        test_update_teach_it <-
+          update_teach_links(WD = WD) %>% catch_err()
+        test_compile_teach_it <-
+          compile_teach_it(WD = WD) %>% catch_err()
+        #update the cache of the teaching-material state of things
+        get_state(path = c(teach_it_path, tm_path_full),
+                  save_path = save_path)
+      } else{
+        message("No changes to `../teaching-materials/` detected...")
+        message("Skipping update_teach_links() and compile_teach-it()")
+      }
+
 
     }
 
