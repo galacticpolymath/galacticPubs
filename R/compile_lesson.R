@@ -42,15 +42,16 @@ compile_lesson <-
     if (missing(choices)) {
       choices <- current_data$ReadyToCompile
     }
-browser()
+
+
 
     # Find the path for the GitHub gp-lessons working dir ---------------------
     WD_git <- get_wd_git(WD = WD)
 
     destFolder <- fs::path(WD_git, "JSONs")
 
-    proj_dir <- get_fm("GdriveDirName",WD=WD)
-    checkmate::assert_character(proj_dir,min.chars=5)
+    proj_dir <- get_fm("GdriveDirName", WD = WD)
+    checkmate::assert_character(proj_dir, min.chars = 5)
 
     if (!dir.exists(destFolder)) {
       stop("Directory not found: ", destFolder)
@@ -70,10 +71,10 @@ browser()
     if (clean) {
       to_delete <-
         list.files(destFolder, pattern = "*\\.json", full.names = TRUE)
-      if(length(to_delete)>0){
-      unlink(to_delete)
-      message("\nJSONs folder cleared: ", destFolder, "\n")
-      }else{
+      if (length(to_delete) > 0) {
+        unlink(to_delete)
+        message("\nJSONs folder cleared: ", destFolder, "\n")
+      } else{
         message("\nNo JSONs found at: ", destFolder, "\n")
       }
     }
@@ -146,7 +147,7 @@ browser()
       compiled_standards_path,
       standards_gsheet_path,
       newer = TRUE,
-      WD=WD
+      WD = WD
     )
 
     # Compile standards if out of date or missing or rebuild==T ----------------
@@ -166,13 +167,15 @@ browser()
         current_data$LearningChartFriendly <-
           alignment$learning_chart_friendly
         if (is.na(current_data$TargetSubject)) {
-          warning("Run editor() for this lesson and enter a Target Subject on the Edit tab and try again.")
+          warning(
+            "Run editor() for this lesson and enter a Target Subject on the Edit tab and try again."
+          )
         }
         message("\nGenerating Learning Chart\n")
       }
     }
 
-
+    #??Is this why compile_lesson sometimes runs once unnecessarily?
     if ("Standards Alignment" %in% choices) {
       # Test if standards are compatible with learning chart --------------------
       if (!file.exists(compiled_standards_path)) {
@@ -188,17 +191,16 @@ browser()
         save_json(sh,
                   fs::path(destFolder, "standards-header.json"))
 
-        save_json(
-          saved_standards$data$list_for_json,
-          fs::path(destFolder, "standards.json")
-        )
+        save_json(saved_standards$data$list_for_json,
+                  fs::path(destFolder, "standards.json"))
       }
       #Only proceed to generate learningChart if compatible...
       if (!saved_standards$learning_chart_friendly) {
         current_data$LearningChart <- NULL
       } else if (!inSync(
         fs::path(WD, "assets", "_learning-plots", "GP-Learning-Chart.png"),
-        standards_gsheet_path
+        standards_gsheet_path,
+        WD = WD
       ) |
       (rebuild)) {
         #LEARNING CHART
@@ -250,10 +252,8 @@ browser()
         )
 
         #write learning chart section before standards section
-        save_json(
-          lc,
-          fs::path(destFolder, "learning-chart.json")
-        )
+        save_json(lc,
+                  fs::path(destFolder, "learning-chart.json"))
       }
 
     }#end general standards stuff
@@ -268,7 +268,8 @@ browser()
               "_learning-plots",
               "GP-Learning-Epaulette.png"
             ),
-            standards_gsheet_path
+            standards_gsheet_path,
+            WD = WD
           ) | rebuild | is_empty(current_data$LearningEpaulette)
         )) {
       #####################
@@ -308,7 +309,8 @@ browser()
         )
       } else{
         #check if previous save file exists
-        save_path <- fs::path(WD_git, "saves", "save-state_teach-it.RDS")
+        save_path <-
+          fs::path(WD_git, "saves", "save-state_teach-it.RDS")
         test_save_exists <- file.exists(save_path)
         if (test_save_exists) {
           #compare current timestamps and file counts from last update to current
