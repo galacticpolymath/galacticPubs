@@ -4,13 +4,14 @@
 #'
 #' @param WD WD working directory, passed to [parse_wd()]
 #' @returns a Tibble with success, filenames and download links
+#' @family google cloud storage
 #' @export
 
 upload_assets <- \(WD = "?",
                    bucket = "gp-cloud") {
   WD <- parse_wd(WD)
-  init_gcs()
-
+  test_init <- init_gcs(bucket=bucket)
+  checkmate::assert_true(test_init,.var.name="GCS cloud connection initialized")
 
   GdriveDirName = get_fm("GdriveDirName", WD = WD)
   #The relative path where we will be storing (or have stored)
@@ -30,37 +31,9 @@ upload_assets <- \(WD = "?",
   #Otherwise delete records with cloud_prefix and upload anew
   message("Uploading files to galacticPubs GCS bucket: ", bucket, "\n")
 
-  out <- purrr::map_df(1:nrow(assets), .progress = TRUE, .f = \(i) {
-    asset_i <- assets[i, ]
-    test_upload_i <-
-      googleCloudStorageR::gcs_upload(
-        file = asset_i$path,
-        bucket = bucket,
-        name = asset_i$cloud_path,
-        predefinedAcl = 'bucketLevel'
-      )  %>%
-      catch_err(keep_results = T)
+  out <- gcs_add(assets,
+                bucket=bucket) %>% catch_err(keep_results = TRUE)
 
-    if (test_upload_i$success) {
-      asset_i$download_url <-
-        paste0("https://storage.googleapis.com/",
-               bucket,
-               "/",
-               asset_i$cloud_path)
-    } else{
-      asset_i$download_url <- NA
-    }
-
-
-    #output report
-    dplyr::tibble(
-      success = test_upload_i$success,
-      name = asset_i$name,
-      cloud_path = asset_i$cloud_path,
-      download_url = asset_i$download_url
-    )
-
-  })
   #Show output with nice checks
   out %>% dplyr::mutate(success=convert_T_to_check(.data$success)) %>% print()
 
@@ -69,3 +42,13 @@ upload_assets <- \(WD = "?",
   out
 
 }
+
+#' gcs_upload_assets()
+#'
+#' Alias for upload_assets
+#'
+#' @describeIn upload_assets alias
+#' @family google cloud storage
+#' @export
+
+gcs_upload_assets <- upload_assets

@@ -2,9 +2,12 @@
 % Please edit documentation in R/upload_assets.R
 \name{upload_assets}
 \alias{upload_assets}
+\alias{gcs_upload_assets}
 \title{upload_assets()}
 \usage{
 upload_assets(WD = "?", bucket = "gp-cloud")
+
+gcs_upload_assets(WD = "?", bucket = "gp-cloud")
 }
 \arguments{
 \item{WD}{WD working directory, passed to \code{\link[=parse_wd]{parse_wd()}}}
@@ -14,4 +17,21 @@ a Tibble with success, filenames and download links
 }
 \description{
 Upload lesson assets to galacticPubs Google Cloud Storage bucket
+
+Alias for upload_assets
 }
+\section{Functions}{
+\itemize{
+\item \code{gcs_upload_assets()}: alias
+
+}}
+\seealso{
+Other google cloud storage: 
+\code{\link{gcs_add}()},
+\code{\link{gcs_contents}()}
+
+Other google cloud storage: 
+\code{\link{gcs_add}()},
+\code{\link{gcs_contents}()}
+}
+\concept{google cloud storage}
