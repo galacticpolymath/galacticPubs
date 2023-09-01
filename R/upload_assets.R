@@ -86,7 +86,7 @@ upload_assets <- \(WD = "?",
 
   # Stage assets: aggregate and copy to published/ --------------------------
   assets <- purrr::map(1:nrow(tasks), \(i) {
-    df_i <- tasks[i,]
+    df_i <- tasks[i, ]
     if (is.na(df_i$exclude)) {
       ex <- NULL
     } else{
@@ -115,26 +115,35 @@ upload_assets <- \(WD = "?",
 
   # See what's already in the cloud ------------------------------------------------
   uploaded <- gcs_contents(WD = WD, detail = "more")
-  uploaded$updated <- lubridate::force_tz(uploaded$updated,tz="UTC")
-  #local TZ
-   loc_tz <-  Sys.timezone()
-  #reassign to local timezone
-  uploaded$updated <- lubridate::with_tz(uploaded$updated,tz=loc_tz)
+  if (nrow(uploaded) == 0) {
+    to_upload <- assets
+  } else{
+    uploaded$updated <-
+      lubridate::force_tz(uploaded$updated, tz = "UTC")
+    #local TZ
+    loc_tz <-  Sys.timezone()
+    #reassign to local timezone
+    uploaded$updated <-
+      lubridate::with_tz(uploaded$updated, tz = loc_tz)
 
 
-  merged_mod_times <-
-    dplyr::left_join(
-      assets[, c("cloud_path", "updated", "path1", "key")],
-      uploaded[, c("name", "updated")],
-      by = c("cloud_path" = "name"),
-      suffix = c(".local", ".cloud")
-    )
+    merged_mod_times <-
+      dplyr::left_join(
+        assets[, c("cloud_path", "updated", "path1", "key")],
+        uploaded[, c("name", "updated")],
+        by = c("cloud_path" = "name"),
+        suffix = c(".local", ".cloud")
+      )
 
 
-  to_upload <- merged_mod_times %>%
-    dplyr::filter(.data$updated.local > .data$updated.cloud |
-                    is.na(.data$updated.cloud)) %>%
-    dplyr::rename(path = .data$path1)
+    to_upload <- merged_mod_times %>%
+      dplyr::filter(.data$updated.local > .data$updated.cloud |
+                      is.na(.data$updated.cloud)) %>%
+      dplyr::rename(path = .data$path1)
+  }
+
+
+  # UPLOAD STUFF ------------------------------------------------------------
 
   if (nrow(to_upload) > 0) {
     upload_L <- gcs_add(assets = to_upload,
@@ -144,7 +153,10 @@ upload_assets <- \(WD = "?",
     print(upload_L$result)
   }
 
-  # Now which files in the cloud should be deleted?
+
+  # DELETE STUFF ------------------------------------------------------------
+
+
   to_del <-
     dplyr::anti_join(uploaded[, "name"], assets[, "cloud_path"], by = c("name" =
                                                                           "cloud_path"))
@@ -186,10 +198,16 @@ upload_assets <- \(WD = "?",
       df_x$download_url
     })
 
-  test_fm_update <- update_fm(WD = WD, change_this =fm_update_list)
+  test_fm_update <- update_fm(WD = WD, change_this = fm_update_list)
 
-  summ <- dplyr::tibble(success=convert_T_to_check(c(test_uploaded,test_fm_update)),
-                        task=c("synced assets with the cloud","updated all URLs in front-matter"))
+  summ <-
+    dplyr::tibble(
+      success = convert_T_to_check(c(test_uploaded, test_fm_update)),
+      task = c(
+        "synced assets with the cloud",
+        "updated all URLs in front-matter"
+      )
+    )
   print(summ)
 
 

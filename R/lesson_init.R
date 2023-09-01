@@ -55,7 +55,7 @@ lesson_init <- \(ShortTitle) {
   asset_subdir <-
     c(
       "_banners_logos_etc",
-      "_learning_plots",
+      "_learning-plots",
       "_orig-client-media_NoEdit",
       "_other-media-to-publish",
       "_R_outputs",
