@@ -71,6 +71,7 @@ stage_assets <-
     if(nrow(to_copy)==0){
       out <- NULL
     }else{
+
     out <-copy_updated_files(paths = to_copy$path, dest_folder, clear = clear,WD=WD) %>%
       catch_err(keep_results = TRUE)
     }

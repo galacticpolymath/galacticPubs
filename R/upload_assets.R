@@ -89,7 +89,7 @@ upload_assets <- \(WD = "?",
 
   # Stage assets: aggregate and copy to published/ --------------------------
   assets <- purrr::map(1:nrow(tasks), \(i) {
-    df_i <- tasks[i,]
+    df_i <- tasks[i, ]
     if (is.na(df_i$exclude)) {
       ex <- NULL
     } else{
@@ -110,20 +110,26 @@ upload_assets <- \(WD = "?",
     if (!is_empty(res_i$result)) {
       res_i$result %>% dplyr::mutate(key = df_i$key) %>% dplyr::relocate("key")
     }
-  }) %>%
-    dplyr::bind_rows() %>%
-    dplyr::rename(path = .data$path1)
+  })
 
-  #add modified date to assets
-  assets$updated <- fs::file_info(assets$path)$modification_time
+  if (!is_empty(assets)) {
+    assets <- assets  %>%
+      dplyr::bind_rows() %>%
+      dplyr::rename(path = .data$path1)
 
-  #add expected cloud_path
-  assets$cloud_path <- paste0(cloud_prefix, "/", assets$name)
+
+    #add modified date to assets
+    assets$updated <- fs::file_info(assets$path)$modification_time
+
+    #add expected cloud_path
+    assets$cloud_path <- paste0(cloud_prefix, "/", assets$name)
+  }
+
 
 
 
   #Don't do anything if there are no assets to upload
-  if (nrow(assets) == 0) {
+  if (is_empty(assets)) {
     message("No assets found. Skipping upload")
     out <-
       dplyr::tibble(
@@ -132,7 +138,7 @@ upload_assets <- \(WD = "?",
         log = NA,
         cloud_path = NA,
         download_url = NA
-      )[0,]
+      )[0, ]
 
     #Start Big Else
   } else{
@@ -141,7 +147,7 @@ upload_assets <- \(WD = "?",
     uploaded <- gcs_contents(WD = WD, detail = "more")
     if (!is_empty(uploaded)) {
       if (clear) {
-        to_del <- uploaded %>% dplyr::rename(cloud_path=.data$name)
+        to_del <- uploaded %>% dplyr::rename(cloud_path = .data$name)
         #figure out what's missing
       } else{
         to_del <-
