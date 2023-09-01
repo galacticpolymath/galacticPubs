@@ -22,6 +22,7 @@ inSync <- function(path1,
  WD <- parse_wd(WD)
 
   pathz <- c(path1, path2,...)
+
   if(is_empty(path2)){
     test_age<-FALSE
     warning("Path2: '",path2,"' is invalid")

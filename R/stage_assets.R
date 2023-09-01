@@ -46,6 +46,10 @@ stage_assets <-
     #     "SupportingMedia"
     #   )
     full_path <- fs::path(WD, rel_path)
+
+
+# Check if there's anything to copy ---------------------------------------
+
     to_copy <-
       dplyr::tibble(
         path = fs::dir_ls(full_path),
@@ -64,9 +68,12 @@ stage_assets <-
     }
 
     # clear target directory if requested and copy updated files
-
+    if(nrow(to_copy)==0){
+      out <- NULL
+    }else{
     out <-copy_updated_files(paths = to_copy$path, dest_folder, clear = clear,WD=WD) %>%
       catch_err(keep_results = TRUE)
+    }
 
     return(invisible(out))
 

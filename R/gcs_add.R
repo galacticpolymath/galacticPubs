@@ -67,7 +67,7 @@ gcs_add <- \(assets,
 
       #output report
       dplyr::tibble(
-        success = test_upload_i$success,
+        success = convert_T_to_check(test_upload_i$success),
         filename = basename(asset_i$path),
         cloud_path = asset_i$cloud_path,
         download_url = asset_i$download_url
