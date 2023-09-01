@@ -2,27 +2,30 @@
 % Please edit documentation in R/stage_assets.R
 \name{stage_assets}
 \alias{stage_assets}
-\title{stage_assets}
+\title{Copy updated assets in a specific folder to a destination}
 \usage{
 stage_assets(
-  current_data = NULL,
-  WD = getwd(),
+  WD,
+  rel_path,
+  pattern = NULL,
+  exclude = NULL,
   dest_folder = NULL,
-  clear = TRUE,
-  status = NULL
+  clear = FALSE
 )
 }
 \arguments{
-\item{current_data}{either data read in from front-matter.yml or made with the Shiny helper function prep_input()}
+\item{WD}{what's the project working directory? passed to parse_wd()}
 
-\item{WD}{what's the project working directory? default: getwd()}
+\item{rel_path}{what's the subfolder path within WD? e.g."assets/_learning-plots"}
 
-\item{dest_folder}{where you want things to go (defaults to www)}
+\item{pattern}{a regular expression for allowable file types; default=NULL}
 
-\item{clear}{do you want to delete everything in the target directory? default: T}
+\item{exclude}{a regular expression to exclude from uploading; default=NULL excludes nothing; ".ai$" would exclude Adobe Illustrator files for example.}
 
-\item{status}{if staging assets for publishing, you can toggle "Draft" or "Live"; default=NULL}
+\item{dest_folder}{full path to where you want things to go (defaults to WD/published)}
+
+\item{clear}{do you want to delete everything in the target directory? default= FALSE}
 }
 \description{
-Copy all lesson assets to the desired location to prep for lesson publishing
+Helper for \code{\link[=upload_assets]{upload_assets()}}.
 }

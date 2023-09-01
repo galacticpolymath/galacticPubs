@@ -4,7 +4,7 @@
 \alias{gcs_add}
 \title{Helper for \code{\link[=upload_assets]{upload_assets()}}: Add a file to Google Cloud Storage bucket}
 \usage{
-gcs_add(assets, bucket = "gp-cloud")
+gcs_add(assets, bucket = "gp-cloud", key = NULL)
 }
 \arguments{
 \item{assets}{expects a tibble with local path(s) to a file. Must have columns:
@@ -14,6 +14,8 @@ gcs_add(assets, bucket = "gp-cloud")
 }}
 
 \item{bucket}{GCS bucket; default= "gp-cloud"}
+
+\item{key}{name of the galacticPubs key to add to Google Cloud meta data. Passed to \code{\link[googleCloudStorageR:gcs_metadata_object]{googleCloudStorageR::gcs_metadata_object()}}; default=NULL. *Right now it will go to the web, but there doesn't seem to be a way to access it in R.}
 }
 \value{
 boolean of success
@@ -27,6 +29,7 @@ A shallow wrapper for \code{\link[googleCloudStorageR:gcs_upload]{googleCloudSto
 \seealso{
 Other google cloud storage: 
 \code{\link{gcs_contents}()},
+\code{\link{gcs_delete}()},
 \code{\link{upload_assets}()}
 }
 \concept{google cloud storage}

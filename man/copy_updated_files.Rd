@@ -16,7 +16,7 @@ copy_updated_files(paths, dest_folder, clear = FALSE, verbose = TRUE)
 \item{verbose}{print summary table? default=T}
 }
 \value{
-tibble of path1 files and statuses
+tibble of path1 files and statuses (whether they were updated, added, or are up-to-date)
 }
 \description{
 Copy files to destination only if the file is missing or out of date at the destination

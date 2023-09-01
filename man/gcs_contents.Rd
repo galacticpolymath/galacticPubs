@@ -20,6 +20,7 @@ A shallow wrapper for \code{\link[googleCloudStorageR:gcs_list_objects]{googleCl
 \seealso{
 Other google cloud storage: 
 \code{\link{gcs_add}()},
+\code{\link{gcs_delete}()},
 \code{\link{upload_assets}()}
 }
 \concept{google cloud storage}

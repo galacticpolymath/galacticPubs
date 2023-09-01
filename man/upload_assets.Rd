@@ -28,10 +28,12 @@ Alias for upload_assets
 \seealso{
 Other google cloud storage: 
 \code{\link{gcs_add}()},
-\code{\link{gcs_contents}()}
+\code{\link{gcs_contents}()},
+\code{\link{gcs_delete}()}
 
 Other google cloud storage: 
 \code{\link{gcs_add}()},
-\code{\link{gcs_contents}()}
+\code{\link{gcs_contents}()},
+\code{\link{gcs_delete}()}
 }
 \concept{google cloud storage}

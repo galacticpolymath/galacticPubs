@@ -18,11 +18,11 @@ gcs_delete <- \(cloud_path,
   checkmate::assert_choice(bucket, c("gp-cloud"))
   message("Removing outdated files from galacticPubs GCS bucket: ", bucket, "\n")
 
-  if (nrow(assets) == 0) {
+  if (length(cloud_path) == 0) {
     #output report
-    dplyr::tibble(
+    out <- dplyr::tibble(
       success = FALSE,
-      cloud_path = cloud_path
+      cloud_path = NA
     )
   } else{
     out <- purrr::map_df(cloud_path, .progress = TRUE, .f = \(x) {
@@ -42,4 +42,5 @@ gcs_delete <- \(cloud_path,
 
     })
   }
+  out
 }

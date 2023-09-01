@@ -6,7 +6,7 @@
 #' @param path2 path to reference file (expected to be at least slightly older, if newer=T). Path 2 can also be
 #' @param newer logical; is path1 expected to be newer than (i.e. derived from) other paths? default=T. If newer=F, will test if path1 is older than all other paths.
 #' @param ... path to other reference files to compare modified date to path1; separated by commas
-#' @param verbose print out table with information? default=FALSE
+#' @param full_results default=FALSE; if TRUE, returns a list with success and a data table with modification info
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke [pick_lesson()]
 #'
 #' @returns T if timestamps match, F if they don't or if path 1 is missing
@@ -16,14 +16,14 @@ inSync <- function(path1,
                    path2,
                    newer = TRUE,
                    ...,
-                   verbose = FALSE,
+                   full_results = FALSE,
                    WD = "?"
 ) {
  WD <- parse_wd(WD)
 
   pathz <- c(path1, path2,...)
   if(is_empty(path2)){
-    out<-FALSE
+    test_age<-FALSE
     warning("Path2: '",path2,"' is invalid")
   }else{
   existence <- sapply(pathz, file.exists)
@@ -34,7 +34,7 @@ inSync <- function(path1,
                              not_found_here=fs::path_rel(names(existence)[which(!existence)], WD))
     message("\n****\nSome Path(s) Not Found:\n***")
     message(utils::capture.output(print(as.data.frame(bad_paths)),type="message"))
-      out <- FALSE
+      test_age <- FALSE
 
   } else{
     #if all files found, compare time stamps
@@ -42,10 +42,6 @@ inSync <- function(path1,
                          lapply(pathz, function(x)
                            file.info(x)))[c(1, 4:6)] %>% dplyr::as_tibble()
 
-    if (verbose) {
-      message("PATH INFO")
-      print(path_info)
-    }
 
     #Is path 1 newer than dependent paths?? (time1 should always be greater, and diff>=0)
     ageDiff <-sapply(2:length(existence),function(i){round(path_info$mtime[1],0)-round(path_info$mtime[i],0)})
@@ -53,11 +49,11 @@ inSync <- function(path1,
     if(newer){test <- ageDiff>=0}else{test <- ageDiff<=0}
 
     # the test has n-1 comparisons; does the number of test passes equal length of entries?
-    # out should be TRUE if everything is in sync
+    # test_age should be TRUE if everything is in sync
 
-    out<-ifelse(sum(test,na.rm=TRUE)+1==length(existence),TRUE,FALSE)
+    test_age<-ifelse(sum(test,na.rm=TRUE)+1==length(existence),TRUE,FALSE)
     #output file paths that are newer/older than path1 file
-    if(!out){
+    if(!test_age){
       # Expect Path 1 to be newer
       if(newer) {
         bad_paths <- dplyr::tibble(
@@ -85,6 +81,16 @@ inSync <- function(path1,
 
     }
   }
+  }
+
+  if(full_results){
+    out <- list(
+      success=test_age,
+      data=
+        dplyr::tibble(name=basename(path1),up_to_date=test_age,path1=path1,path2=path2)
+    )
+  }else{
+    out <- test_age
   }
   out
 }
