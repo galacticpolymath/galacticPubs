@@ -94,7 +94,7 @@ compile_lesson <-
     }
 
     #quell Rcheck
-    lumpItems <- catalogURL <- expand_md_links <- NULL
+    lumpItems <- expand_md_links <- NULL
 
 
     # Define some paths -------------------------------------------------------
@@ -219,7 +219,7 @@ compile_lesson <-
                            "_learning-plots",
                            paste0(formals(learningChart)$fileName, ".png"))
         if (file.exists(lcname)) {
-          current_data$LearningChart <- lcname
+          current_data$LearningChart <- get_fm("LearningChart",WD=WD)
         }
       }
 
@@ -242,13 +242,7 @@ compile_lesson <-
               "."
             ),
           Footnote = "",
-          Badge = list(url = ifelse(
-            is_empty(current_data$LearningChart[1]),
-            NA,
-            catalogURL(basename(current_data$LearningChart[1]), proj_dir)
-          ))
-
-
+          Badge = current_data$LearningChart[1]
         )
 
         #write learning chart section before standards section
@@ -282,6 +276,7 @@ compile_lesson <-
         heightScalar = current_data$LearningEpaulette_params_heightScalar,
         randomSeed = current_data$LearningEpaulette_params_randomSeed
       ) %>% catch_err()
+
 
 
 
