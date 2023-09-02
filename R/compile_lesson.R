@@ -51,7 +51,7 @@ compile_lesson <-
     destFolder <- fs::path(WD_git, "JSONs")
 
     proj_dir <- get_fm("GdriveDirName", WD = WD)
-    checkmate::assert_character(proj_dir, min.chars = 5)
+    checkmate::assert_character(proj_dir, min.chars = 2)
 
     if (!dir.exists(destFolder)) {
       stop("Directory not found: ", destFolder)
