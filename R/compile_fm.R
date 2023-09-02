@@ -71,17 +71,10 @@ compile_fm <- \(WD = "?") {
     )$Text,
     Tags = lapply(fm$Tags, function(x)
       list(Value = x)),
-    SteamEpaulette = list(url = ifelse(
-      is.na(fm$LearningEpaulette[1]),
-      NA,
-      catalogURL(basename(fm$LearningEpaulette[1]), WD=WD)
-    )),
+    SteamEpaulette =  fm$LearningEpaulette[1],
     #might want to add more complex image handling later),
-    SteamEpaulette_vert = list(url = ifelse(
-      is.na(fm$LearningEpaulette_vert[1]),
-      NA,
-      catalogURL(basename(fm$LearningEpaulette_vert[1]), WD=WD)
-    ))
+    SteamEpaulette_vert = fm$LearningEpaulette_vert[1]
+
     #might want to add more complex image handling later),
   )
 

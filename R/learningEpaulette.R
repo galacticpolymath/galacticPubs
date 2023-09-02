@@ -302,6 +302,9 @@ learningEpaulette <-
       message("GP Learning Epaulette saved\n@ ", output)
       prop <- rectangles$proportion
       names(prop) <- rectangles$subject
+      message("Running upload_assets() to upload updated epaulettes & add to front-matter")
+      upload_assets(WD=WD)
+
       return(invisible(list(
         horiz = G,
         vert = G_vert,

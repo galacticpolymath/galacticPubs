@@ -1,6 +1,6 @@
 #' learningChart
 #'
-#' Make a GP Learning Chart
+#' Make a GP Learning Chart. Will also run [upload_assets()] when it's done.
 #'
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param caption quoted text you want to go at the bottom of the chart
@@ -564,6 +564,8 @@ learningChart = function(WD = "?",
 
       #tell user where file is saved
       message("GP Learning Chart saved\n@ ", outFile)
+      message("Running upload_assets() to upload updated learningChart & add to front-matter")
+      upload_assets(WD=WD)
 
       #return object to user (wrapped in invisible to prevent meaningless gTree obj being printed)
       return(invisible(G))

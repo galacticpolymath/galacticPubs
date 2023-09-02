@@ -146,6 +146,7 @@ upload_assets <- \(WD = "?",
     # See what's already in the cloud
     uploaded <- gcs_contents(WD = WD, detail = "more")
     if (!is_empty(uploaded)) {
+
       if (clear) {
         to_del <- uploaded %>% dplyr::rename(cloud_path = .data$name)
         #figure out what's missing

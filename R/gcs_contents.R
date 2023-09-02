@@ -13,7 +13,7 @@ gcs_contents <- \(WD = NULL,
                   ...) {
   if(!is.null(WD)){
   WD <- parse_wd(WD)
-  prefix <- paste0("lessons/",get_fm("GdriveDirName", WD=WD))
+  prefix <- paste0("lessons/",get_fm("GdriveDirName", WD=WD),"/")
   }else{prefix <- NULL}
   test_init <- init_gcs(bucket=bucket)
   checkmate::assert_true(test_init,.var.name="GCS cloud connection initialized")

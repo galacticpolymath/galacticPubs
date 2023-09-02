@@ -23,7 +23,6 @@ update_fm <-
            return_fm = FALSE,
            reorder = TRUE,
            drive_reconnect = FALSE) {
-
     WD <- parse_wd(WD)
     . = NULL
 
@@ -59,17 +58,17 @@ update_fm <-
     new_yaml$GdriveDirName <- basename(WD)
 
 
-# TEMP: Migrate some old names to new key names ---------------------------------
-  if("id" %in% names(old_yaml)){
-    new_yaml$numID <- old_yaml$id
-  }
-    if("numId" %in% names(old_yaml)){
-    new_yaml$numID <- old_yaml$numId
-  }
+    # TEMP: Migrate some old names to new key names ---------------------------------
+    if ("id" %in% names(old_yaml)) {
+      new_yaml$numID <- old_yaml$id
+    }
+    if ("numId" %in% names(old_yaml)) {
+      new_yaml$numID <- old_yaml$numId
+    }
 
-  if("UniqueID" %in% names(old_yaml)){
-    new_yaml$`_id` <- old_yaml$UniqueID
-  }
+    if ("UniqueID" %in% names(old_yaml)) {
+      new_yaml$`_id` <- old_yaml$UniqueID
+    }
 
 
     # change_this: Make manual changes if requested ----------------------------------------
@@ -112,48 +111,52 @@ update_fm <-
       }
 
 
-      if(sum(test_changes,na.rm=T)>0){
-      # Set up output of changes
-      old_data <- purrr::map(1:length(change_keys), \(i) {
-        key_i <- change_keys[i]
-        element_i <- old_yaml[[key_i]]
-        if (!is.data.frame(element_i)) {
-          #
-          old_i <- dplyr::tibble(key = key_i, old_value = element_i)
-        } else{
-          #To combine simple
-          old_i <-
-            tidyr::pivot_longer(element_i, dplyr::everything()) %>%
-            dplyr::rename(key = "name", old_value = "value") %>%
-            dplyr::mutate(key = paste0(key_i, "$", .data$key))
-        }
+      if (sum(test_changes, na.rm = T) > 0) {
+        # Set up output of changes
+        old_data <- purrr::map(1:length(change_keys), \(i) {
+          key_i <- change_keys[i]
+          element_i <- old_yaml[[key_i]]
+          if (!is.data.frame(element_i)) {
+            #
+            old_i <-
+              dplyr::tibble(key = key_i, old_value = element_i)
+          } else{
+            #To combine simple
+            old_i <-
+              tidyr::pivot_longer(element_i, dplyr::everything()) %>%
+              dplyr::rename(key = "name", old_value = "value") %>%
+              dplyr::mutate(key = paste0(key_i, "$", .data$key))
+          }
 
-      }) %>% dplyr::bind_rows()
+        }) %>% dplyr::bind_rows()
 
 
-      new_data <- purrr::map(1:length(change_keys), \(i) {
-        key_i <- change_keys[i]
-        element_i <- new_yaml[[key_i]]
-        if (!is.data.frame(element_i)) {
-          #
-          new_i <- dplyr::tibble(key = key_i, new_value = element_i)
-        } else{
-          #To combine simple
-          new_i <-
-            tidyr::pivot_longer(element_i, dplyr::everything()) %>%
-            dplyr::rename(key = "name", new_value = "value") %>%
-            dplyr::mutate(key = paste0(key_i, "$", .data$key))
-        }
-      }) %>%
-        dplyr::bind_rows()
+        new_data <- purrr::map(1:length(change_keys), \(i) {
+          key_i <- change_keys[i]
+          element_i <- new_yaml[[key_i]]
+          if (!is.data.frame(element_i)) {
+            #
+            new_i <-
+              dplyr::tibble(key = key_i, new_value = element_i)
+          } else{
+            #To combine simple
+            new_i <-
+              tidyr::pivot_longer(element_i, dplyr::everything()) %>%
+              dplyr::rename(key = "name", new_value = "value") %>%
+              dplyr::mutate(key = paste0(key_i, "$", .data$key))
+          }
+        }) %>%
+          dplyr::bind_rows()
 
-      summary <- dplyr::full_join(old_data,new_data,by="key",keep=F) %>%
-                dplyr::mutate(changed=convert_T_to_check(.data$old_value!=.data$new_value)) %>%
-        dplyr::relocate(changed)
+        summary <-
+          dplyr::full_join(old_data, new_data, by = "key", keep = F) %>%
+          dplyr::mutate(changed = convert_T_to_check(.data$old_value !=
+                                                       .data$new_value)) %>%
+          dplyr::relocate(changed)
 
-      message("The following keys were changed in front-matter: ")
-      print(summary)
-      }else{
+        message("The following keys were changed in front-matter: ")
+        print(summary)
+      } else{
         message("Nothing to change. 'change_this' list ignored")
       }
     }
@@ -166,8 +169,9 @@ update_fm <-
     new_yaml <- new_yaml %>% parse_locale()
 
     #make a unique `_id` combining numID & locale
-    if(!is_empty(new_yaml$numID)){
-      new_yaml$`_id` <- paste0(c("lesson",new_yaml$numID,new_yaml$locale),collapse="_")
+    if (!is_empty(new_yaml$numID)) {
+      new_yaml$`_id` <-
+        paste0(c("lesson", new_yaml$numID, new_yaml$locale), collapse = "_")
     }
 
     # overwrite MediumTitle used for sensible folder naming in public-facing GalacticPolymath network drive
@@ -231,12 +235,19 @@ update_fm <-
 
     # remove the following deprecated variables -------------------------------
 
-    deprecated <- c("GitHubPath", "GPCatalogPath", "test","id","numId", "UniqueID","GdriveTeachMat")
+    deprecated <-
+      c("GitHubPath",
+        "GPCatalogPath",
+        "test",
+        "id",
+        "numId",
+        "UniqueID",
+        "GdriveTeachMat")
     remove_deez <- which(names(new_yaml) %in% deprecated)
     if (length(remove_deez) > 0) {
       message(
         "The following deprecated entries were removed from your front-matter.yml:\n -",
-        paste0(names(new_yaml)[remove_deez],collapse="\n -")
+        paste0(names(new_yaml)[remove_deez], collapse = "\n -")
       )
       new_yaml <- new_yaml[-remove_deez]
 
@@ -398,13 +409,12 @@ update_fm <-
         pubID <- NA
 
 
-# Differential logic for paths of LIVE projects ---------------------------
+        # Differential logic for paths of LIVE projects ---------------------------
 
 
         #Live teaching materials found on GalacticPolymath shared drive,
         #renamed with MediumTitle
       } else{
-
         tm_path <-
           fs::path("GalacticPolymath", new_yaml$MediumTitle)
         tm_path_full <-
@@ -473,6 +483,10 @@ update_fm <-
         new_yaml$TemplateVer
       )
     }
+
+
+    # enforce certain classes -------------------------------------------------
+    new_yaml$numID <- as.integer(new_yaml$numID)
 
 
 
