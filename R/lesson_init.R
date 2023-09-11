@@ -4,22 +4,10 @@
 #'
 #' Will fail if ShortTitle duplicates an existing name found in GP-Studio or GP-Live
 #'
-#' @param ShortTitle What will be the ShortTitle prefix for the front-matter.yml?
 #' @export
 #'
 
-lesson_init <- \(ShortTitle) {
-    # Check if ShortTitle is valid and not a duplicate -------------------------
-  checkmate::assert_character(
-    inputs$ShortTitle,
-    min.chars = 2,
-    max.chars = 20,
-    all.missing = FALSE,
-    len = 1
-  )
-
-
-
+lesson_init <- \() {
 
   # Get details for new lesson with helper shiny app ------------------------
   inputs <- lesson_init_helper()
@@ -27,8 +15,18 @@ lesson_init <- \(ShortTitle) {
 
   #add locale to inputs
   inputs2 <- parse_locale(inputs)
+  inputs2$DefaultLocale <- inputs2$locale
   unit_name <-
     paste0(c(inputs$ShortTitle, inputs2$locale), collapse = "_")
+
+  # Check if ShortTitle is valid and not a duplicate -------------------------
+  checkmate::assert_character(
+    inputs$ShortTitle,
+    min.chars = 2,
+    max.chars = 20,
+    all.missing = FALSE,
+    len = 1
+  )
 
 
   #location of gp-lessons git project (not a google drive folder)
@@ -142,7 +140,8 @@ lesson_init <- \(ShortTitle) {
     update_fm_success <- suppressWarnings(update_fm(
       WD = WD,
       WD_git = WD_git,
-      change_this = inputs2[common_keys]
+      change_this = inputs2[common_keys],
+      try_harder=TRUE
     ))
   }
 

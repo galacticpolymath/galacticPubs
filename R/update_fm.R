@@ -11,6 +11,7 @@
 #' @param return_fm logical; if TRUE, returns the the updated front-matter; if FALSE (default), returns TRUE/FALSE of success
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
 #' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=F
+#' @param try_harder passed to [catch_err()] specifically when we look for GdriveDir, just in case the Google Drive for Desktop and Web are out of sync, it'll try after a series of intervals. Default= FALSE.
 #' @return returns logical of success
 #' @export
 #'
@@ -22,7 +23,8 @@ update_fm <-
            save_output = TRUE,
            return_fm = FALSE,
            reorder = TRUE,
-           drive_reconnect = FALSE) {
+           drive_reconnect = FALSE,
+           try_harder=FALSE) {
     WD <- parse_wd(WD)
     . = NULL
 
@@ -133,7 +135,7 @@ update_fm <-
 
         new_data <- purrr::map(1:length(change_keys), \(i) {
           key_i <- change_keys[i]
-          element_i <- new_yaml[[key_i]]
+          element_i <- new_yaml[[key_i]] %>% as.character()
           if (!is.data.frame(element_i)) {
             #
             new_i <-
@@ -277,7 +279,7 @@ update_fm <-
           "Lessons",
           new_yaml$GdriveDirName
         )) %>%
-        catch_err(keep_results = TRUE)
+        catch_err(keep_results = TRUE,try_harder = try_harder)
 
       checkmate::assert_data_frame(proj_dribble_test$result,
                                    nrows = 1,

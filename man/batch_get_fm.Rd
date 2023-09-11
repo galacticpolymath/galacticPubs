@@ -4,10 +4,12 @@
 \alias{batch_get_fm}
 \title{get front-matter for a bunch of projects}
 \usage{
-batch_get_fm(WD, WD_git = NULL)
+batch_get_fm(key = NULL, WD = "s", WD_git = NULL)
 }
 \arguments{
-\item{WD}{working directory; if "?" or "s" supplied, will get key values for all projects in the GP-Studio drive. "??" or "l" will get data for "GP-LIVE"}
+\item{key}{which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'}
+
+\item{WD}{working directory; if "?" or "s" supplied, will get key values for all projects in the GP-Studio drive. "??" or "l" will get data for "GP-LIVE";  default="s"}
 
 \item{WD_git}{default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.}
 }

@@ -11,7 +11,8 @@ update_fm(
   save_output = TRUE,
   return_fm = FALSE,
   reorder = TRUE,
-  drive_reconnect = FALSE
+  drive_reconnect = FALSE,
+  try_harder = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ update_fm(
 \item{reorder}{do you want to reorder the resulting list, based on template order? default=TRUE}
 
 \item{drive_reconnect}{logical; do you want to re-look-up all \verb{Gdrive*} keys? (might be useful if old files have been replaced instead of updated and \verb{Gdrive*} keys point to a trashed file); default=F}
+
+\item{try_harder}{passed to \code{\link[=catch_err]{catch_err()}} specifically when we look for GdriveDir, just in case the Google Drive for Desktop and Web are out of sync, it'll try after a series of intervals. Default= FALSE.}
 }
 \value{
 returns logical of success

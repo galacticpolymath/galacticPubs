@@ -5,12 +5,9 @@
 \alias{init_lesson}
 \title{lesson_init}
 \usage{
-lesson_init(ShortTitle)
+lesson_init()
 
-init_lesson(ShortTitle)
-}
-\arguments{
-\item{ShortTitle}{What will be the ShortTitle prefix for the front-matter.yml?}
+init_lesson()
 }
 \description{
 Set up a new Galactic Polymath lesson or mini-unit project folder. Create folder structure in 'GP-Studio'/Edu/Lessons Google Shared Drive and add meta/files
