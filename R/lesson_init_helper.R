@@ -12,12 +12,14 @@
 
 lesson_init_helper <- function(){
 
-  browser()
+
 #need to write logic to assign the next number to this lesson
-  numIDs <- gp_api_query(keys="numID") %>% unlist() %>% as.integer()
-  #filter out the following TEST numbers
-  excluded <- c(999)
-  next_num <- (numIDs[which(!numIDs %in% excluded) ]%>% max(na.rm=TRUE))+1
+#For now, this should work
+next_num <- batch_get_fm("numID") %>% unlist() %>% max()+1
+  # numIDs <- gp_api_query(keys="numID") %>% unlist() %>% as.integer()
+  # #filter out the following TEST numbers
+  # excluded <- c(999)
+  # next_num <- (numIDs[which(!numIDs %in% excluded) ]%>% max(na.rm=TRUE))+1
   checkmate::assert_number(next_num,na.ok=FALSE,.var.name="next unit numID")
   .GlobalEnv$.lesson_init_num <- next_num
 

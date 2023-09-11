@@ -38,6 +38,9 @@ get_fm(
 
 \item{...}{additional args passed to check function}
 }
+\value{
+Tries to cromulently return an appropriate string, tibble, list or vector of values for the associated keys.
+}
 \description{
 Imports meta/front-matter.yml value(s) to environment as a list.
 }

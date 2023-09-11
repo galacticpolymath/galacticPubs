@@ -14,6 +14,7 @@
 #' @param always_list logical; do you want to always return a list? default=FALSE will unlist() the result if it seems to be a single item
 #' @param standardize_NA logical; do you want all "",NULL,list(), etc. to be read in as NA using [is_empty()]? passed to [safe_read_yaml()]; default=TRUE
 #' @param ... additional args passed to check function
+#' @returns Tries to cromulently return an appropriate string, tibble, list or vector of values for the associated keys.
 #' @examples
 #' get_fm()
 #' get_fm(key=c("Title","ShortTitle","locale"))
