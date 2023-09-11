@@ -2,19 +2,18 @@
 #'
 #' Constructs a query and requests selected information from the from the galacticpolymath.com/api
 #'
-#' @param keys character vector; which front-matter keys do you want from lessons? default: NULL will give you numId and Title. See all options with [get_fm_names()]
+#' @param keys character vector; which front-matter keys do you want from lessons? default: c("numID","_id","Title"). See all options with [get_fm_names()]
 #' @param output return values as "tibble" or "list"; default="tibble"
 #' @return list of results or tbl_json
 #' @family GP API
 #' @export
 
-gp_api_query <- \(keys=NULL,
+gp_api_query <- \(keys=c("numID","_id","Title"),
                   output="tibble"
 ){
-  if(is.null(keys)){
-    keys <- c("numId","Title")
-  }
+
   tictoc::tic()
+
   lapply(keys,\(x) checkmate::assert_choice(x,get_fm_names()))
 
   checkmate::assert_choice(output,c("tibble","list"))

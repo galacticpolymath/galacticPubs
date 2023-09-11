@@ -5,12 +5,12 @@
 \alias{query_gp_api}
 \title{Get info for Galactic Polymath units}
 \usage{
-gp_api_query(keys = NULL, output = "tibble")
+gp_api_query(keys = c("numID", "_id", "Title"), output = "tibble")
 
-query_gp_api(keys = NULL, output = "tibble")
+query_gp_api(keys = c("numID", "_id", "Title"), output = "tibble")
 }
 \arguments{
-\item{keys}{character vector; which front-matter keys do you want from lessons? default: NULL will give you numId and Title. See all options with \code{\link[=get_fm_names]{get_fm_names()}}}
+\item{keys}{character vector; which front-matter keys do you want from lessons? default: c("numID","_id","Title"). See all options with \code{\link[=get_fm_names]{get_fm_names()}}}
 
 \item{output}{return values as "tibble" or "list"; default="tibble"}
 }

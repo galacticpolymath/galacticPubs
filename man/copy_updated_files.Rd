@@ -4,7 +4,7 @@
 \alias{copy_updated_files}
 \title{copy_updated_files}
 \usage{
-copy_updated_files(paths, dest_folder, clear = FALSE, verbose = TRUE)
+copy_updated_files(paths, dest_folder, clear = FALSE, verbose = TRUE, WD = "?")
 }
 \arguments{
 \item{paths}{vector of file paths you want to check and/or copy}
@@ -14,6 +14,8 @@ copy_updated_files(paths, dest_folder, clear = FALSE, verbose = TRUE)
 \item{clear}{do you want to delete all files in the destination folder before copying? default=FALSE}
 
 \item{verbose}{print summary table? default=T}
+
+\item{WD}{Working directory. Needed to pass on to inSync.. :/ might want to refactor}
 }
 \value{
 tibble of path1 files and statuses (whether they were updated, added, or are up-to-date)

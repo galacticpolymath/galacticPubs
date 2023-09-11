@@ -8,6 +8,7 @@
 pick_lesson(
   shared_drive = "s",
   show_all = FALSE,
+  pick_all = FALSE,
   full_path = TRUE,
   sort_az = FALSE,
   lessons_dir = NULL
@@ -16,6 +17,7 @@ pick_lesson(
 lesson_pick(
   shared_drive = "s",
   show_all = FALSE,
+  pick_all = FALSE,
   full_path = TRUE,
   sort_az = FALSE,
   lessons_dir = NULL
@@ -31,6 +33,8 @@ lesson_pick(
 
 \item{show_all}{show an 'all' option? default=FALSE}
 
+\item{pick_all}{logical; Default=FALSE makes user pick unit. If TRUE, choice is set to "all" and will return paths to all projects in this directory.}
+
 \item{full_path}{do you want a full path to the chosen lesson? default= TRUE}
 
 \item{sort_az}{logical; sort alphabetically? default =F sorts by last modified}
@@ -41,7 +45,7 @@ lesson_pick(
 the selected lesson name
 }
 \description{
-Interactively lets you pick from a list of published Galactic Polymath lessons and will out put a virtualized Google Drive for Desktop path
+Interactively lets you pick from a list of published Galactic Polymath units and will out put a virtualized Google Drive for Desktop path
 }
 \section{Functions}{
 \itemize{

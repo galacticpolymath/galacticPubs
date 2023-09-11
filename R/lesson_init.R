@@ -9,6 +9,18 @@
 #'
 
 lesson_init <- \(ShortTitle) {
+    # Check if ShortTitle is valid and not a duplicate -------------------------
+  checkmate::assert_character(
+    inputs$ShortTitle,
+    min.chars = 2,
+    max.chars = 20,
+    all.missing = FALSE,
+    len = 1
+  )
+
+
+
+
   # Get details for new lesson with helper shiny app ------------------------
   inputs <- lesson_init_helper()
   checkmate::assert_list(inputs, all.missing = FALSE)
@@ -18,14 +30,6 @@ lesson_init <- \(ShortTitle) {
   unit_name <-
     paste0(c(inputs$ShortTitle, inputs2$locale), collapse = "_")
 
-  # Check if ShortTitle is valid and not a duplicate -------------------------
-  checkmate::assert_character(
-    inputs$ShortTitle,
-    min.chars = 2,
-    max.chars = 20,
-    all.missing = FALSE,
-    len = 1
-  )
 
   #location of gp-lessons git project (not a google drive folder)
   gp_lessons_dir <- fs::path(get_wd_git(), "Lessons")
@@ -47,6 +51,8 @@ lesson_init <- \(ShortTitle) {
   WD_exists <- checkmate::test_directory_exists(WD)
 
   checkmate::assert_false(WD_exists, .var.name = "Project Already Exists on GP-Studio!")
+
+
 
 
   # Create new project directory and subfolders --------------------------------------------

@@ -48,5 +48,5 @@ learningChart(
 the learning chart plot object (grid format); Result can be plotted with grid::grid.draw(result). The chart file is saved to assets/GP_Learning_Chart.png by default
 }
 \description{
-Make a GP Learning Chart
+Make a GP Learning Chart. Will also run \code{\link[=upload_assets]{upload_assets()}} when it's done.
 }

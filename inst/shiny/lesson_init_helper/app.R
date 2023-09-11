@@ -3,10 +3,11 @@
 #
 
 library(shiny)
-
+numID <- .GlobalEnv$.lesson_init_num
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   titlePanel("Initialize a new Galactic Polymath Mini-Unit"),
+  htmlOutput("numIDdiv"),
   textInput(
     "ShortTitle",
     label = "ShortTitle prefix for project",
@@ -98,10 +99,16 @@ ui <- fluidPage(
 
   # Define server logic required to draw a histogram
   server <- function(input, output) {
+    output$numIDdiv <- renderUI(
+      shiny::tagList(
+        span(em("numID: "),numID)
+      )
+    )
+
     observe(isolate({
-      # .GlobalEnv$galacticPubs_setLanguage<-input$Language
-      # .GlobalEnv$galacticPubs_setCountry<-input$Country
+
       result <- list(
+        numID = numID,
         ShortTitle = input$ShortTitle,
         Language = input$Language,
         Country = input$Country,

@@ -1,12 +1,13 @@
 #' pick_lesson (or lesson_pick)
 #'
-#' Interactively lets you pick from a list of published Galactic Polymath lessons and will out put a virtualized Google Drive for Desktop path
+#' Interactively lets you pick from a list of published Galactic Polymath units and will out put a virtualized Google Drive for Desktop path
 #'
 #' @param shared_drive which shared drive do you want to find the lessons in? default= "s" Options:
 #' - "s" or "?" = GP-Studio (draft working directory, many users with access)
 #' - "l" or "??" = GP-Live (private, admin only)
 #' - "gp"= GalacticPolymath (public-facing read-only)
 #' @param show_all show an 'all' option? default=FALSE
+#' @param pick_all logical; Default=FALSE makes user pick unit. If TRUE, choice is set to "all" and will return paths to all projects in this directory.
 #' @param full_path do you want a full path to the chosen lesson? default= TRUE
 #' @param sort_az logical; sort alphabetically? default =F sorts by last modified
 #' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling [lessons_get_path()]
@@ -15,6 +16,7 @@
 
 pick_lesson <- function(shared_drive = "s",
                         show_all = FALSE,
+                        pick_all = FALSE,
                         full_path = TRUE,
                         sort_az = FALSE,
                         lessons_dir = NULL) {
@@ -42,32 +44,41 @@ pick_lesson <- function(shared_drive = "s",
   }
 
   d <- data.frame(PROJECT = projects, CHOICE = 1:length(projects))
-  if(show_all){
-  d <- rbind(d, c(PROJECT = "all", CHOICE = 0))
+  if (show_all & !pick_all) {
+    d <- rbind(d, c(PROJECT = "all", CHOICE = 0))
   }
-  message("Available lessons at: /", switch(
-    shared_drive,
-    s = "GP-Studio",
-    l = "GP-LIVE",
-    gp = "GalacticPolymath"
-  ), "/")
-  message(utils::capture.output(print(d, row.names = F), type = "message"))
-  num0 <-
-    readline("Which lesson? (separate multiple with ',') > ") #%>% as.integer()
 
-  num1 <- gsub(" ", "", num0) #remove spaces
-  num2 <-
-    strsplit(num1, ",", fixed = TRUE) %>% unlist() %>% as.integer() #separate multiple values and make numeric
-  choice <- sapply(num2, function(x) {
-    d$PROJECT[match(x, d$CHOICE)]
-  })
+
+  if (pick_all) {
+    choice <- "all"
+  } else{
+    message("Available units at: /", switch(
+      shared_drive,
+      s = "GP-Studio",
+      `?` = "GP-Studio",
+      l = "GP-LIVE",
+      `??` = "GP-LIVE",
+      gp = "GalacticPolymath"
+    ), "/")
+    message(utils::capture.output(print(d, row.names = F), type = "message"))
+    num0 <-
+      readline("Which lesson? (separate multiple with ',') > ") #%>% as.integer()
+
+    num1 <- gsub(" ", "", num0) #remove spaces
+    num2 <-
+      strsplit(num1, ",", fixed = TRUE) %>% unlist() %>% as.integer() #separate multiple values and make numeric
+
+    choice <- sapply(num2, function(x) {
+      d$PROJECT[match(x, d$CHOICE)]
+    })
+  }
 
   if (full_path & !identical(choice, "all")) {
     return(fs::path(lessons_dir, choice))
 
-  } else if (choice=="all"){
+  } else if (choice == "all") {
     return(fs::path(lessons_dir, projects))
-  }else{
+  } else{
     return(choice)
   }
 

@@ -5,15 +5,19 @@
 \alias{gcs_upload_assets}
 \title{upload_assets()}
 \usage{
-upload_assets(WD = "?", bucket = "gp-cloud")
+upload_assets(WD = "?", bucket = "gp-cloud", clear = FALSE)
 
-gcs_upload_assets(WD = "?", bucket = "gp-cloud")
+gcs_upload_assets(WD = "?", bucket = "gp-cloud", clear = FALSE)
 }
 \arguments{
 \item{WD}{WD working directory, passed to \code{\link[=parse_wd]{parse_wd()}}}
+
+\item{bucket}{which bucket? default= "gp-cloud"}
+
+\item{clear}{do you want to clear all existing files for this project before uploading? default=FALSE}
 }
 \value{
-a Tibble with success, filenames and download links
+invisibly returns a Tibble with filenames and download links
 }
 \description{
 Upload lesson assets to galacticPubs Google Cloud Storage bucket
