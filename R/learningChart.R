@@ -24,7 +24,7 @@ learningChart = function(WD = "?",
                          captionN = TRUE,
                          centralText = NA,
                          quotedTitle = NA,
-                         centralTextSize = 3.7,
+                         centralTextSize = 3.5,
                          saveFile = TRUE,
                          destFolder,
                          fileName = "GP-Learning-Chart",
@@ -118,7 +118,7 @@ learningChart = function(WD = "?",
       # Make a proportional Learning Chart --------------------------------------
 
       #val for scale of the biggest ray
-      barScale <- max(a_combined$n_prop_adj, na.rm = T)
+      barScale <- max(a_combined$n_prop, na.rm = T)
 
       #function for putting things a little beyond the max value in the dataset
       smidge <- function(amt = 1) {
