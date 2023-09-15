@@ -1,13 +1,13 @@
 #' learningEpaulette
 #'
 #' Create a Galactic Polymath Learning Epaulette which is a special kind of mosaic plot showing proportion of lesson by subject. Outputs a horizontal and a vertical version for mobile
+#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_wd_git()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
 #' @param heightScalar for horizontal epaulette, multiplier for image height which affects amount of padding between label text and epaulette; default=1
 #' @param epauletteHeight relative size of the epaulette; default=0.2
 #' @param randomSeed random number for getting slightly different (but repeatable) repelled text labels
 #' @param saveFile T/F, save file or just print to screen?
 #' @param destFolder where do you want to save the folder; by default in the "assets/_learning-plots" folder, 1 level up from the working directory
 #' @param fileName expects "somefilename" for ggsave output image file
-#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
 #' @param font_size size of font in pts;default=11
 #' @param width plot width in inches
 #' @param height plot height in inches
@@ -43,6 +43,7 @@ learningEpaulette <-
     # a<-match.call(expand.dots=TRUE)[-1] %>% as.list()
     #
 
+    WD_git <- get_wd_git(WD=WD)
 
     #if WD supplied that is not getwd(), append it to destFolder
     if (!identical(WD, getwd())) {
@@ -51,7 +52,7 @@ learningEpaulette <-
 
 
     # Standards exist?
-    standardsFile <- fs::path(WD, "meta", "standards.RDS")
+    standardsFile <- fs::path(WD_git, "saves", "standards.RDS")
     standardsFound <- file.exists(standardsFile)
 
     ###########
@@ -66,10 +67,7 @@ learningEpaulette <-
       targetSubj <- importedData$targetSubj
       rectangles <- importedData$rectangles
       xlabels <- importedData$xlabels
-      clrs <-
-        as.vector(gpColors(c(
-          "math", "ela", "science", "socstudies"
-        )))
+
 
       # #install compact font
       # sysfonts::font_add_google(name="sans",regular.wt=400,bold.wt=600)
@@ -89,7 +87,7 @@ learningEpaulette <-
           size = 1.2,
           show.legend = F
         ) +
-        ggplot2::scale_colour_manual(values = clrs,
+        ggplot2::scale_colour_manual(values = as.vector(rectangles$color),
                                      aesthetics = c("color", "fill")) +
         #Add Target border(s) if necessary
         ggplot2::geom_rect(
@@ -180,7 +178,7 @@ learningEpaulette <-
           size = 1.2,
           show.legend = F
         ) +
-        ggplot2::scale_colour_manual(values = clrs,
+        ggplot2::scale_colour_manual(values = as.vector(rectangles$color),
                                      aesthetics = c("color", "fill")) +
         #Add Target border(s) if necessary
         ggplot2::geom_rect(

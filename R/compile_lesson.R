@@ -153,7 +153,7 @@ compile_lesson <-
     # Compile standards if out of date or missing or rebuild==T ----------------
     if ("Standards Alignment" %in% choices &
         (stnds_out_of_date | rebuild)) {
-      message("Recompiling standards to reflect newer 'teach_it*.gsheet'")
+      message("Recompiling standards to reflect newer 'standards*.gsheet'")
       compile_standards_output <- compile_standards(
         WD = WD,
         targetSubj = current_data$TargetSubject,
@@ -252,16 +252,25 @@ compile_lesson <-
 
     }#end general standards stuff
 
-    #Remake Epaulette if out of date or missing
-    if ("Standards Alignment" %in% choices &
-        (
-          !inSync(
-            fs::path(
+    ep_file <- fs::path(
               WD,
               "assets",
               "_learning-plots",
               "GP-Learning-Epaulette.png"
-            ),
+            )
+    ep_vert_file <- fs::path(
+              WD,
+              "assets",
+              "_learning-plots",
+              "GP-Learning-Epaulette_vert.png"
+            )
+
+    #Remake Epaulette if out of date or missing
+    if ("Standards Alignment" %in% choices &
+        (
+          !inSync(
+            ep_file,
+            ep_vert_file,
             standards_gsheet_path,
             WD = WD
           ) | rebuild | is_empty(current_data$LearningEpaulette)

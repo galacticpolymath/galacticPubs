@@ -787,9 +787,11 @@ server <- function(input, output, session) {
               fluidRow(
                 class = "ep-container",
                 div(class = "ep-horiz space-top",
-                    imageOutput("epaulette_fig", inline = T)),
+                    img(src=isolate(vals$current_data$LearningEpaulette),alt="No learning epaulette found")),
+                    #imageOutput("epaulette_fig", inline = T)),
                 div(class = "ep-vert space-top",
-                    imageOutput("epaulette_fig_vert", inline = T))
+                    img(src=isolate(vals$current_data$LearningEpaulette_vert),alt="No learning epaulette found"))
+                    #imageOutput("epaulette_fig_vert", inline = T))
               ),
               # LEARNING EPAULETTE COMPILE PREVIEW
               div(
@@ -825,7 +827,8 @@ server <- function(input, output, session) {
               class = "preview-chart",
               h3("Learning Chart Preview"),
               uiOutput("chart_fig_disclaimer"),
-              plotOutput("chart_fig", width = "500px", height = "300px"),
+              img(src=isolate(vals$current_data$LearningChart),alt="No Learning Chart Found"),
+              # plotOutput("chart_fig", width = "500px", height = "300px"),
               textInput(
                 "LearningChart_params_caption",
                 "Manual caption:",
@@ -894,7 +897,7 @@ server <- function(input, output, session) {
 
   #Update Epaulette Previews if remake button pushed
   observe({
-    output$epaulette_fig <- renderImage({
+    # output$epaulette_fig <- renderImage({
       isolate({
         #generate new epaulette image
         learningEpaulette(
@@ -903,40 +906,40 @@ server <- function(input, output, session) {
           heightScalar = input$LearningEpaulette_params_heightScalar,
           randomSeed = input$LearningEpaulette_params_randomSeed
         )
-        #update filenames
-        vals$current_data$LearningEpaulette <-
-          fs::path("assets",
-                   "_learning-plots",
-                   paste0(formals(learningEpaulette)$fileName, ".png"))
-        vals$current_data$LearningEpaulette_vert <-
-          fs::path("assets",
-                   "_learning-plots",
-                   paste0(formals(learningEpaulette)$fileName, "_vert.png"))
+        # #update filenames
+        # vals$current_data$LearningEpaulette <-
+        #   fs::path("assets",
+        #            "_learning-plots",
+        #            paste0(formals(learningEpaulette)$fileName, ".png"))
+        # vals$current_data$LearningEpaulette_vert <-
+        #   fs::path("assets",
+        #            "_learning-plots",
+        #            paste0(formals(learningEpaulette)$fileName, "_vert.png"))
       })
 
-      #copy image to www folder
-      isolate({
-        copy_updated_files(fs::path(WD(),
-                                    c((vals$current_data$LearningEpaulette),
-                                      (vals$current_data$LearningEpaulette_vert)
-                                    )), img_loc)
-      })
+      # #copy image to www folder
+      # isolate({
+      #   copy_updated_files(fs::path(WD(),
+      #                               c((vals$current_data$LearningEpaulette),
+      #                                 (vals$current_data$LearningEpaulette_vert)
+      #                               )), img_loc)
+      # })
 
       # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
 
-      #return file info to UI
-      list(src = fs::path("www", basename(
-        isolate(vals$current_data$LearningEpaulette)
-      )), alt = "Compile Standards to generate epaulette previews")
-
-    }, deleteFile = TRUE)
-
-    #Render vertical epaulette
-    output$epaulette_fig_vert <- renderImage({
-      list(src = fs::path("www", basename(
-        isolate(vals$current_data$LearningEpaulette_vert)
-      )), alt = "vert_epaulette")
-    }, deleteFile = TRUE)
+    #   #return file info to UI
+    #   list(src = fs::path("www", basename(
+    #     isolate(vals$current_data$LearningEpaulette)
+    #   )), alt = "Compile Standards to generate epaulette previews")
+    #
+    # }, deleteFile = TRUE)
+#
+#     #Render vertical epaulette
+#     output$epaulette_fig_vert <- renderImage({
+#       list(src = fs::path("www", basename(
+#         isolate(vals$current_data$LearningEpaulette_vert)
+#       )), alt = "vert_epaulette")
+#     }, deleteFile = TRUE)
   }) %>% bindEvent(input$remake_ep,
                    ignoreInit = T,
                    ignoreNULL = F)

@@ -60,7 +60,7 @@ update_teach_links <- function(WD = "?",
     checkmate::check_character(med_title, min.chars = 2),
     checkmate::check_character(short_title, min.chars = 2),
     checkmate::check_character(GdriveHome, min.chars = 6),
-    checkmate::check_choice(status, c("Live", "Draft")),
+    checkmate::check_choice(status, c("Proto", "Draft", "Live")),
     combine = "and"
   )
 

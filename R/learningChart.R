@@ -2,7 +2,7 @@
 #'
 #' Make a GP Learning Chart. Will also run [upload_assets()] when it's done.
 #'
-#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
+#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_wd_git()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
 #' @param caption quoted text you want to go at the bottom of the chart
 #' @param captionN T/F, add the range of the number of standards per grade used to make the plot to caption?
 #' @param centralText specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades`\\n`5-6")
@@ -32,6 +32,7 @@ learningChart = function(WD = "?",
                          showPlot = TRUE,
                          ...) {
   WD <- parse_wd(WD)
+  WD_git <- get_wd_git(WD=WD)
 
   if (missing(destFolder)) {
     destFolder <- fs::path(WD, "assets", "_learning-plots")
@@ -62,7 +63,7 @@ learningChart = function(WD = "?",
   }
 
   # Standards exist?
-  standardsFile <- fs::path(WD, "meta", "standards.RDS")
+  standardsFile <- fs::path(WD_git, "saves", "standards.RDS")
   standardsFound <- file.exists(standardsFile)
 
   ###########
@@ -98,6 +99,8 @@ learningChart = function(WD = "?",
 
       if (is_empty(centralText)) {
         Gs <- get_fm("ForGrades", WD)
+        #Shorten long words (e.g. "9-university" becomes "9-uni")
+        Gs <- gsub("(^[^-]*-.{1,3}).*$",replacement = "\\1",Gs)
         prefix <- get_fm("GradesOrYears", WD)
 
         centralText <-
@@ -138,7 +141,9 @@ learningChart = function(WD = "?",
       # Make sure a_combined proportions have no NA -----------------------------
       a_combined <-
         a_combined %>% dplyr::mutate(dplyr::across(dplyr::starts_with("n_prop"),  ~
-                                                     ifelse(is.na(.), 0, .)))
+                                                     ifelse(is.na(.), 0, .))) %>%
+        dplyr::filter(!is.na(.data$n))
+
       #Overwrite data (bit messy, but controls for NAs in incoming data)
       a_combined$id <- 1:nrow(a_combined)
 
@@ -163,7 +168,7 @@ learningChart = function(WD = "?",
         )
 
       targetRows <- which(bgRec2$subject %in% tolower(targetSubj))
-      outerFill <- bgRec2[targetRows, ]
+      outerFill <- bgRec2[targetRows,]
       outerFill$ymin <- smidge(.1)
       outerFill$ymax <- 10
 
@@ -175,7 +180,7 @@ learningChart = function(WD = "?",
         badge_prop0 <-
           ggplot2::ggplot(
             a_combined,
-            ggplot2::aes_string(x = "as.factor(id)", y = "n_prop_adj", fill = "subject"),
+            ggplot2::aes_string(x = "as.factor(id)", y = "n_prop", fill = "subject"),
             col = gpColors("galactic black")
           ) +
           galacticEdTools::theme_galactic(font = "sans") +
@@ -225,7 +230,7 @@ learningChart = function(WD = "?",
           ggplot2::scale_y_continuous(
             expand = c(0, 0),
             breaks = seq(0, barScale, .1),
-            limits = c(-.1, smidge(4))
+            limits = c(-.1, smidge(3))
           ) +
           #cover outside circle crap with white box
           ggplot2::geom_rect(
@@ -565,7 +570,7 @@ learningChart = function(WD = "?",
       #tell user where file is saved
       message("GP Learning Chart saved\n@ ", outFile)
       message("Running upload_assets() to upload updated learningChart & add to front-matter")
-      upload_assets(WD=WD)
+      upload_assets(WD = WD)
 
       #return object to user (wrapped in invisible to prevent meaningless gTree obj being printed)
       return(invisible(G))

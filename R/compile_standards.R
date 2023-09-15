@@ -32,15 +32,18 @@ compile_standards <- function(WD = "?",
       "Social Studies",
       "Art",
       "Sustainability",
+      "SEL",
       "Technology")
   #learning chart/learningEpaulette subject titles (<=5 char)
   ordered_subj_chart <-
-    c("Math", "ELA", "Sci"    , "SocSt",        "Art", "SDGs",          "Tech")
+    c("Math", "ELA", "Sci"    , "SocSt",        "Art", "SDGs", "SEL",         "Tech")
   #here for legacy reasons
   ordered_subj <-
-    c("math", "ela", "science", "socstudies",     "art", "sdgs",         "tech")
+    c("math", "ela", "science", "socstudies",    "art", "sust",  "sel",       "tech")
 
-
+  subj_tib <- dplyr::tibble(Subjects=ordered_subjects,Subj=ordered_subj_chart,subj=ordered_subj) %>%
+    dplyr::mutate(n=1:dplyr::n()) %>% dplyr::relocate(.data$n) %>%
+    dplyr::mutate(color=gpColors(.data$subj))
 
 
   #define paths
@@ -220,17 +223,19 @@ compile_standards <- function(WD = "?",
 
       # Extract learning objectives by lesson -------------------------------------
       LOs
-      if(nrow(LOs)>0){
-      LO_tib <- LOs %>%
-        dplyr::select("LO#", "Lsn", "lo_statement") %>%
-        tidyr::separate_longer_delim(cols = "Lsn", delim = ",") %>%
-        dplyr::arrange(.data$Lsn, .data$`LO#`) %>%
-        dplyr::select(-"LO#")
-      learningObj <- lapply(unique(LO_tib$Lsn),\(i){
-        LO_tib %>% dplyr::filter(.data$Lsn==i) %>% dplyr::pull("lo_statement")
-      })
+      if (nrow(LOs) > 0) {
+        LO_tib <- LOs %>%
+          dplyr::select("LO#", "Lsn", "lo_statement") %>%
+          tidyr::separate_longer_delim(cols = "Lsn", delim = ",") %>%
+          dplyr::arrange(.data$Lsn, .data$`LO#`) %>%
+          dplyr::select(-"LO#")
+        learningObj <- lapply(unique(LO_tib$Lsn), \(i) {
+          LO_tib %>% dplyr::filter(.data$Lsn == i) %>% dplyr::pull("lo_statement")
+        })
 
-      }else{learningObj <- NULL}
+      } else{
+        learningObj <- NULL
+      }
 
 
       # Check supported subjects ------------------------------------------------
@@ -239,6 +244,7 @@ compile_standards <- function(WD = "?",
           "Math",
           "Science",
           "Social Studies",
+          "SEL",
           "Sustainability")
 
       #required subjects for learning chart
@@ -311,7 +317,7 @@ compile_standards <- function(WD = "?",
         undoc <- rep(FALSE, nrow(a0))
       }
 
-      a1 <- a0[!undoc & !tbds, ]
+      a1 <- a0[!undoc & !tbds,]
 
       # a2 has markdown bullets ("- ") added if missing
       # Add markdown bullet to front of lines that don't start with it
@@ -640,12 +646,14 @@ compile_standards <- function(WD = "?",
       if (learningplot_correction) {
         proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop_adj, na.rm =
                                                                                  T), 2), .groups =
-                                                          "drop")
+                                                          "drop",
+                                                        n_stnds=sum(.data$n))
       } else{
         #don't use adjusted proportions if not requested
         proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop, na.rm =
                                                                                  T), 2), .groups =
-                                                          "drop")
+                                                          "drop",
+                                                        n_stnds=sum(.data$n))
       }
 
       #Make sure proportions = 100%
@@ -700,15 +708,18 @@ compile_standards <- function(WD = "?",
 
       epaulette_names <-
         ordered_subj_chart[match(proportions$subject, ordered_subjects)]
+      clrs <-subj_tib %>% dplyr::filter(.data$Subjects %in% proportions$subject) %>% dplyr::pull("color")
 
       rectangles <-
         dplyr::tibble(
           proportion = proportions$proportion,
+          n_stnds= proportions$n_stnds,
           xmin = c(0, cumsum(proportions$proportion)[-length(proportions$proportion)]),
           xmax = cumsum(proportions$proportion),
           ymin = 1 - thickness,
           ymax = 1,
-          subject = epaulette_names
+          subject = epaulette_names,
+          color = clrs
         ) %>% dplyr::filter(.data$proportion > 0)
       rectangles$subject <-
         factor(rectangles$subject,
@@ -809,11 +820,11 @@ compile_standards <- function(WD = "?",
 
       # Save Standards Data -----------------------------------------------------
       toSave <- list(
-        learningObj=learningObj,
+        learningObj = learningObj,
         data = list(
           input = dplyr::as_tibble(a0),
           compiled = dplyr::as_tibble(A),
-          problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0,]),
+          problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
           gradeBand = gradeBand,
           list_for_json = out
         ),
@@ -842,14 +853,14 @@ compile_standards <- function(WD = "?",
         test_json <- save_json(out, json_saveFile) %>% catch_err()
 
         problem_entries <-
-          dplyr::as_tibble(a0[(tbds + undoc) > 0,])
+          dplyr::as_tibble(a0[(tbds + undoc) > 0, ])
         #need to build better checks than this
         success <-  TRUE
       }
     }
   }#End Big else
 
-  message("Standards Compiled: ",success)
+  message("Standards Compiled: ", success)
   #add grades information to output
   invisible(
     list(
