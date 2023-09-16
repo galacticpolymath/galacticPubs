@@ -59,12 +59,12 @@ stage_assets <-
     #not sure why the regexp parameter in dir_ls() doesn't work...
     if(!is.null(pattern)){
       to_copy <- to_copy %>%
-        dplyr::filter(grepl(pattern,.data$name))
+        dplyr::filter(grepl(pattern,.data$name,perl = TRUE))
     }
 
     if (!is.null(exclude)) {
       to_copy <- to_copy %>%
-        dplyr::filter(!grepl(exclude, .data$name))
+        dplyr::filter(!grepl(exclude, .data$name,perl = TRUE))
     }
 
     # clear target directory if requested and copy updated files

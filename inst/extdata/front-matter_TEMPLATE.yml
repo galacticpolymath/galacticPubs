@@ -17,7 +17,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.5.9
+TemplateVer: 0.6.0
 galacticPubsVer: ''
 isTestRepo: false
 URL: ''
@@ -43,11 +43,13 @@ SponsoredBy: ''
 SponsorLogo: ''
 LessonBanner: ''
 LessonCard: ''
-LessonTiles: ''
 TargetSubject: ''
 LessonEnvir: ''
 ForGrades: ''
 GradesOrYears: 'Grades'
+#Not exported with header (exported elsewhere)
+LessonTiles: ''
+#Overview section->
 EstLessonTime: ''
 PullStandardsInfoFrom: 'myFile'
 LearningPlotCorrection: TRUE

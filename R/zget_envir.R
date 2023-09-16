@@ -140,6 +140,13 @@ zget_grade_bands <- \(df, fm, assess) {
 #'
 zget_lessons <- \(df, fm) {
   lessons <- unique_sans_na(df$`_lsn`)
+  #lesson tiles
+  tiles <- fm$LessonTiles
+  tiles_initialized <- !is_empty(tiles)
+  #extract Lnum
+  tile_Ls <- stringr::str_extract(tiles,".*[Ll](\\d{1,2}).*",group=1)
+
+
   if (length(lessons) == 0) {
     #make it resilient if there's only 1 implied lsn
     lessons <- "1"
@@ -147,8 +154,20 @@ zget_lessons <- \(df, fm) {
   out <- lessons %>%
     #map across all lessons
     purrr::map(., \(lsn_i) {
+
+      i <-as.numeric(lsn_i)
       #Get info for the subfolder
       df_lsn_i <- df %>% dplyr::filter(`_lsn` == lsn_i)
+
+      #handle tiles
+      if(tiles_initialized &
+         i %in% tile_Ls){
+        tile_i <- tiles[i]
+
+      }else{
+        message("No tile found for L",i,"\n Use name format 'L1_tile.png'")
+        warning("No tile found for L",i,"\n Use name format 'L1_tile.png'")
+        tile_i <- NA}
 
       #parse tags
       lsn_i_tags0 <- df_lsn_i$actTags[1]
@@ -164,6 +183,7 @@ zget_lessons <- \(df, fm) {
         title = df_lsn_i$lsnTitle[1],
         tags= list(lsn_i_tags),
         preface = df_lsn_i$lsnPreface[1],
+        tile=tile_i,
         itemList = zget_items(df_lsn_i, fm = fm)
       )
 

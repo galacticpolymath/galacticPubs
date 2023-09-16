@@ -100,6 +100,7 @@ compile_teach_it <- function(WD = "?",
     dplyr::filter(!is.na(.data$code)) %>%
     dplyr::select(1:dplyr::starts_with("otherLink"))
 
+  #unit info
   uinfo <-
     googlesheets4::read_sheet(
       teach_it_drib,
@@ -117,6 +118,8 @@ compile_teach_it <- function(WD = "?",
     ) %>% dplyr::filter(`REF(Is_initiatialized)` == TRUE &
                           !is.na(.data$itemTitle)) %>%
     dplyr::select("lsn", "order", "itemTitle", "description", "link")
+
+
 
   #bring in procedure
   #Rename _Step, again, b/c we're not overwriting to spreadsheet
@@ -149,8 +152,11 @@ compile_teach_it <- function(WD = "?",
   uinfo_preface_initialized <-
     !grepl("^Overall description", uinfo$unitPreface[1])
   proc_initialized <-
-    !grepl("^\\*", proc$ChunkTitle[1]) &
-    !grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
+    sum(!is.na(proc$`_issues`))==0 #FALSE if issues found
+  if(!proc_initialized){
+    message("Procedure not processed! Issues found...see teach-it.gsheet")
+    warning("Procedure not processed! Issues found...see teach-it.gsheet")
+  }
   lext_initialized <- !grepl("^URL", lext$link[1])
   mlinks_initialized <- nrow(mlinks) > 0
 

@@ -19,8 +19,10 @@ compile_fm <- \(WD = "?") {
   WD_git <- get_wd_git(WD=WD)
   json_dir <- fs::path(WD_git, "JSONs")
   fm <- get_fm(WD_git = WD_git)
-  fm_keys <- fm %>% names()
-  header <- fm[1:which(fm_keys == "GradesOrYears")]
+  fm_keys <- get_fm_names()
+  which_fm_keys <- fm_keys[1:which(fm_keys == "GradesOrYears")]
+  #Header includes everything up to GradesOrYears
+  header <- fm[which_fm_keys]
 
   # Make a few assertions to require minimally functional header ------------
   checkmate::assert_character(fm$ShortTitle,
@@ -31,14 +33,14 @@ compile_fm <- \(WD = "?") {
   checkmate::assert_character(fm$locale, n.chars = 5, any.missing = F)
 
 
-
-  # make full catalog paths following naming conventions the frontend --------
-  header$SponsorImage = list(url = ifelse(is.na(fm$SponsorLogo),
-                                          NA,
-                                          catalogURL(basename(fm$SponsorLogo), WD=WD)))
-  header$CoverImage = list(url = ifelse(is.na(fm$LessonBanner),
-                                        NA,
-                                        catalogURL(basename(fm$LessonBanner), WD=WD)))
+#
+#   # make full catalog paths following naming conventions the frontend --------
+#   header$SponsorImage = list(url = ifelse(is.na(fm$SponsorLogo),
+#                                           NA,
+#                                           catalogURL(basename(fm$SponsorLogo), WD=WD)))
+#   header$CoverImage = list(url = ifelse(is.na(fm$LessonBanner),
+#                                         NA,
+#                                         catalogURL(basename(fm$LessonBanner), WD=WD)))
 
   #output header.json
   save_json(header,

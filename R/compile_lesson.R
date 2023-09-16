@@ -33,6 +33,8 @@ compile_lesson <-
 
     # Always update front-matter (in case of template updates) ----------------
     update_fm(WD = WD, save_output = TRUE)
+    #run upload_assets to make sure there's nothing new
+    upload_assets(WD=WD)
 
     if (missing(current_data)) {
       current_data <-
@@ -337,6 +339,7 @@ compile_lesson <-
 
 
     # Separate parts of Front Matter ------------------------------------------
+
     #always rebuild front matter if it's in choices
     if ("Front Matter" %in% choices) {
       compile_fm(WD = WD)
