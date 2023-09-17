@@ -151,12 +151,23 @@ compile_teach_it <- function(WD = "?",
     !grepl("^Lesson Title", uinfo$lsnTitle[1])
   uinfo_preface_initialized <-
     !grepl("^Overall description", uinfo$unitPreface[1])
+
   proc_initialized <-
+    !grepl("\\*\\*\\*",proc$Chunk[2]) #template has *** in second step chunk (D4)
+  proc_errors <-
     sum(!is.na(proc$`_issues`))==0 #FALSE if issues found
+  proj_name <- basename(WD)
   if(!proc_initialized){
-    message("Procedure not processed! Issues found...see teach-it.gsheet")
-    warning("Procedure not processed! Issues found...see teach-it.gsheet")
+    message(proj_name,": Procedure not processed! Issues found...see teach-it.gsheet")
+    warning(proj_name,": Procedure not processed! Issues found...see teach-it.gsheet")
   }
+
+  if(proc_errors){
+    message(proj_name,": Procedure issues found...see teach-it.gsheet")
+    warning(proj_name,": Procedure issues found ! Issues found...see teach-it.gsheet")
+  }
+
+
   lext_initialized <- !grepl("^URL", lext$link[1])
   mlinks_initialized <- nrow(mlinks) > 0
 

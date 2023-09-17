@@ -254,6 +254,7 @@ compile_standards <- function(WD = "?",
                         "Social Studies")
 
       #supported sets of standards for generating learning chart
+      #Also treated as REQUIRED for learning chart output
       supported_sets <-
         c("Common Core Math", "Common Core ELA", "NGSS", "C3")
 
@@ -576,7 +577,8 @@ compile_standards <- function(WD = "?",
       a_template <-
         a_master %>%
         #Get rid of sets not included in the alignment
-        dplyr::filter(.data$set %in% c(unique(A$set))) %>%
+        #EXCEPT the 4 required sets
+        dplyr::filter(.data$set %in% c(unique(A$set),supported_sets)) %>%
         dplyr::select("subject", "dimension") %>%
         dplyr::distinct() %>% dplyr::mutate(n = 0)
 
@@ -614,6 +616,7 @@ compile_standards <- function(WD = "?",
         dplyr::summarise(n = dplyr::n())
 
 
+
       bias_by_subj <-
         bias %>% dplyr::summarise(tot_n_subj = sum(.data$n, na.rm = T),
                                   .groups = "drop")
@@ -642,7 +645,7 @@ compile_standards <- function(WD = "?",
 
 
       #Calculate corrected proportions if requested
-      proportions0 = a_combined  %>% dplyr::group_by(.data$subject)
+      proportions0 = a_combined  %>% dplyr::group_by(.data$subject) %>% dplyr::filter(.data$n>0)
       if (learningplot_correction) {
         proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop_adj, na.rm =
                                                                                  T), 2), .groups =

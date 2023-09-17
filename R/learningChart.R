@@ -153,7 +153,7 @@ learningChart = function(WD = "?",
       label_data2$hjust <-
         ifelse(360 * (label_data2$id - 0.5) / nrow(label_data2) < 180 , 0, 1)
       label_data2$y <- smidge(2)
-      label_data2$y[c(1, 12)] <- smidge(3)
+      label_data2$y[c(1, nrow(label_data2))] <- smidge(3)
 
       #make background rectangles for each set of dimensions
 

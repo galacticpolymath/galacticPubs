@@ -220,6 +220,7 @@ upload_assets <- \(WD = "?",
       to_upload <- merged_mod_times %>%
         dplyr::filter(.data$updated.local > .data$updated.cloud |
                         is.na(.data$updated.cloud))
+
     }
 
 

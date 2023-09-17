@@ -48,32 +48,85 @@ stage_assets <-
     full_path <- fs::path(WD, rel_path)
 
 
-# Check if there's anything to copy ---------------------------------------
+
+    # Check if there's anything to copy ---------------------------------------
 
     to_copy <-
-      dplyr::tibble(
-        path = fs::dir_ls(full_path),
-        name = basename(.data$path)
-      ) %>%
+      dplyr::tibble(path = fs::dir_ls(full_path),
+                    name = basename(.data$path)) %>%
       dplyr::relocate("name")
     #not sure why the regexp parameter in dir_ls() doesn't work...
-    if(!is.null(pattern)){
+    if (!is.null(pattern)) {
       to_copy <- to_copy %>%
-        dplyr::filter(grepl(pattern,.data$name,perl = TRUE))
+        dplyr::filter(grepl(pattern, .data$name, perl = TRUE))
     }
 
     if (!is.null(exclude)) {
       to_copy <- to_copy %>%
-        dplyr::filter(!grepl(exclude, .data$name,perl = TRUE))
+        dplyr::filter(!grepl(exclude, .data$name, perl = TRUE))
     }
 
     # clear target directory if requested and copy updated files
-    if(nrow(to_copy)==0){
+    if (nrow(to_copy) == 0) {
       out <- NULL
-    }else{
+    } else{
+      # Make sure names conform... no spaces ------------------------------------
+      # Google Cloud Storage (GCS) don't like no spaces
 
-    out <-copy_updated_files(paths = to_copy$path, dest_folder, clear = clear,WD=WD) %>%
-      catch_err(keep_results = TRUE)
+      #rename by replacing spaces with "-"
+      to_rename <- to_copy %>%
+        dplyr::filter(grepl(" ", .data$name))
+      if (nrow(to_rename) > 0) {
+        rename_results <- purrr::map(1:nrow(to_rename), \(i) {
+          parent_path <- path_parent_dir(to_rename$path[i])
+          parent_dir <- basename(parent_path)
+          old_name <- to_rename$name[i]
+          new_name <- gsub(" ", "-", old_name)
+          #for concise output
+          new_rel_path <- fs::path(parent_dir, new_name)
+          old_rel_path <- fs::path(parent_dir, old_name)
+          #for renaming
+          old_path <- fs::path(parent_path, old_name)
+          new_path <- fs::path(parent_path, new_name)
+          test_rename <-
+            fs::file_move(path = old_path, new_path = new_path) %>% catch_err()
+
+          dplyr::tibble(
+            renamed = test_rename,
+            old_name = old_rel_path,
+            new_name = new_rel_path,
+            path = new_path
+          )
+
+        }) %>% dplyr::bind_rows()
+
+        if (sum(test_rename$renamed) == nrow(rename_results)) {
+          message("Successfully renamed the following files to change spaces into '-':")
+          for_output <-
+            rename_results %>% dplyr::mutate(renamed = convert_T_to_check(.data$renamed))
+          print(for_output)
+
+          #rename to_copy to match updated file names
+          to_copy <- hard_left_join(to_copy,
+                                    rename_results %>%
+                                      dplyr::select("new_name","path") %>%
+                                      dplyr::rename(name="new_name"),
+                                    by="name") %>%
+            dplyr::mutate(name=gsub(" ","-",.data$name))
+
+        } else{
+          message("Renaming of files to remove spaces failed:")
+          print(to_rename)
+        }
+
+      }
+
+      out <-
+        copy_updated_files(paths = to_copy$path,
+                           dest_folder,
+                           clear = clear,
+                           WD = WD) %>%
+        catch_err(keep_results = TRUE)
     }
 
     return(invisible(out))
