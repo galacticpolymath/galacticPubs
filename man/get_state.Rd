@@ -4,12 +4,14 @@
 \alias{get_state}
 \title{get_state}
 \usage{
-get_state(path, save_path = NULL)
+get_state(path, save_path = NULL, path1_modTime_diff = NULL)
 }
 \arguments{
 \item{path}{path to the directory you want to collect info for (using local, i.e. Google Drive Virtual, path); can be a vector (e.g. c(path1, path2))}
 
 \item{save_path}{if you want to save the output, write a local path; must be a full path from root to filename, including extension .RDS; default=NULL}
+
+\item{path1_modTime_diff}{numeric; time in minutes that we expect the modification time for path1 to be from the current time. Default=NULL stores file info as-is. Put 3 if for example you ran update_teach_it() right before this and you're worried about the gdrive mod time being inaccurate if drive-based activities aren't synced to the local computer. If you put a number here, it engages \link{catch_err(try_harder=T)}, so it will repeatedly try to get file info until the mod time falls within the 3 minutes or whatever you put for path1_modTime_diff.}
 }
 \value{
 a tibble of recursive filenames, type, size, and modification_time for the path

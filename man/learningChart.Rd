@@ -10,7 +10,7 @@ learningChart(
   captionN = TRUE,
   centralText = NA,
   quotedTitle = NA,
-  centralTextSize = 3.7,
+  centralTextSize = 3.5,
   saveFile = TRUE,
   destFolder,
   fileName = "GP-Learning-Chart",
@@ -20,7 +20,7 @@ learningChart(
 )
 }
 \arguments{
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling \code{\link[=get_wd_git]{get_wd_git()}}. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.}
 
 \item{caption}{quoted text you want to go at the bottom of the chart}
 

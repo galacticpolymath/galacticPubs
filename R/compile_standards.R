@@ -772,6 +772,7 @@ compile_standards <- function(WD = "?",
                   WD = WD)
         learning_chart_friendly <- FALSE
         a_combined$dimAbbrev <- NA
+        supported_dims <- NULL
       } else{
         update_fm(change_this = list(LearningChartFriendly = T),
                   WD = WD)
@@ -814,8 +815,12 @@ compile_standards <- function(WD = "?",
 
 
       #Add abbrev to a_combined output
+      if(!is.null(supported_dims)){
       a_out <- a_combined %>% dplyr::full_join(.,
                                                supported_dims)
+      }else{
+        a_out <- a_combined
+      }
 
 
 

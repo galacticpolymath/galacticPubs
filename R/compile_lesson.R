@@ -34,7 +34,7 @@ compile_lesson <-
     # Always update front-matter (in case of template updates) ----------------
     update_fm(WD = WD, save_output = TRUE)
     #run upload_assets to make sure there's nothing new
-    upload_assets(WD=WD)
+    upload_assets(WD = WD)
 
     if (missing(current_data)) {
       current_data <-
@@ -221,7 +221,7 @@ compile_lesson <-
                            "_learning-plots",
                            paste0(formals(learningChart)$fileName, ".png"))
         if (file.exists(lcname)) {
-          current_data$LearningChart <- get_fm("LearningChart",WD=WD)
+          current_data$LearningChart <- get_fm("LearningChart", WD = WD)
         }
       }
 
@@ -254,28 +254,23 @@ compile_lesson <-
 
     }#end general standards stuff
 
-    ep_file <- fs::path(
-              WD,
-              "assets",
-              "_learning-plots",
-              "GP-Learning-Epaulette.png"
-            )
-    ep_vert_file <- fs::path(
-              WD,
-              "assets",
-              "_learning-plots",
-              "GP-Learning-Epaulette_vert.png"
-            )
+    ep_file <- fs::path(WD,
+                        "assets",
+                        "_learning-plots",
+                        "GP-Learning-Epaulette.png")
+    ep_vert_file <- fs::path(WD,
+                             "assets",
+                             "_learning-plots",
+                             "GP-Learning-Epaulette_vert.png")
 
     #Remake Epaulette if out of date or missing
     if ("Standards Alignment" %in% choices &
         (
-          !inSync(
-            ep_file,
-            ep_vert_file,
-            standards_gsheet_path,
-            WD = WD
-          ) | rebuild | is_empty(current_data$LearningEpaulette)
+          !inSync(ep_file,
+                  ep_vert_file,
+                  standards_gsheet_path,
+                  WD = WD) |
+          rebuild | is_empty(current_data$LearningEpaulette)
         )) {
       #####################
       #LEARNING EPAULETTE
@@ -311,69 +306,99 @@ compile_lesson <-
         curr_update_state <-
           get_state(c(teach_it_path, tm_path_full), save_path = NULL)
 
-        skip_update <-
-          identical(prev_update_state, curr_update_state)
-      } else{
+        #can't just test "identical b/c there are some slight mod time diffs that are a pain in the ass
+        #to deal with (i.e. google drive might take a minute to sync)
+        #all old files exist in new folder
+        old_still_found <-
+          prev_update_state$path %in% curr_update_state$path %>% sum() == length(prev_update_state$path)
+        if (!old_still_found) {
+          skip_update <- FALSE
+        } else{
+          testL <- lapply(1:nrow(curr_update_state), \(i) {
+            curr_file_i <- curr_update_state[i, ]
+            matching_old_file_i <-
+              prev_update_state %>% dplyr::filter(.data$path == curr_file_i$path)
+
+            test <- nrow(matching_old_file_i) == 1
+            if (test) {
+              test2 <- test &
+                matching_old_file_i$size == curr_file_i$size &
+                #test whether sync time is within 3 minutes;
+                #helps deal with annoying difference in mod time b/w cloud and Gdrive for desktop
+                difftime(
+                  curr_file_i$modification_time,
+                  matching_old_file_i$modification_time ,
+                  units = "mins"
+                ) <= 3
+            } else{
+              test2 <- test
+            }
+            test2
+          }) %>% unlist()
+          skip_update <- sum(testL) == length(testL)
+        }
+      }else{
         skip_update <- FALSE
       }
 
-      if (!skip_update | rebuild) {
-        # update teach_it links and compile ---------------------------------------
-        message("Changes to `../teaching-materials/` detected...")
-        message("Running update_teach_links() and compile_teach-it()")
+        if (!skip_update | rebuild) {
+          # update teach_it links and compile ---------------------------------------
+          message("Changes to `../teaching-materials/` detected...")
+          message("Running update_teach_links() and compile_teach-it()")
 
-        test_update_teach_it <-
-          update_teach_links(WD = WD) %>% catch_err()
-        test_compile_teach_it <-
-          compile_teach_it(WD = WD) %>% catch_err()
-        #update the cache of the teaching-material state of things
-        get_state(path = c(teach_it_path, tm_path_full),
-                  save_path = save_path)
-      } else{
-        message("No changes to `../teaching-materials/` detected...")
-        message("Skipping update_teach_links() and compile_teach-it()")
+          test_update_teach_it <-
+            update_teach_links(WD = WD) %>% catch_err()
+          test_compile_teach_it <-
+            compile_teach_it(WD = WD) %>% catch_err()
+          #update the cache of the teaching-material state of things
+          get_state(path = c(teach_it_path, tm_path_full),
+                    save_path = save_path,
+                    path1_modTime_diff=2)
+        } else{
+          message("No changes to `../teaching-materials/` detected...")
+          message("Skipping update_teach_links() and compile_teach-it()")
+        }
+
+
       }
 
 
+      # Separate parts of Front Matter ------------------------------------------
+
+      #always rebuild front matter if it's in choices
+      if ("Front Matter" %in% choices) {
+        compile_fm(WD = WD)
+
+      }#End of Front Matter export
+
+      # Printable Lesson --------------------------------------------------------
+
+      if ("Printable Lesson" %in% choices) {
+        make_printable(WD = WD, rebuild = rebuild)
+
+      }
+
+      ################################################################
+      # Compile all JSONs ----------------------------------------------
+      compile_json(WD_git = WD_git)
+
+      #after run, reset rebuild-all trigger
+      if (rebuild) {
+        current_data$RebuildAllMaterials <- FALSE
+      }
+
+      #Save updated YAML
+      yaml::write_yaml(current_data, fs::path(WD_git, "front-matter.yml"))
+
+      invisible(current_data)
     }
 
+    #alias
 
-    # Separate parts of Front Matter ------------------------------------------
+    #' lesson_compile
+    #'
+    #' @describeIn compile_lesson
+    #'
+    #' @export
 
-    #always rebuild front matter if it's in choices
-    if ("Front Matter" %in% choices) {
-      compile_fm(WD = WD)
-
-    }#End of Front Matter export
-
-    # Printable Lesson --------------------------------------------------------
-
-    if ("Printable Lesson" %in% choices) {
-      make_printable(WD = WD, rebuild = rebuild)
-
-    }
-
-    ################################################################
-    # Compile all JSONs ----------------------------------------------
-    compile_json(WD_git = WD_git)
-
-    #after run, reset rebuild-all trigger
-    if (rebuild) {
-      current_data$RebuildAllMaterials <- FALSE
-    }
-
-    #Save updated YAML
-    yaml::write_yaml(current_data, fs::path(WD_git, "front-matter.yml"))
-
-    invisible(current_data)
-  }
-
-#alias
-
-#' lesson_compile
-#'
-#' @describeIn compile_lesson
-#'
-#' @export
-
-lesson_compile <- compile_lesson
+    lesson_compile <- compile_lesson

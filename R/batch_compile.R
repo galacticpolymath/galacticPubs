@@ -40,12 +40,11 @@ batch_compile <-
     update_list <- lapply(projects, function(WD) {
       #1. compile all lessons of the unit
       compile_success <-
-        catch_err(
-          compile_lesson(
+        compile_lesson(
           WD = WD,
           rebuild = rebuild,
           clean = clean
-        ))
+        ) %>% catch_err()
 
       dplyr::tibble(Compiled = convert_T_to_check(compile_success),
                     Lesson = basename(WD))

@@ -60,7 +60,7 @@ compile_json <- function(WD = NULL,
   #point out missing sections
   if (sum(matches$found) < length(jsonNames)) {
     missingJSON <- subset(matches, !matches$found)$file
-    warning("\n\tFYI, you're missing:\n\t -",
+    message("\n\tFYI, you're missing:\n\t -",
             paste(missingJSON, collapse = "\n\t -"),
             "\n")
   }
