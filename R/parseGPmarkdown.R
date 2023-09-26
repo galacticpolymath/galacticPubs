@@ -29,7 +29,8 @@ parseGPmarkdown <-
     #WD is an optional parameter
     if(!is.null(WD)){
     WD <- parse_wd(WD)
-    cache_path <- fs::path(WD, "meta", "multimedia.RDS")
+    WD_git <- get_wd_git(WD=WD)
+    cache_path <- fs::path(WD_git, "saves", "multimedia.RDS")
     }
 
     # 1. Look for multimedia json if use_cache --------------------------------

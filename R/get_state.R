@@ -24,43 +24,43 @@ get_state <- \(path,
     checkmate::assert(is_file,
                       is_dir,
                       .var.name = paste0("fs::is_dir()|is_file() for '", path_i, "'"))
-    #Annoyingly, directory are also is_file()==T
+    #Annoyingly, directories are also is_file()==T
     if (is_dir) {
       info_i <- fs::dir_info(path_i, recurse = TRUE)
 
     } else{
       info_i <- fs::file_info(path_i)
 
-      # Logic for dealing with path1 being a Google Drive file  -----------------
-      # making sure modTime has synced before storing state
-
-      if (!is.null(path1_modTime_diff) & i == 1) {
-        #just using lapply for anonymous function
-        #to use catch_err
-        wait_success <- lapply(path_i, \(x) {
-          info_i <- fs::file_info(path_i)
-          inaccurate_mod_time <-
-            difftime(cur_time, info_i$modification_time, units = "mins") > path1_modTime_diff
-          if (inaccurate_mod_time) {
-            stop("Mod time is old for: '",
-                 path_i,
-                 "'\nWaiting for Gdrive to sync")
-          }
-        }) %>% catch_err(try_harder = T)
-        browser()
-        if (wait_success) {
-          #if it succeeds, reassign the new updated info (with accurate/synced modTime)
-          info_i <- fs::file_info(path_i)
-        } else{
-          stop(
-            "ModTime did not match current time within ",
-            path1_modTime_diff,
-            " min. TimeDiff=",
-            difftime(cur_time, info_i$modification_time, units = "mins")
-          )
-        }
-
-      }
+      # # Logic for dealing with path1 being a Google Drive file  -----------------
+      # # making sure modTime has synced before storing state
+      #
+      # if (!is.null(path1_modTime_diff) & i == 1) {
+      #   #just using lapply for anonymous function
+      #   #to use catch_err
+      #   wait_success <- lapply(path_i, \(x) {
+      #     info_i <- fs::file_info(path_i)
+      #     inaccurate_mod_time <-
+      #       difftime(cur_time, info_i$modification_time, units = "mins") > path1_modTime_diff
+      #     if (inaccurate_mod_time) {
+      #       stop("Mod time is old for: '",
+      #            path_i,
+      #            "'\nWaiting for Gdrive to sync")
+      #     }
+      #   }) %>% catch_err(try_harder = T)
+      #   browser()
+      #   if (wait_success) {
+      #     #if it succeeds, reassign the new updated info (with accurate/synced modTime)
+      #     info_i <- fs::file_info(path_i)
+      #   } else{
+      #     stop(
+      #       "ModTime did not match current time within ",
+      #       path1_modTime_diff,
+      #       " min. TimeDiff=",
+      #       difftime(cur_time, info_i$modification_time, units = "mins")
+      #     )
+      #   }
+      #
+      # }
     }
 
     out_i <- info_i %>%

@@ -5,28 +5,18 @@
 \alias{query_gp_api}
 \title{Get info for Galactic Polymath units}
 \usage{
-gp_api_query(
-  keys = c("numID", "_id", "Title"),
-  numID = NULL,
-  id = NULL,
-  output = "tibble"
-)
+gp_api_query(keys = NULL, numID = NULL, id = NULL, output_tibble = TRUE)
 
-query_gp_api(
-  keys = c("numID", "_id", "Title"),
-  numID = NULL,
-  id = NULL,
-  output = "tibble"
-)
+query_gp_api(keys = NULL, numID = NULL, id = NULL, output_tibble = TRUE)
 }
 \arguments{
-\item{keys}{character vector; which front-matter keys do you want from lessons? default: c("numID","_id","Title"). See all options with \code{\link[=get_fm_names]{get_fm_names()}}}
+\item{keys}{character vector; which front-matter keys do you want from lessons? default:NULL; use "basic" as shorthand for c("numID","_id","Title"). See all options with \code{\link[=get_fm_names]{get_fm_names()}}}
 
 \item{numID}{is a vector of numIDs for unit(s) you want. default=NULL returns all units}
 
 \item{id}{is a vector of \verb{_id}s for unit(s) you want. default=NULL returns all units}
 
-\item{output}{return values as "tibble" or "list"; default="tibble"}
+\item{output_tibble}{return values as a "tibble"? otherwise, list; default=TRUE}
 }
 \value{
 list of results or tbl_json

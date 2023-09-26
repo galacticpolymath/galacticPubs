@@ -27,5 +27,5 @@ stage_assets(
 \item{clear}{do you want to delete everything in the target directory? default= FALSE}
 }
 \description{
-Helper for \code{\link[=upload_assets]{upload_assets()}}.
+Helper for \code{\link[=upload_assets]{upload_assets()}}. Not really intended for use by user. Looks for a pattern in a given path within a working directory and copies those files to the dest_folder, usually /published
 }

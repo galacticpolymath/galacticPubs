@@ -10,6 +10,8 @@
 #' @export
 
 get_wd_git <- \(WD = NULL) {
+
+
   gp_lessons_dir <- Sys.getenv("galacticPubs_git_gp_lessons_dir")
 
   if (is_empty(gp_lessons_dir)) {
@@ -23,6 +25,7 @@ get_wd_git <- \(WD = NULL) {
   if (is.null(WD)) {
     out <- gp_lessons_dir
   } else{
+    WD <- parse_wd(WD)
     #Get path to front-matter path
     proj <- basename(WD)
     # need to find paired yaml_path in github gp-lessons folder

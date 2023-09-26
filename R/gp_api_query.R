@@ -2,32 +2,30 @@
 #'
 #' Constructs a query and requests selected information from the from the galacticpolymath.com/api
 #'
-#' @param keys character vector; which front-matter keys do you want from lessons? default: c("numID","_id","Title"). See all options with [get_fm_names()]
+#' @param keys character vector; which front-matter keys do you want from lessons? default:NULL; use "basic" as shorthand for c("numID","_id","Title"). See all options with [get_fm_names()]
 #' @param numID is a vector of numIDs for unit(s) you want. default=NULL returns all units
 #' @param id is a vector of `_id`s for unit(s) you want. default=NULL returns all units
-#' @param output return values as "tibble" or "list"; default="tibble"
+#' @param output_tibble return values as a "tibble"? otherwise, list; default=TRUE
 #' @return list of results or tbl_json
 #' @family GP API
 #' @export
 
 gp_api_query <- \(
-  keys = c("numID", "_id", "Title"),
+  keys = NULL,
   numID = NULL,
   id=NULL,
-  output = "tibble"
+  output_tibble = TRUE
 ) {
   if(!is.null(numID)&!is.null(id)){
     stop("Only supply numID OR _id.")
   }
   tictoc::tic()
 
-  lapply(keys, \(x) checkmate::assert_choice(x, get_fm_names()))
+  #return basic results for all units if no keys and no ids provided
+  if(is.null(keys)&is.null(numID)&is.null(id)){
+    keys <- "basic"
+  }
 
-  checkmate::assert_choice(output, c("tibble", "list"))
-  params <- lapply(keys, \(x) {
-    1
-  })
-  names(params) <- keys
 
   #construct base request
   req0 <-
@@ -48,10 +46,23 @@ gp_api_query <- \(
     }else{req <- req0}
 
   #Combine filter with projections to make final query
+  if(!is.null(keys)){
+     if(identical(keys,"basic")){keys <- c("numID", "_id", "Title")}
+    #this is dumb b/c these keys don't match Lesson.json hierarchy
+    # lapply(keys, \(x) checkmate::assert_choice(x, get_fm_names()))
+
+
+  params <- lapply(keys, \(x) {
+    1
+  })
+  names(params) <- keys
   req_final <- req %>% httr2::req_url_query (projectionsObj =
                           paste0(as.character(
                             jsonlite::toJSON(params, auto_unbox = TRUE)
                           )))
+  }else{
+    req_final <- req
+  }
 
 
 
@@ -63,11 +74,14 @@ gp_api_query <- \(
   out <- res %>%
     httr2::resp_body_json() %>% .[[1]]
 
-  if (output == "tibble") {
+
+
+  #This will silently leave out columns if they don't fit into a tibble :/
+  if (output_tibble) {
     out2 <-
       out %>% tidyjson::as_tbl_json() %>%  tidyjson::spread_all() %>%
       dplyr::arrange(dplyr::desc(.data$`_id`))
-  }
+  }else{out2 <- out}
   tictoc::toc()
   out2
 
