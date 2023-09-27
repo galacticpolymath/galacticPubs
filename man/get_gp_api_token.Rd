@@ -28,6 +28,7 @@ Will get a token from the R environment if available and test it with an empty q
 \seealso{
 Other GP API: 
 \code{\link{gp_api_query}()},
-\code{\link{gp_api_unit_delete}()}
+\code{\link{gp_api_unit_delete}()},
+\code{\link{gp_api_unit_insert}()}
 }
 \concept{GP API}
