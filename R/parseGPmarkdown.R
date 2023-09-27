@@ -60,7 +60,7 @@ parseGPmarkdown <-
                                   skip = 1,
                                   col_types = "c") %>%
         dplyr::select(1:dplyr::starts_with("otherLink")) %>%
-        dplyr::filter(!is.na(.data$code))
+        dplyr::filter(!is.na(.data$`_code`))
 
       valid_mm <-
         checkmate::test_data_frame(mlinks, min.rows = 1)
@@ -106,7 +106,7 @@ parseGPmarkdown <-
 
             #extract number from codes
             codeN <-
-              stringr::str_extract(vidLinks$code, "[^\\d]*(\\d*)", group = 1)
+              stringr::str_extract(vidLinks$`_code`, "[^\\d]*(\\d*)", group = 1)
 
             #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
             index <- match(vidN, codeN, nomatch = 999)
@@ -149,7 +149,7 @@ parseGPmarkdown <-
                                                                                 "")
             #extract number from codes
             codeN <-
-              stringr::str_extract(mlinks$code, "[^\\d]*(\\d*)", group = 1)
+              stringr::str_extract(mlinks$`_code`, "[^\\d]*(\\d*)", group = 1)
             #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
             index <- match(itemN, codeN, nomatch = 999)
             if (index != 999 & !is.na(index)) {

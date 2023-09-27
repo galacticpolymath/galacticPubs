@@ -347,7 +347,7 @@ compile_lesson <-
       # }else{
       #   skip_update <- FALSE
       # }
-      browser()
+
       if (!skip_update | rebuild) {
         # update teach_it links and compile ---------------------------------------
         message("Changes to `../teaching-materials/` detected...")
