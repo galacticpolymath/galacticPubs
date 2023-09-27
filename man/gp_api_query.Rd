@@ -29,4 +29,9 @@ Constructs a query and requests selected information from the from the galacticp
 \item \code{query_gp_api()}: Alias for gp_api_query
 
 }}
+\seealso{
+Other GP API: 
+\code{\link{get_gp_api_token}()},
+\code{\link{gp_api_unit_delete}()}
+}
 \concept{GP API}

@@ -5,9 +5,17 @@
 \alias{gp_api_get_token}
 \title{Get a JWT token for GP API}
 \usage{
-get_gp_api_token()
+get_gp_api_token(trigger_oauth = FALSE, refresh = FALSE)
 
-gp_api_get_token()
+gp_api_get_token(trigger_oauth = FALSE, refresh = FALSE)
+}
+\arguments{
+\item{trigger_oauth}{a temporary, ugly setting. If T, this will run oauth_flow_auth_code, which then hangs. Default=F; Rerun with False to get the token #smh}
+
+\item{refresh}{do you want to re-authenticate? default=FALSE}
+}
+\value{
+the token
 }
 \description{
 Will get a token from the R environment if available and test it with an empty query to GP API. If missing or expired, will attempt to renew through Google Oauth flow.
@@ -17,3 +25,9 @@ Will get a token from the R environment if available and test it with an empty q
 \item \code{gp_api_get_token()}: alias
 
 }}
+\seealso{
+Other GP API: 
+\code{\link{gp_api_query}()},
+\code{\link{gp_api_unit_delete}()}
+}
+\concept{GP API}

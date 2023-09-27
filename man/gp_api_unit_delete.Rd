@@ -2,16 +2,24 @@
 % Please edit documentation in R/gp_api_unit_delete.R
 \name{gp_api_unit_delete}
 \alias{gp_api_unit_delete}
-\title{Delete a GP unit}
+\title{Delete a GP unit from the database}
 \usage{
-gp_api_unit_delete(WD = "?")
+gp_api_unit_delete(WD = "?", unit_id = NULL)
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}};default="?"}
+
+\item{unit_id}{instead of supplying WD, you can supply the _id directly for the unit that you want to delete.}
 }
 \value{
 success (logical)
 }
 \description{
-Deletes a unit from MongoDB using the GP API
+Deletes a unit from MongoDB using the GP API. Does not delete it from Google Drive or GitHub gp-lessons project.
 }
+\seealso{
+Other GP API: 
+\code{\link{get_gp_api_token}()},
+\code{\link{gp_api_query}()}
+}
+\concept{GP API}
