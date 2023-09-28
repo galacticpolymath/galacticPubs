@@ -15,7 +15,7 @@ gp_api_get_token(trigger_oauth = FALSE, refresh = FALSE)
 \item{refresh}{do you want to re-authenticate? default=FALSE}
 }
 \value{
-the token
+invisibly returns the token
 }
 \description{
 Will get a token from the R environment if available and test it with an empty query to GP API. If missing or expired, will attempt to renew through Google Oauth flow.
@@ -29,6 +29,7 @@ Will get a token from the R environment if available and test it with an empty q
 Other GP API: 
 \code{\link{gp_api_query}()},
 \code{\link{gp_api_unit_delete}()},
-\code{\link{gp_api_unit_insert}()}
+\code{\link{gp_api_unit_insert}()},
+\code{\link{gp_api_unit_replace}()}
 }
 \concept{GP API}

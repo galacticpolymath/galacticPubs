@@ -120,6 +120,7 @@ if(is.null(WD_git)){
   #Add Chunk Start Times
   proc$ChunkStart <- sapply(unique_sans_na(proc$lsn), function(p) {
     p_i <- subset(proc, proc$lsn == p)
+
     newChunkIndx <-
       sapply(1:nrow(p_i), function(i)
         which.max(p_i$Chunk[1:i])) %>% unique()
@@ -179,8 +180,10 @@ if(is.null(WD_git)){
     if(length(learningObj[[1]])==0){
       learningObj_i <- NULL
       warning("No learning objectives found for lesson: ",i)
-    }else{
-
+    }else if(!i%in%1:length(learningObj)){
+      message("No learning objectives found for Lesson ",i)
+      learningObj_i <- NA
+      }else{
       learningObj_i <- learningObj[[i]]
     }
     proc_df_i <- subset(proc, proc$lsn == i)
@@ -257,8 +260,8 @@ if(is.null(WD_git)){
       lsnExt <- purrr::map(1:nrow(lext_df_i), \(j) {
         list(
           item = j,
-          itemTitle = lext_df_i$ItemTitle[j] ,
-          itemDescription = lext_df_i$Description[j],
+          itemTitle = lext_df_i$itemTitle[j] ,
+          itemDescription = lext_df_i$description[j],
           itemLink = lext_df_i$link[j]
         )
       })

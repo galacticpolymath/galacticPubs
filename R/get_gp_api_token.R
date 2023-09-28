@@ -4,11 +4,11 @@
 #' @param trigger_oauth a temporary, ugly setting. If T, this will run oauth_flow_auth_code, which then hangs. Default=F; Rerun with False to get the token #smh
 #' @param refresh do you want to re-authenticate? default=FALSE
 #' @family GP API
-#' @return the token
+#' @return invisibly returns the token
 #' @export
 #'
 get_gp_api_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
-  token_stored <- Sys.getenv('galacticPubs_gp_api_token')
+
   oauth_sec <-
     httr2::obfuscated("LJZonP3Q0vVpNm_Z9vJp25gIZYvkKdHGUOGmZ0Y5qG36A9ssZNFweIl4cI1YPQ-3KBf-")
 
@@ -37,6 +37,24 @@ get_gp_api_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
   }
   checkmate::assert_character(email, pattern = "\\w*@\\w*\\.")
 
+  token_stored <- Sys.getenv('galacticPubs_gp_api_token')
+  #if we're not already going to refresh, do a test to see if token is current
+  #by posting no
+
+  if (!is_empty(token_stored) & !refresh) {
+
+    #need to figure out how to form a good check of token currency, but removing for now
+    # test_request <-
+    #   httr2::request("https://dev.galacticpolymath.com/api/update-lessons") %>%
+    #   httr2::req_method("PUT") %>%
+    #   httr2::req_auth_bearer_token(token = token_stored) %>%
+    #   httr2::req_perform(verbosity = 2) %>% suppressWarnings() %>% catch_err(keep_results = TRUE)
+    # http_code <- test_request$result$status
+    # if (http_code != 200) {
+    #   refresh <- TRUE
+    #   }
+  }
+
   # try to authenticate and store a token if it's missing -------------------
   if (is_empty(token_stored) | refresh) {
     token_request <-
@@ -44,27 +62,30 @@ get_gp_api_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
       httr2::req_body_json(list(email = email))
 
 
-    token_resp <- token_request %>% httr2::req_perform(verbosity = 2)%>% catch_err(keep_results = TRUE)
+    token_resp <-
+      token_request %>% httr2::req_perform(verbosity = 2) %>% catch_err(keep_results = TRUE)
 
 
     http_code <- token_resp$result$status
-    if(http_code!=200){
-      stop("Token refresh failed. Try reauthenticating by running 'get_gp_api_token(trigger_oauth=TRUE)'")
+    if (http_code != 200) {
+      stop(
+        "Token refresh failed. Try reauthenticating by running 'get_gp_api_token(trigger_oauth=TRUE)'"
+      )
     }
 
     token <- token_resp$result %>%
       httr2::resp_body_json() %>% unlist()
 
 
-    checkmate::assert_character(token,min.chars=10)
+    checkmate::assert_character(token, min.chars = 10)
     #Assign the value to a system variable
-    Sys.setenv(galacticPubs_gp_api_token=token)
+    Sys.setenv(galacticPubs_gp_api_token = token)
 
   } else{
     token <- token_stored
   }
 
-  token
+  invisible(token)
 }
 
 #' @describeIn get_gp_api_token alias

@@ -155,7 +155,7 @@ compile_teach_it <- function(WD = "?",
   proc_initialized <-
     !grepl("\\*\\*\\*",proc$Chunk[2]) #template has *** in second step chunk (D4)
   proc_errors <-
-    sum(!is.na(proc$`_issues`))==0 #FALSE if issues found
+    sum(!is.na(proc$`_issues`))!=0 #FALSE if issues found
   proj_name <- basename(WD)
   if(!proc_initialized){
     message(proj_name,": Procedure not processed! Issues found...see teach-it.gsheet")

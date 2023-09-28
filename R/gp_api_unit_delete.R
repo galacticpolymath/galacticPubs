@@ -47,7 +47,7 @@ gp_api_unit_delete <- \(WD = "?", unit_id = NULL) {
 
 
     test_request <-
-      httr2::req_perform(req, verbosity = 3) %>% catch_err()
+      httr2::req_perform(req, verbosity = 2) %>% catch_err()
 
     test_delete <-
       gp_api_query(id = unit_id, c("Title", "Subtitle")) %>% is_empty()
@@ -57,6 +57,7 @@ gp_api_unit_delete <- \(WD = "?", unit_id = NULL) {
     TRUE
   } else{
     message("Deletion FAILED for '", unit_id, "'.")
+    message("Maybe try re-authenticating?")
     FALSE
   }
 

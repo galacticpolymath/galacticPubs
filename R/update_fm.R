@@ -130,7 +130,7 @@ update_fm <-
               dplyr::mutate(key = paste0(key_i, "$", .data$key))
           }
 
-        }) %>% dplyr::bind_rows()
+        }) %>% dplyr::bind_rows() %>% catch_err(keep_results = TRUE)
 
 
         new_data <- purrr::map(1:length(change_keys), \(i) {
@@ -148,16 +148,21 @@ update_fm <-
               dplyr::mutate(key = paste0(key_i, "$", .data$key))
           }
         }) %>%
-          dplyr::bind_rows()
+          dplyr::bind_rows() %>%
+          catch_err(keep_results = TRUE)
 
+        if(old_data$success & new_data$success){
         summary <-
-          dplyr::full_join(old_data, new_data, by = "key", keep = F) %>%
+          dplyr::full_join(old_data$result, new_data$result, by = "key", keep = F) %>%
           dplyr::mutate(changed = convert_T_to_check(.data$old_value !=
                                                        .data$new_value)) %>%
           dplyr::relocate(changed)
 
         message("The following keys were changed in front-matter: ")
         print(summary)
+        }else{
+          message("Unable to generate summary. Seems to be successful, but changes may not be tibble-friendly. ")
+        }
       } else{
         message("Nothing to change. 'change_this' list ignored")
       }

@@ -11,15 +11,16 @@ DefaultCountry: 'United States'
 #!!---> operational variables (that don't have Shiny inputs
 #LastUpdated has to be at the top here
 LastUpdated: ''
+ReleaseDate: '2050-01-01'
+isTestRepo: false
 FirstPublicationDate: ''
 MediumTitle: '' # Format: Title + _Subj_ + _Gx-y_+ (Locale)
 lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.6.0
+TemplateVer: 0.6.1
 galacticPubsVer: ''
-isTestRepo: false
 URL: ''
 GdriveHome: 'GP-Studio'
 GdriveDirName: ''
@@ -35,7 +36,6 @@ GdriveDirURL: ''
 #!!<--- operational variables (that don't have Shiny inputs)
 # RebuildAllMaterials must be top of this list
 RebuildAllMaterials: no
-ReleaseDate: '2050-01-01'
 Title: ''
 Subtitle: ''
 SponsorName: ''
