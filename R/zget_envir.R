@@ -232,13 +232,13 @@ zget_items <- \(df, fm) {
     } else if (grepl("presentation", df_item_i$`_itemType`)) {
       "present"
     } else{
-      "Download"
+      "pdf"
     }
     #link text for website
     cust_txt <- switch(what_we_want,
                        "present" = "Present Now",
                        "pdf" = "PDF",
-                       "Download")#default
+                       "PDF")#default
 
     full_link_txt <- paste_valid(cust_txt, disclaimer,collapse=" ")
 
@@ -266,7 +266,7 @@ zget_items <- \(df, fm) {
         cust_url
       )
 
-    drive_share_txt <- paste_valid("Copy/Edit in Google Docs",disclaimer, collapse=" ")
+    drive_share_txt <- paste_valid("Preview/Copy in Google Docs",disclaimer, collapse=" ")
     #output for this lsn
     list(
       itemTitle = df_item_i$title,
