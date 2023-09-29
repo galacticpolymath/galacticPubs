@@ -2,12 +2,13 @@
 #'
 #' Will get a token from the R environment if available and test it with an empty query to GP API. If missing or expired, will attempt to renew through Google Oauth flow.
 #' @param trigger_oauth a temporary, ugly setting. If T, this will run oauth_flow_auth_code, which then hangs. Default=F; Rerun with False to get the token #smh
+#'
 #' @param refresh do you want to re-authenticate? default=FALSE
 #' @family GP API
 #' @return invisibly returns the token
 #' @export
 #'
-get_gp_api_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
+gp_api_get_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
 
   oauth_sec <-
     httr2::obfuscated("LJZonP3Q0vVpNm_Z9vJp25gIZYvkKdHGUOGmZ0Y5qG36A9ssZNFweIl4cI1YPQ-3KBf-")
@@ -88,7 +89,8 @@ get_gp_api_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
   invisible(token)
 }
 
-#' @describeIn get_gp_api_token alias
+
+#' @describeIn gp_api_get_token alias
 #' @export
 #'
-gp_api_get_token <- get_gp_api_token
+get_gp_api_token <- gp_api_get_token

@@ -19,7 +19,7 @@ Deletes a unit from MongoDB using the GP API. Does not delete it from Google Dri
 }
 \seealso{
 Other GP API: 
-\code{\link{get_gp_api_token}()},
+\code{\link{gp_api_get_token}()},
 \code{\link{gp_api_query}()},
 \code{\link{gp_api_unit_insert}()},
 \code{\link{gp_api_unit_replace}()}

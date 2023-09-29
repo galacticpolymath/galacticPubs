@@ -17,7 +17,7 @@ Insert (i.e. add) a new unit to MongoDB using the GP API.
 }
 \seealso{
 Other GP API: 
-\code{\link{get_gp_api_token}()},
+\code{\link{gp_api_get_token}()},
 \code{\link{gp_api_query}()},
 \code{\link{gp_api_unit_delete}()},
 \code{\link{gp_api_unit_replace}()}

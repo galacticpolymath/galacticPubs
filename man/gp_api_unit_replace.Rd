@@ -20,7 +20,7 @@ Shallow wrapper for internal functions \code{\link[=gp_api_unit_delete]{gp_api_u
 }
 \seealso{
 Other GP API: 
-\code{\link{get_gp_api_token}()},
+\code{\link{gp_api_get_token}()},
 \code{\link{gp_api_query}()},
 \code{\link{gp_api_unit_delete}()},
 \code{\link{gp_api_unit_insert}()}

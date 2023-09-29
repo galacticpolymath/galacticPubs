@@ -31,7 +31,7 @@ Constructs a query and requests selected information from the from the galacticp
 }}
 \seealso{
 Other GP API: 
-\code{\link{get_gp_api_token}()},
+\code{\link{gp_api_get_token}()},
 \code{\link{gp_api_unit_delete}()},
 \code{\link{gp_api_unit_insert}()},
 \code{\link{gp_api_unit_replace}()}
