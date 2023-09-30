@@ -23,7 +23,9 @@ zget_envir <- \(df, fm) {
       assess <- list(
         lsn = "last",
         title = "Assessments",
+        tags=NULL,
         preface = "",
+        tile="https://storage.googleapis.com/gp-cloud/icons/assessment%20icon.png",
         itemList = zget_items(df_assess, fm = fm)
       )
     }
@@ -109,7 +111,9 @@ zget_grade_bands <- \(df, fm, assess) {
 
       #Add assessment data to the end if it's not null
       if(!is_empty(assess)){
-        LSN_DATA<-c(LSN_DATA,assess)
+
+        cur_len <- length(LSN_DATA)
+        LSN_DATA[[cur_len+1]] <- assess
       }
 
 
@@ -227,7 +231,8 @@ zget_items <- \(df, fm) {
     what_we_want <- if (grepl("handout", df_item_i$`_itemType`) |
                         grepl("worksheet", df_item_i$`_itemType`) |
                         grepl("card", df_item_i$`_itemType`)|
-                        grepl("assess", df_item_i$`_itemType`)) {
+                        grepl("assess", df_item_i$`_itemType`)|
+                        grepl("overview", df_item_i$`_itemType`)) {
       "pdf"
     } else if (grepl("presentation", df_item_i$`_itemType`)) {
       "present"

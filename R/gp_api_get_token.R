@@ -1,32 +1,16 @@
 #' Get a JWT token for GP API
 #'
 #' Will get a token from the R environment if available and test it with an empty query to GP API. If missing or expired, will attempt to renew through Google Oauth flow.
-#' @param trigger_oauth a temporary, ugly setting. If T, this will run oauth_flow_auth_code, which then hangs. Default=F; Rerun with False to get the token #smh
 #'
 #' @param refresh do you want to re-authenticate? default=FALSE
 #' @family GP API
 #' @return invisibly returns the token
 #' @export
 #'
-gp_api_get_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
-
+gp_api_get_token <- \(refresh = FALSE) {
   oauth_sec <-
     httr2::obfuscated("LJZonP3Q0vVpNm_Z9vJp25gIZYvkKdHGUOGmZ0Y5qG36A9ssZNFweIl4cI1YPQ-3KBf-")
 
-  if (trigger_oauth) {
-    message(
-      "**This will lock up. You should rerun again, immediately after you authenticate with 'trigger_oauth=F'"
-    )
-    oauth_id <-
-      "1095510414161-jo8dbgm27asec4dm9h05iqf0t18hviv2.apps.googleusercontent.com"
-    oauth_client_obj <- httr2::oauth_client(id = oauth_id,
-                                            token_url = "https://dev.galacticpolymath.com/api/get-jwt-token",
-                                            secret = oauth_sec)
-
-    auth <-
-      httr2::oauth_flow_auth_code(client = oauth_client_obj,
-                                  auth_url = "https://dev.galacticpolymath.com/api/auth/signin", ) %>% httr2::with_verbosity()
-  }
 
 
   # Get email associated with galacticPubs ----------------------------------
@@ -43,7 +27,6 @@ gp_api_get_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
   #by posting no
 
   if (!is_empty(token_stored) & !refresh) {
-
     #need to figure out how to form a good check of token currency, but removing for now
     # test_request <-
     #   httr2::request("https://dev.galacticpolymath.com/api/update-lessons") %>%
@@ -57,14 +40,33 @@ gp_api_get_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
   }
 
   # try to authenticate and store a token if it's missing -------------------
+
   if (is_empty(token_stored) | refresh) {
+    # First got to authorize through Oauth
+    message(
+      "**Attempting to refresh token. Close window once you've logged into Google Oauth in the browser and return to R.**"
+    )
+    oauth_id <-
+      "1095510414161-jo8dbgm27asec4dm9h05iqf0t18hviv2.apps.googleusercontent.com"
+    oauth_client_obj <- httr2::oauth_client(id = oauth_id,
+                                            token_url = "https://dev.galacticpolymath.com/api/get-jwt-token",
+                                            secret = oauth_sec)
+
+    user_url <-
+      httr2::oauth_flow_auth_code_url(client = oauth_client_obj,
+                                      auth_url = "https://dev.galacticpolymath.com/api/auth/signin",) %>% httr2::with_verbosity()
+    utils::browseURL(user_url)
+
+
     token_request <-
       httr2::request("https://dev.galacticpolymath.com/api/get-jwt-token") %>%
       httr2::req_body_json(list(email = email))
 
+    #Have user hit enter after web sign in done
+    readline("Hit Return when you've succeeded in authenticating on the browser.\n <Return>")
 
     token_resp <-
-      token_request %>% httr2::req_perform(verbosity = 2) %>% catch_err(keep_results = TRUE)
+      token_request %>% httr2::req_perform(verbosity = 1) %>% catch_err(keep_results = TRUE)
 
 
     http_code <- token_resp$result$status
@@ -72,6 +74,8 @@ gp_api_get_token <- \(trigger_oauth = FALSE, refresh = FALSE) {
       stop(
         "Token refresh failed. Try reauthenticating by running 'get_gp_api_token(trigger_oauth=TRUE)'"
       )
+    }else{
+      message("SUCCESS! Token refreshed.")
     }
 
     token <- token_resp$result %>%
