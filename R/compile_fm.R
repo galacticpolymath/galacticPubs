@@ -17,6 +17,8 @@
 compile_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD=WD)
+  #just make sure everything's updated in the cloud
+  upload_assets(WD=WD)
   json_dir <- fs::path(WD_git, "JSONs")
   fm <- get_fm(WD_git = WD_git)
   fm_keys <- get_fm_names()
