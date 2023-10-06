@@ -31,7 +31,7 @@ compile_lesson <-
 
 
     # Always update front-matter (in case of template updates) ----------------
-    update_fm(WD = WD, save_output = TRUE)
+    update_fm(WD = WD, save_output = TRUE,recompile = FALSE)
     #run upload_assets to make sure there's nothing new
     upload_assets(WD = WD)
 

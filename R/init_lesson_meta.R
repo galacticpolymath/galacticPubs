@@ -145,7 +145,7 @@ init_lesson_meta <- function(WD = "?",
       message(
         "\nNow running update_fm() to record new GdriveTeachItID & other IDs in the front-matter.yml"
       )
-      test_update <- update_fm(WD = WD, drive_reconnect = TRUE)
+      test_update <- update_fm(WD = WD, drive_reconnect = TRUE,recompile = FALSE)
       if (test_update) {
         success <- TRUE
       } else{

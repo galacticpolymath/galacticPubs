@@ -12,6 +12,7 @@
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
 #' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=F
 #' @param try_harder passed to [catch_err()] specifically when we look for GdriveDir, just in case the Google Drive for Desktop and Web are out of sync, it'll try after a series of intervals. Default= FALSE.
+#' @param recompile logical; if TRUE (default), runs [compile_fm()] and [compile_JSON()]
 #' @return returns logical of success
 #' @export
 #'
@@ -24,7 +25,8 @@ update_fm <-
            return_fm = FALSE,
            reorder = TRUE,
            drive_reconnect = FALSE,
-           try_harder=FALSE) {
+           try_harder=FALSE,
+           recompile=TRUE) {
     WD <- parse_wd(WD)
     . = NULL
 
@@ -523,6 +525,14 @@ update_fm <-
     } else{
       #assume successful if it makes it here, until I write a better validity test
       success <- TRUE
+    }
+
+    if(success&recompile){
+      message("Recompiling front-matter to JSON")
+      compile_fm(WD=WD)
+      message("Recombining all JSONs")
+      compile_json(WD=WD)
+
     }
 
 

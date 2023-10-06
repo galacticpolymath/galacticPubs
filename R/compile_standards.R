@@ -117,7 +117,7 @@ compile_standards <- function(WD = "?",
       message(
         "Found invalid/empty gsheets_link. Trying to reconnect...running update_fm(WD=WD,drive_reconnect=TRUE)."
       )
-      update_fm(WD = WD, drive_reconnect = TRUE)
+      update_fm(WD = WD, drive_reconnect = TRUE,recompile = FALSE)
       stnds_id <- get_fm("GdriveStandardsID" , WD = WD)
       #Try again to import
       stnds_drib <- drive_find_path(stnds_id)
@@ -769,13 +769,13 @@ compile_standards <- function(WD = "?",
         )
         #Store LearningChart Friendliness in front-matter and also save to RDS file
         update_fm(change_this = list(LearningChartFriendly = F),
-                  WD = WD)
+                  WD = WD,recompile = FALSE)
         learning_chart_friendly <- FALSE
         a_combined$dimAbbrev <- NA
         supported_dims <- NULL
       } else{
         update_fm(change_this = list(LearningChartFriendly = T),
-                  WD = WD)
+                  WD = WD,recompile = FALSE)
         learning_chart_friendly <- TRUE
 
 

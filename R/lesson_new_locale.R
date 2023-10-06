@@ -155,7 +155,8 @@ lesson_new_locale <-
                 LearningChart = "",
                 LearningChartFriendly = ""
 
-              )
+              ),
+              recompile = FALSE
             ) %>% catch_err()
 
 

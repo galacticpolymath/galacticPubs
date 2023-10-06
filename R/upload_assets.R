@@ -266,7 +266,7 @@ upload_assets <- \(WD = "?",
       })
 
     test_fm_update <-
-      update_fm(WD = WD, change_this = fm_update_list)
+      update_fm(WD = WD, change_this = fm_update_list,recompile = FALSE)
 
     summ <-
       dplyr::tibble(

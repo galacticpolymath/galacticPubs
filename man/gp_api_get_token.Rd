@@ -5,13 +5,11 @@
 \alias{get_gp_api_token}
 \title{Get a JWT token for GP API}
 \usage{
-gp_api_get_token(trigger_oauth = FALSE, refresh = FALSE)
+gp_api_get_token(refresh = FALSE)
 
-get_gp_api_token(trigger_oauth = FALSE, refresh = FALSE)
+get_gp_api_token(refresh = FALSE)
 }
 \arguments{
-\item{trigger_oauth}{a temporary, ugly setting. If T, this will run oauth_flow_auth_code, which then hangs. Default=F; Rerun with False to get the token #smh}
-
 \item{refresh}{do you want to re-authenticate? default=FALSE}
 }
 \value{
