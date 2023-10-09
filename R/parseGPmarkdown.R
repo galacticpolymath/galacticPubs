@@ -106,7 +106,7 @@ parseGPmarkdown <-
 
             #extract number from codes
             codeN <-
-              stringr::str_extract(vidLinks[,1], "[^\\d]*(\\d*)", group = 1)
+              stringr::str_extract(unlist(vidLinks[,1]), "[^\\d]*(\\d*)", group = 1)
 
             #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
             index <- match(vidN, codeN, nomatch = 999)
@@ -149,8 +149,8 @@ parseGPmarkdown <-
                                                                                 "")
             #extract number from codes
             codeN <-
-              stringr::str_extract(mlinks[,1], "[^\\d]*(\\d*)", group = 1)
-            #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
+              stringr::str_extract(unlist(mlinks[,1]), "[^\\d]*(\\d*)", group = 1)
+            #if no {itemX} codes, (i.e. ""), ignore, put NA if no match for the number
             index <- match(itemN, codeN, nomatch = 999)
             if (index != 999 & !is.na(index)) {
               type <- mlinks$type[index] %>% tolower()
