@@ -527,7 +527,7 @@ update_fm <-
       success <- TRUE
     }
 
-    if(success&recompile){
+    if(identical(TRUE,success&recompile)){
       message("Recompiling front-matter to JSON")
       compile_fm(WD=WD)
       message("Recombining all JSONs")

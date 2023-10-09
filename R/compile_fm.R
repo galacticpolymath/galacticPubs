@@ -259,10 +259,10 @@ compile_fm <- \(WD = "?") {
       if (!substr(def_i, 1, 1) %in% LETTERS) {
         substr(def_i, 1, 1) <- toupper(substr(def_i, 1, 1))
       }
-      #put parentheses around definition if necessary
-      if (substr(def_i, 1, 1) != "(") {
-        def_i <- paste0("(", def_i, ")")
-      }
+      # #put parentheses around definition if necessary
+      # if (substr(def_i, 1, 1) != "(") {
+      #   def_i <- paste0("(", def_i, ")")
+      # }
       persons_i <- lapply(1:nrow(ack_i), function(row) {
         tmp <-
           list(
