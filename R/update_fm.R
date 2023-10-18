@@ -25,8 +25,8 @@ update_fm <-
            return_fm = FALSE,
            reorder = TRUE,
            drive_reconnect = FALSE,
-           try_harder=FALSE,
-           recompile=TRUE) {
+           try_harder = FALSE,
+           recompile = TRUE) {
     WD <- parse_wd(WD)
     . = NULL
 
@@ -153,17 +153,22 @@ update_fm <-
           dplyr::bind_rows() %>%
           catch_err(keep_results = TRUE)
 
-        if(old_data$success & new_data$success){
-        summary <-
-          dplyr::full_join(old_data$result, new_data$result, by = "key", keep = F) %>%
-          dplyr::mutate(changed = convert_T_to_check(.data$old_value !=
-                                                       .data$new_value)) %>%
-          dplyr::relocate(changed)
+        if (old_data$success & new_data$success) {
+          summary <-
+            dplyr::full_join(old_data$result,
+                             new_data$result,
+                             by = "key",
+                             keep = F) %>%
+            dplyr::mutate(changed = convert_T_to_check(.data$old_value !=
+                                                         .data$new_value)) %>%
+            dplyr::relocate(changed)
 
-        message("The following keys were changed in front-matter: ")
-        print(summary)
-        }else{
-          message("Unable to generate summary. Seems to be successful, but changes may not be tibble-friendly. ")
+          message("The following keys were changed in front-matter: ")
+          print(summary)
+        } else{
+          message(
+            "Unable to generate summary. Seems to be successful, but changes may not be tibble-friendly. "
+          )
         }
       } else{
         message("Nothing to change. 'change_this' list ignored")
@@ -176,6 +181,17 @@ update_fm <-
     #Add/Update the locale and lang fields with a nonexported internal function parse_locale()
     # overwrites existing lang and locale fields and returns the modified current_data list
     new_yaml <- new_yaml %>% parse_locale()
+
+    #Add URL for this locale
+    new_yaml$URL <-
+      paste0(
+        c(
+          "https://www.galacticpolymath.com/lessons",
+          new_yaml$locale,
+          new_yaml$numID
+        ),
+        collapse = "/"
+      )
 
     #make a unique `_id` combining numID & locale
     if (!is_empty(new_yaml$numID)) {
@@ -232,16 +248,6 @@ update_fm <-
     )
 
 
-    # #Add URL to this lesson for once it's published to gp-catalog (if it doesn't exist)
-    # if (is_empty(new_yaml$GPCatalogURL) |
-    #     is_empty(new_yaml$GdriveDirName)) {
-    #   repo <- whichRepo(WD = WD)
-    #
-    #   checkmate::assert_character(repo, any.missing = FALSE)
-    #
-    #   new_yaml$GPCatalogURL <- catalogURL("LESSON.json", repo)
-    # }
-
     # remove the following deprecated variables -------------------------------
 
     deprecated <-
@@ -286,7 +292,7 @@ update_fm <-
           "Lessons",
           new_yaml$GdriveDirName
         )) %>%
-        catch_err(keep_results = TRUE,try_harder = try_harder)
+        catch_err(keep_results = TRUE, try_harder = try_harder)
 
       checkmate::assert_data_frame(proj_dribble_test$result,
                                    nrows = 1,
@@ -527,11 +533,11 @@ update_fm <-
       success <- TRUE
     }
 
-    if(identical(TRUE,success&recompile)){
+    if (identical(TRUE, success & recompile)) {
       message("Recompiling front-matter to JSON")
-      compile_fm(WD=WD)
+      compile_fm(WD = WD)
       message("Recombining all JSONs")
-      compile_json(WD=WD)
+      compile_json(WD = WD)
 
     }
 
