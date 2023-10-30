@@ -4,12 +4,15 @@
 #'
 #' @param WD working directory, passed to [parse_wd()];default="?"
 #' @param unit_id instead of supplying WD, you can supply the _id directly for the unit that you want to delete.
+#' @param prompt_user logical; ask user before deleting and replacing the unit? default=TRUE
 #' @family GP API
 #' @export
 #' @returns success (logical)
 #'
 
-gp_api_unit_delete <- \(WD = "?", unit_id = NULL) {
+gp_api_unit_delete <- \(WD = "?",
+                        unit_id = NULL,
+                        prompt_user = TRUE) {
   token <- get_gp_api_token()
   if (is.null(unit_id)) {
     WD <- parse_wd(WD)
@@ -34,17 +37,18 @@ gp_api_unit_delete <- \(WD = "?", unit_id = NULL) {
       httr2::req_url_query(`_id` = unit_id)
 
     httr2::req_dry_run(req)
-    message(
-      "\n***********************************\n",
-      " Are you sure you want to delete mini-unit '",
-      unit_id,
-      "' from the GP-Catalog?"
-    )
-    choice <- readline("(y/n)? >")
-    if (choice != "y") {
-      stop("Unit deletion aborted.")
+    if (prompt_user) {
+      message(
+        "\n***********************************\n",
+        " Are you sure you want to delete mini-unit '",
+        unit_id,
+        "' from the GP-Catalog?"
+      )
+      choice <- readline("(y/n)? >")
+      if (choice != "y") {
+        stop("Unit deletion aborted.")
+      }
     }
-
 
     test_request <-
       httr2::req_perform(req, verbosity = 2) %>% catch_err()

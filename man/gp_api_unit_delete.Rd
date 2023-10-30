@@ -4,12 +4,14 @@
 \alias{gp_api_unit_delete}
 \title{Delete a GP unit from the database}
 \usage{
-gp_api_unit_delete(WD = "?", unit_id = NULL)
+gp_api_unit_delete(WD = "?", unit_id = NULL, prompt_user = TRUE)
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}};default="?"}
 
 \item{unit_id}{instead of supplying WD, you can supply the _id directly for the unit that you want to delete.}
+
+\item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 }
 \value{
 success (logical)

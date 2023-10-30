@@ -12,7 +12,7 @@ learningEpaulette(
   saveFile = TRUE,
   destFolder,
   fileName = "GP-Learning-Epaulette",
-  font_size = 10,
+  font_size = 18,
   width = 11,
   height = 1.6,
   dpi = 200,

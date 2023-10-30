@@ -4,10 +4,12 @@
 \alias{gp_api_unit_replace}
 \title{Replace a GP unit in the database}
 \usage{
-gp_api_unit_replace(WD = "?")
+gp_api_unit_replace(WD = "?", prompt_user = TRUE)
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}};default="?"}
+
+\item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 }
 \value{
 success (logical)

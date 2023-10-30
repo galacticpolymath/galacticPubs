@@ -5,16 +5,19 @@
 #' Shallow wrapper for internal functions [gp_api_unit_delete()] and [gp_api_unit_insert()]
 #'
 #' @param WD working directory, passed to [parse_wd()];default="?"
+#' @param prompt_user logical; ask user before deleting and replacing the unit? default=TRUE
 #' @family GP API
 #' @export
 #' @returns success (logical)
 
-gp_api_unit_replace <- \(WD="?"){
+gp_api_unit_replace <- \(WD="?",
+                         prompt_user=TRUE){
   WD <- parse_wd(WD)
 
   id <- get_fm("_id",WD=WD)
 
-  test_delete <- gp_api_unit_delete(unit_id=id)
+  test_delete <- gp_api_unit_delete(unit_id=id,
+                                    prompt_user=prompt_user)
 
   if(!test_delete){
     message("Deletion failed for ",id)

@@ -254,6 +254,7 @@ if(is.null(WD_git)){
     # stringr::str_extract(lext_df_i$link,pattern = ".*\\(?([^\\)]*)\\)?$")
 
     #Make NA row to avoid errors
+
     if (nrow(lext_df_i) == 0) {
       lsnExt <- NULL
     } else{
@@ -281,6 +282,7 @@ if(is.null(WD_git)){
     )
 
   })
+
   out$vocab <- vocab_df
 
 

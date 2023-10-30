@@ -115,7 +115,7 @@ compile_teach_it <- function(WD = "?",
       sheet = "LsnExt",
       skip = 1,
       col_types = "c"
-    ) %>% dplyr::filter(`REF(Is_initiatialized)` == TRUE &
+    ) %>% dplyr::filter(.data$link!= "URL" &
                           !is.na(.data$itemTitle)) %>%
     dplyr::select("lsn", "order", "itemTitle", "description", "link")
 
