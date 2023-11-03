@@ -297,7 +297,7 @@ compile_fm <- \(WD = "?") {
   # versions.json -----------------------------------------------------------
 
   ver <-
-    get_fm("Versions", WD = WD,standardize_NA = TRUE)[[1]] %>% dplyr::as_tibble()
+    get_fm("Versions", WD = WD,standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble()
 
   if (is_empty(ver)) {
     ver_out0 <- NULL
@@ -334,6 +334,7 @@ compile_fm <- \(WD = "?") {
         list(major_release = unique(ver$major)[mjr],
              sub_releases = (out_mjr))
     }
+
   }
 
 
@@ -347,6 +348,13 @@ compile_fm <- \(WD = "?") {
 
   message("front-matter compiled")
 
+ message("Recombining all JSONs")
+ test_compile <- compile_json(WD = WD) %>% catch_err()
+ if(test_compile){
+   message("SUCCESS! New LESSON.json created for '",basename(WD),"'")
+ }else{
+   message("FAILURE! LESSON.json not regenerated for '",basename(WD),"'")
+ }
 }
 
 #' fm_compile
