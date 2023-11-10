@@ -27,7 +27,13 @@ update_fm <-
            drive_reconnect = FALSE,
            try_harder = FALSE,
            recompile = TRUE) {
+    if(!is.null(WD_git)){
+      fm <- get_fm(WD_git=WD_git)
+      WD <- fs::path(path_parent_dir(get_lessons_path(),3),fm$GdriveHome,"Edu","Lessons",fm$GdriveDirName)
+      checkmate::assert_directory_exists(WD)
+    }else{
     WD <- parse_wd(WD)
+    }
     . = NULL
 
     proj <- basename(WD)

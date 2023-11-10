@@ -11,3 +11,11 @@ open_proj_folder <- \(WD="?"){
    system(sprintf('open %s', shQuote(WD)))
 
 }
+
+#' open_wd
+#'
+#' @describeIn open_wd Alias for [open_proj_folder]
+#' @export
+#'
+
+open_wd <- open_proj_folder

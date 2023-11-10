@@ -5,7 +5,7 @@
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [parse_wd()]; default is WD=getwd()
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
 #' @param rename_lessons logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_lessons()]
-#' @param prompt_rename logical, do you want to prompt user about whether to rename lessons? default=T
+#' @param prompt_rename logical, do you want to prompt user about whether to rename lessons? default=FALSE
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 #' @importFrom rlang .data
 #' @export
@@ -13,7 +13,7 @@
 compile_teach_it <- function(WD = "?",
                              teach_it_drib = NULL,
                              rename_lessons = TRUE,
-                             prompt_rename = TRUE) {
+                             prompt_rename = FALSE) {
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD=WD)
   . = NULL #to avoid errors with dplyr syntax
@@ -210,6 +210,11 @@ compile_teach_it <- function(WD = "?",
       "`"
     )
   }
+
+
+# Assign lesson statuses --------------------------------------------------
+
+  zassign_lsn_stats(is_initialized=uinfo_titles_initialized,WD_git=WD_git, fm=fm,uinfo=uinfo)
 
   ####
 
