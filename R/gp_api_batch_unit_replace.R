@@ -26,10 +26,10 @@ gp_api_batch_unit_replace <- \(shared_drive="?"
         gp_api_unit_replace(
           WD = WD,
           prompt_user=ask_once
-        ) %>% catch_err()
+        )
 
-      dplyr::tibble(Replaced = convert_T_to_check(replace_success),
-                    Lesson = basename(WD))
+      dplyr::tibble(`Replaced?` = convert_T_to_check(replace_success),
+                    Unit = basename(WD))
     })
 
 

@@ -139,11 +139,11 @@ compile_teach_it <- function(WD = "?",
 
 
   # Check and Validate Data Import--------------------------------------------------
-  checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!TeachMatLinks")
+  checkmate::assert_data_frame(tlinks0, min.rows = 0, .var.name = "teach-it.gsheet!TeachMatLinks")
   checkmate::assert_data_frame(mlinks, min.rows = 0, .var.name = "teach-it.gsheet!Multimedia")#multimedia might be 0 rows
   checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
   checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
-  checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!Procedure")
+  checkmate::assert_data_frame(proc, min.rows = 0, .var.name = "teach-it.gsheet!Procedure")
   checkmate::assert_data_frame(lext, min.rows = 0, .var.name = "teach-it.gsheet!LsnExt")
 
   # Check for template text (uninitialized data) ----------------------------
