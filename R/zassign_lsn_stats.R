@@ -12,6 +12,7 @@ zassign_lsn_stats <- \(is_initialized,
                        WD_git,
                        fm,
                        uinfo) {
+
   if (!is_initialized) {
     message("No lessons documented on Tab1 of teach-it.gsheet for this project. ")
     lsnStatuses <- NULL
@@ -21,7 +22,7 @@ zassign_lsn_stats <- \(is_initialized,
     if (identical(TRUE, fm$ReleaseDate < "2023-11-10") &
         is_empty(fm$LsnStatuses)) {
       lsnStatuses <- purrr::map(1:nrow(uinfo), \(i) {
-        xi <- uinfo[i, ]
+        xi <- uinfo[i,]
         list(
           lsn = as.integer(xi$lsn),
           status = "Live",
@@ -55,7 +56,7 @@ zassign_lsn_stats <- \(is_initialized,
       }
 
       lsnStatuses <- purrr::map(1:nrow(uinfo), \(i) {
-        xi <- uinfo[i, ]
+        xi <- uinfo[i,]
         if (is.null(old_statuses)) {
           old_xi <- NULL
         } else if (i %in% old_statuses$lsn) {

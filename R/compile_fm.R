@@ -114,7 +114,7 @@ compile_fm <- \(WD = "?") {
   # Create preview.json -----------------------------------------------------
   #Multimedia browser
   preview <- list(
-    `__component` = "lesson-plan.lesson-preview",
+    `__component` = "lesson-plan.unit-preview",
     SectionTitle = "Lesson Preview",
     #allow smooth-scrolling to in-page references (with Anchor Links)
     QuickPrep = fm$QuickPrep %>% fixAnchorLinks(),

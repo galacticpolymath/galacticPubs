@@ -75,10 +75,10 @@ init_lesson_meta <- function(WD = "?",
   # #This is stupid and only kinda works sometimes...
   # Should refactor
   #  -------------------------------------------------------
-  if (!overwrite | override) {
+  if (!overwrite & !override) {
     meta_to_copy <-
       meta_matching %>% dplyr::filter(!.data$name2 %in% loc_meta_ls$name)
-  } else{
+  } else if (overwrite & !override){
     #identify any existing meta templates for deletion (i.e. overwriting by deleting and copying new)
     to_delete <- loc_meta_ls %>%
       dplyr::filter(.data$name %in% meta_matching$name2)
@@ -100,6 +100,9 @@ init_lesson_meta <- function(WD = "?",
               paste0(to_delete$full, collapse = "\n -"))
     }
     meta_to_copy <- meta_matching
+  }else{
+    meta_to_copy <-
+      meta_matching
   }
 
   # Copy template files -----------------------------------------------------

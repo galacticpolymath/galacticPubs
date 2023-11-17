@@ -4,8 +4,8 @@
 #'
 #' @param keys character vector; which front-matter keys do you want from lessons? default:NULL; use "basic" as shorthand for c("numID","_id","Title"). See all options with [get_fm_names()]
 #' @param numID is a vector of numIDs for unit(s) you want. default=NULL returns all units
-#' @param id is a vector of `_id`s for unit(s) you want. default=NULL returns all units
 #' @param output_tibble return values as a "tibble"? otherwise, list; default=TRUE
+#' @param id is a vector of `_id`s for unit(s) you want. default=NULL returns all units
 #' @return list of results or tbl_json
 #' @family GP API
 #' @export
@@ -13,8 +13,8 @@
 gp_api_query <- \(
   keys = NULL,
   numID = NULL,
-  id = NULL,
-  output_tibble = TRUE
+  output_tibble = TRUE,
+  id = NULL
 ) {
   if (!is.null(numID) & !is.null(id)) {
     stop("Only supply numID OR _id.")
@@ -73,6 +73,7 @@ gp_api_query <- \(
 
   #for printout
   req_final %>% httr2::req_dry_run()
+
   #actually run request
   res <-
     req_final %>% httr2::req_perform() %>% catch_err(keep_results = TRUE)
@@ -82,6 +83,7 @@ gp_api_query <- \(
       httr2::resp_body_json() %>% .[[1]]
 
   if (length(out)>0) {
+
 
     #This will silently leave out columns if they don't fit into a tibble :/
     if (output_tibble) {

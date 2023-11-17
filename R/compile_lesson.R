@@ -214,14 +214,7 @@ compile_lesson <-
           WD = WD
         )
 
-        #set learning chart filename from default file output on learningChart function
-        #(since this file doesn't exist in yaml yet)
-        lcname <- fs::path("assets",
-                           "_learning-plots",
-                           paste0(formals(learningChart)$fileName, ".png"))
-        if (file.exists(lcname)) {
-          current_data$LearningChart <- get_fm("LearningChart", WD = WD)
-        }
+
       }
 
 
@@ -356,6 +349,8 @@ compile_lesson <-
           update_teach_links(WD = WD) %>% catch_err()
         test_compile_teach_it <-
           compile_teach_it(WD = WD) %>% catch_err()
+
+
         #update the cache of the teaching-material state of things
         get_state(
           path = c(teach_it_path, tm_path_full),
@@ -392,11 +387,10 @@ compile_lesson <-
 
     #after run, reset rebuild-all trigger
     if (rebuild) {
-      current_data$RebuildAllMaterials <- FALSE
+      update_fm(WD_git=WD_git,change_this = list(RebuildAllMaterials=FALSE))
+
     }
 
-    #Save updated YAML
-    yaml::write_yaml(current_data, fs::path(WD_git, "front-matter.yml"))
 
     invisible(current_data)
   }

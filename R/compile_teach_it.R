@@ -213,7 +213,7 @@ compile_teach_it <- function(WD = "?",
 
 
 # Assign lesson statuses --------------------------------------------------
-
+ if(!uinfo_titles_initialized){message("Not assigning lesson statuses because unit info not initialized on teach-it.gsheet")}
   zassign_lsn_stats(is_initialized=uinfo_titles_initialized,WD_git=WD_git, fm=fm,uinfo=uinfo)
 
   ####
