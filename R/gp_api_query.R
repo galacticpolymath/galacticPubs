@@ -5,6 +5,7 @@
 #' @param keys character vector; which front-matter keys do you want from lessons? default:NULL; use "basic" as shorthand for c("numID","_id","Title"). See all options with [get_fm_names()]
 #' @param numID is a vector of numIDs for unit(s) you want. default=NULL returns all units
 #' @param output_tibble return values as a "tibble"? otherwise, list; default=TRUE
+#' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
 #' @param id is a vector of `_id`s for unit(s) you want. default=NULL returns all units
 #' @return list of results or tbl_json
 #' @family GP API
@@ -14,6 +15,7 @@ gp_api_query <- \(
   keys = NULL,
   numID = NULL,
   output_tibble = TRUE,
+  dev = FALSE,
   id = NULL
 ) {
   if (!is.null(numID) & !is.null(id)) {
@@ -28,8 +30,9 @@ gp_api_query <- \(
 
 
   #construct base request
+  dev_toggle <- ifelse(dev,"dev.","")
   req0 <-
-    httr2::request("https://dev.galacticpolymath.com//api/get-lessons")
+    httr2::request(paste0("https://",dev_toggle,"galacticpolymath.com/api/get-lessons"))
 
   #Add filterObj to query to filter by numID and `_id`
   if (!is.null(id) | !is.null(numID)) {
@@ -86,7 +89,10 @@ gp_api_query <- \(
 
 
     #This will silently leave out columns if they don't fit into a tibble :/
+    #Had to learn this again...seriously, if an item is a list of more than 1, it will leave it out
+    #e.g. LsnStatuses
     if (output_tibble) {
+
       out2 <-
         out %>% tidyjson::as_tbl_json() %>%  tidyjson::spread_all() %>%
         dplyr::arrange(dplyr::desc(.data$`_id`)) %>%

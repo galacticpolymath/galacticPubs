@@ -3,12 +3,14 @@
 #' Insert (i.e. add) a new unit to MongoDB using the GP API.
 #'
 #' @param WD working directory, passed to [parse_wd()];default="?"
+#' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
 #' @family GP API
 #' @export
 #' @returns success (logical)
 #'
 
-gp_api_unit_insert <- \(WD = "?") {
+gp_api_unit_insert <- \(WD = "?",
+                        dev = FALSE) {
   token <- get_gp_api_token()
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
@@ -16,8 +18,12 @@ gp_api_unit_insert <- \(WD = "?") {
   unit_path <- fs::path(WD_git, "LESSON.json")
   unit <- jsonlite::read_json(unit_path)
 
+    dev_toggle <- ifelse(dev,"dev.","")
+  req0 <-
+    httr2::request(paste0("https://",dev_toggle,"galacticpolymath.com/api/insert-lesson"))
+
   req <-
-    httr2::request("https://dev.galacticpolymath.com/api/insert-lesson") %>%
+    req0 %>%
     httr2::req_auth_bearer_token(token = token) %>%
     httr2::req_method("POST") %>%
     httr2::req_body_json(data = list(lesson = unit))

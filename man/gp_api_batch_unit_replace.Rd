@@ -4,7 +4,7 @@
 \alias{gp_api_batch_unit_replace}
 \title{batch replace units}
 \usage{
-gp_api_batch_unit_replace(shared_drive = "?")
+gp_api_batch_unit_replace(shared_drive = "?", dev = FALSE)
 }
 \arguments{
 \item{shared_drive}{passed to \code{\link[=pick_lesson]{pick_lesson()}} which shared drive do you want to find the lessons in? default= "s" Options:
@@ -12,6 +12,8 @@ gp_api_batch_unit_replace(shared_drive = "?")
 \item "s" or "?" = GP-Studio (draft working directory, many users with access)
 \item "l" or "??" = GP-Live (private, admin only)
 }}
+
+\item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}
 }
 \description{
 Deletes and replaces the selected units

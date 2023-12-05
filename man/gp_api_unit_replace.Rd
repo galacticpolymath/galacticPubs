@@ -4,12 +4,14 @@
 \alias{gp_api_unit_replace}
 \title{Replace a GP unit in the database}
 \usage{
-gp_api_unit_replace(WD = "?", prompt_user = TRUE)
+gp_api_unit_replace(WD = "?", prompt_user = TRUE, dev = FALSE)
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}};default="?"}
 
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
+
+\item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}
 }
 \value{
 success (logical)
