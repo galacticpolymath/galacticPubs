@@ -133,7 +133,7 @@ compile_teach_it <- function(WD = "?",
       ChunkDur = as.integer(.data$ChunkDur),
       Step = as.integer(.data$`Step`),
       lsnN = as.integer(.data$`_lsnN`),
-      lsnDur = as.integer(.data$lsnDur)
+      lsnDur = as.integer(.data$lsnDur) #we won't use this, as it's sometimes left blank. Will sum ChunkDurs
     ) %>%
     dplyr::select(1:.data$lsnDur)
 

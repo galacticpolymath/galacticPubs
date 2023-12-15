@@ -17,7 +17,7 @@ gp_api_unit_insert <- \(WD = "?",
   unit_id <- get_fm("_id", WD_git = WD_git)
   unit_path <- fs::path(WD_git, "LESSON.json")
   unit <- jsonlite::read_json(unit_path)
-
+  catalog_name <- ifelse(dev,"Dev","Prod")
     dev_toggle <- ifelse(dev,"dev.","")
   req0 <-
     httr2::request(paste0("https://",dev_toggle,"galacticpolymath.com/api/insert-lesson"))
@@ -37,10 +37,10 @@ gp_api_unit_insert <- \(WD = "?",
   test_insertion <- nrow(query_resp)==1
 
   if(http_code_test&test_insertion){
-    message("New unit '",unit_id,"' added to GP-Catalog!")
+    message("New unit '",unit_id,"' added to (",catalog_name,") GP-Catalog!")
     TRUE
   }else{
-    message("New unit insertion '",unit_id,"' FAILED!")
+    message("New unit insertion '",unit_id,"' FAILED on  (",catalog_name,") GP-Catalog!")
     FALSE
   }
 

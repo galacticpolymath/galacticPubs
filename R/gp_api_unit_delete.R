@@ -21,6 +21,8 @@ gp_api_unit_delete <- \(WD = "?",
     unit_id <- get_fm("_id", WD)
   }
 
+  catalog_name <- ifelse(dev,"Dev","Prod")
+
   checkmate::assert_character(unit_id, all.missing = FALSE, min.chars =
                                 5)
 
@@ -29,7 +31,7 @@ gp_api_unit_delete <- \(WD = "?",
     gp_api_query(id = unit_id, c("Title", "Subtitle")) %>% is_empty()
 
   if (unit_missing) {
-    message("No unit found on GP-Catalog with _id == '", unit_id, "'.")
+    message("No unit found on (",catalog_name,") GP-Catalog with _id == '", unit_id, "'.")
     test_request <- test_delete <- FALSE
   } else{
 
@@ -49,7 +51,7 @@ gp_api_unit_delete <- \(WD = "?",
         "\n***********************************\n",
         " Are you sure you want to delete mini-unit '",
         unit_id,
-        "' from the GP-Catalog?"
+        "' from the (",catalog_name,") GP-Catalog?"
       )
       choice <- readline("(y/n)? >")
       if (choice != "y") {

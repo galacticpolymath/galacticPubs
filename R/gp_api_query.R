@@ -28,6 +28,7 @@ gp_api_query <- \(
     keys <- "basic"
   }
 
+    catalog_name <- ifelse(dev,"Dev","Prod")
 
   #construct base request
   dev_toggle <- ifelse(dev,"dev.","")
@@ -78,6 +79,7 @@ gp_api_query <- \(
   req_final %>% httr2::req_dry_run()
 
   #actually run request
+  message("Querying  (",catalog_name,") GP-Catalog...")
   res <-
     req_final %>% httr2::req_perform() %>% catch_err(keep_results = TRUE)
 
@@ -101,7 +103,7 @@ gp_api_query <- \(
       out2 <- out
     }
   } else{
-    message("No records found for this unit.")
+    message("No records found for this unit on (",catalog_name,") GP-Catalog.")
     out2 <- NULL
   }
   tictoc::toc()

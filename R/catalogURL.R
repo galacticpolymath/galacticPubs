@@ -19,7 +19,7 @@ catalogURL<-function(relative_ref,WD){
      out<-NULL
    }else{
     # out<-paste0("https://catalog.galacticpolymath.com/lessons/",repo,"/",relative_ref)
-    out<-paste0("https://gp-catalog.vercel.app/lessons/",basename(WD),"/",relative_ref)
+    out<-paste0("https://storage.googleapis.com/gp-cloud/lessons/",basename(WD),"/",relative_ref)
 
    }
   }

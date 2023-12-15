@@ -174,7 +174,13 @@ if(is.null(WD_git)){
   out$lessons <- lapply(1:nlsns, function(i) {
     lsnNum <- i
     lsnTitle <- ifelse(length(ptitles) < i, NA, ptitles[i])
-    lsnDur <- proc$lsnDur[i]
+
+    lsnDur <-
+      proc %>%
+      dplyr::filter(.data$lsn == i) %>%
+      dplyr::summarise(sum_chunk_dur =sum(.data$ChunkDur, na.rm = TRUE)) %>%
+      dplyr::pull("sum_chunk_dur")
+
     lsnPreface <- ifelse(length(pprefs) < i, NA, pprefs[i])
 
     if(length(learningObj[[1]])==0){
