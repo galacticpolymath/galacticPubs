@@ -11,16 +11,20 @@ gp_api_unit_replace(WD = "?", prompt_user = TRUE, dev = FALSE)
 
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 
-\item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}
+\item{dev}{logical; default (NULL) modifies both production and dev gp-catalogs. FALSE modifies the production gp-catalog. TRUE modifies only the dev catalog.}
 }
 \value{
 success (logical)
 }
 \description{
-Completely deletes and re-inserts a LESSON.json for the mini-unit.
+Completely deletes and re-inserts a LESSON.json for the mini-unit on the MongoDB database (aka gp-catalog). There are 2 catalogs:
+\itemize{
+\item dev (not public-facing; viewable through the dev.galacticpolymath.com)
+\item production (public facing; live on galacticpolymath.com)
+}
 }
 \details{
-Shallow wrapper for internal functions \code{\link[=gp_api_unit_delete]{gp_api_unit_delete()}} and \code{\link[=gp_api_unit_insert]{gp_api_unit_insert()}}
+Which catalog you're modifying is controlled by the dev parameter. Default is to modify both (so they don't get out of sync). Shallow wrapper for internal functions \code{\link[=gp_api_unit_delete]{gp_api_unit_delete()}} and \code{\link[=gp_api_unit_insert]{gp_api_unit_insert()}}
 }
 \seealso{
 Other GP API: 

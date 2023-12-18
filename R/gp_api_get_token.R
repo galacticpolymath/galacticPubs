@@ -66,26 +66,28 @@ gp_api_get_token <- \(refresh = FALSE,
     token_request <-
       httr2::request(paste0(dev_toggle,"/api/get-jwt-token")) %>%
       httr2::req_body_json(list(email = email))
+    #for troubleshooting
+    # httr2::req_dry_run(token_request)
 
     #Have user hit enter after web sign in done
     readline("Hit Return when you've succeeded in authenticating on the browser.\n <Return>")
     #Not sure why verbosity 2 (printing jwt to screen) avoids 404 errors, but :shrug:
     token_resp <-
-      token_request %>% httr2::req_perform(verbosity = 2) %>% catch_err(keep_results = TRUE)
-
+      token_request %>% httr2::req_perform(verbosity = 2) %>%
+      catch_err(keep_results = TRUE)
 
     http_code <- token_resp$result$status
     if (http_code != 200) {
       stop(
-        "Token refresh failed. Try reauthenticating by running 'get_gp_api_token(trigger_oauth=TRUE)'"
+        "Token refresh failed. Try reauthenticating by running 'get_gp_api_token(refresh=TRUE)'"
       )
     }else{
       message("SUCCESS! Token refreshed.")
     }
 
-    token <- token_resp$result %>%
-      httr2::resp_body_json() %>% unlist()
-
+    tokens_both <- token_resp$result %>%
+      httr2::resp_body_json()
+    token <- tokens_both[['access']]
 
     checkmate::assert_character(token, min.chars = 10)
     #Assign the value to a system variable
