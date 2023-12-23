@@ -33,7 +33,7 @@ gp_api_unit_insert <- \(WD = "?",
 
   http_code_test <- res$result$status==200
 
-  query_resp <- gp_api_query(id=unit_id)
+  query_resp <- gp_api_query(id=unit_id,dev=dev)
   test_insertion <- nrow(query_resp)==1
 
   if(http_code_test&test_insertion){

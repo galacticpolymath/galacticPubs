@@ -17,7 +17,7 @@ gp_api_unit_replace <- \(WD="?",
                          prompt_user=TRUE,
                          dev = FALSE){
   WD <- parse_wd(WD)
-  browser()
+
   unit_name <- get_fm(c("_id","ShortTitle"),WD = WD) %>% paste(.,collapse=" (") %>% paste0(" '",.,")' ")
   #recursive call to gp_api_unit_replace
   #to make changes on both repositories
