@@ -13,48 +13,66 @@
 #' @export
 #' @returns success (logical)
 
-gp_api_unit_replace <- \(WD="?",
-                         prompt_user=TRUE,
-                         dev = FALSE){
+gp_api_unit_replace <- \(WD = "?",
+                         prompt_user = TRUE,
+                         dev = FALSE) {
   WD <- parse_wd(WD)
 
-  unit_name <- get_fm(c("_id","ShortTitle"),WD = WD) %>% paste(.,collapse=" (") %>% paste0(" '",.,")' ")
+  unit_name <-
+    get_fm(c("_id", "ShortTitle"), WD = WD) %>% paste(., collapse = " (") %>% paste0(" '", ., ")' ")
   #recursive call to gp_api_unit_replace
   #to make changes on both repositories
+  if (is.null(dev)) {
+    dev <- c(TRUE, FALSE)
+    message(
+      "For Unit=",
+      unit_name,
+      "\nModifying both production and dev versions of GP-Catalog (i.e. MongoDB collection)"
+    )
+    success_dev <-
+      gp_api_unit_replace(WD = WD,
+                          prompt_user = prompt_user,
+                          dev = dev[1]) %>% catch_err()#only prompt once max
+    success_prod <-
+      gp_api_unit_replace(WD = WD,
+                          prompt_user = FALSE,
+                          dev = dev[2]) %>% catch_err()
 
-  if(is.null(dev)){
-    dev <- c(TRUE,FALSE)
-    message("For Unit=",unit_name,"\nModifying both production and dev versions of GP-Catalog (i.e. MongoDB collection)")
-    success_dev <- gp_api_unit_replace(WD=WD,prompt_user=prompt_user, dev= dev[1]) %>% catch_err()#only prompt once max
-    success_prod <- gp_api_unit_replace(WD=WD,prompt_user=FALSE, dev= dev[2]) %>% catch_err()
+    to_print <-
+      dplyr::tibble(
+        success = convert_T_to_check(c(success_dev, success_prod)),
+        catalog = c("Dev", "Production"),
+        unit = unit_name
+      )
 
-    to_print <- dplyr::tibble(success=convert_T_to_check(c(success_dev,success_prod)),
-                              catalog=c("Dev","Production"),
-                              unit=unit_name
-                              )
+    to_print
 
+    #nonrecursive, single delete/insert process
+  } else{
+    id <- get_fm("_id", WD = WD)
+
+    test_delete <- gp_api_unit_delete(unit_id = id,
+                                      prompt_user = prompt_user,
+                                      dev = dev)
+
+    if (!test_delete) {
+      message("Deletion failed for ", id)
+      test_insert <- FALSE
+    } else{
+      test_insert <- gp_api_unit_insert(WD = WD, dev = dev)
+    }
+
+    comb_success <- test_delete & test_insert
+    if (comb_success) {
+      message("SUCCESS! Unit was replaced thru GP-API: '", id, "'")
+    } else{
+      message("Failure! Unit was not replaced thru GP-API: '", id, "'")
+      dplyr::tibble(
+        success = convert_T_to_check(comb_success),
+        task = c("Delete unit", "Re-insert unit")
+      )
+    }
+
+    comb_success
   }
-
-  id <- get_fm("_id",WD=WD)
-
-  test_delete <- gp_api_unit_delete(unit_id=id,
-                                    prompt_user=prompt_user,
-                                    dev=dev)
-
-  if(!test_delete){
-    message("Deletion failed for ",id)
-    test_insert <- FALSE
-  }else{
-    test_insert <- gp_api_unit_insert(WD=WD, dev=dev)
-  }
-
-  comb_success <- test_delete&test_insert
-  if(comb_success){
-    message("SUCCESS! Unit was replaced thru GP-API: '",id,"'")
-  }else{
-    message("Failure! Unit was not replaced thru GP-API: '",id,"'")
-    dplyr::tibble(success=convert_T_to_check(comb_success),task=c("Delete unit","Re-insert unit"))
-  }
-
-  comb_success
 }
