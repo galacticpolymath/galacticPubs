@@ -138,8 +138,18 @@ upload_assets <- \(WD = "?",
       dplyr::rename(path = .data$path1)
 
 
+    #local TZ
+      loc_tz <-  Sys.timezone()
     #add modified date to assets
     assets$updated <- fs::file_info(assets$path)$modification_time
+    #reassign to local timezone (for some weird reason, CST timestamps are in future)
+     assets$updated <-
+        lubridate::force_tz(assets$updated, tz = "UTC")
+
+
+      assets$updated <-
+        lubridate::with_tz(assets$updated, tz = loc_tz)
+
 
     #add expected cloud_path
     assets$cloud_path <- paste0(cloud_prefix, "/", assets$name)
@@ -201,8 +211,7 @@ upload_assets <- \(WD = "?",
 
       uploaded$updated <-
         lubridate::force_tz(uploaded$updated, tz = "UTC")
-      #local TZ
-      loc_tz <-  Sys.timezone()
+
       #reassign to local timezone
       uploaded$updated <-
         lubridate::with_tz(uploaded$updated, tz = loc_tz)
