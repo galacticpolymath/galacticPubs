@@ -27,8 +27,7 @@ gp_api_batch_unit_replace <- \(shared_drive = "?",
                           prompt_user = ask_once,
                           dev=dev)
 
-    dplyr::tibble(`Replaced?` = convert_T_to_check(replace_success),
-                  Unit = basename(WD))
+    replace_success
   })
 
 
