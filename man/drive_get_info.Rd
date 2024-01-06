@@ -6,6 +6,7 @@
 \usage{
 drive_get_info(
   dribble,
+  set_lsn = NULL,
   set_envir = NULL,
   set_grades = NULL,
   validate = FALSE,
@@ -14,6 +15,8 @@ drive_get_info(
 }
 \arguments{
 \item{dribble}{a dribble input (e.g. piped from \code{\link[googledrive:drive_get]{googledrive::drive_get()}}) for a single file}
+
+\item{set_lsn}{set lesson manually (not from file name)}
 
 \item{set_envir}{set envir output manually (not from file name); partial string matching of options "classroom", "remote", "assessments"}
 

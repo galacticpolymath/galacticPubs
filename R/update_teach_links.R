@@ -100,7 +100,7 @@ update_teach_links <- function(WD = "?",
 
   #Make top-level download link entry to build on (for the TeachMatLinks tab of teach-it.gsheet)
   teach_dir_info <-
-    teach_dir %>% drive_get_info %>% dplyr::mutate(title = med_title, `_itemType` =
+    teach_dir %>% drive_get_info() %>% dplyr::mutate(title = med_title, `_itemType` =
                                                      "teachMatDir")
 
 

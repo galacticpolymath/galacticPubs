@@ -5,6 +5,7 @@
 #' Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match TeachMatLinks fields, though they cannot be populated automatically.
 #'
 #' @param dribble a dribble input (e.g. piped from [googledrive::drive_get()]) for a single file
+#' @param set_lsn set lesson manually (not from file name)
 #' @param set_envir set envir output manually (not from file name); partial string matching of options "classroom", "remote", "assessments"
 #' @param set_grades set grade bands manually (not from file name); passed as a string (e.g. "5-9")
 #' @param validate logical; do you want to throw an error if any of the following are missing? default= FALSE
@@ -23,7 +24,13 @@
 #' @family Google Drive Functions
 #' @export
 
-drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=FALSE, all_info=FALSE) {
+drive_get_info <- function(dribble,
+                           set_lsn= NULL,
+                           set_envir = NULL,
+                           set_grades = NULL,
+                           validate = FALSE,
+                           all_info = FALSE
+) {
   #Make sure a dribble
   checkmate::assert(checkmate::check_class(dribble, "dribble"))
 
@@ -40,12 +47,18 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     short_title = string_parseCamel(shortTitle) %>% catch_err(keep_results = TRUE) %>% .$result
     #Most will have a lesson number in the 2nd place (that starts with "L").
     #Will just supply the number if an l is found in this spot, OR there is no - here indicating grade range; otherwise NA
+    #
+
+    if(!is.null(set_lsn)){
+      lsn <- set_lsn
+    }else{
     lsn <-  ifelse(
       substr(tolower(nom_split[2]), 1, 1) == "l" |
         !grepl("-", nom_split[2], fixed = TRUE),
       gsub("[a-zA-Z]", "", nom_split[2]),
       NA
     )
+    }
     #remove lesson values that aren't numbers
     lsn <- ifelse(!grepl("\\d",lsn),NA,lsn)
 
@@ -141,6 +154,13 @@ drive_get_info <- function(dribble, set_envir = NULL, set_grades=NULL,validate=F
     #Get filetype
     fileType <-
       mimeKey$human_type[match(dribble_i$drive_resource[[1]]$mimeType, mimeKey$mime_type)]
+
+    #if it's a shortcut, get the mime type of target
+    if(fileType=="shortcut"){
+    target_file_type <-dribble_i$drive_resource[[1]][["shortcutDetails"]][["targetMimeType"]]
+    fileType <-
+      mimeKey$human_type[match(target_file_type, mimeKey$mime_type)]
+    }
 
     # Let user know if anything unexpected in results
     # usually won't have environment in presentations and worksheet, so not testing
