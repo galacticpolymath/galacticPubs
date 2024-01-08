@@ -63,7 +63,7 @@ lesson_init <- \() {
       "_orig-client-media_NoEdit",
       "_other-media-to-publish",
       "_R_outputs",
-      "_videos-for-this-lesson"
+      "_videos-for-this-unit"
     )
   asset_dirs <- c(fs::path(WD, "assets", asset_subdir))
 
