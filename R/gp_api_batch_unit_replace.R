@@ -5,12 +5,12 @@
 #' @param shared_drive passed to [pick_lesson()] which shared drive do you want to find the lessons in? default= "s" Options:
 #' - "s" or "?" = GP-Studio (draft working directory, many users with access)
 #' - "l" or "??" = GP-Live (private, admin only)
-#' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
+#' @param dev logical; if NULL (default), updates both production and dev catalogs. FALSE=just production; TRUE=just dev.
 #' @export
 #'
 
 gp_api_batch_unit_replace <- \(shared_drive = "?",
-                               dev = FALSE) {
+                               dev = NULL) {
   if (requireNamespace("tictoc")) {
     tictoc::tic()
     timer <- TRUE

@@ -15,9 +15,8 @@
 
 gp_api_unit_replace <- \(WD = "?",
                          prompt_user = TRUE,
-                         dev = FALSE) {
+                         dev = NULL) {
   WD <- parse_wd(WD)
-
   unit_name <-
     get_fm(c("_id", "ShortTitle"), WD = WD) %>% paste(., collapse = " (") %>% paste0(" '", ., ")' ")
   #recursive call to gp_api_unit_replace
@@ -32,11 +31,13 @@ gp_api_unit_replace <- \(WD = "?",
     success_dev <-
       gp_api_unit_replace(WD = WD,
                           prompt_user = prompt_user,
-                          dev = dev[1]) %>% catch_err()#only prompt once max
+                          dev = dev[1])#only prompt once max
+    print(1)
     success_prod <-
       gp_api_unit_replace(WD = WD,
                           prompt_user = FALSE,
-                          dev = dev[2]) %>% catch_err()
+                          dev = dev[2])
+    print(2)
 
     to_print <-
       dplyr::tibble(
@@ -45,7 +46,8 @@ gp_api_unit_replace <- \(WD = "?",
         unit = unit_name
       )
 
-    to_print
+    print(to_print)
+    comb_success <- success_dev&success_prod
 
     #nonrecursive, single delete/insert process
   } else{
@@ -53,13 +55,15 @@ gp_api_unit_replace <- \(WD = "?",
 
     test_delete <- gp_api_unit_delete(unit_id = id,
                                       prompt_user = prompt_user,
-                                      dev = dev)
-
+                                      dev = dev,
+                                      WD=WD)
+  print(3)
     if (!test_delete) {
       message("Deletion failed for ", id)
       test_insert <- FALSE
     } else{
       test_insert <- gp_api_unit_insert(WD = WD, dev = dev)
+      print(4)
     }
 
     comb_success <- test_delete & test_insert
@@ -73,6 +77,6 @@ gp_api_unit_replace <- \(WD = "?",
       )
     }
 
-    comb_success
   }
+      comb_success
 }

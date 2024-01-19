@@ -327,8 +327,8 @@ compile_standards <- function(WD = "?",
 
       #swap out bullets for - to maintain consistency in markdown syntax
       a2$how <- gsub("\u2022", "-", a2$how)
-      a2$how <-
-        ifelse(!grepl("^- ", a2$how), paste0("- ", a2$how), a2$how)
+      # a2$how <-
+      #   ifelse(!grepl("^- ", a2$how), paste0("- ", a2$how), a2$how)
 
 
 

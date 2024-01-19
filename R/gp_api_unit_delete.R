@@ -16,10 +16,13 @@ gp_api_unit_delete <- \(WD = "?",
                         prompt_user = TRUE,
                         dev = FALSE) {
   token <- get_gp_api_token()
+  WD <- parse_wd(WD)
   if (is.null(unit_id)) {
-    WD <- parse_wd(WD)
     unit_id <- get_fm("_id", WD)
   }
+
+   unit_name <-
+    get_fm(c("_id", "ShortTitle"), WD =WD) %>% paste(., collapse = " (") %>% paste0(" '", ., ")' ")
 
   catalog_name <- ifelse(dev,"Dev","Prod")
 
@@ -27,11 +30,12 @@ gp_api_unit_delete <- \(WD = "?",
                                 5)
 
   # test if this unit exists in GP-Catalog ----------------------------------
+
   unit_missing <-
     gp_api_query(id = unit_id, c("Title", "Subtitle"),dev=dev) %>% is_empty()
 
   if (unit_missing) {
-    message("No unit found on (",catalog_name,") GP-Catalog with _id == '", unit_id, "'.")
+    message("No unit found on (",catalog_name,") GP-Catalog for '", unit_name, "'.")
     test_request <- test_delete <- FALSE
   } else{
 
@@ -50,7 +54,7 @@ gp_api_unit_delete <- \(WD = "?",
       message(
         "\n***********************************\n",
         " Are you sure you want to delete mini-unit '",
-        unit_id,
+        unit_name,
         "' from the (",catalog_name,") GP-Catalog?"
       )
       choice <- readline("(y/n)? >")
