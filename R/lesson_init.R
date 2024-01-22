@@ -136,7 +136,7 @@ lesson_init <- \() {
     fm_names <- get_fm_names()
     common_keys <-
       fm_names[match(names(inputs2), fm_names)] %>% unique_sans_na()
-browser()
+
     update_fm_success <- suppressWarnings(update_fm(
       WD_git = WD_git,
       change_this = inputs2[common_keys],
