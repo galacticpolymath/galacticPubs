@@ -396,15 +396,20 @@ update_teach_links <- function(WD = "?",
     # Check for duplicated links ----------------------------------------
     # This should only trigger if rm_missing==F, because otherwise should be filtered out
 
-    dupLinks <-
-      duplicated(merged_teach_it$`_link`) &
-      !is.na(merged_teach_it$`_link`)
+    merged2 <-
+      merged_teach_it %>%
+      dplyr::rowwise() %>%
+      dplyr::mutate(LINKS = paste_valid(.data$`_lsn`, .data$`_link`))
+
+   dupLinks <-
+      duplicated(merged2$LINKS) &
+      !is.na(merged2$`_link`)
     if (sum(dupLinks) > 0) {
       warning(
         "Duplicate links found (delete one entry) in teach-it.gsheet for '",
         proj_dir,
         "': \n  -",
-        paste0(merged_teach_it$`_filename`[dupLinks], collapse = "\n  -")
+        paste0(merged2$`_filename`[dupLinks], collapse = "\n  -")
       )
     }
 

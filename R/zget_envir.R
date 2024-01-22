@@ -221,7 +221,7 @@ zget_items <- \(df, fm) {
     #Add DRAFT FILE disclaimer to links if Draft status
     cust_url <- df_item_i$`_link`
     if (status=="Draft") {
-      disclaimer <- "(DRAFT FILE)"
+      disclaimer <- NA#"(DRAFT FILE)"
     } else{
       disclaimer <- NA
     }

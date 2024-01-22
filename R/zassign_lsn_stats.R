@@ -68,9 +68,10 @@ zassign_lsn_stats <- \(is_initialized,
           old_xi <- NULL
         }
 
-        #only add new if lesson is switched to Live and it did not exist previously
-        if (xi$lsnStatus %in% "Live" & i %in% old_xi$lsn) {
-          if (!is.na(old_xi$lsn)) {
+        #only add new if lesson is switched to Beta or Live and it did not exist previously
+
+        if (xi$lsnStatus %in% c("Beta","Live") & i %in% old_xi$lsn) {
+          if (!is.na(old_xi$lsn)&!is.na(old_xi$new_date)) {
             new_date <- old_xi$new_date
           } else{
             new_date <- as.character(Sys.Date())
@@ -89,7 +90,7 @@ zassign_lsn_stats <- \(is_initialized,
           ifelse(is_empty(old_xi$new_date), NA, curr_date)
 
         #for sorting lessons on the web
-        if (!xi$lsnStatus %in% "Live") {
+        if (!xi$lsnStatus %in% c("Live","Beta")) {
           if (identical(xi$lsnStatus, old_xi$lsnStatus)) {
             sort_by_date <- old_xi$sort_by_date
           } else{
