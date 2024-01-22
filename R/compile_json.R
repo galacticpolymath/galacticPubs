@@ -9,7 +9,7 @@
 #' @importFrom rlang .data
 #' @export
 #'
-compile_json <- function(WD = "?",
+compile_json <- function(WD = NULL,
                          WD_git = NULL,
                          destFolder) {
   if (!is.null(WD)) {
