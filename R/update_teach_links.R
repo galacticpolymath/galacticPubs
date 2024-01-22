@@ -27,7 +27,7 @@ update_teach_links <- function(WD = "?",
                                clean = FALSE,
                                ignore = ".txt$") {
   WD <- parse_wd(WD)
-
+  WD_git <- get_wd_git(WD = WD)
   checkmate::assert(check_wd(WD = WD, throw_error = FALSE),
                     combine = "and")
 
@@ -38,19 +38,16 @@ update_teach_links <- function(WD = "?",
   status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
   #teaching materials are located in different shared drives depending
   #on PublicationStatus
-  checkmate::assert_choice(status, choices = c("Proto", "Draft", "Live"))
-  if (status == "Live") {
-    tm_dir_id <- get_fm("GdrivePublicID", WD = WD, checkWD = F)
-  } else{
-    tm_dir_id <- get_fm("GdriveTeachMatID", WD = WD, checkWD = F)
-  }
 
   med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
   short_title <- get_fm("ShortTitle", WD = WD, checkWD = F)
   GdriveHome <- get_fm("GdriveHome", WD = WD, checkWD = F)
   status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
-
-
+  if (GdriveHome == "GP-Studio") {
+    tm_dir_id <- get_fm("GdriveTeachMatID", WD = WD, checkWD = F)
+  } else{
+    tm_dir_id <- get_fm("GdrivePublicID", WD = WD, checkWD = F)
+  }
 
   checkmate::assert(
     checkmate::check_character(gID, min.chars = 6),
@@ -60,24 +57,30 @@ update_teach_links <- function(WD = "?",
     checkmate::check_character(med_title, min.chars = 2),
     checkmate::check_character(short_title, min.chars = 2),
     checkmate::check_character(GdriveHome, min.chars = 6),
-    checkmate::check_choice(status, c("Proto", "Draft", "Live")),
+    checkmate::check_choice(status, c(
+      "Proto", "Beta", "Coming Soon", "Live", "Draft"
+    )),
+    # draft is deprecated
     combine = "and"
   )
+
+
+
 
 
   # Set up ability to save folder state after update --------
   #Get local path to teaching materials
   #If PublicationStatus=="Draft", found on 'GP-Studio'
   #Else, found on 'GalacticPolymath'
+
   tm_local <-
     ifelse(
-      status == "Draft" |
-        status == "Proto",
+      GdriveHome == "GP-Studio",
       fs::path(WD, "teaching-materials"),
       fs::path(lessons_get_path("gp"), med_title)
     )
   checkmate::assert(fs::is_dir(tm_local), .var.name = "fs::is_dir()")
-  save_path <- fs::path(WD, "meta", "save-state_teach-it.RDS")
+  save_path <- fs::path(WD_git, "saves", "save-state_teach-it.RDS")
   checkmate::assert_path_for_output(save_path, overwrite = TRUE)
   teach_it_path <- fs::path(WD,
                             "meta",
@@ -95,13 +98,17 @@ update_teach_links <- function(WD = "?",
   #Make sure it's not an empty directory, and give hints if it is
   checkmate::assert(
     checkmate::check_data_frame(teach_dir_ls, all.missing = FALSE),
-    .var.name = paste0("directory contents of 'teaching-materials' for [", proj_dir, "]")
+    .var.name = paste0(
+      "directory contents of 'teaching-materials' for [",
+      proj_dir,
+      "]"
+    )
   )
 
   #Make top-level download link entry to build on (for the TeachMatLinks tab of teach-it.gsheet)
   teach_dir_info <-
     teach_dir %>% drive_get_info() %>% dplyr::mutate(title = med_title, `_itemType` =
-                                                     "teachMatDir")
+                                                       "teachMatDir")
 
 
 
@@ -111,7 +118,7 @@ update_teach_links <- function(WD = "?",
           "]\n")
   variant_info <-
     pbapply::pblapply(1:nrow(teach_dir_ls), function(i) {
-      dir_i <- teach_dir_ls[i,]
+      dir_i <- teach_dir_ls[i, ]
       print(dir_i$name)
       envir_type <-
         gsub("([^_ -]*)[_ -]?.*", "\\1", dir_i$name) #extract (first part of name before "_,-, or [space]")
@@ -147,13 +154,13 @@ update_teach_links <- function(WD = "?",
       }
 
 
-      # Now gather info from Part subdirectories --------------------------------
+      # Now gather info from Lesson subdirectories --------------------------------
 
       if (nrow(dir_i_subfolders) > 0) {
         dir_i_subfolders_info <-
           lapply(1:nrow(dir_i_subfolders), function(ii) {
             update_teach_links_lsnHelper(
-              dribble = dir_i_subfolders[ii, ],
+              dribble = dir_i_subfolders[ii,],
               set_grades = dir_i_info$`_grades`,
               set_envir = envir_type
             )
@@ -306,7 +313,7 @@ update_teach_links <- function(WD = "?",
     #Do hard_left_join on empty teach_it_in0 to keep .gsheet structure,
     #but none of the data; sort
     test_teach_it_out <-
-      hard_left_join(teach_it_in[-(1:nrow(teach_it_in)), ],
+      hard_left_join(teach_it_in[-(1:nrow(teach_it_in)),],
                      inferred_teach_it,
                      by =
                        "filename",
@@ -326,9 +333,12 @@ update_teach_links <- function(WD = "?",
     #%>% dplyr::mutate(f_g_e = paste(.data$filename, .data$grades, .data$envir, sep =
     # "---"))
 
+
     test_teach_it_out <- hard_left_join(
-      df1 = teach_it_in %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(.data$`_link`, .data$extLink)),
-      df2 = inferred_teach_it %>% dplyr::mutate(LINKS = .data$`_link`),
+      df1 = teach_it_in %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(
+        .data$`_lsn`, .data$`_link`, .data$extLink
+      )),
+      df2 = inferred_teach_it %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(.data$`_lsn`, .data$`_link`)),
       by = "LINKS",
       df1_cols_to_keep = c("title", "description", "extLink"),
       as_char = TRUE
@@ -385,6 +395,7 @@ update_teach_links <- function(WD = "?",
 
     # Check for duplicated links ----------------------------------------
     # This should only trigger if rm_missing==F, because otherwise should be filtered out
+
     dupLinks <-
       duplicated(merged_teach_it$`_link`) &
       !is.na(merged_teach_it$`_link`)
@@ -400,7 +411,7 @@ update_teach_links <- function(WD = "?",
 
     # assign sharedDrive values for where files are found -----------------
     sharedDrive_vec <- sapply(1:nrow(merged_teach_it), \(i) {
-      item_i <- merged_teach_it[i,]
+      item_i <- merged_teach_it[i, ]
       item_i_type <-
         ifelse(!is.na(item_i$extLink), "extLink", "gp")
       #teachMatDir will always be in GdriveHome; Publication status will determine where other things are
@@ -434,7 +445,7 @@ update_teach_links <- function(WD = "?",
       message("Guessing missing titles...")
       merged_teach_it$title[blank_titles] <-
         sapply(blank_titles, function(i) {
-          d_i <- merged_teach_it[i, ]
+          d_i <- merged_teach_it[i,]
           test_valid_inferred_info <-
             sum(!is_empty(d_i$`_SvT`),
                 !is_empty(d_i$`_itemType`),
@@ -490,26 +501,27 @@ update_teach_links <- function(WD = "?",
 
 
     # Arrange for final export ------------------------------------------------
-    merged_teach_it <- merged_teach_it %>%
-        dplyr::arrange(
-          !.data$`_itemType` == "teachMatDir",
-          .data$`_envir`,
-          .data$`_grades`,
-          .data$`_itemType` != "variantDir",
-          #put variantDir link above all the lsns
-          .data$`_lsn`,
-          .data$`_fileType`
-        )
+
+     merged_teach_it <- merged_teach_it %>%
+      dplyr::arrange(
+        !.data$`_itemType` == "teachMatDir",
+        .data$`_itemType` != "variantDir",
+        .data$`_envir`,
+        .data$`_grades`,
+        .data$`_lsn`,
+        #put variantDir link above all the lsns
+        .data$`_fileType`
+      )
 
 
-# # add _ prefix to auto columns to match spreadsheet -----------------------
-#   browser()
-#     merged_teach_it <- merged_teach_it %>% dplyr::rename(
-#       `_envir`="envir",`_grades`="grades",`_lsn`="lsn",
-#       `_filename`="filename",`_itemType`="itemType",
-#       `_SvT`="SvT",`_sharedDrive`=sharedDrive,
-#       `_link`="link",`_modTime`="modTime"
-#     )
+    # # add _ prefix to auto columns to match spreadsheet -----------------------
+    #   browser()
+    #     merged_teach_it <- merged_teach_it %>% dplyr::rename(
+    #       `_envir`="envir",`_grades`="grades",`_lsn`="lsn",
+    #       `_filename`="filename",`_itemType`="itemType",
+    #       `_SvT`="SvT",`_sharedDrive`=sharedDrive,
+    #       `_link`="link",`_modTime`="modTime"
+    #     )
 
     # Write new data to TeachMatLinks tab ----------------------------------------
     skip_rows <- 2
