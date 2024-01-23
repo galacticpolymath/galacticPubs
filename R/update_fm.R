@@ -249,7 +249,7 @@ update_fm <-
     )
     checkmate::assert_choice(
       new_yaml$PublicationStatus,
-      choices = c("Proto", "Draft", "Live"),
+      choices = c("Proto", "Beta","Coming Soon", "Draft", "Live"),
       .var.name = "front-matter.yml: PublicationStatus"
     )
 

@@ -19,13 +19,15 @@ compile_teach_it <- function(WD = "?",
   . = NULL #to avoid errors with dplyr syntax
   #Keep teaching-materials/ folder tidy
   sweep_teaching_materials(WD = WD)
-
+  message("running compile_teach_it()...")
   #Get front matter from the project working directory
   fm <- get_fm(WD_git=WD_git)
 
   status <- fm$PublicationStatus
-  checkmate::assert_choice(status, c("Proto", "Draft", "Live"))
-  if (status %in% c("Proto", "Draft")) {
+  gdrivehome <- fm$GdriveHome
+  checkmate::assert_choice(status, c("Proto","Beta","Coming Soon", "Draft", "Live"))
+  checkmate::assert_choice(gdrivehome,c("GP-Studio","GP-LIVE"))
+  if (gdrivehome=="GP-Studio") {
     tmID <- fm$GdriveTeachMatID
   } else{
     tmID <- fm$GdrivePublicID

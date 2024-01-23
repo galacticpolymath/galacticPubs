@@ -30,7 +30,7 @@ compile_fm <- \(WD = "?") {
   checkmate::assert_character(fm$ShortTitle,
                               min.chars = 2,
                               any.missing = F)
-  checkmate::assert_choice(fm$PublicationStatus, c("Proto", "Draft", "Live"))
+  checkmate::assert_choice(fm$PublicationStatus, c("Proto", "Beta","Coming Soon","Draft", "Live"))
   checkmate::assert_character(fm$locale, n.chars = 5, any.missing = F)
 
 

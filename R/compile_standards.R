@@ -5,13 +5,11 @@
 #' 2. Output standards.RDS file with the alignment info (this will be read in by [learningEpaulette()] and [learningChart()])
 
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); If you put "?", it will invoke [pick_lesson()]
-#' @param learningplot_correction do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=F, the proportions will just be raw proportions of each subject out of total standards aligned. If TRUE, this will scale proportions of subjects by the relative total proportions of standards in each subject.
 #' @param targetSubj which subject(s) are the focus of the lesson? opts= "math","ela","science","social studies"; default=NULL
 #' @return list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 #' @export
 #'
 compile_standards <- function(WD = "?",
-                              learningplot_correction = FALSE,
                               targetSubj = NULL) {
   . = NULL #to avoid errors with dplyr syntax
   message("compiling standards...")
@@ -37,9 +35,20 @@ compile_standards <- function(WD = "?",
   #learning chart/learningEpaulette subject titles (<=5 char)
   ordered_subj_chart <-
     c("Math", "ELA", "Sci"    , "SocSt",        "Art", "SDGs", "SEL",         "Tech")
-  #here for legacy reasons
+
+
+
+  #here for legacy reasons (for gpColors)
   ordered_subj <-
     c("math", "ela", "science", "socstudies",    "art", "sust",  "sel",       "tech")
+
+    #named short and full names for epaulette and learningchart
+  chart_labels <- dplyr::tibble(full_subj=ordered_subjects,
+                                abbrev_subj=ordered_subj_chart,
+                                gp_pal_subj=ordered_subj
+  )
+
+
 
   subj_tib <- dplyr::tibble(Subjects=ordered_subjects,Subj=ordered_subj_chart,subj=ordered_subj) %>%
     dplyr::mutate(n=1:dplyr::n()) %>% dplyr::relocate(.data$n) %>%
@@ -616,7 +625,6 @@ compile_standards <- function(WD = "?",
         dplyr::summarise(n = dplyr::n())
 
 
-
       bias_by_subj <-
         bias %>% dplyr::summarise(tot_n_subj = sum(.data$n, na.rm = T),
                                   .groups = "drop")
@@ -642,112 +650,6 @@ compile_standards <- function(WD = "?",
         factor(a_combined$subject,
                levels = ordered_subjects,
                ordered = T)
-
-
-      #Calculate corrected proportions if requested
-      proportions0 = a_combined  %>% dplyr::group_by(.data$subject) %>% dplyr::filter(.data$n>0)
-      if (learningplot_correction) {
-        proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop_adj, na.rm =
-                                                                                 T), 2), .groups =
-                                                          "drop",
-                                                        n_stnds=sum(.data$n))
-      } else{
-        #don't use adjusted proportions if not requested
-        proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop, na.rm =
-                                                                                 T), 2), .groups =
-                                                          "drop",
-                                                        n_stnds=sum(.data$n))
-      }
-
-      #Make sure proportions = 100%
-
-      tot_prop <- sum(proportions$proportion)
-      if (tot_prop != 1) {
-        remaining <- 1 - tot_prop
-        where_add <- proportions$proportion %>% which.max()
-        message(
-          "In output for learningEpaulette(), adding ",
-          round(remaining, 2),
-          " to ",
-          proportions$subject[where_add],
-          " so proportions add to 100%"
-        )
-        proportions$proportion[where_add] <-
-          proportions$proportion[where_add] + remaining
-      }
-
-      #Set up vector to recode subject levels according to key (for learning chart subject abbrevs.)
-      convert_labels <- ordered_subj_chart
-      names(convert_labels) <- ordered_subjects
-
-      convert_labels2 <- ordered_subj
-      names(convert_labels2) <- ordered_subjects
-
-      xlabels <- proportions %>%
-        dplyr::rename("subject_orig" = "subject") %>%
-        dplyr::mutate(
-          value = scales::percent(.data$proportion),
-          x.prop = proportion,
-          x = (cumsum(.data$proportion) -
-                 .data$proportion / 2),
-          subject = dplyr::recode(.data$subject_orig, !!!convert_labels),
-          #not sure the next one is necessary...should remove if not
-          subj = dplyr::recode(.data$subject_orig, !!!convert_labels2),
-          lab = paste0(t(.data$value), t(.data$subject)),
-          hjust = 0.5,
-          fontface = "plain",
-          stroke = 1,
-          strokeCol = gpColors(.data$subj),
-          lightCol = colorspace::lighten(strokeCol, 0.8),
-          size = 9,
-          y = 0.6
-        )
-
-
-      #thickness of epaulette bar
-      thickness = 0.2
-
-      #I think learning chart can handle sustainability above...this epaulette code CANNOT...
-
-      epaulette_names <-
-        ordered_subj_chart[match(proportions$subject, ordered_subjects)]
-      clrs <-subj_tib %>% dplyr::filter(.data$Subjects %in% proportions$subject) %>% dplyr::pull("color")
-
-      rectangles <-
-        dplyr::tibble(
-          proportion = proportions$proportion,
-          n_stnds= proportions$n_stnds,
-          xmin = c(0, cumsum(proportions$proportion)[-length(proportions$proportion)]),
-          xmax = cumsum(proportions$proportion),
-          ymin = 1 - thickness,
-          ymax = 1,
-          subject = epaulette_names,
-          color = clrs
-        ) %>% dplyr::filter(.data$proportion > 0)
-      rectangles$subject <-
-        factor(rectangles$subject,
-               ordered = T,
-               levels = epaulette_names)
-      rectangles$border <- "transparent"
-
-      #Ensure that xmax[4] is 1, so there's never a gap at the right
-      rectangles$xmax[nrow(rectangles)] <- 1
-
-
-      #boldenize & embiggenate if targetSubj indicated
-      if (!is.null(targetSubj)) {
-        (targetRows <-
-           which(!is.na(charmatch(
-             tolower(xlabels$subj), tolower(targetSubj)
-           ))))
-        xlabels$stroke[targetRows] <- 2
-        xlabels$strokeCol[targetRows] <- gpColors("galactic black")
-        xlabels$fontface[targetRows] <- "bold"
-        xlabels$size[targetRows] <- 11
-        rectangles$border[targetRows] <- gpColors("galactic black")
-      }
-
-
 
       # prep for LearningChart  -------------------------------------------------
 
@@ -837,8 +739,7 @@ compile_standards <- function(WD = "?",
           list_for_json = out
         ),
         a_combined = a_out,
-        xlabels = xlabels,
-        rectangles = rectangles,
+        chart_labels = chart_labels,
         targetSubj = targetSubj,
         learning_chart_friendly = learning_chart_friendly
       )
@@ -879,7 +780,7 @@ compile_standards <- function(WD = "?",
       gradeBand = gradeBand,
       learningObj = learningObj,
       targetSubj = targetSubj,
-      subject_proportions = proportions,
+      chart_labels = chart_labels,
       learning_chart_friendly = learning_chart_friendly
     )
   )

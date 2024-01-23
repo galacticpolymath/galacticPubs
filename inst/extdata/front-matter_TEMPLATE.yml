@@ -20,7 +20,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.6.2
+TemplateVer: 0.6.3
 galacticPubsVer: ''
 URL: ''
 GdriveHome: 'GP-Studio'
@@ -53,7 +53,7 @@ LessonTiles: ''
 #Overview section->
 EstLessonTime: ''
 PullStandardsInfoFrom: 'myFile'
-LearningPlotCorrection: TRUE
+LearningPlotCorrection: FALSE
 LearningChartFriendly: ''
 LearningEpaulette: ''
 LearningEpaulette_vert: ''
