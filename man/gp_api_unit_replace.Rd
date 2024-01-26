@@ -4,7 +4,7 @@
 \alias{gp_api_unit_replace}
 \title{Replace a GP unit in the database}
 \usage{
-gp_api_unit_replace(WD = "?", prompt_user = TRUE, dev = FALSE)
+gp_api_unit_replace(WD = "?", prompt_user = TRUE, dev = NULL)
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}};default="?"}

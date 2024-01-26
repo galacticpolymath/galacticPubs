@@ -6,6 +6,7 @@
 \usage{
 learningChart(
   WD = "?",
+  learningplot_correction = NULL,
   caption = NA,
   captionN = TRUE,
   centralText = NA,
@@ -21,6 +22,8 @@ learningChart(
 }
 \arguments{
 \item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling \code{\link[=get_wd_git]{get_wd_git()}}. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.}
+
+\item{learningplot_correction}{do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=F, the proportions will just be raw proportions of each subject out of total standards aligned. If TRUE, this will scale proportions of subjects by the relative total proportions of standards in each subject.}
 
 \item{caption}{quoted text you want to go at the bottom of the chart}
 

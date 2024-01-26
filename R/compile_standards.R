@@ -581,7 +581,7 @@ compile_standards <- function(WD = "?",
       message(rep("=", 30))
 
 
-      # Prep learningEpaulette data ---------------------------------------------
+
       #create an empty matrix to merge in, in case some subjects are missing
       a_template <-
         a_master %>%
@@ -663,7 +663,7 @@ compile_standards <- function(WD = "?",
 
       if (!test_alignment_supported) {
         warning(
-          "No Learning Chart created. Currently supported Standards sets:\n  -",
+          "No Learning Chart will be created. Currently supported Standards sets:\n  -",
           paste(supported_sets, collapse = "\n  -"),
           "\nStandard sets found:\n  -",
           paste(unique_sans_na(A$set),

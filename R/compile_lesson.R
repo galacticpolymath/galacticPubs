@@ -102,7 +102,7 @@ compile_lesson <-
     status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
     med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
 
-    checkmate::assert_choice(status, c("Proto", "Draft", "Live"))
+    checkmate::assert_choice(status, c("Proto","Coming Soon","Beta", "Draft", "Live"))
     checkmate::assert_character(med_title, min.chars = 2)
 
     # local path to teaching material
@@ -157,8 +157,7 @@ compile_lesson <-
       message("Recompiling standards to reflect newer 'standards*.gsheet'")
       compile_standards_output <- compile_standards(
         WD = WD,
-        targetSubj = current_data$TargetSubject,
-        learningplot_correction = current_data$LearningPlotCorrection
+        targetSubj = current_data$TargetSubject
       ) %>% catch_err(keep_results = T)
 
       if (!compile_standards_output$success) {

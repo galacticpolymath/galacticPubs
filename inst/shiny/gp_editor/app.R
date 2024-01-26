@@ -756,11 +756,6 @@ server <- function(input, output, session) {
             choices = c("myFile", "standardX"),
             selected = isolate(vals$current_data$PullStandardsInfoFrom)
           ),
-          checkboxInput(
-            "LearningPlotCorrection",
-            label = "Correct Learning Plot Proportions by total possible?" ,
-            value = isolate(vals$current_data$LearningPlotCorrection)
-          ),
           p(
             style = "color:gray;margin-top:-5px;font-size:1rem;",
             "Uncheck the above for custom, partial standards alignments."

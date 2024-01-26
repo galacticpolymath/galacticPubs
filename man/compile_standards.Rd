@@ -4,12 +4,10 @@
 \alias{compile_standards}
 \title{compile_standards}
 \usage{
-compile_standards(WD = "?", learningplot_correction = FALSE, targetSubj = NULL)
+compile_standards(WD = "?", targetSubj = NULL)
 }
 \arguments{
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); If you put "?", it will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
-
-\item{learningplot_correction}{do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=F, the proportions will just be raw proportions of each subject out of total standards aligned. If TRUE, this will scale proportions of subjects by the relative total proportions of standards in each subject.}
 
 \item{targetSubj}{which subject(s) are the focus of the lesson? opts= "math","ela","science","social studies"; default=NULL}
 }

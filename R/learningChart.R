@@ -109,16 +109,16 @@ learningChart = function(WD = "?",
 
 
 
-      subjPal <- gpColors(c("math", "ela", "science", "socstudies"))
-      #Need to rename to agree with named subjects
 
-      names(subjPal) <-
-        c("Math", "ELA", "Science", "Social Studies")
-
-      # Make a proportional Learning Chart --------------------------------------
-
+      # Make a Learning Chart --------------------------------------
+browser()
       #val for scale of the biggest ray
-      barScale <- max(a_combined$n_prop, na.rm = T)
+      barScale <- 40 #max(a_combined$n_prop, na.rm = T)
+
+      # Rescale n counts of standards to always fit in plot
+      a_combined <- a_combined %>%
+        dplyr::mutate(n_rescale= .data$n*barScale/ sum(.data$n,na.rm=TRUE))
+
 
       #function for putting things a little beyond the max value in the dataset
       smidge <- function(amt = 1) {
@@ -127,15 +127,28 @@ learningChart = function(WD = "?",
 
 
       # Filter out certain incomplete subjects ----------------------------------
-      # iteratively add subjects in order of preference if they are missing until we get 4 subjects
-      n_subj <- unique(a_combined$subject) %>% length()
-      if (n_subj > 4) {
-        #a_combined %>%dplyr::group_by(.data$subject) %>%  dplyr::summarize(n_sum =sum(.data$n,na.rm=T))
-        #Man, I can't figure out a way to do what I want to do, so I'm just gonna remove sustainability if it's there
-        to_remove <- "Sustainability"
+      #Only keep first 4 subjects in order of number of aligments
+
+      ranked_subj_alignments <- a_combined %>%
+        dplyr::filter(.data$n>0) %>%
+        dplyr::group_by(.data$subject) %>%
+        dplyr::summarise(N=sum(.data$n,na.rm=TRUE)) %>%
+        dplyr::arrange(dplyr::desc(.data$N))
+
+
+        to_keep <- ranked_subj_alignments$subject[1:4]
+
+
         a_combined <-
-          a_combined %>% dplyr::filter(!.data$subject %in% to_remove)
-      }
+          a_combined %>% dplyr::filter(.data$subject %in% to_keep) %>%
+          dplyr::left_join(.,importedData$chart_labels,by=c(subject="full_subj"))
+
+      unique_subj <- unique(a_combined$gp_pal_subj)
+      subjPal <- gpColors(unique_subj)
+      #Need to rename to agree with named subjects
+
+      names(subjPal) <-
+        a_combined$subject[match(unique_subj,a_combined$gp_pal_subj)]
 
 
       # Make sure a_combined proportions have no NA -----------------------------
@@ -159,7 +172,7 @@ learningChart = function(WD = "?",
 
       bgRec2 <-
         dplyr::tibble(
-          subject = c("math", "ela", "science", "social studies"),
+          subject = unique_subj,
           xmin = seq(0.5, 9.5, 3),
           xmax = seq(3.5, 12.5, 3),
           ymin = rep(0, 4),
