@@ -2,13 +2,13 @@
 #'
 #' Will get a token from the R environment if available and test it with an empty query to GP API. If missing or expired, will attempt to renew through Google Oauth flow.
 #'
-#' @param refresh do you want to re-authenticate? default=FALSE
+#' @param refresh do you want to re-authenticate? default=TRUE
 #' @param dev logical; if TRUE (default), gets catalog from the dev gp-catalog. Otherwise, from the prod catalog.
 #' @family GP API
 #' @return invisibly returns the token
 #' @export
 #'
-gp_api_get_token <- \(refresh = FALSE,
+gp_api_get_token <- \(refresh = TRUE,
                          dev = TRUE) {
   oauth_sec <-
     httr2::obfuscated("LJZonP3Q0vVpNm_Z9vJp25gIZYvkKdHGUOGmZ0Y5qG36A9ssZNFweIl4cI1YPQ-3KBf-")

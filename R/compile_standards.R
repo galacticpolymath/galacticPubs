@@ -42,10 +42,15 @@ compile_standards <- function(WD = "?",
   ordered_subj <-
     c("math", "ela", "science", "socstudies",    "art", "sust",  "sel",       "tech")
 
-    #named short and full names for epaulette and learningchart
+  #custom labels for learning chart quadrants
+  learning_chart_labs <-
+    c("CCSS\nMath","CCSS\nELA","NGSS\nScience","C3\nSoc Studies","Art","SDGs\nSustain.","SEL","Tech")
+
+  #named short and full names for epaulette and learningchart
   chart_labels <- dplyr::tibble(full_subj=ordered_subjects,
                                 abbrev_subj=ordered_subj_chart,
-                                gp_pal_subj=ordered_subj
+                                gp_pal_subj=ordered_subj,
+                                learning_chart_labs=learning_chart_labs
   )
 
 

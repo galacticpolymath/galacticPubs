@@ -15,7 +15,7 @@ gp_api_unit_delete <- \(WD = "?",
                         unit_id = NULL,
                         prompt_user = TRUE,
                         dev = FALSE) {
-  token <- get_gp_api_token()
+  token <- get_gp_api_token(refresh = FALSE)
   WD <- parse_wd(WD)
   if (is.null(unit_id)) {
     unit_id <- get_fm("_id", WD)

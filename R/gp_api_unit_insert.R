@@ -11,7 +11,7 @@
 
 gp_api_unit_insert <- \(WD = "?",
                         dev = FALSE) {
-  token <- get_gp_api_token()
+  token <- get_gp_api_token(refresh = FALSE)
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
   unit_id <- get_fm("_id", WD_git = WD_git)
