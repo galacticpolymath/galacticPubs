@@ -13,7 +13,7 @@ gp_api_unit_delete(WD = "?", unit_id = NULL, prompt_user = TRUE, dev = FALSE)
 
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 
-\item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}
+\item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.NULL not allowed!}
 }
 \value{
 success (logical)

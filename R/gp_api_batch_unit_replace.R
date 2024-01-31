@@ -35,7 +35,8 @@ gp_api_batch_unit_replace <- \(shared_drive = "?",
   message(paste0(hl, paste0(
     "Unit Replacement through GP API Summary:\n"
   )))
-  print(update_list %>% dplyr::bind_rows())
+
+  print(update_list %>% dplyr::bind_rows() %>% dplyr::mutate(success=convert_T_to_check(.data$success)))
   message(hl)
   # message(paste0(hl,
   #                paste0("Lessons rebuilt:\n - ",

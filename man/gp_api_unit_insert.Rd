@@ -9,7 +9,7 @@ gp_api_unit_insert(WD = "?", dev = FALSE)
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}};default="?"}
 
-\item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}
+\item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog. NULL and NA not allowed.}
 }
 \value{
 success (logical)

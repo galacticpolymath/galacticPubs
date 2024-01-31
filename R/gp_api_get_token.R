@@ -73,7 +73,7 @@ gp_api_get_token <- \(refresh = TRUE,
     readline("Hit Return when you've succeeded in authenticating on the browser.\n <Return>")
     #Not sure why verbosity 2 (printing jwt to screen) avoids 404 errors, but :shrug:
     token_resp <-
-      token_request %>% httr2::req_perform(verbosity = 2) %>%
+      token_request %>% httr2::req_perform(verbosity = 1) %>%
       catch_err(keep_results = TRUE)
 
     http_code <- token_resp$result$status

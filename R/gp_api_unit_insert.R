@@ -3,7 +3,7 @@
 #' Insert (i.e. add) a new unit to MongoDB using the GP API.
 #'
 #' @param WD working directory, passed to [parse_wd()];default="?"
-#' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
+#' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog. NULL and NA not allowed.
 #' @family GP API
 #' @export
 #' @returns success (logical)
@@ -11,6 +11,7 @@
 
 gp_api_unit_insert <- \(WD = "?",
                         dev = FALSE) {
+  checkmate::assert_choice(dev,c(TRUE,FALSE),null.ok=FALSE)
   token <- get_gp_api_token(refresh = FALSE)
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
