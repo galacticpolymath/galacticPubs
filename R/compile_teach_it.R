@@ -25,7 +25,8 @@ compile_teach_it <- function(WD = "?",
 
   status <- fm$PublicationStatus
   gdrivehome <- fm$GdriveHome
-  checkmate::assert_choice(status, c("Proto","Beta","Coming Soon", "Draft", "Live"))
+  checkmate::assert_choice(status,
+                           c("Proto","Hidden","Beta","Coming Soon", "Live","Draft"))#draft deprecated
   checkmate::assert_choice(gdrivehome,c("GP-Studio","GP-LIVE"))
   if (gdrivehome=="GP-Studio") {
     tmID <- fm$GdriveTeachMatID

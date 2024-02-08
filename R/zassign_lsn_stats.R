@@ -12,7 +12,6 @@ zassign_lsn_stats <- \(is_initialized,
                        WD_git,
                        fm,
                        uinfo) {
-
   if (!is_initialized) {
     message("No lessons documented on Tab1 of teach-it.gsheet for this project. ")
     lsnStatuses <- NULL
@@ -31,8 +30,6 @@ zassign_lsn_stats <- \(is_initialized,
           sort_by_date = fm$ReleaseDate
         )
       })
-
-
 
       #Add statuses to info spreadsheet
       googlesheets4::range_write(
@@ -55,6 +52,8 @@ zassign_lsn_stats <- \(is_initialized,
           }) %>% dplyr::bind_rows()
       }
 
+
+      # Map lesson statuses for each lesson in unit -----------------------------
       lsnStatuses <- purrr::map(1:nrow(uinfo), \(i) {
         xi <- uinfo[i,]
         if (is.null(old_statuses)) {
@@ -68,10 +67,16 @@ zassign_lsn_stats <- \(is_initialized,
           old_xi <- NULL
         }
 
-        #only add new if lesson is switched to Beta or Live and it did not exist previously
 
-        if (xi$lsnStatus %in% c("Beta","Live") & i %in% old_xi$lsn) {
-          if (!is.na(old_xi$lsn)&!is.na(old_xi$new_date)) {
+        #If unit is not live, make lessons hidden
+        if(fm$PublicationStatus %in% c("Proto","Hidden")){
+          xi$lsnStatus <- "Hidden"
+        }
+
+        #only add new if lesson is switched to Beta or Live and it did not exist previously
+        if (xi$lsnStatus %in% c("Beta", "Live") &
+            i %in% old_xi$lsn) {
+          if (!is.na(old_xi$lsn) & !is.na(old_xi$new_date)) {
             new_date <- old_xi$new_date
           } else{
             new_date <- as.character(Sys.Date())
@@ -83,6 +88,7 @@ zassign_lsn_stats <- \(is_initialized,
         #Updated flag only applies to lessons that were released previously
         #and have a new_date value
 
+        #***Incomplete logic
         #curr_date needs to only get triggered if the lesson has had substantive changes
         #Maybe associated with versioning or something?
         curr_date <- NA
@@ -90,7 +96,7 @@ zassign_lsn_stats <- \(is_initialized,
           ifelse(is_empty(old_xi$new_date), NA, curr_date)
 
         #for sorting lessons on the web
-        if (!xi$lsnStatus %in% c("Live","Beta")) {
+        if (!xi$lsnStatus %in% c("Live", "Beta")) {
           if (identical(xi$lsnStatus, old_xi$lsnStatus)) {
             sort_by_date <- old_xi$sort_by_date
           } else{
