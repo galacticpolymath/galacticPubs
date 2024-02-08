@@ -44,11 +44,12 @@ zassign_lsn_stats <- \(is_initialized,
     } else{
       ####<<<<<< End Delete
       if (is_empty(fm$LsnStatuses)) {
-        old_statuses <- NULL
+        old_statuses <- NA
       } else{
+
         old_statuses <-
           fm$LsnStatuses %>% purrr::map(., \(x) {
-            dplyr::as_tibble(x)
+             dplyr::as_tibble(x) %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
           }) %>% dplyr::bind_rows()
       }
 
@@ -93,13 +94,17 @@ zassign_lsn_stats <- \(is_initialized,
         #for sorting lessons on the web
         if (!xi$lsnStatus %in% c("Live", "Beta")) {
           if (identical(xi$lsnStatus, old_xi$lsnStatus)) {
-            sort_by_date <- old_xi$sort_by_date
+            sort_by_date <- old_xi$sort_by_date  %>% as.character()
           } else{
             sort_by_date <- as.character(Sys.Date())
           }
           #for live lessons, sort by the most recent dates
         } else{
-          sort_by_date <- max(c(updated_date, new_date), na.rm = TRUE)
+          if(!is.character(updated_date)&!is.character(new_date)){
+            sort_by_date <- NA
+          }else{
+          sort_by_date <- max(c(updated_date, new_date), na.rm = TRUE) %>% as.character()
+          }
         }
 
         list(
@@ -110,6 +115,7 @@ zassign_lsn_stats <- \(is_initialized,
           sort_by_date = sort_by_date
         )
       })
+
 
     }
   }
