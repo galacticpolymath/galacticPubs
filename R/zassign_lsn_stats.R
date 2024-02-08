@@ -68,11 +68,6 @@ zassign_lsn_stats <- \(is_initialized,
         }
 
 
-        #If unit is not live, make lessons hidden
-        if(fm$PublicationStatus %in% c("Proto","Hidden")){
-          xi$lsnStatus <- "Hidden"
-        }
-
         #only add new if lesson is switched to Beta or Live and it did not exist previously
         if (xi$lsnStatus %in% c("Beta", "Live") &
             i %in% old_xi$lsn) {
