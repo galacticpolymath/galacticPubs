@@ -112,9 +112,12 @@ zassign_lsn_stats <- \(is_initialized,
           status = ifelse(is.na(xi$lsnStatus), "Hidden", xi$lsnStatus),
           updated_date = updated_date,
           new_date = new_date,
-          sort_by_date = sort_by_date
+          sort_by_date = sort_by_date,
+          unit_status=fm$PublicationStatus,
+          unit_release_date=fm$ReleaseDate
         )
       })
+
 
 
     }

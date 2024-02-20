@@ -28,6 +28,7 @@ update_teach_links <- function(WD = "?",
                                ignore = ".txt$") {
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
+
   checkmate::assert(check_wd(WD = WD, throw_error = FALSE),
                     combine = "and")
 
@@ -42,7 +43,6 @@ update_teach_links <- function(WD = "?",
   med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
   short_title <- get_fm("ShortTitle", WD = WD, checkWD = F)
   GdriveHome <- get_fm("GdriveHome", WD = WD, checkWD = F)
-  status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
   if (GdriveHome == "GP-Studio") {
     tm_dir_id <- get_fm("GdriveTeachMatID", WD = WD, checkWD = F)
   } else{
@@ -57,7 +57,7 @@ update_teach_links <- function(WD = "?",
     checkmate::check_character(med_title, min.chars = 2),
     checkmate::check_character(short_title, min.chars = 2),
     checkmate::check_character(GdriveHome, min.chars = 6),
-    checkmate::assert_choice(status,
+    checkmate::check_choice(status,
                            c("Proto","Hidden","Beta","Coming Soon", "Live","Draft")),#draft deprecated
 
     combine = "and"
@@ -419,13 +419,12 @@ update_teach_links <- function(WD = "?",
       item_i_type <-
         ifelse(!is.na(item_i$extLink), "extLink", "gp")
       #teachMatDir will always be in GdriveHome; Publication status will determine where other things are
-      out <-  if (item_i_type == "extLink") {
-        "extLink"
+      if (item_i_type == "extLink") {
+        out <-  "extLink"
       } else{
-        switch(status,
-               Draft = GdriveHome,
+        out <-  switch(status,
                Live = "GalacticPolymath",
-               "Unknown Status provided")
+               GdriveHome)
       }
 
     })
