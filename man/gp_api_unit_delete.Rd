@@ -4,7 +4,13 @@
 \alias{gp_api_unit_delete}
 \title{Delete a GP unit from the database}
 \usage{
-gp_api_unit_delete(WD = "?", unit_id = NULL, prompt_user = TRUE, dev = FALSE)
+gp_api_unit_delete(
+  WD = "?",
+  unit_id = NULL,
+  prompt_user = TRUE,
+  dev = FALSE,
+  verbosity = 1
+)
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}};default="?"}
@@ -14,6 +20,8 @@ gp_api_unit_delete(WD = "?", unit_id = NULL, prompt_user = TRUE, dev = FALSE)
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 
 \item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.NULL not allowed!}
+
+\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
 }
 \value{
 success (logical)

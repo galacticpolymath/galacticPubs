@@ -4,12 +4,14 @@
 #'
 #' @param refresh do you want to re-authenticate? default=TRUE
 #' @param dev logical; if TRUE (default), gets catalog from the dev gp-catalog. Otherwise, from the prod catalog.
+#' @param verbosity passed to [httr2::req_perform()]; default=1
 #' @family GP API
 #' @return invisibly returns the token
 #' @export
 #'
 gp_api_get_token <- \(refresh = TRUE,
-                         dev = TRUE) {
+                         dev = TRUE,
+                      verbosity= 1) {
   oauth_sec <-
     httr2::obfuscated("LJZonP3Q0vVpNm_Z9vJp25gIZYvkKdHGUOGmZ0Y5qG36A9ssZNFweIl4cI1YPQ-3KBf-")
 
@@ -59,7 +61,7 @@ gp_api_get_token <- \(refresh = TRUE,
 
     user_url <-
       httr2::oauth_flow_auth_code_url(client = oauth_client_obj,
-                                      auth_url = paste0(dev_toggle,"/api/auth/signin")) %>% httr2::with_verbosity()
+                                      auth_url = paste0(dev_toggle,"/api/auth/signin")) %>% httr2::with_verbosity(verbosity=verbosity)
     utils::browseURL(user_url)
 
 
@@ -73,7 +75,7 @@ gp_api_get_token <- \(refresh = TRUE,
     readline("Hit Return when you've succeeded in authenticating on the browser.\n <Return>")
     #Not sure why verbosity 2 (printing jwt to screen) avoids 404 errors, but :shrug:
     token_resp <-
-      token_request %>% httr2::req_perform(verbosity = 1) %>%
+      token_request %>% httr2::req_perform(verbosity = verbosity) %>%
       catch_err(keep_results = TRUE)
 
     http_code <- token_resp$result$status

@@ -61,7 +61,7 @@ Suggests:
     tools (>= 3.6.0),
     urltools (>= 1.7.3)
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Depends: 
     R (>= 3.5.0)
 Config/testthat/edition: 3

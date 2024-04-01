@@ -6,6 +6,7 @@
 #' @param unit_id instead of supplying WD, you can supply the _id directly for the unit that you want to delete.
 #' @param prompt_user logical; ask user before deleting and replacing the unit? default=TRUE
 #' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.NULL not allowed!
+#' @param verbosity passed to [httr2::req_perform()]; default=1
 #' @family GP API
 #' @export
 #' @returns success (logical)
@@ -14,7 +15,8 @@
 gp_api_unit_delete <- \(WD = "?",
                         unit_id = NULL,
                         prompt_user = TRUE,
-                        dev = FALSE) {
+                        dev = FALSE,
+                        verbosity=1) {
   checkmate::assert_choice(dev,c(TRUE,FALSE),null.ok=TRUE)
   token <- get_gp_api_token(refresh = FALSE)
   WD <- parse_wd(WD)

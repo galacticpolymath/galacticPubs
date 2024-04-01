@@ -4,12 +4,14 @@
 \alias{gp_api_unit_insert}
 \title{Insert a new GP unit into the database}
 \usage{
-gp_api_unit_insert(WD = "?", dev = FALSE)
+gp_api_unit_insert(WD = "?", dev = FALSE, verbosity = 1)
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}};default="?"}
 
 \item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog. NULL and NA not allowed.}
+
+\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
 }
 \value{
 success (logical)
