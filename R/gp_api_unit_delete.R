@@ -42,10 +42,10 @@ gp_api_unit_delete <- \(WD = "?",
     test_request <- test_delete <- FALSE
   } else{
 
-    dev_toggle <- ifelse(dev,"dev.","")
+    dev_toggle <- ifelse(dev,"dev.","www.")
     req0 <-
     httr2::request(paste0("https://",dev_toggle,"galacticpolymath.com/api/delete-lesson"))
-
+browser()
     req <-
       req0 %>%
       httr2::req_auth_bearer_token(token = token) %>%

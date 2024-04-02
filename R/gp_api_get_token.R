@@ -53,7 +53,7 @@ gp_api_get_token <- \(refresh = TRUE,
     oauth_id <-
       "1095510414161-jo8dbgm27asec4dm9h05iqf0t18hviv2.apps.googleusercontent.com"
 
-    dev_toggle <- ifelse(dev,"https://dev.galacticpolymath.com","https://galacticpolymath.com")
+    dev_toggle <- ifelse(dev,"https://dev.galacticpolymath.com","https://www.galacticpolymath.com")
 
     oauth_client_obj <- httr2::oauth_client(id = oauth_id,
                                             token_url = paste0(dev_toggle,"/api/get-jwt-token"),
