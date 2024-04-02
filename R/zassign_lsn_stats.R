@@ -21,7 +21,7 @@ zassign_lsn_stats <- \(is_initialized,
     if (identical(TRUE, fm$ReleaseDate < "2023-11-10") &
         is_empty(fm$LsnStatuses)) {
       lsnStatuses <- purrr::map(1:nrow(uinfo), \(i) {
-        xi <- uinfo[i,]
+        xi <- uinfo[i, ]
         list(
           lsn = as.integer(xi$lsn),
           status = "Live",
@@ -46,18 +46,18 @@ zassign_lsn_stats <- \(is_initialized,
       if (is_empty(fm$LsnStatuses)) {
         old_statuses <- NA
       } else{
-
         old_statuses <-
           fm$LsnStatuses %>% purrr::map(., \(x) {
-             dplyr::as_tibble(x) %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+            dplyr::as_tibble(x) %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
           }) %>% dplyr::bind_rows()
       }
 
 
       # Map lesson statuses for each lesson in unit -----------------------------
+
       lsnStatuses <- purrr::map(1:nrow(uinfo), \(i) {
-        xi <- uinfo[i,]
-        if (is.null(old_statuses)) {
+        xi <- uinfo[i, ]
+        if (is_empty(old_statuses)) {
           old_xi <- NULL
         } else if (i %in% old_statuses$lsn) {
           old_xi <- old_statuses %>% dplyr::filter(.data$lsn == i)
@@ -100,10 +100,11 @@ zassign_lsn_stats <- \(is_initialized,
           }
           #for live lessons, sort by the most recent dates
         } else{
-          if(!is.character(updated_date)&!is.character(new_date)){
+          if (!is.character(updated_date) & !is.character(new_date)) {
             sort_by_date <- NA
-          }else{
-          sort_by_date <- max(c(updated_date, new_date), na.rm = TRUE) %>% as.character()
+          } else{
+            sort_by_date <-
+              max(c(updated_date, new_date), na.rm = TRUE) %>% as.character()
           }
         }
 
@@ -113,8 +114,8 @@ zassign_lsn_stats <- \(is_initialized,
           updated_date = updated_date,
           new_date = new_date,
           sort_by_date = sort_by_date,
-          unit_status=fm$PublicationStatus,
-          unit_release_date=fm$ReleaseDate
+          unit_status = fm$PublicationStatus,
+          unit_release_date = fm$ReleaseDate
         )
       })
 
