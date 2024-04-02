@@ -138,7 +138,8 @@ compile_teach_it <- function(WD = "?",
       lsnN = as.integer(.data$`_lsnN`),
       lsnDur = as.integer(.data$lsnDur) #we won't use this, as it's sometimes left blank. Will sum ChunkDurs
     ) %>%
-    dplyr::select(1:.data$lsnDur)
+    dplyr::select(1:.data$lsnDur) %>%
+    dplyr::filter(!is.na(.data$lsn))
 
 
   # Check and Validate Data Import--------------------------------------------------
@@ -156,7 +157,7 @@ compile_teach_it <- function(WD = "?",
     !grepl("^Overall description", uinfo$unitPreface[1])
 
   proc_initialized <-
-    !grepl("\\*\\*\\*",proc$Chunk[2]) #template has *** in second step chunk (D4)
+    !grepl("\\*\\*\\*",proc$ChunkTitle[2])|nrow(proc)==0 #template has *** in second step chunk (D4)
   proc_errors <-
     sum(!is.na(proc$`_issues`))!=0 #FALSE if issues found
   proj_name <- basename(WD)
