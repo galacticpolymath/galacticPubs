@@ -111,12 +111,16 @@ gp_api_query <- \(
   tictoc::toc()
 
 # Get rid of tibble:json detritus -----------------------------------------
+
+  if(!is.null(out2)){
   out3 <- out2 %>% dplyr::as_tibble() %>% dplyr::select(-.data$document.id)
 
 
 # order by desired column -------------------------------------------------
   out3[order(unlist(out3[sort_by])),]
-
+  }else{
+  out2
+}
 
 }
 

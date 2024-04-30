@@ -61,8 +61,8 @@ gp_api_unit_insert <- \(WD = "?",
       dplyr::tibble(
         success = comb_success,
         unit = unit_name,
-        dev_replaced = success_dev,
-        prod_replaced = success_prod
+        dev_inserted = success_dev,
+        prod_inserted = success_prod
       )
 
 # nonrecursive (main logic) -----------------------------------------------

@@ -39,7 +39,7 @@ gp_api_unit_delete <- \(WD = "?",
   # test if this unit exists in GP-Catalog ----------------------------------
 
   unit_missing <-
-    gp_api_query(id = unit_id, c("Title", "Subtitle"),dev=dev) %>% is_empty()
+    gp_api_query(id = unit_id, c("numID","Title", "Subtitle"),dev=dev) %>% is_empty()
 
   if (unit_missing) {
     message("No unit found on (",catalog_name,") GP-Catalog for '", unit_name, "'.")
@@ -74,7 +74,7 @@ gp_api_unit_delete <- \(WD = "?",
       httr2::req_perform(req, verbosity = 2) %>% catch_err()
 
     test_delete <-
-      gp_api_query(id = unit_id, c("Title", "Subtitle"),dev=dev) %>% is_empty()
+      gp_api_query(id = unit_id, c("numID","Title", "Subtitle"),dev=dev) %>% is_empty()
   }
   if (test_request & test_delete) {
     message("Deletion SUCCEEDED for '", unit_id, "'.")

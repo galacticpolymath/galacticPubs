@@ -120,7 +120,10 @@ if(is.null(WD_git)){
   #Add Chunk Start Times
   proc$ChunkStart <- sapply(unique_sans_na(proc$lsn), function(p) {
     p_i <- subset(proc, proc$lsn == p)
-
+    if(nrow(p_i)<=1){
+      message("Error in Proc for Lsn ",p,": Not enough valid rows.")
+      NA
+    }else{
     newChunkIndx <-
       sapply(1:nrow(p_i), function(i)
         which.max(p_i$Chunk[1:i])) %>% unique()
@@ -130,6 +133,7 @@ if(is.null(WD_git)){
     chunkStart[newChunkIndx] <-
       cumsum(shiftedChunkDur)
     chunkStart
+    }
   }) %>% unlist()
 
   ####

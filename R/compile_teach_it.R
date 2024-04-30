@@ -15,20 +15,20 @@ compile_teach_it <- function(WD = "?",
                              rename_lessons = TRUE,
                              prompt_rename = FALSE) {
   WD <- parse_wd(WD)
-  WD_git <- get_wd_git(WD=WD)
+  WD_git <- get_wd_git(WD = WD)
   . = NULL #to avoid errors with dplyr syntax
   #Keep teaching-materials/ folder tidy
   sweep_teaching_materials(WD = WD)
   message("running compile_teach_it()...")
   #Get front matter from the project working directory
-  fm <- get_fm(WD_git=WD_git)
+  fm <- get_fm(WD_git = WD_git)
 
   status <- fm$PublicationStatus
   gdrivehome <- fm$GdriveHome
   checkmate::assert_choice(status,
-                           c("Proto","Hidden","Beta","Coming Soon", "Live","Draft"))#draft deprecated
-  checkmate::assert_choice(gdrivehome,c("GP-Studio","GP-LIVE"))
-  if (gdrivehome=="GP-Studio") {
+                           c("Proto", "Hidden", "Beta", "Coming Soon", "Live", "Draft"))#draft deprecated
+  checkmate::assert_choice(gdrivehome, c("GP-Studio", "GP-LIVE"))
+  if (gdrivehome == "GP-Studio") {
     tmID <- fm$GdriveTeachMatID
   } else{
     tmID <- fm$GdrivePublicID
@@ -99,7 +99,7 @@ compile_teach_it <- function(WD = "?",
       col_types = "c",
 
     ) %>%
-    dplyr::rename(code=.data$`_code`) %>%
+    dplyr::rename(code = .data$`_code`) %>%
     dplyr::filter(!is.na(.data$code)) %>%
     dplyr::select(1:dplyr::starts_with("otherLink"))
 
@@ -118,7 +118,7 @@ compile_teach_it <- function(WD = "?",
       sheet = "LsnExt",
       skip = 1,
       col_types = "c"
-    ) %>% dplyr::filter(.data$link!= "URL" &
+    ) %>% dplyr::filter(.data$link != "URL" &
                           !is.na(.data$itemTitle)) %>%
     dplyr::select("lsn", "order", "itemTitle", "description", "link")
 
@@ -129,7 +129,7 @@ compile_teach_it <- function(WD = "?",
   proc <-
     googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip =
                                 1) %>%
-    dplyr::rename(Step=.data$`_Step`) %>%
+    dplyr::rename(Step = .data$`_Step`) %>%
     dplyr::mutate(
       lsn = as.integer(.data$lsn),
       Chunk = as.integer(.data$Chunk),
@@ -157,18 +157,22 @@ compile_teach_it <- function(WD = "?",
     !grepl("^Overall description", uinfo$unitPreface[1])
 
   proc_initialized <-
-    !grepl("\\*\\*\\*",proc$ChunkTitle[2])|nrow(proc)==0 #template has *** in second step chunk (D4)
+    !grepl("\\*\\*\\*", proc$ChunkTitle[2]) |
+    nrow(proc) == 0 #template has *** in second step chunk (D4)
   proc_errors <-
-    sum(!is.na(proc$`_issues`))!=0 #FALSE if issues found
+    sum(!is.na(proc$`_issues`)) != 0 #FALSE if issues found
   proj_name <- basename(WD)
-  if(!proc_initialized){
-    message(proj_name,": Procedure not processed! Issues found...see teach-it.gsheet")
-    warning(proj_name,": Procedure not processed! Issues found...see teach-it.gsheet")
+  if (!proc_initialized) {
+    message(proj_name,
+            ": Procedure not processed! Issues found...see teach-it.gsheet")
+    warning(proj_name,
+            ": Procedure not processed! Issues found...see teach-it.gsheet")
   }
 
-  if(proc_errors){
-    message(proj_name,": Procedure issues found...see teach-it.gsheet")
-    warning(proj_name,": Procedure issues found ! Issues found...see teach-it.gsheet")
+  if (proc_errors) {
+    message(proj_name, ": Procedure issues found...see teach-it.gsheet")
+    warning(proj_name,
+            ": Procedure issues found ! Issues found...see teach-it.gsheet")
   }
 
 
@@ -216,9 +220,16 @@ compile_teach_it <- function(WD = "?",
   }
 
 
-# Assign lesson statuses --------------------------------------------------
- if(!uinfo_titles_initialized){message("Not assigning lesson statuses because unit info not initialized on teach-it.gsheet")}
-  zassign_lsn_stats(is_initialized=uinfo_titles_initialized,WD_git=WD_git, fm=fm,uinfo=uinfo)
+  # Assign lesson statuses --------------------------------------------------
+  if (!uinfo_titles_initialized) {
+    message("Not assigning lesson statuses because unit info not initialized on teach-it.gsheet")
+  }
+  zassign_lsn_stats(
+    is_initialized = uinfo_titles_initialized,
+    WD_git = WD_git,
+    fm = fm,
+    uinfo = uinfo
+  )
 
   ####
 
@@ -328,7 +339,7 @@ compile_teach_it <- function(WD = "?",
   # Extract majority of Teach-It data ---------------------------------------
   #Get item links for each environment*gradeBand
   teach_mat_data <- zget_envir(tlinks, fm = fm)
-
+browser()
   if (!proc_initialized) {
     #should change 'lessons' to something more like 'procedure'
     #output NULL structure paralleling real data
@@ -346,30 +357,37 @@ compile_teach_it <- function(WD = "?",
     })
     proc_data$vocab <- NULL
   } else{
-
-    proc_data <-
+    proc_data_test <-
       zget_procedure(
         proc = proc,
         lext = lext,
         uinfo = uinfo,
         mlinks = mlinks,
-        WD_git=WD_git
-      )
+        WD_git = WD_git
+      ) %>% catch_err(keep_results = TRUE)
+    if (!proc_data_test$success) {
+      message("FAILED to compile procedures")
+      warning("FAILED to compile procedures")
+      proc_data <- NULL
 
-    #output gathered vocab as csv
-    if (!is.null(proc_data$vocab)) {
-      vocab_outfile <-
-        fs::path(WD, "assets", "_other-media-to-publish", "vocab.csv")
-      vocab_saved <-
-        write.csv(x = proc_data$vocab,
-                  file = vocab_outfile,
-                  row.names = FALSE) %>% catch_err()
-      if (vocab_saved) {
-        message("\nVocab gathered from procedure and saved to ",
-                vocab_outfile,
-                "\n")
-      } else{
-        warning("Vocab was gathered from procedure, but failed to save")
+    } else{
+      proc_data <- proc_data_test$result
+
+      #output gathered vocab as csv
+      if (!is.null(proc_data$vocab)) {
+        vocab_outfile <-
+          fs::path(WD, "assets", "_other-media-to-publish", "vocab.csv")
+        vocab_saved <-
+          write.csv(x = proc_data$vocab,
+                    file = vocab_outfile,
+                    row.names = FALSE) %>% catch_err()
+        if (vocab_saved) {
+          message("\nVocab gathered from procedure and saved to ",
+                  vocab_outfile,
+                  "\n")
+        } else{
+          warning("Vocab was gathered from procedure, but failed to save")
+        }
       }
     }
 
@@ -415,7 +433,7 @@ compile_teach_it <- function(WD = "?",
   message(" JSON file saved\n @ ",
           fs::path(destFolder, "multimedia.json"),
           "\n")
-  message(" Success: ",success)
+  message(" Success: ", success)
   message(" ", rep("-", 30))
 
 }
