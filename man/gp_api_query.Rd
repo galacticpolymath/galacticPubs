@@ -10,7 +10,8 @@ gp_api_query(
   numID = NULL,
   output_tibble = TRUE,
   dev = FALSE,
-  id = NULL
+  id = NULL,
+  sort_by = "numID"
 )
 
 query_gp_api(
@@ -18,7 +19,8 @@ query_gp_api(
   numID = NULL,
   output_tibble = TRUE,
   dev = FALSE,
-  id = NULL
+  id = NULL,
+  sort_by = "numID"
 )
 }
 \arguments{
@@ -31,6 +33,8 @@ query_gp_api(
 \item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}
 
 \item{id}{is a vector of \verb{_id}s for unit(s) you want. default=NULL returns all units}
+
+\item{sort_by}{a character giving the column name to sort by. Default="numID"}
 }
 \value{
 list of results or tbl_json

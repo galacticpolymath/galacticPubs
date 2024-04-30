@@ -8,7 +8,7 @@ gp_api_unit_delete(
   WD = "?",
   unit_id = NULL,
   prompt_user = TRUE,
-  dev = FALSE,
+  dev = TRUE,
   verbosity = 1
 )
 }
@@ -19,7 +19,7 @@ gp_api_unit_delete(
 
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 
-\item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.NULL not allowed!}
+\item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}
 
 \item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
 }

@@ -7,6 +7,7 @@
 #' @param output_tibble return values as a "tibble"? otherwise, list; default=TRUE
 #' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
 #' @param id is a vector of `_id`s for unit(s) you want. default=NULL returns all units
+#' @param sort_by a character giving the column name to sort by. Default="numID"
 #' @return list of results or tbl_json
 #' @family GP API
 #' @export
@@ -16,7 +17,8 @@ gp_api_query <- \(
   numID = NULL,
   output_tibble = TRUE,
   dev = FALSE,
-  id = NULL
+  id = NULL,
+  sort_by= "numID"
 ) {
   if (!is.null(numID) & !is.null(id)) {
     stop("Only supply numID OR _id.")
@@ -107,7 +109,13 @@ gp_api_query <- \(
     out2 <- NULL
   }
   tictoc::toc()
-  out2
+
+# Get rid of tibble:json detritus -----------------------------------------
+  out3 <- out2 %>% dplyr::as_tibble() %>% dplyr::select(-.data$document.id)
+
+
+# order by desired column -------------------------------------------------
+  out3[order(unlist(out3[sort_by])),]
 
 
 }

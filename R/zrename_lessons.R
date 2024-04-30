@@ -36,6 +36,7 @@ zrename_lessons <- \(uinfo,
       success <- NA
     } else{
       #Iterate renaming through lessons of all environments found
+
       test_rename <- purrr::map(1:nrow(tm_ls), \(i) {
         dir_i <- tm_ls[i,]
         dir_i_ls <-
