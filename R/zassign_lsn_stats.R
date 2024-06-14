@@ -24,7 +24,7 @@ zassign_lsn_stats <- \(is_initialized,
         xi <- uinfo[i, ]
         list(
           lsn = as.integer(xi$lsn),
-          status = "Live",
+          lsnStatus = "Live",
           updated_date = NA,
           new_date = fm$ReleaseDate,
           sort_by_date = fm$ReleaseDate

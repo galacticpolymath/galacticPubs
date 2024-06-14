@@ -90,8 +90,11 @@ gp_api_query <- \(
       httr2::resp_body_json() %>% .[[1]]
 
   if (length(out)>0) {
+  names_in_data <- names(out[[1]])
+  checkmate::assert(
+    sum(!keys %in% names_in_data)==0,.var.name = paste0("Keys: \"",paste(keys,collapse=","),"\" found in query response")
 
-
+  )
     #This will silently leave out columns if they don't fit into a tibble :/
     #Had to learn this again...seriously, if an item is a list of more than 1, it will leave it out
     #e.g. LsnStatuses

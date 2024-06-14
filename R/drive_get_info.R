@@ -43,7 +43,18 @@ drive_get_info <- function(dribble,
     fileType <-
       mimeKey$human_type[match(dribble_i$drive_resource[[1]]$mimeType, mimeKey$mime_type)]
 
+    #hackish solution for undocumented audio filetypes
 
+    if(is_empty(fileType)){
+      if(grepl("audio",dribble_i$drive_resource[[1]]$mimeType)){
+        fileType<-"audio"
+      }
+    }
+
+    if(is_empty(fileType)){
+    message("drive_get_info() | undocumented filetype:", fileType)
+    warning("drive_get_info() | undocumented filetype:", fileType)
+    }
     #If it's a shortcut, resolve shortcut
     dribble_i_0 <- dribble_i #backup
     if(fileType=="shortcut"){

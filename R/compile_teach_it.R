@@ -101,6 +101,7 @@ compile_teach_it <- function(WD = "?",
     ) %>%
     dplyr::rename(code = .data$`_code`) %>%
     dplyr::filter(!is.na(.data$code)) %>%
+    dplyr::arrange(.data$order) %>%
     dplyr::select(1:dplyr::starts_with("otherLink"))
 
   #unit info
@@ -235,7 +236,7 @@ compile_teach_it <- function(WD = "?",
 
   # Figure out lesson duration string ---------------------------------------
   nlessons <-
-    max(1, max(tlinks0$`_lsn`, na.rm = TRUE), na.rm = TRUE) #how many lessons are there in teaching mat? (1 by default)
+    max(1, max(c(uinfo$lsn,tlinks0$`_lsn`), na.rm = TRUE), na.rm = TRUE) #how many lessons are there in teaching mat? (1 by default)
 
 
 
@@ -339,7 +340,7 @@ compile_teach_it <- function(WD = "?",
   # Extract majority of Teach-It data ---------------------------------------
   #Get item links for each environment*gradeBand
   teach_mat_data <- zget_envir(tlinks, fm = fm)
-browser()
+
   if (!proc_initialized) {
     #should change 'lessons' to something more like 'procedure'
     #output NULL structure paralleling real data

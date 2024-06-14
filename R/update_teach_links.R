@@ -105,6 +105,7 @@ update_teach_links <- function(WD = "?",
   )
 
   #Make top-level download link entry to build on (for the TeachMatLinks tab of teach-it.gsheet)
+
   teach_dir_info <-
     teach_dir %>% drive_get_info() %>% dplyr::mutate(title = med_title, `_itemType` =
                                                        "teachMatDir")
@@ -149,6 +150,7 @@ update_teach_links <- function(WD = "?",
         dir_i_files_info <-
           dir_i_files %>% drive_get_info(set_envir = dir_i_info$`_envir`)
       } else{
+
         dir_i_files_info <- NULL
       }
 
@@ -158,16 +160,30 @@ update_teach_links <- function(WD = "?",
       if (nrow(dir_i_subfolders) > 0) {
         dir_i_subfolders_info <-
           lapply(1:nrow(dir_i_subfolders), function(ii) {
-            update_teach_links_lsnHelper(
+
+            out_ii <- update_teach_links_lsnHelper(
               dribble = dir_i_subfolders[ii,],
               set_grades = dir_i_info$`_grades`,
               set_envir = envir_type
             )
+            out_ii
           }) %>% dplyr::bind_rows()
       } else{
         dir_i_subfolders_info <- NULL
       }
 
+      #make everything as.character to avoid rbind issue, but only if not null
+      if(!is.null(dir_i_info)){
+      dir_i_info <- dir_i_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+      }
+
+      if(!is.null(dir_i_files_info)){
+      dir_i_files_info <- dir_i_files_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+      }
+
+      if(!is.null(dir_i_subfolders_info)){
+      dir_i_subfolders_info <- dir_i_subfolders_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+      }
       #combine all info at this level
       dir_i_INFO <- dplyr::bind_rows(dir_i_info,
                                      dir_i_files_info,
@@ -176,6 +192,9 @@ update_teach_links <- function(WD = "?",
 
 
   # Now combine it all for output -------------------------------------------
+
+  teach_dir_info <- teach_dir_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+  variant_info <- variant_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
 
   inferred_teach_it <- dplyr::bind_rows(teach_dir_info,
                                         variant_info) %>%
