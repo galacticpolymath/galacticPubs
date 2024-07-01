@@ -1,7 +1,7 @@
 Package: galacticPubs
 Type: Package
 Title: Galactic Polymath Lesson Publishing Tools
-Version: 1.0.1
+Version: 1.1.1
 Author: Matthew R Wilkins, PhD
 Maintainer: Matthew R Wilkins, PhD <matt@galacticpolymath.com>
 Description: Code to enable the GP Nexus education publishing workflow. Outputs are highly structured
@@ -61,7 +61,7 @@ Suggests:
     tools (>= 3.6.0),
     urltools (>= 1.7.3)
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Depends: 
     R (>= 3.5.0)
 Config/testthat/edition: 3

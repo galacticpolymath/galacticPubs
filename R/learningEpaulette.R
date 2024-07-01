@@ -31,7 +31,7 @@ learningEpaulette <-
            saveFile = TRUE,
            destFolder,
            fileName = "GP-Learning-Epaulette",
-           font_size = 18,
+           font_size = 8,
            width = 11,
            height = 1.6,
            dpi = 200,
@@ -280,7 +280,7 @@ learningEpaulette <-
         ggplot2::theme(
           plot.background = ggplot2::element_blank(),
           panel.background = ggplot2::element_blank(),
-          plot.margin = ggplot2::unit(c(0, 0, 5, 0), "points")
+          plot.margin = ggplot2::unit(c(0, 0, 0, 0), "points")
         )
 
 

@@ -5,7 +5,7 @@
 #' Combines functionality of:
 #' - [compile_fm()]
 #' - [compile_standards()]
-#' - [learningChart()] and [learningEpaulette()]
+#' - [learningEpaulette()]
 #' - [compileAcknowledgments()]
 #' - [compileVersions()]
 #' - [compileJSON()]
@@ -165,14 +165,7 @@ compile_lesson <-
         stop("Standards were not compiled successfully.")
       } else{
         alignment <- compile_standards_output$result
-        current_data$LearningChartFriendly <-
-          alignment$learning_chart_friendly
-        if (is.na(current_data$TargetSubject)) {
-          warning(
-            "Run editor() for this lesson and enter a Target Subject on the Edit tab and try again."
-          )
-        }
-        message("\nGenerating Learning Chart\n")
+
       }
     }
 
@@ -195,53 +188,9 @@ compile_lesson <-
         save_json(saved_standards$data$list_for_json,
                   fs::path(destFolder, "standards.json"))
       }
-      #Only proceed to generate learningChart if compatible...
-      if (!saved_standards$learning_chart_friendly) {
-        current_data$LearningChart <- NULL
-      } else if (!inSync(
-        fs::path(WD, "assets", "_learning-plots", "GP-Learning-Chart.png"),
-        standards_gsheet_path,
-        WD = WD
-      ) |
-      (rebuild)) {
-        #LEARNING CHART
-        learningChart(
-          quotedTitle = current_data$Title,
-          centralText = current_data$LearningChart_params_centralText,
-          caption = current_data$LearningChart_params_caption,
-          captionN = current_data$LearningChart_params_captionN,
-          showPlot = FALSE,
-          WD = WD
-        )
 
 
-      }
 
-
-      #If learning chart exists, always output the learning-chart.json
-      if (!is_empty(current_data$LearningChart) ) {
-        #export learning chart section
-        lc <- list(
-          `__component` = "lesson-plan.learning-chart",
-          Title = "About the GP Learning Chart",
-          Description =
-            paste0(
-              "This Galactic Polymath Learning Chart illustrates the areas of knowledge covered. This lesson targets ",
-              current_data$TargetSubject,
-              ", but it helps teach national learning standards in 4 subjects: \n- [Common Core Math](https://learning.ccsso.org/common-core-state-standards-initiative); [Common Core ELA](https://learning.ccsso.org/common-core-state-standards-initiative); [Next Generation Science (NGSS)](https://www.nextgenscience.org/); and [College, Career, and Civic Life (C3) Social Studies Standards](https://www.socialstudies.org/standards/c3).\nIn total, there are ",
-              sum(saved_standards$a_combined$n, na.rm = T),
-              " standards across US grade band(s): ",
-              paste0(saved_standards$data$gradeBand, collapse = ', '),
-              "."
-            ),
-          Footnote = "",
-          Badge = current_data$LearningChart[1]
-        )
-
-        #write learning chart section before standards section
-        save_json(lc,
-                  fs::path(destFolder, "learning-chart.json"))
-      }
 
     }#end general standards stuff
 
