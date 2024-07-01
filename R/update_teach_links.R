@@ -58,7 +58,7 @@ update_teach_links <- function(WD = "?",
     checkmate::check_character(short_title, min.chars = 2),
     checkmate::check_character(GdriveHome, min.chars = 6),
     checkmate::check_choice(status,
-                           c("Proto","Hidden","Beta","Coming Soon", "Live","Draft")),#draft deprecated
+                           c("Proto","Hidden","Beta","Coming Soon", "Live","Draft","Upcoming")),#draft deprecated
 
     combine = "and"
   )
@@ -293,8 +293,6 @@ update_teach_links <- function(WD = "?",
   }
 
 
-
-
   # Remove blank links ------------------------------------------------------
   missing_links <-
     teach_it_in0 %>% dplyr::filter(is.na(.data$`_link`) &
@@ -324,7 +322,15 @@ update_teach_links <- function(WD = "?",
   }
 
 
-  teach_it_in <- teach_it_in0
+
+# Add web resource type for external links --------------------------------
+   teach_it_in <- teach_it_in0
+  #this isn't pretty or tidy, but mutate bullshit failed me (shakes fist at dplyr)
+  teach_it_in$`_fileType`=ifelse(is.na(teach_it_in$`_fileType`),"web resource",teach_it_in$`_fileType`)
+
+
+
+
   # Begin logic for clean parameter (merge or overwrite .gsheet?-----------------
   if (clean) {
     #Assign the inferred data for output if clean==T
