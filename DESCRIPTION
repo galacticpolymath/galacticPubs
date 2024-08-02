@@ -49,6 +49,7 @@ Remotes:
 Suggests: 
     colorspace (>= 2.0.0),
     commonmark (>= 1.8.0),
+    htmltools (>= 0.5.8),
     rmdformats (>= 1.0.3),
     pacman (>= 0.5.0),
     tictoc (>= 1.0.1),

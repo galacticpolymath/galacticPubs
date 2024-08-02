@@ -139,6 +139,7 @@ lesson_init <- \() {
 
     update_fm_success <- suppressWarnings(update_fm(
       WD_git = WD_git,
+      recompile = F,
       change_this = inputs2[common_keys],
       try_harder=TRUE
     ))

@@ -56,14 +56,15 @@ stage_assets <-
                     name = basename(.data$path)) %>%
       dplyr::relocate("name")
     #not sure why the regexp parameter in dir_ls() doesn't work...
+    # tolower makes these pattern matches case-insensitive
     if (!is.null(pattern)) {
       to_copy <- to_copy %>%
-        dplyr::filter(grepl(pattern, .data$name, perl = TRUE))
+        dplyr::filter(grepl(pattern, tolower(.data$name), perl = TRUE))
     }
 
     if (!is.null(exclude)) {
       to_copy <- to_copy %>%
-        dplyr::filter(!grepl(exclude, .data$name, perl = TRUE))
+        dplyr::filter(!grepl(exclude, tolower(.data$name), perl = TRUE))
     }
 
     # clear target directory if requested and copy updated files

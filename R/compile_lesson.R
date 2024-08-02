@@ -330,6 +330,12 @@ compile_lesson <-
 
     }
 
+
+# Make Shareable Assets ---------------------------------------------------
+make_shareable_assets(WD=WD)
+
+
+
     ################################################################
     # Compile all JSONs ----------------------------------------------
     compile_json(WD_git = WD_git)

@@ -9,7 +9,9 @@
 #' @export
 
 update_teach_links_lsnHelper<-function(dribble,set_grades=NULL,set_envir=NULL){
-  P_ls<-dribble %>% drive_contents
+
+  P_ls<-dribble %>% drive_contents%>%
+    dplyr::filter(!startsWith(tolower(.data$name), "scrap"))
 
 
   #Get lesson info from parent dir

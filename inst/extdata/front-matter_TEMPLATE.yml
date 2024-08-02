@@ -20,7 +20,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.6.4
+TemplateVer: 0.6.5
 galacticPubsVer: ''
 URL: ''
 GdriveHome: 'GP-Studio'
@@ -44,6 +44,7 @@ SponsoredBy: ''
 SponsorLogo: ''
 LessonBanner: ''
 LessonCard: ''
+QRcode: ''
 TargetSubject: ''
 LessonEnvir: ''
 ForGrades: ''
@@ -109,7 +110,7 @@ Versions:
   date:
   - !expr format(Sys.Date(), '%B %d, %Y')
   ver_summary:
-  - 'Lesson initialized'
+  - 'Unit initialized'
   ver_notes:
   - .na
   ver_acknowledgments:

@@ -14,7 +14,7 @@
 #' 7. Save teach-it_state.RDS that stores info about the teaching-materials folder at the time of the last update. [compile_lesson()] uses [get_state()] to check if the current state is identical to the state at the time of the last update to skip this update_teach_links call.
 #'
 #' @param WD a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" which will invoke [pick_lesson()]
-#' @param rebuild if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL
+#' @param rebuild deprecated!! if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL
 #' @param rm_missing logical; do you want to automatically remove records that are missing (and for which no link was found during crawl of Google Drive folder?); default= TRUE; if FALSE, the link will be left blank
 #' @param clean logical; do you want to ignore all info on the teach-it.gsheet and only import inferred info from crawled google drive project files? THIS WILL OVERWRITE MANUALLY ENTERED TITLES; default=FALSE
 #' @param ignore regex expression to remove certain filetypes (e.g. txt files); default= ".txt$"
@@ -139,6 +139,7 @@ update_teach_links <- function(WD = "?",
       dir_i_subfolders <-
         dir_i_ls %>% dplyr::filter(googledrive::is_folder(dir_i_ls) &
                                      !startsWith(tolower(name), "scrap"))
+
       #get all files
       dir_i_files <-
         dir_i_ls %>% dplyr::filter(!googledrive::is_folder(dir_i_ls))
