@@ -324,7 +324,7 @@ zget_items <- \(df, fm) {
 #' @export
 #' @family Internal helper functions
 zYTembed <- function(link) {
-  gsub("^.*(?:v=|youtu.be\\/)([^&]*).*",
+  gsub("^.*(?:v=|youtu.be\\/)([^&\\?]*).*",
        "https://www.youtube.com/embed/\\1",
        link)
 }
