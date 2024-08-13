@@ -10,4 +10,4 @@
 ^reading-material.*$
 ^assembled-lesson-materials.*$
 ^inst/shiny/gp_editor/www/[^rsrc].*$
-
+^\.httr-oauth$

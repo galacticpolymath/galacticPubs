@@ -189,6 +189,7 @@ update_fm <-
     new_yaml <- new_yaml %>% parse_locale()
 
     #Add URL for this locale
+    if(is_empty(new_yaml$URL) | is_empty(new_yaml$ShortURL)){
     new_yaml$URL <-
       paste0(
         c(
@@ -198,6 +199,22 @@ update_fm <-
         ),
         collapse = "/"
       )
+
+    #Add bitly (short URL)
+      test_assign <- urlshorteneR::bitly_create_bitlink(
+        long_url = utils::URLencode(new_yaml$URL),
+        title=new_yaml$MediumTitle
+      ) %>% catch_err(keep_results = TRUE)
+
+      if(test_assign$success){
+        message("Bit.ly created for this unit:\n @",test_assign$result$link[1])
+
+        new_yaml$ShortURL <-test_assign$result$link[1]
+      }else{
+        message("Bit.ly creation failed for ",new_yaml$MediumTitle,":\n @",new_yaml$URL)
+      }
+
+    }
 
     #make a unique `_id` combining numID & locale
     if (!is_empty(new_yaml$numID)) {

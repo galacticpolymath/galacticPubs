@@ -56,6 +56,7 @@ Suggests:
     ISOcodes (>= 2022.01.10),
     rhandsontable (>= 0.3.8),
     testthat (>= 3.0.0),
+    urlshorteneR (>= 1.5.7),
     usethis (>= 2.1.3),
     shadowtext (>= 0.0.9),
     showtext (>= 0.9.0),

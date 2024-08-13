@@ -332,7 +332,7 @@ compile_lesson <-
 
 
 # Make Shareable Assets ---------------------------------------------------
-make_shareable_assets(WD=WD)
+make_shareable_assets(WD=WD,open_file = FALSE)
 
 
 

@@ -3,13 +3,15 @@
 #' Make an HTML file with shareable assets for creating a unit Press Kit for clients
 #'
 #' @param WD "?"
+#' @param open_file logical; open resulting HTML file? Default=TRUE
 #'
 #' @return success
 #' @export
 #'
 
-make_shareable_assets <- \(WD = "?") {
+make_shareable_assets <- \(WD = "?", open_file = TRUE) {
   WD <- parse_wd(WD)
+  fm <- get_fm(WD = WD)
   ShortTitle <- get_fm("ShortTitle", WD = WD)
   unit_url <- get_fm("URL", WD = WD)
   checkmate::assert_string(unit_url, min.chars = 10)
@@ -39,15 +41,20 @@ make_shareable_assets <- \(WD = "?") {
 
   # Make divs for each GP-Cloud image ---------------------------------------
   thumbs <- lapply(1:length(links), \(i) {
-    htmltools::div(style = "display: block;",
-                   htmltools::a(
-                     href = links[i],
-                     htmltools::img(style = "width: 120px; height:auto; max-height:120px; object-fit: contain;", src =
-                                      links[i])
-                   ),
-                   htmltools::a(href = links[i],  htmltools::h3(style = "display:inline;", basename(links[i]))))
+    htmltools::div(
+      style = "display: block;",
+      htmltools::a(
+        href = links[i],
+        htmltools::img(style = "width: 120px; height:auto; max-height:120px; object-fit: contain;", src =
+                         links[i])
+      ),
+      htmltools::a(
+        href = links[i],
+        htmltools::h3(style = "display:inline;", basename(links[i]))
+      )
+    )
   })
-  body0 <- htmltools::tagList(thumbs)
+  gcloud_divs <- htmltools::tagList(thumbs)
 
 
   # Create YT previews for youtube vids attached to unit --------------------
@@ -55,31 +62,80 @@ make_shareable_assets <- \(WD = "?") {
   cache_path <- fs::path(WD_git, "saves", "multimedia.RDS")
 
 
-  # 1. Look for multimedia json if use_cache --------------------------------
-    if (!file.exists(cache_path)) {
-      message("No multimedia info cache found at : ",
-              cache_path)
+  # Look for multimedia cache file
+  if (!file.exists(cache_path)) {
+    message("No multimedia info cache found at : ", cache_path)
+    body <- gcloud_divs
+  } else{
+    mlinks <- readRDS(cache_path)
+    checkmate::assert_data_frame(mlinks)
+    mlinks$isYT <- ifelse(mlinks$type == "video" &
+                            grepl("youtu.be|youtube", mlinks$mainLink),
+                          TRUE,
+                          FALSE)
+    mlinks2 <- mlinks %>% dplyr::filter(.data$isYT)
+
+
+    if (is_empty(mlinks2)) {
+      message("No valid YouTube vids found")
+      body <- gcloud_divs
     } else{
-      mlinks <- readRDS(cache_path)
-      checkmate::assert_data_frame(mlinks)
-      mlinks$isYT <- ifelse(mlinks$type=="video"&grepl("youtu.be|youtube",mlinks$mainLink),TRUE,FALSE)
+      yt_links <- mlinks2$mainLink
+      yt_codes <- stringr::str_extract(yt_links,
+                                       ".*[youtu.be|youtube.com]/([^\\?]*).*",
+                                       group = 1)
+      yt_thumbs <- paste0("https://i3.ytimg.com/vi/", yt_codes, "/hqdefault.jpg")
+
+      # TODO: create taglist with images and links to YT vids -------------------
+      YT_divs <- lapply(1:length(yt_thumbs), \(i) {
+        htmltools::div(
+          style = "display: block;",
+          htmltools::a(
+            href = yt_links[i],
+            htmltools::img(style = "width: 120px; height:auto; max-height:120px; object-fit: contain;", src =
+                             yt_thumbs[i])
+          ),
+          htmltools::a(
+            href = yt_links[i],
+            htmltools::h3(style = "display:inline;", mlinks2$title[i])
+          )
+        )
+      })
+
+      body <- list(
+        htmltools::h2("Google Cloud Links"),
+        gcloud_divs,
+        htmltools::h2("YouTube Links"),
+        YT_divs
+      )
+
     }
-  browser()
-  if(is_empty(mlinks)){
-    message("No valid media found")
+
   }
 
+  head <- htmltools::tagList(
+    htmltools::h4("SHAREABLE ASSETS FOR:"),
+    htmltools::h1(fm$MediumTitle),
+    htmltools::h3(htmltools::a(href = fm$URL, fm$URL)),
+    htmltools::h3(htmltools::a(href = fm$ShortURL,gsub("https://(.*)","\\1",fm$ShortURL))),
 
+  )
+  page <- c(head, body)
 
-    filename <- fs::path(WD,
-                         "assets",
-                         paste0("~Shareable_Assets_", ShortTitle, "_.html"))
-    test_success <- htmltools::save_html(body, filename) %>% catch_err()
+  filename <- fs::path(WD,
+                       "assets",
+                       paste0("~Shareable_Assets_", ShortTitle, ".html"))
+  test_success <- htmltools::save_html(page, filename) %>% catch_err()
 
-    if (test_success) {
-      message("SUCCESS! Shareable Assets Webpage saved to:\n ",
-              filename,
-              "\n")
-    }
-    test_success
+  if (test_success) {
+    message("SUCCESS! Shareable Assets Webpage saved to:\n ",
+            filename,
+            "\n")
   }
+  if (open_file) {
+    utils::browseURL(filename)
+  }
+  test_success
+
+
+}

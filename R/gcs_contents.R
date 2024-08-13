@@ -9,7 +9,7 @@
 #' @family google cloud storage
 #' @export
 
-gcs_contents <- \(WD = NULL,
+gcs_contents <- \(WD = "?",
                    bucket = "gp-cloud",
                    detail="summary",
                   ...) {

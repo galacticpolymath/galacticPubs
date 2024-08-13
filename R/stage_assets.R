@@ -59,7 +59,7 @@ stage_assets <-
     # tolower makes these pattern matches case-insensitive
     if (!is.null(pattern)) {
       to_copy <- to_copy %>%
-        dplyr::filter(grepl(pattern, tolower(.data$name), perl = TRUE))
+        dplyr::filter(grepl(tolower(pattern), tolower(.data$name), perl = TRUE))
     }
 
     if (!is.null(exclude)) {

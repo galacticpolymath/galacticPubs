@@ -4,14 +4,16 @@
 \alias{make_shareable_assets}
 \title{make_shareable_assets}
 \usage{
-make_shareable_assets(WD = "?")
+make_shareable_assets(WD = "?", open_file = TRUE)
 }
 \arguments{
 \item{WD}{"?"}
+
+\item{open_file}{logical; open resulting HTML file? Default=TRUE}
 }
 \value{
 success
 }
 \description{
-Make an HTML file with shareable assets
+Make an HTML file with shareable assets for creating a unit Press Kit for clients
 }

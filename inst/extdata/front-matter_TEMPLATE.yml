@@ -20,9 +20,10 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.6.5
+TemplateVer: 0.6.6
 galacticPubsVer: ''
 URL: ''
+ShortURL: ''
 GdriveHome: 'GP-Studio'
 GdriveDirName: ''
 GdriveTeachMatPath: ''

@@ -91,9 +91,15 @@ upload_assets <- \(WD = "?",
       "SupportingMedia",
       "assets/_other-media-to-publish",
       NA,
-      "help.txt"
-    )
+      "help.txt",
 
+      "9",
+      NA,
+      "assets/_banners_logos_etc",
+      "linkedin",
+      NA
+
+    )
 
 
   # #copy everything except LESSON.json to the cloud
@@ -267,7 +273,7 @@ upload_assets <- \(WD = "?",
 
     #  assign keys with update_fm -----------------------------------------
     #Always go ahead and re-assign. It's instantaneous anyway
-    keys <- unique(out$key)
+    keys <- unique_sans_na(out$key)
 
     fm_update_list <- purrr::set_names(keys) %>%
       purrr::map(., \(x) {
