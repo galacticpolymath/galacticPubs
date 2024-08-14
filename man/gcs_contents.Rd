@@ -4,7 +4,7 @@
 \alias{gcs_contents}
 \title{Get contents of GP Google Cloud Storage bucket}
 \usage{
-gcs_contents(WD = NULL, bucket = "gp-cloud", detail = "summary", ...)
+gcs_contents(WD = "?", bucket = "gp-cloud", detail = "summary", ...)
 }
 \arguments{
 \item{WD}{WD working directory, passed to \code{\link[=parse_wd]{parse_wd()}}. Default=NULL will show all bucket objects. Supplying WD will give you the subset for a given unit.}

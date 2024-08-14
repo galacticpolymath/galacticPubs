@@ -319,6 +319,7 @@ compile_lesson <-
 
     #always rebuild front matter if it's in choices
     if ("Front Matter" %in% choices) {
+      message("• Running compile_fm()")
       compile_fm(WD = WD)
 
     }#End of Front Matter export
@@ -326,22 +327,26 @@ compile_lesson <-
     # Printable Lesson --------------------------------------------------------
 
     if ("Printable Lesson" %in% choices) {
+      message("• Running make_printable()")
       make_printable(WD = WD, rebuild = rebuild)
 
     }
 
 
 # Make Shareable Assets ---------------------------------------------------
+message("• Running make_shareable_assets()")
 make_shareable_assets(WD=WD,open_file = FALSE)
 
 
 
     ################################################################
     # Compile all JSONs ----------------------------------------------
+    message("• Running compile_json()")
     compile_json(WD_git = WD_git)
 
     #after run, reset rebuild-all trigger
     if (rebuild) {
+      message("• Running update_fm()")
       update_fm(WD_git=WD_git,change_this = list(RebuildAllMaterials=FALSE))
 
     }

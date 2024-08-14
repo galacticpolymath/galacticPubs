@@ -10,6 +10,7 @@
 #'
 
 make_shareable_assets <- \(WD = "?", open_file = TRUE) {
+
   WD <- parse_wd(WD)
   fm <- get_fm(WD = WD)
   ShortTitle <- get_fm("ShortTitle", WD = WD)
@@ -26,7 +27,7 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
     grDevices::png(qr_path)
     plot(qrcode::qr_code(unit_url))
     grDevices::dev.off()
-    upload_assets()
+    upload_assets(WD=WD)
     message("QR Code generated for ", unit_name, " at:\n", qr_path, "\n")
   }
 
