@@ -16,7 +16,8 @@ zget_envir <- \(df, fm) {
   #Assessments aren't a real environment; we want to concat this info to the end of lsns for each envir
   if ("assessments" %in% envirs) {
     df_assess <- df %>% dplyr::filter(.data$`_envir` == "assessments",
-                                      .data$`_fileType` != "folder")
+                                      .data$`_fileType` != "folder",
+                                      .data$`_fileType`!="spreadsheet")
     if (!nrow(df_assess) > 0) {
       assess <- list(NULL)
     } else{
@@ -24,7 +25,7 @@ zget_envir <- \(df, fm) {
         lsn = "last",
         title = "Assessments",
         tags = NULL,
-        preface = "",
+        preface = "Editable assessments for evaluating student understanding & STEM identity",
         tile = "https://storage.googleapis.com/gp-cloud/icons/assessment%20icon.png",
         itemList = zget_items(df_assess, fm = fm)
       )
@@ -36,7 +37,7 @@ zget_envir <- \(df, fm) {
   envirs <- envirs[envirs != "assessments"]
   out <- envirs %>%
     purrr::set_names() %>%
-    #map across learning environments (classroom/remote)
+    #map across (non-assessment) learning environments (classroom/remote)
     purrr::map(., \(envir_i) {
       df_i <- df %>%
         dplyr::filter(.data$`_envir` == envir_i |
@@ -212,7 +213,8 @@ zget_items <- \(df, fm) {
 
   #Sort so presentation is first
   df <- df0 %>% dplyr::arrange(!.data$`_fileType` == "presentation",
-                               !.data$`_fileType` == "web resource")
+                               !.data$`_fileType` == "web resource",
+                               !.data$`_fileType` == "form")
   item_counter <- 1:nrow(df)
   status <- fm$PublicationStatus
 
@@ -239,10 +241,13 @@ zget_items <- \(df, fm) {
       grepl("card", df_item_i$`_itemType`) |
       grepl("assess", df_item_i$`_itemType`) |
       grepl("overview", df_item_i$`_itemType`)
-    ) & df_item_i$`_fileType` != "spreadsheet") {
+    ) & df_item_i$`_fileType` != "spreadsheet" &
+       df_item_i$`_fileType` != "form") {
       what_we_want <- "pdf"
     } else if (df_item_i$`_fileType` == "web resource") {
       what_we_want <- "open"
+    } else if (df_item_i$`_fileType` == "form") {
+      what_we_want <- "nothing"
     } else if (df_item_i$`_fileType` == "spreadsheet") {
       what_we_want <- "xlsx"
     } else if (grepl("presentation", df_item_i$`_itemType`)) {
@@ -257,6 +262,7 @@ zget_items <- \(df, fm) {
       "open" = "Open This Link",
       "pdf" = "PDF",
       "xlsx" = "XLSX",
+      "nothing" = "Not exportable",
       "PDF"
     )#default
 
@@ -268,6 +274,8 @@ zget_items <- \(df, fm) {
     cust_url2 <- switch(
       paste(what_we_want, df_item_i$`_fileType`, sep = "-"),
       "present-presentation" = paste0(cust_url, "/present"),
+      #nulls for Forms (no PDF or equivalent export file)
+      "nothing-form"=NA,
       #preview link for Slides presentation
       "pdf-presentation" = paste0(cust_url, "/export/pdf"),
       #pdf link for Slides presentation
@@ -283,7 +291,7 @@ zget_items <- \(df, fm) {
     #Now make custom Drive share links
     drive_share_link <-
       ifelse(
-        df_item_i$`_fileType` %in% c("document", "presentation","spreadsheet"),
+        df_item_i$`_fileType` %in% c("document", "presentation","spreadsheet","form"),
         paste0(cust_url, "/template/preview"),
         cust_url
       )
@@ -293,6 +301,8 @@ zget_items <- \(df, fm) {
       drive_share_link  <- NULL
     } else if (df_item_i$`_fileType` == "spreadsheet") {
       drive_share_txt <- "Preview/Copy in Google Sheets"
+    } else if (df_item_i$`_fileType` == "form") {
+      drive_share_txt <- "Preview/Copy in Google Forms"
     } else{
       drive_share_txt <- "Preview/Copy in Google Docs"
     }

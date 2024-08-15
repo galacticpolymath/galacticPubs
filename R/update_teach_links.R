@@ -29,8 +29,7 @@ update_teach_links <- function(WD = "?",
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
 
-  checkmate::assert(check_wd(WD = WD, throw_error = FALSE),
-                    combine = "and")
+  checkmate::assert(check_wd(WD = WD, throw_error = FALSE), combine = "and")
 
   gID <- get_fm("GdriveDirID", WD = WD)
   meta_id <-
@@ -51,14 +50,25 @@ update_teach_links <- function(WD = "?",
 
   checkmate::assert(
     checkmate::check_character(gID, min.chars = 6),
-    checkmate::check_character(meta_id,  min.chars = 6),
-    checkmate::check_character(proj_dir,  min.chars = 2),
-    checkmate::check_character(tm_dir_id,  min.chars = 6),
+    checkmate::check_character(meta_id, min.chars = 6),
+    checkmate::check_character(proj_dir, min.chars = 2),
+    checkmate::check_character(tm_dir_id, min.chars = 6),
     checkmate::check_character(med_title, min.chars = 2),
     checkmate::check_character(short_title, min.chars = 2),
     checkmate::check_character(GdriveHome, min.chars = 6),
-    checkmate::check_choice(status,
-                           c("Proto","Hidden","Beta","Coming Soon", "Live","Draft","Upcoming")),#draft deprecated
+    checkmate::check_choice(
+      status,
+      c(
+        "Proto",
+        "Hidden",
+        "Beta",
+        "Coming Soon",
+        "Live",
+        "Draft",
+        "Upcoming"
+      )
+    ),
+    #draft deprecated
 
     combine = "and"
   )
@@ -81,9 +91,7 @@ update_teach_links <- function(WD = "?",
   checkmate::assert(fs::is_dir(tm_local), .var.name = "fs::is_dir()")
   save_path <- fs::path(WD_git, "saves", "save-state_teach-it.RDS")
   checkmate::assert_path_for_output(save_path, overwrite = TRUE)
-  teach_it_path <- fs::path(WD,
-                            "meta",
-                            paste_valid("teach-it", short_title), ext = "gsheet")
+  teach_it_path <- fs::path(WD, "meta", paste_valid("teach-it", short_title), ext = "gsheet")
 
   #Find Gdrive web equivalent
   teach_dir <-
@@ -151,7 +159,6 @@ update_teach_links <- function(WD = "?",
         dir_i_files_info <-
           dir_i_files %>% drive_get_info(set_envir = dir_i_info$`_envir`)
       } else{
-
         dir_i_files_info <- NULL
       }
 
@@ -161,9 +168,8 @@ update_teach_links <- function(WD = "?",
       if (nrow(dir_i_subfolders) > 0) {
         dir_i_subfolders_info <-
           lapply(1:nrow(dir_i_subfolders), function(ii) {
-
             out_ii <- update_teach_links_lsnHelper(
-              dribble = dir_i_subfolders[ii,],
+              dribble = dir_i_subfolders[ii, ],
               set_grades = dir_i_info$`_grades`,
               set_envir = envir_type
             )
@@ -174,31 +180,28 @@ update_teach_links <- function(WD = "?",
       }
 
       #make everything as.character to avoid rbind issue, but only if not null
-      if(!is.null(dir_i_info)){
-      dir_i_info <- dir_i_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+      if (!is.null(dir_i_info)) {
+        dir_i_info <- dir_i_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
       }
 
-      if(!is.null(dir_i_files_info)){
-      dir_i_files_info <- dir_i_files_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+      if (!is.null(dir_i_files_info)) {
+        dir_i_files_info <- dir_i_files_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
       }
 
-      if(!is.null(dir_i_subfolders_info)){
-      dir_i_subfolders_info <- dir_i_subfolders_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+      if (!is.null(dir_i_subfolders_info)) {
+        dir_i_subfolders_info <- dir_i_subfolders_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
       }
       #combine all info at this level
-      dir_i_INFO <- dplyr::bind_rows(dir_i_info,
-                                     dir_i_files_info,
-                                     dir_i_subfolders_info)
+      dir_i_INFO <- dplyr::bind_rows(dir_i_info, dir_i_files_info, dir_i_subfolders_info)
     }) %>% dplyr::bind_rows()
 
 
   # Now combine it all for output -------------------------------------------
 
-  teach_dir_info <- teach_dir_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
-  variant_info <- variant_info %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
+  teach_dir_info <- teach_dir_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
+  variant_info <- variant_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
 
-  inferred_teach_it <- dplyr::bind_rows(teach_dir_info,
-                                        variant_info) %>%
+  inferred_teach_it <- dplyr::bind_rows(teach_dir_info, variant_info) %>%
     dplyr::select(-"shortTitle", -"short_title") %>%
     #filter out ignoredinfo
     dplyr::filter(!grepl(ignore, .data$`_filename`)) %>%
@@ -305,8 +308,7 @@ update_teach_links <- function(WD = "?",
       dplyr::pull(.data$f_g_e)
 
 
-    message("No link found for:\n  -",
-            paste0(msg, collapse = "\n  -"))
+    message("No link found for:\n  -", paste0(msg, collapse = "\n  -"))
 
 
     # Remove records with missing links  ----------------------------------
@@ -324,10 +326,12 @@ update_teach_links <- function(WD = "?",
 
 
 
-# Add web resource type for external links --------------------------------
-   teach_it_in <- teach_it_in0
+  # Add web resource type for external links --------------------------------
+  teach_it_in <- teach_it_in0
   #this isn't pretty or tidy, but mutate bullshit failed me (shakes fist at dplyr)
-  teach_it_in$`_fileType`=ifelse(is.na(teach_it_in$`_fileType`),"web resource",teach_it_in$`_fileType`)
+  teach_it_in$`_fileType` = ifelse(is.na(teach_it_in$`_fileType`),
+                                   "web resource",
+                                   teach_it_in$`_fileType`)
 
 
 
@@ -338,7 +342,7 @@ update_teach_links <- function(WD = "?",
     #Do hard_left_join on empty teach_it_in0 to keep .gsheet structure,
     #but none of the data; sort
     test_teach_it_out <-
-      hard_left_join(teach_it_in[-(1:nrow(teach_it_in)),],
+      hard_left_join(teach_it_in[-(1:nrow(teach_it_in)), ],
                      inferred_teach_it,
                      by =
                        "filename",
@@ -426,7 +430,7 @@ update_teach_links <- function(WD = "?",
       dplyr::rowwise() %>%
       dplyr::mutate(LINKS = paste_valid(.data$`_lsn`, .data$`_link`))
 
-   dupLinks <-
+    dupLinks <-
       duplicated(merged2$LINKS) &
       !is.na(merged2$`_link`)
     if (sum(dupLinks) > 0) {
@@ -448,9 +452,7 @@ update_teach_links <- function(WD = "?",
       if (item_i_type == "extLink") {
         out <-  "extLink"
       } else{
-        out <-  switch(status,
-               Live = "GalacticPolymath",
-               GdriveHome)
+        out <-  switch(status, Live = "GalacticPolymath", GdriveHome)
       }
 
     })
@@ -474,24 +476,32 @@ update_teach_links <- function(WD = "?",
       message("Guessing missing titles...")
       merged_teach_it$title[blank_titles] <-
         sapply(blank_titles, function(i) {
-          d_i <- merged_teach_it[i,]
-          test_valid_inferred_info <-
-            sum(!is_empty(d_i$`_SvT`),
-                !is_empty(d_i$`_itemType`),
-                !is_empty(d_i$`_lsn`)) > 1
-          #Only guess title if we have at least 2 bits of inferred info; otherwise put filename as title
-          if (test_valid_inferred_info) {
-            paste_valid(d_i$`_SvT`,
-                        d_i$`_itemType`,
-                        ifelse(
-                          is_empty(d_i$`_lsn`),
-                          "",
-                          paste0("(Lesson ", d_i$`_lsn`, ")")
-                        ),
-                        collapse = " ") %>%
-              stringr::str_to_title()
-          } else{
+          d_i <- merged_teach_it[i, ]
+          #Format titles for assessments
+          if (d_i$`_envir` == "assessments") {
+            #output just the filename for the title
             d_i$`_filename`
+          } else{
+            test_valid_inferred_info <-
+              sum(
+                !is_empty(d_i$`_SvT`),
+                !is_empty(d_i$`_itemType`),
+                !is_empty(d_i$`_lsn`)
+              ) > 1
+            #Only guess title if we have at least 2 bits of inferred info; otherwise put filename as title
+            if (test_valid_inferred_info) {
+              paste_valid(d_i$`_SvT`,
+                          d_i$`_itemType`,
+                          ifelse(
+                            is_empty(d_i$`_lsn`),
+                            "",
+                            paste0("(Lesson ", d_i$`_lsn`, ")")
+                          ),
+                          collapse = " ") %>%
+                stringr::str_to_title()
+            } else{
+              d_i$`_filename`
+            }
           }
         }) %>% unlist()
     }
@@ -504,34 +514,49 @@ update_teach_links <- function(WD = "?",
           merged_teach_it$`_fileType` != "folder" &
           merged_teach_it$`_sharedDrive` != "extLink"
       )
+
+
+
     if (length(blank_descr) > 0) {
       message("Guessing missing descriptions...")
       merged_teach_it$description[blank_descr] <-
         sapply(blank_descr, function(ii) {
-          itemSvT <-
-            paste_valid(merged_teach_it$`_itemType`[ii],
-                        merged_teach_it$`_SvT`[ii],
-                        collapse =
-                          "-")
-          #Default instructions for each type of item
-          switch(
-            itemSvT,
-            "worksheet-teacher" = "Print 1",
-            "worksheet-student" = "Print 1 Per Student",
-            "handout/ card"     = "Print 1 Per Student",
-            "handout/ table" = "Print Classroom Set",
-            "handout/ table student" = "Print Classroom Set",
-            "handout student" = "Print Classroom Set or 1 Per Student",
-            "presentation" = "Need: WiFi, Computer, Projector, Sound",
-            ""
-          )
+          #Default descriptions for assessments
+          if (merged_teach_it[ii, "_envir"] == "assessments") {
+            #Give
+            out <- switch(
+              merged_teach_it$`_fileType`[ii],
+              "document" = "Printable assessment",
+              "form" = "Digital form for pre/post test assessment. See printable teacher version for evaluation guidance.",
+              ""
+            )
+          } else{
+            #Default instructions for other types of items
+            itemSvT <-
+              paste_valid(merged_teach_it$`_itemType`[ii],
+                          merged_teach_it$`_SvT`[ii],
+                          collapse =
+                            "-")
+            out <- switch(
+              itemSvT,
+              "worksheet-teacher" = "Print 1",
+              "worksheet-student" = "Print 1 Per Student",
+              "handout/ card"     = "Print 1 Per Student",
+              "handout/ table" = "Print Classroom Set",
+              "handout/ table student" = "Print Classroom Set",
+              "handout student" = "Print Classroom Set or 1 Per Student",
+              "presentation" = "Need: WiFi, Computer, Projector, Sound",
+              ""
+            )
+          }
+          out
         }) %>% unlist()
     }
 
 
     # Arrange for final export ------------------------------------------------
 
-     merged_teach_it <- merged_teach_it %>%
+    merged_teach_it <- merged_teach_it %>%
       dplyr::arrange(
         !.data$`_itemType` == "teachMatDir",
         .data$`_itemType` != "variantDir",
@@ -555,11 +580,7 @@ update_teach_links <- function(WD = "?",
     # Write new data to TeachMatLinks tab ----------------------------------------
     skip_rows <- 2
     #delete 500 rows of data
-    clear_range <- paste0("A",
-                          1 + skip_rows,
-                          ":",
-                          LETTERS[ncol(merged_teach_it)],
-                          skip_rows + 500)
+    clear_range <- paste0("A", 1 + skip_rows, ":", LETTERS[ncol(merged_teach_it)], skip_rows + 500)
 
     write_range <-
       paste0("A",
@@ -571,9 +592,7 @@ update_teach_links <- function(WD = "?",
 
     #Test success of clearing gsheet before writing new data
     ss_clear_success <-
-      googlesheets4::range_clear(teach_it_drib$id,
-                                 sheet = "TeachMatLinks",
-                                 range = clear_range) %>% catch_err()
+      googlesheets4::range_clear(teach_it_drib$id, sheet = "TeachMatLinks", range = clear_range) %>% catch_err()
     if (!ss_clear_success) {
       warning("teach-it.gsheet not cleared successfully")
     }
