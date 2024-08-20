@@ -421,7 +421,6 @@ update_teach_links <- function(WD = "?",
 
 
 
-
     # Check for duplicated links ----------------------------------------
     # This should only trigger if rm_missing==F, because otherwise should be filtered out
 
@@ -443,7 +442,9 @@ update_teach_links <- function(WD = "?",
     }
 
 
-    # assign sharedDrive values for where files are found -----------------
+    # assign sharedDrive values for where files are found
+    # #this logic is stupid and incorrect Meganaut
+    # live status no longer related to drive loc -----------------
     sharedDrive_vec <- sapply(1:nrow(merged_teach_it), \(i) {
       item_i <- merged_teach_it[i, ]
       item_i_type <-

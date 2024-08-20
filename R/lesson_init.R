@@ -4,14 +4,21 @@
 #'
 #' Will fail if ShortTitle duplicates an existing name found in GP-Studio or GP-Live
 #'
+#' @param recover logical; do you want to try to finish initializing a unit that didn't complete due to some error? default=FALSE
+#' @param WD working directory, passed to [parse_wd()]; default="?"; only used if recover=T
+#'
 #' @export
 #'
 
-lesson_init <- \() {
+lesson_init <- \(recover=FALSE,WD="?") {
 
   # Get details for new lesson with helper shiny app ------------------------
+  if(!recover){
   inputs <- lesson_init_helper()
   checkmate::assert_list(inputs, all.missing = FALSE)
+  }else{
+  inputs <- get_fm(WD=WD)
+  }
 
   #add locale to inputs
   inputs2 <- parse_locale(inputs)
@@ -39,16 +46,22 @@ lesson_init <- \() {
                                      access = "w",
                                      .var.name = "GP-Studio/Edu/Lessons")
 
-  #Test for name redundancy
+  #Test for name redundancy if not recovering
+  if(!recover){
   existing_units <- list.files(gp_lessons_dir)
   is_unique <- !unit_name %in% existing_units
   checkmate::assert_true(is_unique, .var.name = "Unique Unit/lesson name. Cannot match existing 'gp-lessons' project.")
+
+  }
 
   #Test that this project doesn't already exist on GP-Studio
   WD <- fs::path(studio_lessons_dir, unit_name)
   WD_exists <- checkmate::test_directory_exists(WD)
 
-  checkmate::assert_false(WD_exists, .var.name = "Project Already Exists on GP-Studio!")
+  if(WD_exists){
+    message("Unit '",unit_name,"' Already exists in on GP-Studio/Edu/Lessons")
+  }
+
 
 
 
@@ -80,11 +93,11 @@ lesson_init <- \() {
     fs::path(WD, "teaching-materials", teach_mat_envir_dirs)
 
   #Add Subfolders with Lx if we've specified more than 1 lesson in this unit
-  if (inputs$n_lessons > 1) {
+  if (inputs$LsnCount > 1) {
     #everything will write recursively, so we only have to specify the most specific paths,
     #intermediate folders will be created automatically
     teach_dirs <-
-      sapply(1:inputs$n_lessons, \(i) {
+      sapply(1:inputs$LsnCount, \(i) {
         fs::path(teach_mat_dir, paste0("L", i))
       })
   } else{
@@ -146,7 +159,12 @@ lesson_init <- \() {
   }
 
   # Initialize the meta template files --------------------------------------
-  if (inputs$bool_init_meta) {
+  if(recover){
+    inputs$bool_init_meta <- inputs$bool_teach<- inputs$bool_pres <- TRUE
+  }
+
+  # use identical to be more resilient to missing
+  if (identical(TRUE,inputs$bool_init_meta)) {
     init_lesson_meta_success <- init_lesson_meta(WD = WD)
   } else{
     init_lesson_meta_success = NA
@@ -155,17 +173,18 @@ lesson_init <- \() {
 
   # Handle copying of teach-mat templates -----------------------------------
   #only if there's more than 0 lessons and templates requested
-  if (inputs$n_lessons > 0 &
-      (inputs$bool_teach | inputs$bool_pres)) {
+
+  if (identical(TRUE,inputs$LsnCount > 0 &
+      (inputs$bool_teach | inputs$bool_pres) )) {
     #resolve template dribbles as needed
     if (inputs$bool_teach) {
       teach_template <-
-        drive_find_path("GP-Studio/Templates_BE_CAREFUL/worksheet template (TEACHER)")
+        drive_find_path("1JeUM7ekUHGgAP3wUH6rGHjqBJS7aw0JcIzlPCFy9HIY")
     }
 
     if (inputs$bool_pres) {
       pres_template <-
-        drive_find_path("GP-Studio/Templates_BE_CAREFUL/Presentation Template")
+        drive_find_path("10ReeG6K02W0GrLjklrNy7g5TNWX0suxqO54Vofi-SwQ")
     }
 
     #get GdriveID for teaching-material gdrive folder

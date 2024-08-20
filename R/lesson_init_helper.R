@@ -4,7 +4,7 @@
 #' - ShortName
 #' - Language
 #' - Country
-#' - N_lessons
+#' - LsnCount
 #'
 #' Selections are passed to the global environment and interpreted by [lesson_init()]
 #'

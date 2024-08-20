@@ -27,9 +27,10 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
     grDevices::png(qr_path)
     plot(qrcode::qr_code(unit_url))
     grDevices::dev.off()
-    upload_assets(WD=WD)
     message("QR Code generated for ", unit_name, " at:\n", qr_path, "\n")
   }
+  #make sure we have updated assets online
+  upload_assets(WD=WD)
 
 
   cloud_assets <- gcs_contents(WD = WD) %>%

@@ -5,9 +5,14 @@
 \alias{init_lesson}
 \title{lesson_init}
 \usage{
-lesson_init()
+lesson_init(recover = FALSE, WD = "?")
 
-init_lesson()
+init_lesson(recover = FALSE, WD = "?")
+}
+\arguments{
+\item{recover}{logical; do you want to try to finish initializing a unit that didn't complete due to some error? default=FALSE}
+
+\item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}}; default="?"; only used if recover=T}
 }
 \description{
 Set up a new Galactic Polymath lesson or mini-unit project folder. Create folder structure in 'GP-Studio'/Edu/Lessons Google Shared Drive and add meta/files

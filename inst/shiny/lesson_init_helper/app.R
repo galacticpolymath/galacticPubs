@@ -65,7 +65,7 @@ ui <- fluidPage(
     width = 250
   ),
   numericInput(
-    "n_lessons",
+    "LsnCount",
     "Number of Lessons",
     value = 0,
     min = 0,
@@ -110,7 +110,7 @@ server <- function(input, output) {
       max_grade = input$max_grade,
       GradesOrYears = input$GradesOrYears,
       LessonEnvir = input$LessonEnvir,
-      n_lessons = input$n_lessons,
+      LsnCount = input$LsnCount,
       bool_init_meta = input$bool_init_meta,
       bool_pres = input$bool_pres,
       bool_teach = input$bool_teach

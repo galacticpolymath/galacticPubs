@@ -14,13 +14,14 @@ LastUpdated: ''
 ReleaseDate: '2050-01-01'
 isTestRepo: false
 FirstPublicationDate: ''
+LsnCount: ''
 LsnStatuses: ''
 MediumTitle: '' # Format: Title + _Subj_ + _Gx-y_+ (Locale)
 lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.6.6
+TemplateVer: 0.6.7
 galacticPubsVer: ''
 URL: ''
 ShortURL: ''

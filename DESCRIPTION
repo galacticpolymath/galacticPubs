@@ -6,7 +6,7 @@ Author: Matthew R Wilkins, PhD
 Maintainer: Matthew R Wilkins, PhD <matt@galacticpolymath.com>
 Description: Code to enable the GP Nexus education publishing workflow. Outputs are highly structured
              JSON files and custom graphics for visualizing knowledge transferred in lessons. Also includes
-             a Shiny app editor for interfacing with various working documents, previewing lesson plans,
+             a Shiny app editor for interfacing with various working documents, previewing unit plans,
              and staging for publication.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8

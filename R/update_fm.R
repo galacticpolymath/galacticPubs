@@ -27,12 +27,18 @@ update_fm <-
            drive_reconnect = FALSE,
            try_harder = FALSE,
            recompile = TRUE) {
-    if(!is.null(WD_git)){
-      fm <- get_fm(WD_git=WD_git)
-      WD <- fs::path(path_parent_dir(get_lessons_path(),3),fm$GdriveHome,"Edu","Lessons",basename(WD_git))
+    if (!is.null(WD_git)) {
+      fm <- get_fm(WD_git = WD_git)
+      WD <- fs::path(
+        path_parent_dir(get_lessons_path(), 3),
+        fm$GdriveHome,
+        "Edu",
+        "Lessons",
+        basename(WD_git)
+      )
       checkmate::assert_directory_exists(WD)
-    }else{
-    WD <- parse_wd(WD)
+    } else{
+      WD <- parse_wd(WD)
     }
     . = NULL
 
@@ -51,20 +57,17 @@ update_fm <-
 
     #safe_read_yaml will create yaml if it's missing
     old_yaml <-
-      get_fm(WD = WD,
-             checkWD = FALSE)
+      get_fm(WD = WD, checkWD = FALSE)
+
 
     galacticPubs_template <-
       get_fm(
-        yaml_path = system.file("extdata",
-                                "front-matter_TEMPLATE.yml",
-                                package = "galacticPubs"),
+        yaml_path = system.file("extdata", "front-matter_TEMPLATE.yml", package = "galacticPubs"),
         checkWD = FALSE
       )
 
     new_yaml <-
       add_missing_fields(old_yaml, galacticPubs_template, reorder = reorder)
-
     new_yaml$GdriveDirName <- basename(WD)
 
 
@@ -79,6 +82,22 @@ update_fm <-
     if ("UniqueID" %in% names(old_yaml)) {
       new_yaml$`_id` <- old_yaml$UniqueID
     }
+
+    if (is_empty(new_yaml$LsnCount)) {
+      new_yaml$LsnCount <- gsub("[^\\d]?(\\d*).*", "\\1", new_yaml$EstLessonTime)
+    }
+
+
+   #add NAs for new keys that aren't present in old_yaml
+
+    new_names_indx <- which(!names(new_yaml) %in% names(old_yaml))
+    if (length(new_names_indx) > 0) {
+      new_names <- names(new_yaml)[new_names_indx]
+      blank_entries <- lapply(new_names, \(x) x = NA)
+      names(blank_entries) <- new_names
+      old_yaml <- c(old_yaml, blank_entries)
+    }
+
 
 
     # change_this: Make manual changes if requested ----------------------------------------
@@ -120,6 +139,7 @@ update_fm <-
         }
       }
 
+      #If
 
       if (sum(test_changes, na.rm = T) > 0) {
         # Set up output of changes
@@ -189,29 +209,31 @@ update_fm <-
     new_yaml <- new_yaml %>% parse_locale()
 
     #Add URL for this locale
-    if(is_empty(new_yaml$URL) | is_empty(new_yaml$ShortURL)){
-    new_yaml$URL <-
-      paste0(
-        c(
-          "https://www.galacticpolymath.com/lessons",
-          new_yaml$locale,
-          new_yaml$numID
-        ),
-        collapse = "/"
-      )
+    if (is_empty(new_yaml$URL) | is_empty(new_yaml$ShortURL)) {
+      new_yaml$URL <-
+        paste0(
+          c(
+            "https://www.galacticpolymath.com/lessons",
+            new_yaml$locale,
+            new_yaml$numID
+          ),
+          collapse = "/"
+        )
 
-    #Add bitly (short URL)
-      test_assign <- urlshorteneR::bitly_create_bitlink(
-        long_url = utils::URLencode(new_yaml$URL),
-        title=new_yaml$MediumTitle
-      ) %>% catch_err(keep_results = TRUE)
+      #Add bitly (short URL)
+      test_assign <- urlshorteneR::bitly_create_bitlink(long_url = utils::URLencode(new_yaml$URL),
+                                                        title = new_yaml$MediumTitle) %>% catch_err(keep_results = TRUE)
 
-      if(test_assign$success){
-        message("Bit.ly created for this unit:\n @",test_assign$result$link[1])
+      if (test_assign$success) {
+        message("Bit.ly created for this unit:\n @",
+                test_assign$result$link[1])
 
-        new_yaml$ShortURL <-test_assign$result$link[1]
-      }else{
-        message("Bit.ly creation failed for ",new_yaml$MediumTitle,":\n @",new_yaml$URL)
+        new_yaml$ShortURL <- test_assign$result$link[1]
+      } else{
+        message("Bit.ly creation failed for ",
+                new_yaml$MediumTitle,
+                ":\n @",
+                new_yaml$URL)
       }
 
     }
@@ -244,9 +266,7 @@ update_fm <-
         "",
         paste0(substr(new_yaml$GradesOrYears, 1, 1), new_yaml$ForGrades, " ")
       ),
-      paste0("(",
-             new_yaml$locale,
-             ")"),
+      paste0("(", new_yaml$locale, ")"),
       collapse = ""
     )
 
@@ -266,7 +286,8 @@ update_fm <-
     )
     checkmate::assert_choice(
       new_yaml$PublicationStatus,
-      choices = c("Proto","Hidden","Beta","Coming Soon", "Live","Draft"),#draft deprecated
+      choices = c("Proto", "Hidden", "Beta", "Coming Soon", "Live", "Draft"),
+      #draft deprecated
       .var.name = "front-matter.yml: PublicationStatus"
     )
 
