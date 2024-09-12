@@ -8,11 +8,11 @@ gp_footer(
   obj,
   caption,
   x = 0.01,
-  y = 0.0275,
-  text_size = 7,
+  y = 0.05,
+  text_size = 9,
   text_col = "#363636",
   data_attrib = NULL,
-  data_attrib_scale = 0.6,
+  data_attrib_scale = 0.9,
   logo = "black",
   fill_col = gpColors("sparkle")
 )
@@ -22,13 +22,13 @@ gp_footer(
 
 \item{caption}{plot caption}
 
-\item{x}{x coord}
+\item{x}{x how much to inset caption as a fraction; default=0.01}
 
-\item{y}{y coord}
+\item{y}{y height of box as a fraction; default=0.08;}
 
 \item{text_size}{text size; default=9;}
 
-\item{data_attrib}{concise citation for data source (will be smaller font)}
+\item{data_attrib}{concise citation for data source (will be smaller font and follow "Data: ")}
 
 \item{data_attrib_scale}{default=0.6 from 0 to 1, how much smaller to scale attribution text?}
 

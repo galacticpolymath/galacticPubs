@@ -6,10 +6,13 @@
 \usage{
 gpsave(
   filename,
+  obj = ggplot2::last_plot(),
   WD = "?",
   width = 7,
-  height = 3.94,
+  height = NULL,
+  aspect = 16/9,
   dpi = 300,
+  open = FALSE,
   bg = "transparent",
   ...
 )
@@ -17,13 +20,19 @@ gpsave(
 \arguments{
 \item{filename}{expects filename, with file extension (e.g. "plot.png"); can also include subfolder (e.g. "newfolder/plot.png")}
 
+\item{obj}{ggplot or grid object; default= ggplot2::last_plot()}
+
 \item{WD}{working directory; default="?" or a unit picker dialog}
 
 \item{width}{plot width in inches (default= 7)}
 
-\item{height}{plot height in inches (default= 3.94, i.e. 16:9 aspect ratio)}
+\item{height}{plot height in inches default= NULL will calculate from aspect}
+
+\item{aspect}{ratio of width to height; default= 16/9; aspect is ignored if width and height are supplied}
 
 \item{dpi}{dots per inch resolution (default= 300); note changing this will unfortunately also change the output relative text size}
+
+\item{open}{logical; open file after save? default=FALSE}
 
 \item{bg}{background color (default= "transparent")}
 
