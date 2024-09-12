@@ -19,10 +19,10 @@ gp_footer <-
   function(obj,
            caption,
            x = 0.01,
-           y = 0.08,
-           text_size = 8,
+           y = 0.05,
+           text_size = 9,
            text_col = "#363636",
-           data_attrib= NULL,
+           data_attrib = NULL,
            data_attrib_scale = 0.9,
            logo = "black",
            fill_col = gpColors("sparkle")) {
@@ -34,49 +34,59 @@ gp_footer <-
     logo_png <-
       png::readPNG(RCurl::getURLContent(logo_url), native = T)
 
-    #Make background for plot
-    grid::grid.rect(
-      x = .5,
-      y = 0,
-      width = 1,
-      height = y,
-      just = "bottom",
-      gp = grid::gpar(fill = fill_col)
-    ) #"#090816"
 
-    # grid::grid.lines(
-    #   x = c(0, 1),
-    #   y = c(.06, .06),
-    #   gp = grid::gpar(col = "white")
-    # )
-    if (!is.null(caption)) {
-      grid::grid.text(
-        label = caption,
-        x = x,
-        y = y/2,
-        just = c( "left","center"),
-        gp = grid::gpar(col = text_col, fontsize = text_size,
-                          font=2)
+    # Capture all output ------------------------------------------------------
+    G <- grid::grid.grabExpr({
+      ###Plot background object
+      grid::grid.draw(obj)
+
+      #Make background for plot
+      grid::grid.rect(
+        x = .5,
+        y = 0,
+        width = 1,
+        height = y,
+        just = "bottom",
+        gp = grid::gpar(fill = fill_col)
+      ) #"#090816"
+
+      # grid::grid.lines(
+      #   x = c(0, 1),
+      #   y = c(.06, .06),
+      #   gp = grid::gpar(col = "white")
+      # )
+      if (!is.null(caption)) {
+        grid::grid.text(
+          label = caption,
+          x = x,
+          y = y / 2,
+          just = c("left", "center"),
+          gp = grid::gpar(
+            col = text_col,
+            fontsize = text_size,
+            font = 2
+          )
+        )
+      }
+
+      if (!is.null(data_attrib)) {
+        grid::grid.text(
+          label = paste0("Data: ", data_attrib),
+          x = 0.75,
+          y = y / 2,
+          just = c("right", "center"),
+          gp = grid::gpar(col = text_col, fontsize = text_size * data_attrib_scale)
+        )
+      }
+
+      grid::grid.raster(
+        logo_png,
+        x = grid::unit(0.98, "npc"),
+        y = grid::unit(y / 2, "npc"),
+        height = grid::unit(y * 0.6, "npc"),
+        just = c("right", "center")
       )
-    }
+    })
+    G
 
-    if (!is.null(data_attrib)) {
-
-      grid::grid.text(
-        label = paste0("Data: ",data_attrib),
-        x = 0.75,
-        y = y/2,
-        just = c("right","center"),
-        gp = grid::gpar(col = text_col,
-                        fontsize = text_size* data_attrib_scale)
-      )
-    }
-
-    grid::grid.raster(
-      logo_png,
-      x = grid::unit(0.98, "npc"),
-      y = grid::unit(y/2, "npc"),
-      height = grid::unit(y*0.7, "npc"),
-      just = c("right", "center")
-    )
   }
