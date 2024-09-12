@@ -122,28 +122,6 @@ if(test_git_gp_lessons_dir){
   } else{
     message("\nGoogle Drive For Desktop Virtualized Lessons Path(s) set for next time: \n ")
 
-    catalog_dir <-
-      fs::path(
-        fs::path_home(),
-        "Library",
-        "CloudStorage",
-        gdrive_userdir,
-        "Shared drives",
-        "GP-Misc",
-        "GitHub_Meta-Projects",
-        "gp-catalog"
-      )
-    test_catalog_dir <- file.exists(catalog_dir)
-    if (!test_catalog_dir) {
-      warning("Catalog not found. Make sure you have access to 'GP-Misc' Drive.\n -",
-              catalog_dir)
-      catalog_dir <- NA
-    } else{
-      message(
-        "\nGoogle Drive for Desktop Virtualized GP Catalog Path set for next time: \n -",
-        catalog_dir
-      )
-    }
 
     if (!test_dev_dir) {
       message(
@@ -163,7 +141,7 @@ if(test_git_gp_lessons_dir){
     Sys.setenv(
       galacticPubs_gdrive_galacticpolymath_lessons_dir = ifelse(!test_galacticpolymath_lessons_dir, NA, galacticpolymath_lessons_dir)
     )
-    Sys.setenv(galacticPubs_gdrive_catalog_dir = ifelse(!test_catalog_dir, NA, catalog_dir))
+
 
     Sys.setenv(galacticPubs_gdrive_dev_dir = ifelse(!test_dev_dir, NA, dev_dir))
 
@@ -203,7 +181,6 @@ if(test_git_gp_lessons_dir){
           test_studio_lessons_dir,
           test_live_lessons_dir,
           test_galacticpolymath_lessons_dir,
-          test_catalog_dir,
           test_auth_file
         )
       ),
@@ -215,7 +192,6 @@ if(test_git_gp_lessons_dir){
         "galacticPubs_gdrive_studio_lessons_dir",
         "galacticPubs_gdrive_live_lessons_dir",
         "galacticPubs_gdrive_galacticpolymath_lessons_dir",
-        "galacticPubs_gdrive_catalog_dir",
         "GCS_AUTH_FILE"
       ),
       Value = c(
@@ -226,7 +202,6 @@ if(test_git_gp_lessons_dir){
         studio_lessons_dir,
         live_lessons_dir,
         galacticpolymath_lessons_dir,
-        catalog_dir,
         auth_file
       )
     )

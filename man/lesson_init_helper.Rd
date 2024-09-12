@@ -12,7 +12,7 @@ Lets you set the following values for your lesson:
 \item ShortName
 \item Language
 \item Country
-\item N_lessons
+\item LsnCount
 }
 }
 \details{

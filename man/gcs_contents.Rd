@@ -4,12 +4,25 @@
 \alias{gcs_contents}
 \title{Get contents of GP Google Cloud Storage bucket}
 \usage{
-gcs_contents(WD = "?", bucket = "gp-cloud", detail = "summary", ...)
+gcs_contents(
+  WD = "?",
+  cloud_dir = NULL,
+  bucket = "gp-cloud",
+  detail = "summary",
+  pattern = NULL,
+  ...
+)
 }
 \arguments{
-\item{WD}{WD working directory, passed to \code{\link[=parse_wd]{parse_wd()}}. Default=NULL will show all bucket objects. Supplying WD will give you the subset for a given unit.}
+\item{WD}{WD working directory, passed to \code{\link[=parse_wd]{parse_wd()}}. Default="?" will pick unit. Supplying WD will give you the subset for a given unit.}
+
+\item{cloud_dir}{default=NULL; which directory in the chosen bucket do you want to list? Options= "css","icons","lessons","logos","people"}
+
+\item{bucket}{default="GP-Studio"; which bucket do you want to pick?}
 
 \item{detail}{the detail parameter for \code{\link[googleCloudStorageR:gcs_list_objects]{googleCloudStorageR::gcs_list_objects()}}; options= c("summary", "more", "full"); default="more"}
+
+\item{pattern}{default=NULL; pattern for filtering rows}
 
 \item{...}{other parameters passed to \code{\link[googleCloudStorageR:gcs_list_objects]{googleCloudStorageR::gcs_list_objects()}}}
 }

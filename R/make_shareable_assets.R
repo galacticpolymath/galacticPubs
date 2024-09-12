@@ -82,9 +82,10 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
       message("No valid YouTube vids found")
       body <- gcloud_divs
     } else{
+
       yt_links <- mlinks2$mainLink
       yt_codes <- stringr::str_extract(yt_links,
-                                       ".*[youtu.be|youtube.com]/([^\\?]*).*",
+                                       ".*[youtu.be|youtube.com]\\/s?h?o?r?t?s?\\/?([^\\?]*).*",
                                        group = 1)
       yt_thumbs <- paste0("https://i3.ytimg.com/vi/", yt_codes, "/hqdefault.jpg")
 

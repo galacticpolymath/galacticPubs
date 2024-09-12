@@ -5,44 +5,43 @@
 #' 2. clone a lesson found on GitHub
 #' 3. fill in missing files in the Google Drive folder
 #'
-#' @param gh_proj_name the name of the project as it is on GitHub and Google Drive
+#' @param WD the name of the project as it is on GitHub and Google Drive
 #' @param new_proj_name the name of the new locale variant you want to create. Default=NULL will launch a locale picker app.
-#' @param repair logical; if you had failures during initial locale cloning, should we try to do the steps that failed? i.e. will skip cloning
+#' @param repair logical; if you had failures during initial locale cloning, should we try to do the steps that failed?
 #' @returns summary tibble
 #' @export
 
 lesson_new_locale <-
-  function(gh_proj_name,
+  function(WD="?",
            new_proj_name = NULL,
            repair = FALSE) {
     # 1. SETUP ----------------------------------------------------------------
     skip <- NULL
-    lessons_dir <- lessons_get_path()
+    #get path to lessons on Shared Drive
+    lessons_dir <- lessons_get_path("s")
 
-    if (missing(gh_proj_name)) {
-      gh_proj_name <- pick_lesson(full_path = FALSE)
-    }
+
+    WD <- parse_wd("WD")
+    ShortTitle <- get_fm("ShortTitle",WD=WD)
 
     if (!is.null(new_proj_name) & repair) {
       new_proj_path <- fs::path(lessons_dir, new_proj_name)
-      gh_proj_path <- fs::path(lessons_dir, gh_proj_name)
       already_exists <- file.exists(new_proj_path)
       if (already_exists) {
-        skip <- c("user_prompt", "cloning", "gh_push_forked_repo")
-        y<-get_fm(gh_proj_path)
-        ShortTitle <- y$ShortTitle
-        locale<-y$locale
-        Language<-y$Language
-        lang<-y$lang
-        lng<-y$lng
-        Country<-y$Country
+        skip <- c("user_prompt")
+        fm<-get_fm(gh_proj_path)
+        ShortTitle <- fm$ShortTitle
+        locale<-fm$locale
+        Language<-fm$Language
+        lang<-fm$lang
+        lng<-fm$lng
+        Country<-fm$Country
         continue <- choice <- NA
       }
     }
 
     if (!"user_prompt" %in% skip) {
-      #Extract base name info w/o locale
-      ShortTitle <- gsub("^(.*)_[^_]*$" , "\\1", gh_proj_name)
+
       message(
         "-----------------------------\n",
         "Do you want to use this ShortTitle for new lesson?\n -",
@@ -82,7 +81,7 @@ lesson_new_locale <-
         message(
           "-----------------------------\n",
           "Create new locale version of '",
-          gh_proj_name,
+          WD,
           "' called '",
           new_proj_name,
           "'?"
@@ -103,7 +102,7 @@ lesson_new_locale <-
         } else{
           gh_proj_url <-
             paste0("https://github.com/galacticpolymath/",
-                   gh_proj_name)
+                   WD)
           new_proj_path <- fs::path(lessons_dir, new_proj_name)
           #test if new_proj_path already exists
           if (file.exists(new_proj_path)) {
@@ -125,11 +124,16 @@ lesson_new_locale <-
           test_update_fm <-
             test_copy_missing <- test_renaming <- test_push <- NA
         } else{
+          #NEW logic should
+          #test if new_fm and template_fm numID are the same, otherwise set:
+          # numID <- `_id` <- NA and run update_fm()
+
+          #OLD logic
           #Not adding repair logic b/c this should be the same if you do it again.
 
           #Get UniqueID from cloned lesson
           old_UI <-
-            get_fm(fs::path(lessons_dir, gh_proj_name), "UniqueID")$UniqueID
+            get_fm(fs::path(lessons_dir, WD), "UniqueID")$UniqueID
 
           old_UI_split <- strsplit(old_UI, "_", fixed = T)[[1]]
           new_UI <-
@@ -169,7 +173,7 @@ lesson_new_locale <-
           } else {
             #only go on if front-matter updated
             test_copy_missing <- drive_copy_missing_files(
-              from_dir = fs::path(lessons_get_path(), gh_proj_name),
+              from_dir = fs::path(lessons_get_path(), WD),
               to_dir = fs::path(lessons_get_path(), new_proj_name),
               try_harder = TRUE
             ) %>% catch_err()
@@ -215,8 +219,8 @@ lesson_new_locale <-
                 )
                 test_push <- NA
               }
-              test_push <-
-                gh_push_forked_repo(WD = new_proj_path) %>% catch_err()
+              # test_push <-
+                # gh_push_forked_repo(WD = new_proj_path) %>% catch_err()
             }#end Renaming & Push
           }#end Copy missing files
         }#end update front-matter
@@ -244,7 +248,7 @@ lesson_new_locale <-
       " ",
       convert_T_to_check(test_cloning),
       "  Cloned '",
-      gh_proj_name,
+      WD,
       "' as '",
       new_proj_name,
       "'\n",

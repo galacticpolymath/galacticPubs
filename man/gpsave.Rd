@@ -4,10 +4,20 @@
 \alias{gpsave}
 \title{gpsave}
 \usage{
-gpsave(filename, width = 7, height = 3.94, dpi = 300, bg = "transparent", ...)
+gpsave(
+  filename,
+  WD = "?",
+  width = 7,
+  height = 3.94,
+  dpi = 300,
+  bg = "transparent",
+  ...
+)
 }
 \arguments{
 \item{filename}{expects filename, with file extension (e.g. "plot.png"); can also include subfolder (e.g. "newfolder/plot.png")}
+
+\item{WD}{working directory; default="?" or a unit picker dialog}
 
 \item{width}{plot width in inches (default= 7)}
 
@@ -23,5 +33,5 @@ gpsave(filename, width = 7, height = 3.94, dpi = 300, bg = "transparent", ...)
 Wrapper for \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}} with galacticPubs defaults
 }
 \details{
-Most important thing it does is default to saving in the assets/_R_outputs/ folder and save with reasonable dimensions that maintain large, readable text size of graph labels
+Most important thing it does is default to saving in the assets/_R_outputs/ folder in the unit working directory and save with reasonable dimensions that maintain large, readable text size of graph labels
 }
