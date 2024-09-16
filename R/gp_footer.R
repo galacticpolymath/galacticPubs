@@ -12,6 +12,7 @@
 #' @param data_attrib_scale default=0.6 from 0 to 1, how much smaller to scale attribution text?
 #' @param logo default="black"; which GP logo do you want to use?
 #' @param fill_col fill color for caption at bottom; default is gpColors("sparkle white")
+#' @param show_plot logical; plot resulting figure? default=T
 #'
 #' @export
 
@@ -25,7 +26,8 @@ gp_footer <-
            data_attrib = NULL,
            data_attrib_scale = 0.9,
            logo = "black",
-           fill_col = gpColors("sparkle")) {
+           fill_col = gpColors("sparkle"),
+           show_plot=TRUE) {
     checkmate::assert_choice(logo, "black")
 
     logo_fullname = switch(logo, black = "GP_horiz_logo+wordmark_black.png")
@@ -87,6 +89,9 @@ gp_footer <-
         just = c("right", "center")
       )
     })
+    if(show_plot){
+    grid::grid.draw(G)
+    }
     G
 
   }
