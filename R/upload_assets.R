@@ -22,6 +22,7 @@ upload_assets <- \(WD = "?",
                    bucket = "gp-cloud",
                    clear = FALSE) {
   WD <- parse_wd(WD)
+
   test_init <- init_gcs(bucket = bucket)
   checkmate::assert_true(test_init, .var.name = "GCS cloud connection initialized")
 
@@ -54,7 +55,7 @@ upload_assets <- \(WD = "?",
       "2",
       "LessonBanner",
       "assets/_banners_logos_etc",
-      paste0("(?!old)_?[Bb]anner[^\\.]*",img_patt,collapse="|"),
+      paste0("(?!old)_?[Bb]anner[^\\.]*[^OLD|old]",img_patt,collapse="|"),
       "help.txt",
 
       "3",
@@ -181,7 +182,10 @@ upload_assets <- \(WD = "?",
   } else{
     # DELETE STUFF ------------------------------------------------------------
     # See what's already in the cloud
-    uploaded <- gcs_contents(WD = WD, detail = "more")
+    upload_try <- gcs_contents(WD = WD, detail = "more") %>% catch_err(keep_results = TRUE)
+    if(upload_try$success){
+      uploaded <- upload_try$result
+    }else{uploaded <- NA}
     if (!is_empty(uploaded)) {
 
       if (clear) {
@@ -210,7 +214,7 @@ upload_assets <- \(WD = "?",
 
 
 
-    if (nrow(uploaded) == 0) {
+    if (is_empty(uploaded)) {
       to_upload <- assets
 
     } else{
