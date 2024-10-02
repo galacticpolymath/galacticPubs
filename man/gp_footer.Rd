@@ -14,7 +14,8 @@ gp_footer(
   data_attrib = NULL,
   data_attrib_scale = 0.9,
   logo = "black",
-  fill_col = gpColors("sparkle")
+  fill_col = gpColors("sparkle"),
+  show_plot = TRUE
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ gp_footer(
 \item{logo}{default="black"; which GP logo do you want to use?}
 
 \item{fill_col}{fill color for caption at bottom; default is gpColors("sparkle white")}
+
+\item{show_plot}{logical; plot resulting figure? default=T}
 
 \item{text_color}{text color; default="#363636" aka Galactic Black}
 }

@@ -1,6 +1,6 @@
 #' copy_updated_files
 #'
-#' Copy files to destination only if the file is missing or out of date at the destination
+#' Copy files to destination only if the file is missing or out of date at the destination. Mainly a helper for [stage_assets()]. Not well-designed for general use.
 #'
 #' @param paths vector of file paths you want to check and/or copy
 #' @param dest_folder directory where you want files to be transferred

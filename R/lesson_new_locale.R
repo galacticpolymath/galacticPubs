@@ -21,7 +21,7 @@ lesson_new_locale <-
     lessons_dir <- lessons_get_path("s")
 
 
-    WD <- parse_wd("WD")
+    WD <- parse_wd(WD)
     ShortTitle <- get_fm("ShortTitle",WD=WD)
 
     if (!is.null(new_proj_name) & repair) {
@@ -29,7 +29,7 @@ lesson_new_locale <-
       already_exists <- file.exists(new_proj_path)
       if (already_exists) {
         skip <- c("user_prompt")
-        fm<-get_fm(gh_proj_path)
+        fm<-get_fm(WD=WD)
         ShortTitle <- fm$ShortTitle
         locale<-fm$locale
         Language<-fm$Language
@@ -95,24 +95,28 @@ lesson_new_locale <-
           test_update_fm <-
           test_copy_missing <- test_renaming <- test_push <- NA
       } else{
-        # 2.  Clone existing lesson -----------------------------------------------
+        # 2.  Cloning: copy folder on local file system with GDrive for desktop----------------
         if ("cloning" %in% skip) {
           message("\nSkip cloning for existing repo")
           test_cloning <- NA
         } else{
-          gh_proj_url <-
-            paste0("https://github.com/galacticpolymath/",
-                   WD)
+          browser()
+
           new_proj_path <- fs::path(lessons_dir, new_proj_name)
           #test if new_proj_path already exists
           if (file.exists(new_proj_path)) {
+            if(!repair){
             warning("Locale already exists:'",
                     new_proj_name,
                     "'! Canceling.")
             test_cloning <- FALSE
+            }else{
+              message("\nTrying to repair existing project: ",new_proj_path,"\n")
+            }
           } else{
+            #Used to actually c
             test_cloning <-
-              catch_err(gert::git_clone(gh_proj_url, path = new_proj_path))
+              catch_err(fs::file_copy(path=WD,new_path =  new_proj_path))
           }
         }
 

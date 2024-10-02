@@ -15,9 +15,11 @@ zget_envir <- \(df, fm) {
     unique_sans_na(df$`_envir`) %>% tolower() %>% sort()
   #Assessments aren't a real environment; we want to concat this info to the end of lsns for each envir
   if ("assessments" %in% envirs) {
-    df_assess <- df %>% dplyr::filter(.data$`_envir` == "assessments",
-                                      .data$`_fileType` != "folder",
-                                      .data$`_fileType`!="spreadsheet")
+    df_assess <- df %>% dplyr::filter(
+      .data$`_envir` == "assessments",
+      .data$`_fileType` != "folder",
+      .data$`_fileType` != "spreadsheet"
+    )
     if (!nrow(df_assess) > 0) {
       assess <- list(NULL)
     } else{
@@ -212,9 +214,11 @@ zget_items <- \(df, fm) {
 
 
   #Sort so presentation is first
-  df <- df0 %>% dplyr::arrange(!.data$`_fileType` == "presentation",
-                               !.data$`_fileType` == "web resource",
-                               !.data$`_fileType` == "form")
+  df <- df0 %>% dplyr::arrange(
+    !.data$`_fileType` == "presentation",
+    !.data$`_fileType` == "web resource",
+    !.data$`_fileType` == "form"
+  )
   item_counter <- 1:nrow(df)
   status <- fm$PublicationStatus
 
@@ -242,7 +246,7 @@ zget_items <- \(df, fm) {
       grepl("assess", df_item_i$`_itemType`) |
       grepl("overview", df_item_i$`_itemType`)
     ) & df_item_i$`_fileType` != "spreadsheet" &
-       df_item_i$`_fileType` != "form") {
+    df_item_i$`_fileType` != "form") {
       what_we_want <- "pdf"
     } else if (df_item_i$`_fileType` == "web resource") {
       what_we_want <- "open"
@@ -275,7 +279,7 @@ zget_items <- \(df, fm) {
       paste(what_we_want, df_item_i$`_fileType`, sep = "-"),
       "present-presentation" = paste0(cust_url, "/present"),
       #nulls for Forms (no PDF or equivalent export file)
-      "nothing-form"=NA,
+      "nothing-form" = NA,
       #preview link for Slides presentation
       "pdf-presentation" = paste0(cust_url, "/export/pdf"),
       #pdf link for Slides presentation
@@ -291,7 +295,7 @@ zget_items <- \(df, fm) {
     #Now make custom Drive share links
     drive_share_link <-
       ifelse(
-        df_item_i$`_fileType` %in% c("document", "presentation","spreadsheet","form"),
+        df_item_i$`_fileType` %in% c("document", "presentation", "spreadsheet", "form"),
         paste0(cust_url, "/template/preview"),
         cust_url
       )
@@ -330,13 +334,34 @@ zget_items <- \(df, fm) {
 #' Internal helpers for [compile_teach_it()]. Get YT embed code from any Youtube link
 #'
 #' @param link a YouTube link
+#' @examples
+#' #Should give 3 URLs in format www.youtube.com/embed/videoID and 1 original URL (not on YT)
+#' c("https://youtu.be/mD24yi7uLgU","https://youtu.be/ZAFjYJk27Ug?si=d-MIziNb39ib_8fW",
+#' "https://www.youtube.com/watch?v=h5eTqjzQZDY",
+#' "https://into-the-dark.galacticpolymath.com/") %>% zYTembed()
+#'
 #'
 #' @export
 #' @family Internal helper functions
 zYTembed <- function(link) {
-  gsub(".*[youtu.be|youtube.com]\\/s?h?o?r?t?s?\\/?([^\\?]*).*",
-       "https://www.youtube.com/embed/\\1",
-       link)
+  out <- sapply(link, \(link_i) {
+    #for URLs formatted as "https://www.youtube.com/watch?v=Xr1SstxYW8w", get id from v= part
+    if (grepl("^.*watch\\?v=", link_i)) {
+      gsub(".*watch\\?v=([^\\?&]*).*$",
+           "https://www.youtube.com/embed/\\1",
+           link_i,perl = TRUE)
+    } else if (grepl("youtu", link_i)) {
+      #for all other urls, ignore anything after?
+      gsub(
+        ".*[youtu.be|youtube.com]\\/s?h?o?r?t?s?\\/?([^\\?]*).*",
+        "https://www.youtube.com/embed/\\1",
+        link_i
+      )
+    }else{
+      link_i
+    }
+  })
+  out %>% unlist() %>% as.vector()
 }
 
 

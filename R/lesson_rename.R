@@ -176,7 +176,7 @@ if(newstr_is_oldstr) {
       #rename exact matches to curr_ShortTitle to "TmpName"
       change_log <- dplyr::bind_rows(
         change_log,
-        rename_files(
+        rename_unit_files(
           pattern = curr_ShortTitle,
           replacement = "NombreTemporario",
           dir_path = new_proj_dir,
@@ -187,7 +187,7 @@ if(newstr_is_oldstr) {
       #rename matches with spaces to "Tmp Name"
       change_log <- dplyr::bind_rows(
         change_log,
-        rename_files(
+        rename_unit_files(
           pattern = string_parseCamel(curr_ShortTitle, flex_space = FALSE),
           replacement = "Nombre Temporario",
           dir_path = new_proj_dir,
@@ -203,7 +203,7 @@ if(newstr_is_oldstr) {
     #rename exact matches to curr_ShortTitle
     change_log <- dplyr::bind_rows(
       change_log,
-      rename_files(
+      rename_unit_files(
         pattern = pattern2,
         replacement = new_ShortTitle,
         dir_path = new_proj_dir,
@@ -213,7 +213,7 @@ if(newstr_is_oldstr) {
     #rename curr_ShortTitle, preserving any spaces. e.g. Old Name -> New Name instead of Old Name -> NewName
     change_log <- dplyr::bind_rows(
       change_log,
-      rename_files(
+      rename_unit_files(
         pattern = string_parseCamel(pattern2, flex_space = FALSE),
         replacement = string_parseCamel(new_ShortTitle, flex_space = FALSE),
         dir_path = new_proj_dir,
@@ -230,7 +230,7 @@ if(newstr_is_oldstr) {
       #first, exact matches
       change_log <- dplyr::bind_rows(
         change_log,
-        rename_files(
+        rename_unit_files(
           pattern = string_parseCamel(curr_ShortTitle, flex_space = TRUE),
           replacement = "NombreTemporario",
           dir_path = new_proj_dir,
@@ -247,7 +247,7 @@ if(newstr_is_oldstr) {
     #rename curr_ShortTitle, WITHOUT preserving any spaces. e.g. "Old Name"  -> "NewName"
     change_log <- dplyr::bind_rows(
       change_log,
-      rename_files(
+      rename_unit_files(
         pattern = string_parseCamel(pattern2, flex_space = TRUE),
         replacement = new_ShortTitle,
         dir_path = new_proj_dir,

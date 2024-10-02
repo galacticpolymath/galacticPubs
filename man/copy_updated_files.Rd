@@ -21,5 +21,5 @@ copy_updated_files(paths, dest_folder, clear = FALSE, verbose = TRUE, WD = "?")
 tibble of path1 files and statuses (whether they were updated, added, or are up-to-date)
 }
 \description{
-Copy files to destination only if the file is missing or out of date at the destination
+Copy files to destination only if the file is missing or out of date at the destination. Mainly a helper for \code{\link[=stage_assets]{stage_assets()}}. Not well-designed for general use.
 }

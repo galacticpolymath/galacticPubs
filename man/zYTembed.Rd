@@ -12,6 +12,14 @@ zYTembed(link)
 \description{
 Internal helpers for \code{\link[=compile_teach_it]{compile_teach_it()}}. Get YT embed code from any Youtube link
 }
+\examples{
+#Should give 3 URLs in format www.youtube.com/embed/videoID and 1 original URL (not on YT)
+c("https://youtu.be/mD24yi7uLgU","https://youtu.be/ZAFjYJk27Ug?si=d-MIziNb39ib_8fW",
+"https://www.youtube.com/watch?v=h5eTqjzQZDY",
+"https://into-the-dark.galacticpolymath.com/") \%>\% zYTembed()
+
+
+}
 \seealso{
 Other Internal helper functions: 
 \code{\link{zcatchLinkNA}()},
