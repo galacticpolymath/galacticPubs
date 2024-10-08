@@ -552,7 +552,8 @@ update_fm <-
     #save updated file if requested
     if (save_output) {
       #Change LastUpdated field
-      new_yaml$LastUpdated <- Sys.time() %>% as.character()
+
+      new_yaml$LastUpdated <- Sys.time() %>% round.POSIXt(units="secs") %>%  as.character()
       # need to find yaml_path in git hub gp-lessons folder
       if (is.null(WD_git)) {
         WD_git <- get_wd_git(WD = WD)
