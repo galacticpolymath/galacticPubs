@@ -10,8 +10,10 @@ pick_lesson(
   show_all = FALSE,
   pick_all = FALSE,
   full_path = TRUE,
-  sort_az = FALSE,
-  lessons_dir = NULL
+  sort_col = "LastUpdated",
+  sort_decr = FALSE,
+  lessons_dir = NULL,
+  pull_path = TRUE
 )
 
 lesson_pick(
@@ -19,8 +21,10 @@ lesson_pick(
   show_all = FALSE,
   pick_all = FALSE,
   full_path = TRUE,
-  sort_az = FALSE,
-  lessons_dir = NULL
+  sort_col = "LastUpdated",
+  sort_decr = FALSE,
+  lessons_dir = NULL,
+  pull_path = TRUE
 )
 }
 \arguments{
@@ -29,6 +33,7 @@ lesson_pick(
 \item "s" or "?" = GP-Studio (draft working directory, many users with access)
 \item "l" or "??" = GP-Live (private, admin only)
 \item "gp"= GalacticPolymath (public-facing read-only)
+\item "sl" or "?!" = both GP-Studio and GP-Live
 }}
 
 \item{show_all}{show an 'all' option? default=FALSE}
@@ -37,12 +42,16 @@ lesson_pick(
 
 \item{full_path}{do you want a full path to the chosen lesson? default= TRUE}
 
-\item{sort_az}{logical; sort alphabetically? default =F sorts by last modified}
+\item{sort_col}{which column of output to sort by? Default "LastUpdated"; options=c("Unit","numID","ReleaseDate")}
+
+\item{sort_decr}{logical; sort by decreasing order? default= FALSE}
 
 \item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling \code{\link[=lessons_get_path]{lessons_get_path()}}}
+
+\item{pull_path}{logical; do you want to pull (and unlist) only the paths? default= TRUE. FALSE will return the tibble for the selected units}
 }
 \value{
-the selected lesson name
+the selected path, tibble, or string of names
 }
 \description{
 Interactively lets you pick from a list of published Galactic Polymath units and will out put a virtualized Google Drive for Desktop path

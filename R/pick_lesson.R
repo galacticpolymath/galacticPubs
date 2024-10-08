@@ -13,7 +13,8 @@
 #' @param sort_col which column of output to sort by? Default "LastUpdated"; options=c("Unit","numID","ReleaseDate")
 #' @param sort_decr logical; sort by decreasing order? default= FALSE
 #' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling [lessons_get_path()]
-#' @return the selected lesson name
+#' @param pull_path logical; do you want to pull (and unlist) only the paths? default= TRUE. FALSE will return the tibble for the selected units
+#' @return the selected path, tibble, or string of names
 #' @export
 
 pick_lesson <- function(shared_drive = "s",
@@ -22,7 +23,8 @@ pick_lesson <- function(shared_drive = "s",
                         full_path = TRUE,
                         sort_col = "LastUpdated",
                         sort_decr = FALSE,
-                        lessons_dir = NULL) {
+                        lessons_dir = NULL,
+                        pull_path = TRUE) {
   if (is.null(lessons_dir)) {
     if(shared_drive=="sl"|shared_drive=="?!"){
       lessons_dir <- sapply(c("s","l"),\(x) lessons_get_path(shared_drive = x)) %>% unlist()
@@ -90,13 +92,17 @@ projects_sorted <- projects[order(unlist(projects[,sort_col]),decreasing=sort_de
 
     #if not returning all, return the subset
   if (full_path & !identical(choice, "all")) {
-    out <- d %>% dplyr::filter(.data$CHOICE %in% num2)%>% dplyr::pull("path")
+    out <- d %>% dplyr::filter(.data$CHOICE %in% num2) %>%
+      dplyr::select(-.data$CHOICE)
+    if(pull_path){out <- out%>% dplyr::pull("path")}
 
   } else if (identical(choice, "all")) {
-    return(fs::path(lessons_dir, projects))
+    out <- d %>%  dplyr::select(-.data$CHOICE)
+    if(pull_path){out <- out%>% dplyr::pull("path")}
+
     #Return the names of the chosen units if we don't need a full path
   } else{
-    return(choice)
+    out <- choice
   }
 
 out
