@@ -4,6 +4,7 @@
 #' - "?" or "?s": invokes [pick_lesson("s")] to choose from among lessons in the 'GP-Studio' shared drive.
 #' - "??" or "?l": invokes [pick_lesson("l")] to pick a path to lessons on the 'GP-LIVE' drive.
 #' - "???" or "?gp": gives you [pick_lesson("gp")] to pick a path to lesson teaching materials found on 'GalacticPolymath' drive
+#' - "?!" or "sl": invokes [pick_lesson("sl")] to pick from units on 'GP-Studio' and 'GP-LIVE'
 #'
 #' @param str is a string supplied as the WD parameter in a galacticPubs function. Often "?"
 #' @return if str is not "?" or "??", it will return str. Otherwise, returns the result of [pick_lesson()]
@@ -20,6 +21,8 @@ parse_wd <- \(str = NULL) {
       user_choice <- pick_lesson("l")
     } else if (str == "???" | str == "?g" | str == "?gp") {
       user_choice <- pick_lesson("gp")
+    } else if (str == "??" | str == "?l") {
+      user_choice <- pick_lesson("sl")
     } else{
       user_choice <- str
     }

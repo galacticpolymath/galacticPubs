@@ -25,7 +25,7 @@
 #'
 
 lesson_rename <- function(new_proj_name,
-                          WD,
+                          WD="?",
                           new_ShortTitle,
                           curr_ShortTitle,
                           just_files = FALSE,
@@ -36,11 +36,16 @@ lesson_rename <- function(new_proj_name,
                           force_init_capital = TRUE) {
 
 
+  #Current problems with this code!
+  #Doesn't rename files in meta folder (b/c of prefix)
+  #Should run to completion without interrruption summarizing which things worked
+  #This would allow recovering a partially renamed unit
 # 0.  Checks and validation -----------------------------------------------
   if(missing(new_proj_name)){stop("You must supply new_proj_name.")}
 
-
   WD <- parse_wd(WD)
+  WD0 <- WD #backup
+
   #double check that WD looks like a valid lesson directory
   if(run_check_wd) {
     test_check_wd <- check_wd(WD = WD)
@@ -62,9 +67,10 @@ lesson_rename <- function(new_proj_name,
 
 
   #read in yaml
+  WD_git <- get_wd_git(WD)
   y<-get_fm(WD=WD)
 
-
+browser()
 
   #guess at new shortTitle if missing
   short_title_pat<-"(?<![|_] )([^|_]*?)_[^_]*?$"
@@ -139,18 +145,18 @@ if(continue%in%c("N","n")){
   stop("Renaming Canceled")
 }
 
-# 1. Rename top level folder & project name-------------------------------------------
+# 1. Rename top level Gdrive folder & project name-------------------------------------------
 if(!just_files){
 test_folderRename <- file.rename(from=WD,to = new_proj_dir)
-Rproj_file<- list.files(new_proj_dir,pattern=".Rproj",full.names = T)
-new_Rproj_file <- fs::path(new_proj_dir,new_proj_name,ext="Rproj")
+# Rproj_file<- list.files(new_proj_dir,pattern=".Rproj",full.names = T)
+# new_Rproj_file <- fs::path(new_proj_dir,new_proj_name,ext="Rproj")
 #Keep full (new) project name in the Rproject file
-test_RprojRename<- file.rename(from=Rproj_file, to=new_Rproj_file)
-if(test_folderRename & new_Rproj_file!=Rproj_file){
+# test_RprojRename<- file.rename(from=Rproj_file, to=new_Rproj_file)
+if(test_folderRename){# & new_Rproj_file!=Rproj_file
   message("Project Folder Renamed:\n from: ",WD,"\n to:   ",new_proj_dir)
 }
 }else{
-  test_folderRename<-test_RprojRename<-NA
+  test_folderRename<-NA
 }
 
 # 2. Find and rename all files & subfolders found in the project folder  --------
@@ -257,38 +263,45 @@ if(newstr_is_oldstr) {
   }
 }
 
+
+# 3. Change name of WD_git (i.e. GitHub repo) for this project ---------------
+WD_git0 <- WD_git
+WD_git <- gsub(curr_proj_name,new_proj_name,WD_git0)
+test_wdGit_Rename <- file.rename(from=WD_git0,to = WD_git)
+
+
 #
-# # 3. Changes name of GitHub Repo at galacticpolymath/ and galactic --------
-if(!just_files){
-test_rename_remote <- catch_err(
-  #Need to rewire this function to work by just taking the WD parameter and scrapping the gh_proj_name
-  gh_rename_repo(
-    WD=WD,
-    gh_proj_name = basename(WD),
-    prompt_user = FALSE
-  )
-)
-}else{
-  test_rename_remote<-NA
-}
+# # # 3. Change name of gp catalog on github (deprecated) --------
+# if(!just_files){
+# test_rename_remote <- catch_err(
+#   #Need to rewire this function to work by just taking the WD parameter and scrapping the gh_proj_name
+#   gh_rename_repo(
+#     WD=WD,
+#     gh_proj_name = basename(WD),
+#     prompt_user = FALSE
+#   )
+# )
+# }else{
+#   test_rename_remote<-NA
+# }
 
 
-# 4. Reassociate lesson folder with renamed GitHub repo --------
-if(!just_files){
-test_reset_remote <- catch_err(
-  gh_reset_remote(
-    new_proj_name = new_proj_name,
-    WD = new_proj_dir,
-    run_check_wd = run_check_wd
-  )
-)
-}else{
-  test_reset_remote<-NA
-}
+# # 4. Reassociate lesson folder with renamed GitHub repo --------
+# if(!just_files){
+# test_reset_remote <- catch_err(
+#   gh_reset_remote(
+#     new_proj_name = new_proj_name,
+#     WD = new_proj_dir,
+#     run_check_wd = run_check_wd
+#   )
+# )
+# }else{
+#   test_reset_remote<-NA
+# }
 
 
 
-# 5. Change the ShortTitle and GPCatalogURL and GitHubURL items  --------
+# 5. Change the ShortTitle and  items  --------
 #only update front-matter.yml if previous steps succeeded
 
 
@@ -297,10 +310,8 @@ proceed0 <-
   c(
     test_check_wd,
     test_folderRename,
-    test_RprojRename,
-    test_rename_remote,
-    test_reset_remote
-  ) %>% stats::na.omit() %>% as.vector()
+    test_wdGit_Rename
+  ) %>% stats::na.omit() %>% as.vector
 proceed <-
     eval(parse(text = paste0(as.character(proceed0), collapse = "&")))
 if(proceed){
@@ -314,7 +325,7 @@ if(proceed){
       ))
 
   test_update_fm<-
-    catch_err(update_fm(WD=new_proj_dir,change_this = change_this2,
+    catch_err(update_fm(WD_git=WD_git,change_this = change_this2,
       drive_reconnect=TRUE))
 }else{
   test_update_fm<-FALSE
@@ -324,10 +335,14 @@ if(proceed){
 #'
 #'
 
-# 8.   Delete orphaned catalog entry if it exists -------------------------
-if(!just_files & newstr_is_oldstr){
-test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(curr_proj_name))
-}else{test_cleanup_catalog<-NA}
+# 6. rename on gp_catalog through API -------------------------------------
+test_delete_catalog <- gp_api_unit_delete(unit_id=y$`_id`) %>% catch_err()
+test_insert_catalog <- gp_api_unit_insert(WD=new_proj_dir) %>% catch_err()
+
+# # 8.   Delete orphaned catalog entry if it exists -------------------------
+# if(!just_files & newstr_is_oldstr){
+# test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(curr_proj_name))
+# }else{test_cleanup_catalog<-NA}
 
 
 # 7.  Summarize results ---------------------------------------------------
@@ -347,15 +362,14 @@ if(proceed & test_update_fm){
 tests<-c(
     test_check_wd,
     test_folderRename,
-    test_RprojRename,
-    test_rename_remote,
-    test_reset_remote,
-    test_update_fm,
-    test_cleanup_catalog
+    test_wdGit_Rename,
+    test_delete_catalog,
+    test_insert_catalog,
+    test_update_fm
   )
 change_log<- dplyr::bind_rows(change_log)
-summ <- dplyr::tibble(result=convert_T_to_check(tests),test=c("Checked Working Directory","Renamed Project Folder","Renamed Rproj","Renamed GitHub Remote","Reset Local<->Remote Connection","Updated front-matter.yml","Remove orphaned gp-catalog entry"))
-message("You still need to run publish() to push the new project updates to the Catalog.")
+summ <- dplyr::tibble(result=convert_T_to_check(tests),test=c("Checked Working Directory","Renamed Project Folder","Renamed Git Working Directory","Deleted GP-Catalog Entry","Inserted New GP-Catalog Entry","Updated front-matter.yml"))
+
 return(list(change_log = change_log, summary = summ))
 
 }

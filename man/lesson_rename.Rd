@@ -6,7 +6,7 @@
 \usage{
 lesson_rename(
   new_proj_name,
-  WD,
+  WD = "?",
   new_ShortTitle,
   curr_ShortTitle,
   just_files = FALSE,
