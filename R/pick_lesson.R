@@ -11,7 +11,7 @@
 #' @param pick_all logical; Default=FALSE makes user pick unit. If TRUE, choice is set to "all" and will return paths to all projects in this directory.
 #' @param full_path do you want a full path to the chosen lesson? default= TRUE
 #' @param sort_col which column of output to sort by? Default "LastUpdated"; options=c("Unit","numID","ReleaseDate")
-#' @param sort_decr logical; sort by decreasing order? default= FALSE
+#' @param sort_decr logical; sort by decreasing order? default= TRUE
 #' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling [lessons_get_path()]
 #' @param pull_path logical; do you want to pull (and unlist) only the paths? default= TRUE. FALSE will return the tibble for the selected units
 #' @return the selected path, tibble, or string of names
@@ -22,7 +22,7 @@ pick_lesson <- function(shared_drive = "s",
                         pick_all = FALSE,
                         full_path = TRUE,
                         sort_col = "LastUpdated",
-                        sort_decr = FALSE,
+                        sort_decr = TRUE,
                         lessons_dir = NULL,
                         pull_path = TRUE) {
   if (is.null(lessons_dir)) {

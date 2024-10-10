@@ -1,7 +1,7 @@
 #DEFAULT VALUES FOR front-matter.
 numID: ''
 _id: ''
-ShortTitle: ''
+ShortTitle: 'NameMe'
 PublicationStatus: 'Proto'
 Language: 'English'
 Country: 'United States'
@@ -11,6 +11,7 @@ DefaultCountry: 'United States'
 #!!---> operational variables (that don't have Shiny inputs
 #LastUpdated has to be at the top here
 LastUpdated: ''
+LastUpdated_web: ''
 ReleaseDate: '2050-01-01'
 isTestRepo: false
 FirstPublicationDate: ''
@@ -21,7 +22,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.6.7
+TemplateVer: 0.6.8
 galacticPubsVer: ''
 URL: ''
 ShortURL: ''
@@ -39,7 +40,7 @@ GdriveDirURL: ''
 #!!<--- operational variables (that don't have Shiny inputs)
 # RebuildAllMaterials must be top of this list
 RebuildAllMaterials: no
-Title: ''
+Title: 'Title Me!'
 Subtitle: ''
 SponsorName: ''
 SponsoredBy: ''

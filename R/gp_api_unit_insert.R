@@ -17,9 +17,13 @@ gp_api_unit_insert <- \(WD = "?",
   token <- get_gp_api_token()
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
-  ShortTitle <- get_fm("Title", WD_git = WD_git)
+  ShortTitle <- get_fm("ShortTitle", WD_git = WD_git)
+  Title <- get_fm("Title", WD_git = WD_git)
   unit_id <- get_fm("_id", WD_git = WD_git)
-  checkmate::assert_character(ShortTitle, min.len = 1, all.missing = FALSE)
+
+  if(Title=="Title Me!"){
+    message("FYI, not title given to this unit. Give it a name!")
+  }
   checkmate::assert_character(
     unit_id,
     min.len = 1,
