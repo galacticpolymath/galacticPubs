@@ -4,14 +4,14 @@
 #'
 #' @param refresh do you want to re-authenticate? default=TRUE
 #' @param dev logical; if TRUE (default), gets catalog from the dev gp-catalog. Otherwise, from the prod catalog.
-#' @param verbosity passed to [httr2::req_perform()]; default=1
+#' @param verbosity passed to [httr2::req_perform()]; default=0
 #' @family GP API
 #' @return invisibly returns the token
 #' @export
 #'
-gp_api_get_token <- \(refresh = TRUE,
+gp_api_get_token <- \(refresh = FALSE,
                          dev = TRUE,
-                      verbosity= 1) {
+                      verbosity= 0) {
   oauth_sec <-
     httr2::obfuscated("LJZonP3Q0vVpNm_Z9vJp25gIZYvkKdHGUOGmZ0Y5qG36A9ssZNFweIl4cI1YPQ-3KBf-")
 
@@ -31,16 +31,20 @@ gp_api_get_token <- \(refresh = TRUE,
   #by posting no
 
   if (!is_empty(token_stored) & !refresh) {
-    #need to figure out how to form a good check of token currency, but removing for now
-    # test_request <-
-    #   httr2::request("https://dev.galacticpolymath.com/api/update-lessons") %>%
-    #   httr2::req_method("PUT") %>%
-    #   httr2::req_auth_bearer_token(token = token_stored) %>%
-    #   httr2::req_perform(verbosity = 2) %>% suppressWarnings() %>% catch_err(keep_results = TRUE)
-    # http_code <- test_request$result$status
-    # if (http_code != 200) {
-    #   refresh <- TRUE
-    #   }
+    #Check that token is valid
+    test_request <-
+      httr2::request("https://dev.galacticpolymath.com/api/jwt-expiration") %>%
+      httr2::req_method("POST") %>%
+      httr2::req_body_json(list(accessToken = token_stored)) %>%
+      # httr2::req_auth_bearer_token(accessToken = token_stored) %>%
+      httr2::req_perform(verbosity = verbosity) %>%
+      suppressWarnings() %>% catch_err(keep_results = TRUE)
+    http_code <- test_request$result$status
+    if (http_code != 200) {
+      refresh <- TRUE
+    }else{
+        message("Token retrieved and is valid!")
+      }
   }
 
   # try to authenticate and store a token if it's missing -------------------
@@ -51,7 +55,7 @@ gp_api_get_token <- \(refresh = TRUE,
       "**Attempting to refresh token. Close window once you've logged into Google Oauth in the browser and return to R.**"
     )
     oauth_id <-
-      "1095510414161-jo8dbgm27asec4dm9h05iqf0t18hviv2.apps.googleusercontent.com"
+      httr2::obfuscated("pbuXrrB6NXdjDA8wdOSQyZqi_gWYYHm_Pl4wslxx8rmkCl8MO_vaG4DggCR2z4RV6ogxWgKs9Cgw7Q91o4g3SjejvJVhb8Bm1ghmz6Y722QbBhdESwqqa98")
 
     dev_toggle <- ifelse(dev,"https://dev.galacticpolymath.com","https://www.galacticpolymath.com")
 

@@ -14,7 +14,7 @@ gp_api_unit_insert <- \(WD = "?",
                         dev = NULL,
                         verbosity = 1) {
   checkmate::assert_choice(dev, c(TRUE, FALSE), null.ok = TRUE)
-  token <- get_gp_api_token(refresh = FALSE)
+  token <- get_gp_api_token()
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
   ShortTitle <- get_fm("Title", WD_git = WD_git)

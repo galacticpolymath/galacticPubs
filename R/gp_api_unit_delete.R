@@ -18,7 +18,7 @@ gp_api_unit_delete <- \(WD = "?",
                         dev = TRUE,
                         verbosity=1) {
   checkmate::assert_choice(dev,c(TRUE,FALSE),null.ok=TRUE)
-  token <- get_gp_api_token(refresh = FALSE)
+  token <- get_gp_api_token()
 
   if (is.null(unit_id)) {
     WD <- parse_wd(WD)
