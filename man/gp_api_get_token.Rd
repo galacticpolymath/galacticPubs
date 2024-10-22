@@ -5,16 +5,16 @@
 \alias{get_gp_api_token}
 \title{Get a JWT token for GP API}
 \usage{
-gp_api_get_token(refresh = TRUE, dev = TRUE, verbosity = 1)
+gp_api_get_token(refresh = FALSE, dev = TRUE, verbosity = 0)
 
-get_gp_api_token(refresh = TRUE, dev = TRUE, verbosity = 1)
+get_gp_api_token(refresh = FALSE, dev = TRUE, verbosity = 0)
 }
 \arguments{
 \item{refresh}{do you want to re-authenticate? default=TRUE}
 
 \item{dev}{logical; if TRUE (default), gets catalog from the dev gp-catalog. Otherwise, from the prod catalog.}
 
-\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
+\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=0}
 }
 \value{
 invisibly returns the token

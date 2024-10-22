@@ -11,7 +11,7 @@ pick_lesson(
   pick_all = FALSE,
   full_path = TRUE,
   sort_col = "LastUpdated",
-  sort_decr = FALSE,
+  sort_decr = TRUE,
   lessons_dir = NULL,
   pull_path = TRUE
 )
@@ -22,7 +22,7 @@ lesson_pick(
   pick_all = FALSE,
   full_path = TRUE,
   sort_col = "LastUpdated",
-  sort_decr = FALSE,
+  sort_decr = TRUE,
   lessons_dir = NULL,
   pull_path = TRUE
 )
@@ -44,7 +44,7 @@ lesson_pick(
 
 \item{sort_col}{which column of output to sort by? Default "LastUpdated"; options=c("Unit","numID","ReleaseDate")}
 
-\item{sort_decr}{logical; sort by decreasing order? default= FALSE}
+\item{sort_decr}{logical; sort by decreasing order? default= TRUE}
 
 \item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling \code{\link[=lessons_get_path]{lessons_get_path()}}}
 

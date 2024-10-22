@@ -18,6 +18,6 @@ list with 4 objects: $success (did it work?); $input (the input file as a tibble
 Does the following:
 \enumerate{
 \item Compile alignment info from the \code{standards_*.gsheet} in the project's \verb{meta/} folder
-\item Output standards.RDS file with the alignment info (this will be read in by \code{\link[=learningEpaulette]{learningEpaulette()}} and \code{\link[=learningChart]{learningChart()}})
+\item Output standards.RDS file with the alignment info (this will be read in by \code{\link[=learningEpaulette]{learningEpaulette()}} )
 }
 }

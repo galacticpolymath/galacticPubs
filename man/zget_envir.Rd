@@ -46,23 +46,23 @@ Not intended for use outside functions.
 }}
 \seealso{
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 }
 \concept{Internal helper functions}

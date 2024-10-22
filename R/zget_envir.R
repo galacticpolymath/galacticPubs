@@ -329,7 +329,7 @@ zget_items <- \(df, fm) {
 }
 
 
-#' zYTembed
+#' make_yt_embed
 #'
 #' Internal helpers for [compile_teach_it()]. Get YT embed code from any Youtube link
 #'
@@ -338,12 +338,12 @@ zget_items <- \(df, fm) {
 #' #Should give 3 URLs in format www.youtube.com/embed/videoID and 1 original URL (not on YT)
 #' c("https://youtu.be/mD24yi7uLgU","https://youtu.be/ZAFjYJk27Ug?si=d-MIziNb39ib_8fW",
 #' "https://www.youtube.com/watch?v=h5eTqjzQZDY",
-#' "https://into-the-dark.galacticpolymath.com/") %>% zYTembed()
+#' "https://into-the-dark.galacticpolymath.com/") %>% make_yt_embed()
 #'
 #'
 #' @export
 #' @family Internal helper functions
-zYTembed <- function(link) {
+make_yt_embed <- function(link) {
   out <- sapply(link, \(link_i) {
     #for URLs formatted as "https://www.youtube.com/watch?v=Xr1SstxYW8w", get id from v= part
     if (grepl("^.*watch\\?v=", link_i)) {

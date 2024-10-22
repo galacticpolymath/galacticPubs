@@ -2,7 +2,7 @@
 #'
 #' Does the following:
 #' 1. Compile alignment info from the `standards_*.gsheet` in the project's `meta/` folder
-#' 2. Output standards.RDS file with the alignment info (this will be read in by [learningEpaulette()] and [learningChart()])
+#' 2. Output standards.RDS file with the alignment info (this will be read in by [learningEpaulette()] )
 
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); If you put "?", it will invoke [pick_lesson()]
 #' @param targetSubj which subject(s) are the focus of the lesson? opts= "math","ela","science","social studies"; default=NULL
@@ -321,18 +321,30 @@ compile_standards <- function(WD = "?",
            is.na(a0$grp)) |
         sapply(a0$target, function(x)
           identical(x, "skip"), USE.NAMES = F)
+      #If you got more than 1 alignment, and they're just not documented yet, don't remove them, just report message
+      undoc_ok <- sum(undoc)==nrow(a0) & nrow(a0)>1
 
-      if (sum(undoc) > 0) {
+      if (sum(undoc) > 0 & !undoc_ok) {
         message(
           "\nThe following were removed because 'How does lesson align...' was blank or you said 'skip':\n\t\u2022",
           paste0(a0$code[undoc], collapse = "\n\t\u2022"),
           "\n"
         )
-      } else{
+        a1 <- a0[!undoc & !tbds,]
+      }else if(undoc_ok){
+        message(
+          "\nWe kept these aligned standards in, but they're NOT been documented! Fill in 'How does lesson align...' for:\n\t\u2022",
+          paste0(a0$code[undoc], collapse = "\n\t\u2022"),
+          "\n"
+        )
+        a1 <- a0[ !tbds,]
+      }else{
         undoc <- rep(FALSE, nrow(a0))
+        a1 <- a0[!undoc & !tbds,]
       }
 
-      a1 <- a0[!undoc & !tbds,]
+
+
 
       # a2 has markdown bullets ("- ") added if missing
       # Add markdown bullet to front of lines that don't start with it
@@ -364,6 +376,7 @@ compile_standards <- function(WD = "?",
       # a3 has logical values for target instead of "n" and blank
       # also added grouping variable
       a3 <- a2
+
       a3$target <-
         ifelse(is.na(a3$target) |
                  tolower(a3$target) == "n", FALSE, TRUE)
@@ -400,7 +413,7 @@ compile_standards <- function(WD = "?",
         )
       }
 
-      #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standardsRef)
+      #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standards reference Tab 2)
       #Remove "lsn from a_master to avoid conflicts with changes made in tab 4.Finalize"
       A0 <-
         dplyr::left_join(a3[, c("code_set",
@@ -419,21 +432,20 @@ compile_standards <- function(WD = "?",
       A0$subject <-
         factor(A0$subject, levels = ordered_subjects, ordered = T)
       A <-
-        A0 %>% dplyr::filter(!is.na(.data$how)) %>%  dplyr::arrange(.data$subject)
+        A0 %>%  dplyr::arrange(.data$subject)
 
 
       # warn if statements missing (indicates bad merge) -----------------------
-      if (nrow(A) == 0) {
+      if (nrow(A) == 0 & !undoc_ok) {
         warning(
-          "Bad merge. No 'Statements' matched standards code for each set. Try changing 'standardsRef' in compile_standards(); currently, standardsRef = '",
-          standardsRef,
-          "'"
+          "Bad merge. No 'Statements' matched standards code for each set."
         )
       }
 
 
 
       # Add dims if only dimensions provided ------------------------------------
+
       A$dim <- sapply(1:nrow(A), function(i) {
         if (is.na(A$dim[i])) {
           if (is.na(A$dimension[i])) {
@@ -674,16 +686,16 @@ compile_standards <- function(WD = "?",
           paste(unique_sans_na(A$set),
                 collapse = "\n  -")
         )
-        #Store LearningChart Friendliness in front-matter and also save to RDS file
-        update_fm(change_this = list(LearningChartFriendly = F),
+        #Save to RDS file
+        update_fm(
                   WD = WD,recompile = FALSE)
-        learning_chart_friendly <- FALSE
+
         a_combined$dimAbbrev <- NA
         supported_dims <- NULL
       } else{
-        update_fm(change_this = list(LearningChartFriendly = T),
+        update_fm(
                   WD = WD,recompile = FALSE)
-        learning_chart_friendly <- TRUE
+
 
 
 
@@ -745,8 +757,7 @@ compile_standards <- function(WD = "?",
         ),
         a_combined = a_out,
         chart_labels = chart_labels,
-        targetSubj = targetSubj,
-        learning_chart_friendly = learning_chart_friendly
+        targetSubj = targetSubj
       )
       #
 
@@ -785,8 +796,7 @@ compile_standards <- function(WD = "?",
       gradeBand = gradeBand,
       learningObj = learningObj,
       targetSubj = targetSubj,
-      chart_labels = chart_labels,
-      learning_chart_friendly = learning_chart_friendly
+      chart_labels = chart_labels
     )
   )
 

@@ -296,7 +296,7 @@ compile_teach_it <- function(WD = "?",
     multimedia <- lapply(1:nrow(m), function(i) {
       d <- m[i,]
 
-      mainLink <- zYTembed(d$mainLink) %>%
+      mainLink <- make_yt_embed(d$mainLink) %>%
         expand_md_links(WD = WD)
       #if a drive file is supplied, change /edit? or /view? ... to /preview
       #should probably switch all this logic to a function and use urltools

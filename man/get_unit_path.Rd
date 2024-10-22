@@ -7,7 +7,7 @@
 get_unit_path(str, pull_path = TRUE)
 }
 \arguments{
-\item{str}{a string that matches the name of a project in one of the shared drives GP-LIVE or GP-Studio}
+\item{str}{a (regex) string that matches the name of a project in one of the shared drives GP-LIVE or GP-Studio}
 }
 \value{
 path(s) for the match(es) to the string you supplied

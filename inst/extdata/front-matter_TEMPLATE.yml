@@ -22,7 +22,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.6.8
+TemplateVer: 0.6.9
 galacticPubsVer: ''
 URL: ''
 ShortURL: ''
@@ -36,6 +36,7 @@ GdriveMetaID: ''
 GdriveTeachItID: ''
 GdriveStandardsID: ''
 GdrivePublishedID: ''
+GdriveTeachItPermissions: 'view'
 GdriveDirURL: ''
 #!!<--- operational variables (that don't have Shiny inputs)
 # RebuildAllMaterials must be top of this list

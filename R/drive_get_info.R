@@ -220,6 +220,7 @@ drive_get_info <- function(dribble,
     }
 
     #Get Link (removing the edit? or view? lsn)
+    browser()
     if (fileType == "shortcut") {
       link <- googledrive::shortcut_resolve(dribble_i)
       dribble_i$drive_resource[[1]][["shortcutDetails"]]$targetId
