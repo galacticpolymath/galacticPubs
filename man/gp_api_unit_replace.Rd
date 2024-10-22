@@ -16,7 +16,7 @@ gp_api_unit_replace(
 
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 
-\item{dev}{logical; default (NULL) modifies both production and dev gp-catalogs. FALSE modifies the production gp-catalog. TRUE modifies only the dev catalog.}
+\item{dev}{logical; default (NULL) modifies both production and dev gp-catalogs. FALSE modifies the production gp-catalog. TRUE modifies only the dev catalog. supplying c(TRUE,TRUE) is the same as NULL}
 
 \item{print_output}{logical; print result to user? default=TRUE}
 }

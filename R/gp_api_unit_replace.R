@@ -8,7 +8,7 @@
 #'
 #' @param WD working directory, passed to [parse_wd()];default="?"
 #' @param prompt_user logical; ask user before deleting and replacing the unit? default=TRUE
-#' @param dev logical; default (NULL) modifies both production and dev gp-catalogs. FALSE modifies the production gp-catalog. TRUE modifies only the dev catalog.
+#' @param dev logical; default (NULL) modifies both production and dev gp-catalogs. FALSE modifies the production gp-catalog. TRUE modifies only the dev catalog. supplying c(TRUE,TRUE) is the same as NULL
 #' @param print_output logical; print result to user? default=TRUE
 #' @family GP API
 #' @export
@@ -21,22 +21,25 @@ gp_api_unit_replace <- \(
   print_output = TRUE
 ) {
   WD <- parse_wd(WD)
-  checkmate::assert_choice(dev, c(TRUE, FALSE), null.ok = TRUE)
+
   unit_name <-
     get_fm(c("_id", "ShortTitle"), WD = WD) %>% paste(., collapse = " (") %>% paste0(" '", ., ")' ")
+
+
   #recursive call to gp_api_unit_replace
   #to make changes on both repositories
-
-
-
-  if (is.null(dev)) {
+  if(is.null(dev)){
     dev <- c(TRUE, FALSE)
+  }
+# Doesn't matter the order of TRUE, FALSE. Having both values means post to dev and prod collections
+  if (length(dev)==2 & sum(dev)==1) {
 
     message(
       "For Unit=",
       unit_name,
       "\nReplacing both Production and Dev versions of GP-Catalog (i.e. MongoDB collection)"
     )
+
     result_dev <-
       gp_api_unit_replace(WD = WD,
                           prompt_user = prompt_user,

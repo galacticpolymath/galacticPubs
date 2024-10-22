@@ -4,13 +4,25 @@
 \alias{publish}
 \title{publish}
 \usage{
-publish(commit_msg = NULL, WD = "?")
+publish(
+  WD = "?",
+  recompile = FALSE,
+  commit_msg = NULL,
+  prompt_user = TRUE,
+  dev = NULL
+)
 }
 \arguments{
-\item{commit_msg}{What do you want to say about this update? Default= "automated galacticPubs::publish()"}
+\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); passed to \code{\link[=parse_wd]{parse_wd()}}}
 
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+\item{recompile}{logical; run \code{\link[=compile_lesson]{compile_lesson()}}? default=FALSE}
+
+\item{commit_msg}{Deprecated; What do you want to say about this update? Default= "automated galacticPubs::publish()"}
+
+\item{prompt_user}{logical; do you want to ask user for confirmation before doing things? default=TRUE}
+
+\item{dev}{logical; if FALSE, gets catalog from the production gp-catalog. Otherwise, from the dev catalog. NULL (default) will apply to both dev and prod catalogs.}
 }
 \description{
-Commit all files and push to Github, which will automatically publish to catalog.galacticpolymath.com and update the lesson on galacticpolymath.com (if it is current and set to PublicationStatus: "Live")
+Update the unit locally with \code{\link[=update_fm]{update_fm()}} and online. Will update the online catalog according to whether it already exists using helpers \code{\link[=gp_api_unit_insert]{gp_api_unit_insert()}} or \code{\link[=gp_api_unit_replace]{gp_api_unit_replace()}}
 }
