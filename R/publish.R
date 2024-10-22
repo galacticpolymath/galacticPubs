@@ -24,10 +24,15 @@ publish <- function(WD = "?", recompile=FALSE, commit_msg = NULL, prompt_user=TR
     check_wd(WD = WD)
   }
 
-# update front matter -----------------------------------------------------
+# update front matter, unless recompile queued-----------------------------------------------------
 
-
+if(recompile){
+  test_compile <- compile_lesson(WD=WD)
+  test_update <- NA
+}else{
+  test_compile <- NA
   test_update <- update_fm(WD=WD) %>% catch_err()
+}
 
 
   fm <- get_fm(WD_git=WD_git)
@@ -42,20 +47,30 @@ publish <- function(WD = "?", recompile=FALSE, commit_msg = NULL, prompt_user=TR
 # check if exists online, and if not, insert ------------------------------
 # Create vector to determine if replacement needed
 
-  dev_to_replace <- lapply(dev,\(dev_i){
-    cat_type=switch(dev_i,"FALSE"="PROD","TRUE"="DEV")
+  cat_to_replace <- lapply(dev,\(dev_i){
+
+    cat_type=switch(as.character(dev_i), "FALSE"="PROD","TRUE"="DEV")
     exists_online <- length(gp_api_query(id = fm_id,dev = dev_i) ) >0
     if(!exists_online){
-      message("**",fm_id," '",fm$ShortTitle,"' not found in ",cat_type," Catalog.\n***Inserting new record...\n")
+      message("**",fm_id," '",fm$ShortTitle,"' NOT found in ",cat_type," Catalog.\n***Inserting new record...\n")
       insert_success <- gp_api_unit_insert(WD=WD,dev = dev_i)
-      #assume insert_successful, return FALSE, don't replace
-      FALSE
+      #assume insert_successful, don't replace, return NA
+      out <- NA
     }else{
-      TRUE
+      message("**",fm_id," '",fm$ShortTitle,"' found in ",cat_type," Catalog.\n")
+      out <- cat_type #cat_type is easier to understand
     }
-  })
-browser()
-  gp_api_query(id = fm_id,)
+    out
+  }) %>% unlist()
+
+  #interpret cat_type
+  dev_to_replace <- ifelse(cat_to_replace=="DEV",TRUE,FALSE) %>% unique_sans_na()
+
+  if(length(dev_to_replace)>0){
+    gp_api_unit_replace(WD=WD,dev=dev_to_replace)
+  }
+
+
 
 
 
@@ -207,18 +222,18 @@ browser()
 #   }
 #
 
-
-  out_summary <-
-    dplyr::tibble(
-      repo = basename(WD),
-      SUCCESS = convert_T_to_check(test_commit &
-                                     test_push & test_status2),
-      commit = convert_T_to_check(test_commit),
-      push = convert_T_to_check(test_push),
-      git_status = convert_T_to_check(test_status2),
-      path = WD
-    )
-
-  return(out_summary)
+#
+#   out_summary <-
+#     dplyr::tibble(
+#       repo = basename(WD),
+#       SUCCESS = convert_T_to_check(test_commit &
+#                                      test_push & test_status2),
+#       commit = convert_T_to_check(test_commit),
+#       push = convert_T_to_check(test_push),
+#       git_status = convert_T_to_check(test_status2),
+#       path = WD
+#     )
+#
+#   return(out_summary)
 
 }
