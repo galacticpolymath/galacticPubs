@@ -62,7 +62,7 @@ update_fm <-
 
     galacticPubs_template <-
       get_fm(
-        yaml_path = system.file("extdata", "front-matter_TEMPLATE.yml", package = "galacticPubs"),
+        yaml_path = system.file("templates", "front-matter_TEMPLATE.yml", package = "galacticPubs"),
         checkWD = FALSE
       )
 

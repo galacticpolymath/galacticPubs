@@ -2,9 +2,12 @@
 % Please edit documentation in R/edit_script.R
 \name{edit_script}
 \alias{edit_script}
+\alias{init_script}
 \title{Create/Edit a script for a GP unit}
 \usage{
 edit_script(script_name = NULL, WD = "?")
+
+init_script(script_name = NULL, WD = "?")
 }
 \arguments{
 \item{script_name}{text string to name the script. No need to add .R suffix.}
@@ -17,3 +20,8 @@ logical; if succeeds, should open a new file and silently return TRUE
 \description{
 If the script name is not found, it will create one in the gp-lessons/lessons/(working directory) aka wd_git for the unit
 }
+\section{Functions}{
+\itemize{
+\item \code{init_script()}: alias for edit_script()
+
+}}

@@ -31,7 +31,7 @@ init_fm <- function(WD = "?", WD_git = NULL) {
     #use the front matter template supplied with galacticPubs as a starting point
     y <-
       safe_read_yaml(
-        system.file("extdata", "front-matter_TEMPLATE.yml", package =
+        system.file("templates", "front-matter_TEMPLATE.yml", package =
                       "galacticPubs"),
         checkWD = FALSE
       )

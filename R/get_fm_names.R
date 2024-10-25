@@ -8,7 +8,7 @@
 
 get_fm_names <- \(sort_names=FALSE){
 
-   yaml_path = system.file("extdata",
+   yaml_path = system.file("templates",
                                 "front-matter_TEMPLATE.yml",
                                 package = "galacticPubs")
 

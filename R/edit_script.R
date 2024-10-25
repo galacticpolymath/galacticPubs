@@ -9,7 +9,7 @@
 
 edit_script <- \(script_name = NULL, WD = "?") {
   if (is.null(script_name)) {
-    warning("You must supply script_name.")
+    warning("You must supply script_name. e.g. 'ShortTitle_graphs' ")
     out <- FALSE
   } else if (!library(usethis, logical.return = TRUE, quietly = TRUE)) {
     warning("You need the usethis package. Run install.packages('usethis').")
@@ -27,7 +27,7 @@ edit_script <- \(script_name = NULL, WD = "?") {
       script_path <- fs::path(script_dir, script_name, ext = "R")
       if (!file.exists(script_path)) {
         resp <- readline(paste0(
-          "Do you want to create a new function called ",
+          "Do you want to create a new script called ",
           basename(script_path)," for project '",ShortTitle,
           "'? (y/n) >"
         ))
@@ -35,7 +35,13 @@ edit_script <- \(script_name = NULL, WD = "?") {
           out <- FALSE
         }
         if (resp == "y") {
-          out <- usethis::edit_file(script_path) %>% catch_err()
+          template_path <- system.file("templates", "header_for_new_lesson_scripts.R", package =
+                      "galacticPubs")
+
+          #create file from template. Can't use usethis::use_template b/c it wants rel paths :/
+          template_file <- readLines(template_path)
+          out <- writeLines(template_file, con=script_path) %>% catch_err()
+          usethis::edit_file(script_path) %>% catch_err()
         } else{
           out <- FALSE
         }
@@ -47,3 +53,9 @@ edit_script <- \(script_name = NULL, WD = "?") {
   invisible(out)
 
 }
+#alias (b/d behavior same)
+
+#' init_script
+#' @describeIn edit_script alias for edit_script()
+#' @export
+init_script <- edit_script
