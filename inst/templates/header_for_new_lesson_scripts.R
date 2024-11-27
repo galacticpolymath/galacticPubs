@@ -1,5 +1,5 @@
 require(pacman)
-p_load(readr)
+p_load(tidyverse)
 p_load_gh("galacticpolymath/galacticPubs")
 p_load_gh("galacticpolymath/galacticEdTools")
 #Determine unit information based on location of this file in gp-lessons GitHub repo
@@ -14,5 +14,5 @@ data_path <- fs::path(WD,"data")
 
 # Import Data -------------------------------------------------------------
 # Read in data from the data folder in the Gdrive working directory
-df <- readr::read_csv(fs::path(data_path, ENTER_CSV_FILENAME ))
+df <- readr::read_csv(fs::path(data_path, "ENTER_CSV_FILENAME" ))
 

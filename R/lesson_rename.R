@@ -8,15 +8,15 @@
 #' 5. Changes the ShortTitle and GPCatalogURL and GitHubURL items in front-matter.yml using [update_fm()].
 #'
 #' Assumes that you have Google Drive for Desktop set up with access to Lessons/ folder; github and gh CLI set up with proper permissions with GP GitHub. Will ignore case to account for different user behaviors.
+#' @param new_ShortTitle New ShortTitles to be swapped out in lesson project file names. If blank, will try to guess by ignoring terminal "_suffixes"
 #' @param new_proj_name The new name you want to give the selected project
 #' @param WD a virtualized path to the lesson you want to rename. Easiest to specify "?" which will invoke [pick_lesson()]. MUST be the same as the lesson project is named on [https://github.com/galacticpolymath](https://github.com/galacticpolymath).
-#' @param new_ShortTitle New ShortTitles to be swapped out in lesson project file names. If blank, will try to guess by ignoring terminal "_suffixes"
 #' @param curr_ShortTitle Current ShortTitle prefixed to lesson project files. If missing, will try to read this from ShortTitle in the existing front-matter.yml
 #' @param just_files logical; Default=FALSE; Do you want to JUST rename file prefixes, given the ShortTitle? If TRUE, this skips:
 #' - renaming top-level project folder
 #' - renaming associated GitHub project
 #' - pushing changes to GitHub
-#' @param only_rename_prefixes Do you want to only change project files with the ShortTitle at the beginning of the filename? (Could avoid accidental replacements if short title is a common phrase); default=TRUE
+#' @param only_rename_prefixes Do you want to only change project files with the ShortTitle at the beginning (and also end) of the filename? (Could avoid accidental replacements if short title is a common phrase); default=TRUE
 #' @param change_this passed to [update_fm()] if you want to make any other changes to front matter. Must be a list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey book If WD=="all", make sure you set this to something you want to change for everything.
 #' @param preserve_spaces if some files have a space in the 'Short Title', do you want to preserve this? default=FALSE
 #' @param run_check_wd logical; do you want to run [check_wd()]? Basically looks for files and folders you expect in a valid lesson project. default=TRUE
@@ -24,9 +24,9 @@
 #' @export
 #'
 
-lesson_rename <- function(new_proj_name,
+lesson_rename <- function(new_ShortTitle,
+                          new_proj_name,
                           WD="?",
-                          new_ShortTitle,
                           curr_ShortTitle,
                           just_files = FALSE,
                           change_this = NULL,
@@ -35,13 +35,15 @@ lesson_rename <- function(new_proj_name,
                           run_check_wd = TRUE,
                           force_init_capital = TRUE) {
 
+  if(missing(new_ShortTitle)&missing(new_proj_name)){
+    stop("Must supply new_ShortTitle or new_proj_name")
+  }
 
   #Current problems with this code!
   #Doesn't rename files in meta folder (b/c of prefix)
   #Should run to completion without interrruption summarizing which things worked
   #This would allow recovering a partially renamed unit
 # 0.  Checks and validation -----------------------------------------------
-  if(missing(new_proj_name)){stop("You must supply new_proj_name.")}
 
   WD <- parse_wd(WD)
   WD0 <- WD #backup
@@ -70,22 +72,36 @@ lesson_rename <- function(new_proj_name,
   WD_git <- get_wd_git(WD)
   y<-get_fm(WD=WD)
 
-browser()
+  #if new_ShortTitle given, construct new_proj_name using existing locale
+  if(missing(new_proj_name)){
 
-  #guess at new shortTitle if missing
-  short_title_pat<-"(?<![|_] )([^|_]*?)_[^_]*?$"
-  if(missing(new_ShortTitle)){
-    # IGNORED_|ExtractedString_IGNORED
-    new_ShortTitle<-y$ShortTitle
-    message("Guessing new_ShortTitle from front-matter.yml: '",new_ShortTitle,"'")
+  old_locale <- y$locale
+  #make sure old_locale not empty
+  checkmate::assert_character(old_locale,min.chars = 2,all.missing = FALSE)
+  #make sure new_ShortTitle isn't actually new_proj_name (with locale at the end)
+  checkmate::assert_false(grepl("_",new_ShortTitle),.var.name = "new_ShortTitle contains '_'")
+    new_proj_name <- paste0(new_ShortTitle,"_", old_locale)
+  }else{
+    #otherwise get ShortTitle from new_proj_name
+    ShortTitle <- stringr::str_extract(new_proj_name,pattern = "^[^_]*")
+
   }
+
+  # #guess at new shortTitle if missing
+  # short_title_pat<-"(?<![|_] )([^|_]*?)_[^_]*?$"
+  # if(missing(new_ShortTitle)){
+  #   # IGNORED_|ExtractedString_IGNORED
+  #   new_ShortTitle<-y$ShortTitle
+  #   message("Guessing new_ShortTitle from front-matter.yml: '",new_ShortTitle,"'")
+  # }
 
 
   if(missing(curr_ShortTitle)){
     curr_ShortTitle<-y$ShortTitle
+
     #very dangerous to provide an empty regex pattern! ('') will capture anything!
     if(is_empty(curr_ShortTitle)){
-      curr_ShortTitle<-gsub(short_title_pat,"\\1",curr_proj_name,perl=TRUE)
+      curr_ShortTitle<-gsub("(?<![|_] )([^|_]*?)_[^_]*?$","\\1",curr_proj_name,perl=TRUE)
 
     }
     message("Guessing curr_ShortTitle from front-matter.yml: '",curr_ShortTitle,"'")
@@ -135,7 +151,7 @@ message(
     curr_ShortTitle,
     "' to '",
     new_ShortTitle,
-    "'\n\n  *only changing prefixes: ",
+    "'\n\n  *only changing prefixes & suffixes: ",
     only_rename_prefixes,
     "'?\n"
   )
@@ -171,7 +187,7 @@ if(only_rename_prefixes){
 
 #capture all change_logs
 change_log<-NULL
-
+browser()
 #Don't do this renaming if the strings are the same
 if(newstr_is_oldstr) {
   message("No file names to change")

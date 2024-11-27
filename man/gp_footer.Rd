@@ -6,15 +6,20 @@
 \usage{
 gp_footer(
   obj,
-  caption,
-  x = 0.01,
+  caption = NULL,
+  x = 0.015,
   y = 0.05,
   text_size = 9,
+  border_col_graph = "#363636",
+  border_col_foot = "#363636",
+  border_width_graph = 1,
+  border_width_foot = 1,
   text_col = "#363636",
   data_attrib = NULL,
   data_attrib_scale = 0.9,
+  data_attrib_x = 0.75,
   logo = "black",
-  fill_col = gpColors("sparkle"),
+  fill_col = "#D3D3D3",
   show_plot = TRUE
 )
 }
@@ -29,9 +34,15 @@ gp_footer(
 
 \item{text_size}{text size; default=9;}
 
+\item{border_col_graph}{color of border around main plot. default="#363636"; put "transparent" to remove border}
+
+\item{border_col_foot}{color of border around plot footer. default="#363636"; put "transparent" to remove border}
+
 \item{data_attrib}{concise citation for data source (will be smaller font and follow "Data: ")}
 
 \item{data_attrib_scale}{default=0.6 from 0 to 1, how much smaller to scale attribution text?}
+
+\item{data_attrib_x}{where do you want to place the right edge of the data attribution text (0 to 1); default= 0.75}
 
 \item{logo}{default="black"; which GP logo do you want to use?}
 

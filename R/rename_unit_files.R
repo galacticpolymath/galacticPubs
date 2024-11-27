@@ -35,7 +35,7 @@ rename_unit_files <- function(pattern,
       stop("dir_path doesn't exist: \n - ", dir_path)
     }
 
-
+browser()
     filez <- fs::dir_ls(dir_path, recurse = TRUE)
     to_change <- (
       #matches

@@ -8,12 +8,13 @@ gpsave(
   filename,
   obj = ggplot2::last_plot(),
   WD = "?",
-  width = 7,
+  width = NULL,
   height = NULL,
   aspect = 16/9,
   dpi = 300,
   open = FALSE,
   bg = "transparent",
+  units = "in",
   ...
 )
 }
@@ -35,6 +36,8 @@ gpsave(
 \item{open}{logical; open file after save? default=FALSE}
 
 \item{bg}{background color (default= "transparent")}
+
+\item{units}{default= "in"; options c("in", "cm", "mm", "px")}
 
 \item{...}{other parameters from \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}}}
 }
