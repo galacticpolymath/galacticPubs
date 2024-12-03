@@ -52,8 +52,8 @@ pick_lesson <- function(shared_drive = "s",
 projects <- batch_get_fm(c("numID","ReleaseDate","LastUpdated"),projects0,as_tibble = TRUE,
                          exclude_TEST = exclude_TEST)
 path_tib <- dplyr::tibble(unit =basename(projects0),path=projects0)
-#need to do a join, bc batch_get_fm filters out TEST repos
-projects <- dplyr::full_join(projects,path_tib,by="unit")
+
+projects <- dplyr::left_join(projects,path_tib,by="unit")
 
 # Sort by sort_col --------------------------------------------------------
 projects_sorted <- projects[order(unlist(projects[,sort_col]),decreasing=sort_decr),]
