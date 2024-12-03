@@ -98,6 +98,11 @@ upload_assets <- \(WD = "?",
       NA,
       "assets/_banners_logos_etc",
       "linkedin",
+      NA,
+      "10",
+      NA,
+      "assets/_banners_logos_etc",
+      "bluesky",
       NA
 
     )

@@ -6,11 +6,12 @@
 #' @param WD working directory; if "?" or "s" supplied, will get key values for all projects in the GP-Studio drive. "??" or "l" will get data for "GP-LIVE";  default="s"
 #' @param WD_git default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.
 #' @param as_tibble default=TRUE; try to force output into tibble
+#' @param exclude_TEST default=T; excludes test repositories
 #' @family batch functions
 #' @returns a list of values for the requested keys for each project on the given drive
 #' @export
 
-batch_get_fm <- \(key = NULL, WD = "s", WD_git = NULL,as_tibble=TRUE) {
+batch_get_fm <- \(key = NULL, WD = "s", WD_git = NULL,as_tibble=TRUE, exclude_TEST=TRUE) {
   if(sum(fs::is_absolute_path(WD))==length(WD)){
     projects <- WD
   }else{
@@ -18,7 +19,9 @@ batch_get_fm <- \(key = NULL, WD = "s", WD_git = NULL,as_tibble=TRUE) {
 }
   project_names <- basename(projects)
 
+  if(exclude_TEST){
   excluded <- c("TEST", "TEST2")
+  }else{excluded <- ""}
 
   WD_git_projects <- fs::path(get_wd_git(), "Lessons") %>% fs::dir_ls() %>% basename()
 

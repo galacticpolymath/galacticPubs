@@ -14,6 +14,7 @@
 #' @param sort_decr logical; sort by decreasing order? default= TRUE
 #' @param lessons_dir the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling [lessons_get_path()]
 #' @param pull_path logical; do you want to pull (and unlist) only the paths? default= TRUE. FALSE will return the tibble for the selected units
+#' @param exclude_TEST default=T; excludes test repositories
 #' @return the selected path, tibble, or string of names
 #' @export
 
@@ -24,7 +25,8 @@ pick_lesson <- function(shared_drive = "s",
                         sort_col = "LastUpdated",
                         sort_decr = TRUE,
                         lessons_dir = NULL,
-                        pull_path = TRUE) {
+                        pull_path = TRUE,
+                        exclude_TEST=TRUE) {
   if (is.null(lessons_dir)) {
     if(shared_drive=="sl"|shared_drive=="?!"){
       lessons_dir <- sapply(c("s","l"),\(x) lessons_get_path(shared_drive = x)) %>% unlist()
@@ -47,10 +49,11 @@ pick_lesson <- function(shared_drive = "s",
 
 
 # Lookup numID and publication date ---------------------------------------
-projects <- batch_get_fm(c("numID","ReleaseDate","LastUpdated"),projects0,as_tibble = TRUE)
+projects <- batch_get_fm(c("numID","ReleaseDate","LastUpdated"),projects0,as_tibble = TRUE,
+                         exclude_TEST = exclude_TEST)
 path_tib <- dplyr::tibble(unit =basename(projects0),path=projects0)
 #need to do a join, bc batch_get_fm filters out TEST repos
-projects <- dplyr::left_join(projects,path_tib,by="unit")
+projects <- dplyr::full_join(projects,path_tib,by="unit")
 
 # Sort by sort_col --------------------------------------------------------
 projects_sorted <- projects[order(unlist(projects[,sort_col]),decreasing=sort_decr),]

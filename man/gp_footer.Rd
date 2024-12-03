@@ -20,7 +20,8 @@ gp_footer(
   data_attrib_x = 0.75,
   logo = "black",
   fill_col = "#D3D3D3",
-  show_plot = TRUE
+  show_plot = TRUE,
+  clear_cache = FALSE
 )
 }
 \arguments{

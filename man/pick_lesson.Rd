@@ -13,7 +13,8 @@ pick_lesson(
   sort_col = "LastUpdated",
   sort_decr = TRUE,
   lessons_dir = NULL,
-  pull_path = TRUE
+  pull_path = TRUE,
+  exclude_TEST = TRUE
 )
 
 lesson_pick(
@@ -24,7 +25,8 @@ lesson_pick(
   sort_col = "LastUpdated",
   sort_decr = TRUE,
   lessons_dir = NULL,
-  pull_path = TRUE
+  pull_path = TRUE,
+  exclude_TEST = TRUE
 )
 }
 \arguments{
@@ -49,6 +51,8 @@ lesson_pick(
 \item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling \code{\link[=lessons_get_path]{lessons_get_path()}}}
 
 \item{pull_path}{logical; do you want to pull (and unlist) only the paths? default= TRUE. FALSE will return the tibble for the selected units}
+
+\item{exclude_TEST}{default=T; excludes test repositories}
 }
 \value{
 the selected path, tibble, or string of names

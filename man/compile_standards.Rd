@@ -12,7 +12,7 @@ compile_standards(WD = "?", targetSubj = NULL)
 \item{targetSubj}{which subject(s) are the focus of the lesson? opts= "math","ela","science","social studies"; default=NULL}
 }
 \value{
-list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
+list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'skip' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 }
 \description{
 Does the following:

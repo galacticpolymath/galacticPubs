@@ -181,6 +181,7 @@ newstr_is_oldstr<-new_ShortTitle==curr_ShortTitle
 newstr_is_substr<-grepl(new_ShortTitle,curr_ShortTitle,ignore.case = T)
 
 #Now add prefix to gsub pattern to just grab prefixes, if requested
+browser()
 if(only_rename_prefixes){
   curr_ShortTitle<-paste0("^",curr_ShortTitle)
 }

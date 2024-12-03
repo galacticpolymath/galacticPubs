@@ -4,7 +4,13 @@
 \alias{batch_get_fm}
 \title{get front-matter for a bunch of projects}
 \usage{
-batch_get_fm(key = NULL, WD = "s", WD_git = NULL, as_tibble = TRUE)
+batch_get_fm(
+  key = NULL,
+  WD = "s",
+  WD_git = NULL,
+  as_tibble = TRUE,
+  exclude_TEST = TRUE
+)
 }
 \arguments{
 \item{key}{which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'}
@@ -14,6 +20,8 @@ batch_get_fm(key = NULL, WD = "s", WD_git = NULL, as_tibble = TRUE)
 \item{WD_git}{default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.}
 
 \item{as_tibble}{default=TRUE; try to force output into tibble}
+
+\item{exclude_TEST}{default=T; excludes test repositories}
 }
 \value{
 a list of values for the requested keys for each project on the given drive

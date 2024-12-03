@@ -6,7 +6,7 @@
 
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); If you put "?", it will invoke [pick_lesson()]
 #' @param targetSubj which subject(s) are the focus of the lesson? opts= "math","ela","science","social studies"; default=NULL
-#' @return list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
+#' @return list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'skip' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 #' @export
 #'
 compile_standards <- function(WD = "?",
@@ -301,46 +301,49 @@ compile_standards <- function(WD = "?",
       }
 
 
-      # manage TBDs and flagged, undocumented alignments ------------------------
-      tbds <- grepl("tbd", a0$how, ignore.case = TRUE)
-      #a1 does not have records with lo_statements containing "TBD" or no entry for "how"
-      if (sum(tbds) > 0) {
+      # manage "skip" and flagged, undocumented alignments ------------------------
+      #useful if you have multiple locales aligned in same doc.
+      #skip one country's outputs in 1 version
+      skips <- grepl("skip", a0$how, ignore.case = TRUE)
+
+      if (sum(skips) > 0) {
         message(
-          "\nThe following were removed because Learning Objective documentation contained 'TBD':\n\t\u2022",
-          paste0(a0$code[tbds], collapse = "\n\t\u2022"),
+          "\nThe following were removed because Learning Objective documentation contained 'skip':\n\t\u2022",
+          paste0(a0$code[skips], collapse = "\n\t\u2022"),
           "\n"
         )
       } else{
-        tbds <- rep(FALSE, nrow(a0))
+        skips <- rep(FALSE, nrow(a0))
       }
 
       #undocumented alignments
-      #target says "skip" or no "how this lesson aligns"
+      #target has blank for "how this lesson aligns"
+
       undoc <-
-        (is.na(a0$how) &
-           is.na(a0$grp)) |
-        sapply(a0$target, function(x)
-          identical(x, "skip"), USE.NAMES = F)
+        (is.na(a0$how))
       #If you got more than 1 alignment, and they're just not documented yet, don't remove them, just report message
-      undoc_ok <- sum(undoc)==nrow(a0) & nrow(a0)>1
+      # undoc_ok <- sum(undoc)==nrow(a0) & nrow(a0)>1
+
+      #making undoc always ok
+      undoc_ok <- TRUE
 
       if (sum(undoc) > 0 & !undoc_ok) {
         message(
-          "\nThe following were removed because 'How does lesson align...' was blank or you said 'skip':\n\t\u2022",
+          "\nThe following were removed because 'How does lesson align...' was blank and undoc_ok=FALSE :\n\t\u2022",
           paste0(a0$code[undoc], collapse = "\n\t\u2022"),
           "\n"
         )
-        a1 <- a0[!undoc & !tbds,]
+        a1 <- a0[!undoc & !skips,]
       }else if(undoc_ok){
         message(
           "\nWe kept these aligned standards in, but they're NOT been documented! Fill in 'How does lesson align...' for:\n\t\u2022",
           paste0(a0$code[undoc], collapse = "\n\t\u2022"),
           "\n"
         )
-        a1 <- a0[ !tbds,]
+        a1 <- a0[ !skips,]
       }else{
         undoc <- rep(FALSE, nrow(a0))
-        a1 <- a0[!undoc & !tbds,]
+        a1 <- a0[!undoc & !skips,]
       }
 
 
@@ -356,6 +359,8 @@ compile_standards <- function(WD = "?",
       # a2$how <-
       #   ifelse(!grepl("^- ", a2$how), paste0("- ", a2$how), a2$how)
 
+      #Make sure any blanks have placeholder text
+      a2$how <- ifelse(is.na(a2$how),"'How Aligned' not yet documented.",a2$how)
 
 
 
@@ -590,7 +595,7 @@ compile_standards <- function(WD = "?",
         "\nStandards submitted:\t",
         nrow(a0),
         "\nRemoved due to issues:\t",
-        sum(tbds) + sum(undoc),
+        sum(skips) + sum(undoc),
         "\nSuccessfully compiled:\t",
         nrow(A),
         "\n"
@@ -751,7 +756,7 @@ compile_standards <- function(WD = "?",
         data = list(
           input = dplyr::as_tibble(a0),
           compiled = dplyr::as_tibble(A),
-          problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0, ]),
+          problem_entries = dplyr::as_tibble(a0[(skips + undoc) > 0, ]),
           gradeBand = gradeBand,
           list_for_json = out
         ),
@@ -778,7 +783,7 @@ compile_standards <- function(WD = "?",
         test_json <- save_json(out, json_saveFile) %>% catch_err()
 
         problem_entries <-
-          dplyr::as_tibble(a0[(tbds + undoc) > 0, ])
+          dplyr::as_tibble(a0[(skips + undoc) > 0, ])
         #need to build better checks than this
         success <-  TRUE
       }
