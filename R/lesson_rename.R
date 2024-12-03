@@ -159,7 +159,7 @@ message(
   )
 )
 continue <- readline("(y/n) > ")
-if(continue%in%c("N","n")){
+if(!tolower(continue)=="y"){
   stop("Renaming Canceled")
 }
 
@@ -183,14 +183,14 @@ newstr_is_oldstr<-new_ShortTitle==curr_ShortTitle
 newstr_is_substr<-grepl(new_ShortTitle,curr_ShortTitle,ignore.case = T)
 
 #Now add prefix to gsub pattern to just grab prefixes, if requested
-browser()
 if(only_rename_prefixes){
-  curr_ShortTitle<-paste0("^",curr_ShortTitle)
+  #suffix has a positive lookahead so it will ignore the .gsheet filetype
+  curr_ShortTitle<-paste0("^",curr_ShortTitle,"|",curr_ShortTitle,"(?=\\..*?$)")
 }
 
 #capture all change_logs
 change_log<-NULL
-browser()
+
 #Don't do this renaming if the strings are the same
 if(newstr_is_oldstr) {
   message("No file names to change")
@@ -345,7 +345,7 @@ if(proceed){
 
   test_update_fm<-
     catch_err(update_fm(WD_git=WD_git,change_this = change_this2,
-      drive_reconnect=TRUE))
+      drive_reconnect=TRUE,try_harder = TRUE))
 }else{
   test_update_fm<-FALSE
 }
@@ -355,8 +355,9 @@ if(proceed){
 #'
 
 # 6. rename on gp_catalog through API -------------------------------------
-test_delete_catalog <- gp_api_unit_delete(unit_id=y$`_id`) %>% catch_err()
-test_insert_catalog <- gp_api_unit_insert(WD=new_proj_dir) %>% catch_err()
+message("Renaming the unit through the GP Catalog API:\n FROM> ",curr_proj_name,"\n TO> ",new_proj_name)
+test_delete_catalog <- gp_api_unit_delete(unit_id=y$`_id`,verbosity = 3) %>% catch_err()
+test_insert_catalog <- gp_api_unit_insert(WD=new_proj_dir,verbosity = 3) %>% catch_err()
 
 # # 8.   Delete orphaned catalog entry if it exists -------------------------
 # if(!just_files & newstr_is_oldstr){
