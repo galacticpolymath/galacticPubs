@@ -21,6 +21,7 @@
 #' @param preserve_spaces if some files have a space in the 'Short Title', do you want to preserve this? default=FALSE
 #' @param run_check_wd logical; do you want to run [check_wd()]? Basically looks for files and folders you expect in a valid lesson project. default=TRUE
 #' @param force_init_capital do you want to force the output to start with a capital letter? default=FALSE
+#' @param exclude_TEST default=T; excludes test repositories. Passed to [pick_lesson()]
 #' @export
 #'
 
@@ -33,7 +34,8 @@ lesson_rename <- function(new_ShortTitle,
                           only_rename_prefixes = TRUE,
                           preserve_spaces = FALSE,
                           run_check_wd = TRUE,
-                          force_init_capital = TRUE) {
+                          force_init_capital = TRUE,
+                          exclude_TEST=TRUE) {
 
   if(missing(new_ShortTitle)&missing(new_proj_name)){
     stop("Must supply new_ShortTitle or new_proj_name")
@@ -45,7 +47,7 @@ lesson_rename <- function(new_ShortTitle,
   #This would allow recovering a partially renamed unit
 # 0.  Checks and validation -----------------------------------------------
 
-  WD <- parse_wd(WD)
+  WD <- parse_wd(WD,exclude_TEST=exclude_TEST)
   WD0 <- WD #backup
 
   #double check that WD looks like a valid lesson directory

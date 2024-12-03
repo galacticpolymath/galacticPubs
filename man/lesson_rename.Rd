@@ -14,7 +14,8 @@ lesson_rename(
   only_rename_prefixes = TRUE,
   preserve_spaces = FALSE,
   run_check_wd = TRUE,
-  force_init_capital = TRUE
+  force_init_capital = TRUE,
+  exclude_TEST = TRUE
 )
 }
 \arguments{
@@ -42,6 +43,8 @@ lesson_rename(
 \item{run_check_wd}{logical; do you want to run \code{\link[=check_wd]{check_wd()}}? Basically looks for files and folders you expect in a valid lesson project. default=TRUE}
 
 \item{force_init_capital}{do you want to force the output to start with a capital letter? default=FALSE}
+
+\item{exclude_TEST}{default=T; excludes test repositories. Passed to \code{\link[=pick_lesson]{pick_lesson()}}}
 }
 \description{
 Scenario where working title changes midway through project development. Don't run this from the RStudio session of the lesson you want to rename! Does several things:

@@ -4,10 +4,12 @@
 \alias{parse_wd}
 \title{parse_wd}
 \usage{
-parse_wd(str = NULL)
+parse_wd(str = NULL, ...)
 }
 \arguments{
 \item{str}{is a string supplied as the WD parameter in a galacticPubs function. Often "?"}
+
+\item{...}{other parameters passed to \code{\link[=pick_lesson]{pick_lesson()}}}
 }
 \value{
 if str is not "?" or "??", it will return str. Otherwise, returns the result of \code{\link[=pick_lesson]{pick_lesson()}}
