@@ -49,7 +49,8 @@ pick_lesson <- function(shared_drive = "s",
 
 
 # Lookup numID and publication date ---------------------------------------
-projects <- batch_get_fm(c("numID","ReleaseDate","LastUpdated"),projects0,as_tibble = TRUE,
+projects <- batch_get_fm(c("numID","ReleaseDate","LastUpdated"),projects0,
+                         output_tibble = TRUE,
                          exclude_TEST = exclude_TEST)
 path_tib <- dplyr::tibble(unit =basename(projects0),path=projects0)
 

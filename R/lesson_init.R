@@ -89,6 +89,7 @@ lesson_init <- \(recover=FALSE,WD="?") {
       paste_valid(x, teach_mat_suffix)
     })
   #Full path to the teaching material_environment folder(s)
+  browser()
   teach_mat_dir <-
     fs::path(WD, "teaching-materials", teach_mat_envir_dirs)
 

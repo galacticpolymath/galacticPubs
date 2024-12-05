@@ -8,7 +8,7 @@ batch_get_fm(
   key = NULL,
   WD = "s",
   WD_git = NULL,
-  as_tibble = TRUE,
+  output_tibble = TRUE,
   exclude_TEST = TRUE
 )
 }
@@ -19,7 +19,7 @@ batch_get_fm(
 
 \item{WD_git}{default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.}
 
-\item{as_tibble}{default=TRUE; try to force output into tibble}
+\item{output_tibble}{default=TRUE; try to force output into tibble}
 
 \item{exclude_TEST}{default=T; excludes test repositories}
 }

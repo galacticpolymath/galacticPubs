@@ -15,6 +15,7 @@ lesson_init_helper <- function(){
 
 #need to write logic to assign the next number to this lesson
 #For now, this should work
+browser()
 next_num <- batch_get_fm("numID") %>% unlist() %>% max(na.rm=TRUE)+1
   # numIDs <- gp_api_query(keys="numID") %>% unlist() %>% as.integer()
   # #filter out the following TEST numbers

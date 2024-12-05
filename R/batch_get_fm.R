@@ -5,46 +5,78 @@
 #' @param key which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'
 #' @param WD working directory; if "?" or "s" supplied, will get key values for all projects in the GP-Studio drive. "??" or "l" will get data for "GP-LIVE";  default="s"
 #' @param WD_git default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.
-#' @param as_tibble default=TRUE; try to force output into tibble
+#' @param output_tibble default=TRUE; try to force output into tibble
 #' @param exclude_TEST default=T; excludes test repositories
 #' @family batch functions
 #' @returns a list of values for the requested keys for each project on the given drive
 #' @export
 
-batch_get_fm <- \(key = NULL, WD = "s", WD_git = NULL,as_tibble=TRUE, exclude_TEST=TRUE) {
-  if(sum(fs::is_absolute_path(WD))==length(WD)){
+batch_get_fm <- \(
+  key = NULL,
+  WD = "s",
+  WD_git = NULL,
+  output_tibble = TRUE,
+  exclude_TEST = TRUE
+) {
+  if (sum(fs::is_absolute_path(WD)) == length(WD)) {
     projects <- WD
-  }else{
-  projects <- pick_lesson(shared_drive = WD, pick_all = TRUE)
-}
+  } else{
+    #recursive call to get all lessons
+    projects <- pick_lesson(shared_drive = WD, pick_all = TRUE)
+  }
   project_names <- basename(projects)
 
-  if(exclude_TEST){
-  excluded <- c("TEST", "TEST2")
-  }else{excluded <- ""}
+  if (exclude_TEST) {
+    excluded <- c("TEST", "TEST2")
+  } else{
+    excluded <- ""
+  }
 
   WD_git_projects <- fs::path(get_wd_git(), "Lessons") %>% fs::dir_ls() %>% basename()
 
   invalid_projects <- project_names[!project_names %in% WD_git_projects]
 
-  if(length(invalid_projects)>0){
-    message("Error: The following projects in Gdrive did not have Git 'gp-lessons' equivalent:\n- ",paste0(invalid_projects,collapse="\n- "))
+  if (length(invalid_projects) > 0) {
+    message(
+      "Error: The following projects in Gdrive did not have Git 'gp-lessons' equivalent:\n- ",
+      paste0(invalid_projects, collapse = "\n- ")
+    )
   }
 
   valid_projects <-
     projects[which(!project_names %in% excluded &
                      !project_names %in% invalid_projects)]
 
-  res <- purrr::map(1:length(valid_projects), \(i) {
-    get_fm(key = key, WD = valid_projects[i])
+  res0 <-  purrr::map(1:length(valid_projects), \(i) {
+    out <- get_fm(key = key, WD = valid_projects[i])
+    #handle scenario where output is a single vector
+    if(length(out)==1){
+      out <- dplyr::as_tibble(out)
+      names(out) <- key
+    }
+    unit_name <- valid_projects[i] %>% basename()
+    #output as tibble as long as specific keys are supplied (it gets unwieldy otherwise)
+    if (output_tibble & !is.null(key)) {
+      out <- dplyr::as_tibble(out) %>%
+        dplyr::mutate(unit = unit_name) %>%
+        dplyr::relocate("unit")
+    } else{
+      out <- c(unit = unit_name, out)
+    }
+    out
   })
-  names(res) <- basename(valid_projects)
 
-  if(as_tibble){
-    res0 <- res
-    unit_names <- dplyr::tibble(unit=names(res))
-    entries <- purrr::map(res0,~as.data.frame(.x)) %>% dplyr::bind_rows()
-    res <- dplyr::bind_cols(unit_names, entries )
+
+  if (output_tibble & !is.null(key)) {
+    res <- dplyr::bind_rows(res0)
+  } else{
+    #add names back to list
+    res <- res0
+    names(res) <- basename(valid_projects)
+  }
+
+  if (is.null(key) & output_tibble) {
+    message("batch_get_fm()|Outputting as list. Can't coerce to tibble if key not supplied.")
   }
 
   res
