@@ -266,13 +266,14 @@ compile_teach_it <- function(WD = "?",
 
   } else{
     tlinks <-
-      tlinks0 %>% dplyr::mutate(
-        `_lsn` = NA,
-        lsnTitle = NA,
-        lsnPreface = NA,
-        lsnGradeVarNotes = NA,
-        actTags = NA
-      )
+      tlinks0
+    # %>% dplyr::mutate(
+    #     `_lsn` = NA,
+    #     lsnTitle = NA,
+    #     lsnPreface = NA,
+    #     lsnGradeVarNotes = NA,
+    #     actTags = NA
+    #   )
   }
 
   # Multimedia --------------------------------------------------------------

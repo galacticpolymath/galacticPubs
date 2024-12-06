@@ -168,10 +168,12 @@ update_teach_links <- function(WD = "?",
       if (nrow(dir_i_subfolders) > 0) {
         dir_i_subfolders_info <-
           lapply(1:nrow(dir_i_subfolders), function(ii) {
+            lsn_i <- stringr::str_extract(dir_i_subfolders$name[ii],"^.(\\d*)",group=1)
             out_ii <- update_teach_links_lsnHelper(
               dribble = dir_i_subfolders[ii, ],
               set_grades = dir_i_info$`_grades`,
-              set_envir = envir_type
+              set_envir = envir_type,
+              set_lsn= lsn_i
             )
             out_ii
           }) %>% dplyr::bind_rows()
@@ -338,6 +340,7 @@ update_teach_links <- function(WD = "?",
 
   # Begin logic for clean parameter (merge or overwrite .gsheet?-----------------
   if (clean) {
+
     #Assign the inferred data for output if clean==T
     #Do hard_left_join on empty teach_it_in0 to keep .gsheet structure,
     #but none of the data; sort

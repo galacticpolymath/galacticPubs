@@ -76,7 +76,8 @@ lesson_init <- \(recover=FALSE,WD="?") {
       "_orig-client-media_NoEdit",
       "_other-media-to-publish",
       "_R_outputs",
-      "_videos-for-this-unit"
+      "_videos-for-this-unit",
+      "_public"
     )
   asset_dirs <- c(fs::path(WD, "assets", asset_subdir))
 
@@ -89,9 +90,12 @@ lesson_init <- \(recover=FALSE,WD="?") {
       paste_valid(x, teach_mat_suffix)
     })
   #Full path to the teaching material_environment folder(s)
-  browser()
+
   teach_mat_dir <-
     fs::path(WD, "teaching-materials", teach_mat_envir_dirs)
+
+  #Add Assessment folder
+  assess_dir <- fs::path(teach_mat_dir,"assessments")
 
   #Add Subfolders with Lx if we've specified more than 1 lesson in this unit
   if (inputs$LsnCount > 1) {
@@ -116,7 +120,7 @@ lesson_init <- \(recover=FALSE,WD="?") {
 
 
   # Now Create all subfolders -----------------------------------------------
-  all_paths <- c(asset_dirs, teach_dirs, other_dirs)
+  all_paths <- c(asset_dirs, teach_dirs,assess_dir, other_dirs)
   WD_success <-
     fs::dir_create(all_paths, recurse = TRUE) %>% catch_err()
 
@@ -136,7 +140,7 @@ lesson_init <- \(recover=FALSE,WD="?") {
   if (!WD_git_success) {
     init_fm_success <- FALSE
   } else{
-    init_fm_success <- init_fm(WD_git = WD_git) %>% catch_err()
+    init_fm_success <- init_fm(WD_git = WD_git) %>% catch_err(try_harder = T)
 
   }
 
@@ -145,6 +149,7 @@ lesson_init <- \(recover=FALSE,WD="?") {
   #Now update it if front-matter.yml created
   if (!init_fm_success) {
     update_fm_success <- FALSE
+    message("init_fm() failed!")
   } else{
     #change front-matter.yml using matched inputs in the helper app
     fm_names <- get_fm_names()

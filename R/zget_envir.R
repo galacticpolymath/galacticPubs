@@ -11,6 +11,7 @@
 
 # Define f(x)s for extracting nested teach-mat info -----------------------
 zget_envir <- \(df, fm) {
+
   envirs <-
     unique_sans_na(df$`_envir`) %>% tolower() %>% sort()
   #Assessments aren't a real environment; we want to concat this info to the end of lsns for each envir
@@ -157,6 +158,7 @@ zget_lessons <- \(df, fm) {
     #make it resilient if there's only 1 implied lsn
     lessons <- "1"
   }
+  browser()
   out <- lessons %>%
     #map across all lessons
     purrr::map(., \(lsn_i) {
@@ -226,6 +228,7 @@ zget_items <- \(df, fm) {
   status <- fm$PublicationStatus
 
   #map across all lsns
+  if(item_counter>0){
   out <-  purrr::map(item_counter, \(i) {
     #Get info for the subfolder
     df_item_i <- df[i, ]
@@ -328,7 +331,9 @@ zget_items <- \(df, fm) {
 
   })
   out
-
+  }else{
+  out <-NULL
+  message("zget_items(): No Items found.")}
 }
 
 
