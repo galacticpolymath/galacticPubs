@@ -158,7 +158,7 @@ zget_lessons <- \(df, fm) {
     #make it resilient if there's only 1 implied lsn
     lessons <- "1"
   }
-  browser()
+
   out <- lessons %>%
     #map across all lessons
     purrr::map(., \(lsn_i) {
@@ -185,6 +185,8 @@ zget_lessons <- \(df, fm) {
         lsn_i_tags <- stringr::str_split(lsn_i_tags0, ",") %>% unlist() %>% stringr::str_trim()
       }
 
+      items_i <- zget_items(df=df_lsn_i, fm = fm)
+
       #output for this lesson
       list(
         lsn = lsn_i,
@@ -192,7 +194,7 @@ zget_lessons <- \(df, fm) {
         tags = list(lsn_i_tags),
         preface = df_lsn_i$lsnPreface[1],
         tile = tile_i,
-        itemList = zget_items(df_lsn_i, fm = fm)
+        itemList = items_i
       )
 
 
@@ -228,7 +230,7 @@ zget_items <- \(df, fm) {
   status <- fm$PublicationStatus
 
   #map across all lsns
-  if(item_counter>0){
+  if(length(item_counter)>0){
   out <-  purrr::map(item_counter, \(i) {
     #Get info for the subfolder
     df_item_i <- df[i, ]

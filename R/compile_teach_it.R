@@ -346,6 +346,7 @@ compile_teach_it <- function(WD = "?",
 
   # Extract majority of Teach-It data ---------------------------------------
   #Get item links for each environment*gradeBand
+
   teach_mat_data <- zget_envir(tlinks, fm = fm)
 
   if (!proc_initialized) {

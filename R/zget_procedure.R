@@ -94,10 +94,14 @@ if(is.null(WD_git)){
 
     #make sure each row has an = sign
     has_equal <- grepl(pattern = "=",vocab_df0$x)
+    has_too_many_equal <- grepl(pattern = "=.*=",vocab_df0$x)
 
     if(sum(!has_equal)>0){
       stop("The following vocab entries don't have an = sign:\n -",
            paste0(vocab_df0[!has_equal,"x"]))
+    }else if(sum(has_too_many_equal)>0){
+      stop("The following vocab entries have more than one = sign per line. Need to make a new line inside the cell with ALT + ENTER. :\n -",
+           paste0(vocab_df0[has_too_many_equal,"x"]))
     }
 
     vocab_df <- vocab_df0 %>%
@@ -107,7 +111,7 @@ if(is.null(WD_git)){
       names = c("term", "definition")
     ) %>%
       #remove repeated definitions, in case repeated in procedure
-      dplyr::distinct(.data$term, .keep_all = T)
+      dplyr::distinct(.data$term, .keep_all = T) %>% catch_err(keep_results=TRUE)
 
     #Parse vocab for Procedure section (change shorthand into reasonably formatted markdown with bullets)
     proc$Vocab <- formatVocab(proc$Vocab)
