@@ -9,6 +9,7 @@
 #' @param WD working directory, passed to [parse_wd()];default="?"
 #' @param prompt_user logical; ask user before deleting and replacing the unit? default=TRUE
 #' @param dev logical; default (NULL) modifies both production and dev gp-catalogs. FALSE modifies the production gp-catalog. TRUE modifies only the dev catalog. supplying c(TRUE,TRUE) is the same as NULL
+#' @param verbosity passed to [httr2::req_perform()]; default=1
 #' @param print_output logical; print result to user? default=TRUE
 #' @family GP API
 #' @export
@@ -18,6 +19,7 @@ gp_api_unit_replace <- \(
   WD = "?",
   prompt_user = TRUE,
   dev = NULL,
+  verbosity=1,
   print_output = TRUE
 ) {
   WD <- parse_wd(WD)
@@ -44,14 +46,16 @@ gp_api_unit_replace <- \(
       gp_api_unit_replace(WD = WD,
                           prompt_user = prompt_user,
                           dev = dev[1],
-                          print_output=FALSE)#only prompt once max
+                          print_output=FALSE,
+                          verbosity=verbosity)#only prompt once max
     success_dev <- result_dev$success
 
     result_prod <-
       gp_api_unit_replace(WD = WD,
                           prompt_user = FALSE,
                           dev = dev[2],
-                          print_output=FALSE)
+                          print_output=FALSE,
+                          verbosity=verbosity)
     success_prod <- result_prod$success
 
     comb_success <- success_dev & success_prod
@@ -81,6 +85,7 @@ gp_api_unit_replace <- \(
       unit_id = id,
       prompt_user = prompt_user,
       dev = dev,
+      verbosity=verbosity,
       WD = WD
     )
 
@@ -88,7 +93,7 @@ gp_api_unit_replace <- \(
       message("Deletion failed for ", id)
       test_insert <- FALSE
     } else{
-      test_insert <- gp_api_unit_insert(WD = WD, dev = dev)
+      test_insert <- gp_api_unit_insert(WD = WD, dev = dev,verbosity=verbosity)
 
     }
 

@@ -6,11 +6,13 @@
 #' - "s" or "?" = GP-Studio (draft working directory, many users with access)
 #' - "l" or "??" = GP-Live (private, admin only)
 #' @param dev logical; if NULL (default), updates both production and dev catalogs. FALSE=just production; TRUE=just dev.
+#' @param verbosity passed to [httr2::req_perform()]; default=1
 #' @export
 #'
 
 gp_api_batch_unit_replace <- \(shared_drive = "?",
-                               dev = NULL) {
+                               dev = NULL,
+                               verbosity=1) {
   if (requireNamespace("tictoc")) {
     tictoc::tic()
     timer <- TRUE
@@ -25,7 +27,7 @@ gp_api_batch_unit_replace <- \(shared_drive = "?",
     replace_success <-
       gp_api_unit_replace(WD = WD,
                           prompt_user = ask_once,
-                          dev=dev)
+                          dev=dev,verbosity=verbosity)
 
     replace_success
   })

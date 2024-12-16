@@ -7,10 +7,11 @@
 #' @param commit_msg Deprecated; What do you want to say about this update? Default= "automated galacticPubs::publish()"
 #' @param prompt_user logical; do you want to ask user for confirmation before doing things? default=TRUE
 #' @param dev logical; if FALSE, gets catalog from the production gp-catalog. Otherwise, from the dev catalog. NULL (default) will apply to both dev and prod catalogs.
+#' @param verbosity passed to [httr2::req_perform()]; default=1
 #'
 #' @export
 
-publish <- function(WD = "?", recompile=FALSE, commit_msg = NULL, prompt_user=TRUE,dev=NULL ) {
+publish <- function(WD = "?", recompile=FALSE, commit_msg = NULL, prompt_user=TRUE,dev=NULL,verbosity=1 ) {
   dev0 <- dev
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD=WD)
@@ -27,7 +28,7 @@ publish <- function(WD = "?", recompile=FALSE, commit_msg = NULL, prompt_user=TR
 # update front matter, unless recompile queued-----------------------------------------------------
 
 if(recompile){
-  test_compile <- compile_lesson(WD=WD)
+  test_compile <- compile_lesson(WD=WD,rebuild = rebuild)
   test_update <- NA
 }else{
   test_compile <- NA
@@ -53,7 +54,7 @@ if(recompile){
     exists_online <- length(gp_api_query(id = fm_id,dev = dev_i) ) >0
     if(!exists_online){
       message("**",fm_id," '",fm$ShortTitle,"' NOT found in ",cat_type," Catalog.\n***Inserting new record...\n")
-      insert_success <- gp_api_unit_insert(WD=WD,dev = dev_i)
+      insert_success <- gp_api_unit_insert(WD=WD,dev = dev_i,verbosity=verbosity)
       #assume insert_successful, don't replace, return NA
       out <- NA
     }else{
@@ -67,7 +68,7 @@ if(recompile){
   dev_to_replace <- ifelse(cat_to_replace=="DEV",TRUE,FALSE) %>% unique_sans_na()
 
   if(length(dev_to_replace)>0){
-    gp_api_unit_replace(WD=WD,dev=dev_to_replace)
+    gp_api_unit_replace(WD=WD,dev=dev_to_replace,verbosity=verbosity)
   }
 
 

@@ -36,6 +36,9 @@ gpsave <- function(filename,
   }
   fn <- fs::path(WD, "assets", "_R_outputs", filename)
 
+  checkmate::test_class(obj,c( "graf_w_footer","ggplot"))
+    stop("The object must be either a ggplot or a grob.")
+
   # Set default width if no dims supplied
   if(is.null(height) & is.null(width)) {
     width = 7
@@ -49,29 +52,29 @@ gpsave <- function(filename,
     width = height * aspect
   }
 
-  # Determine if the object is a ggplot
-  if (inherits(obj, "ggplot")) {
-    # If it's a ggplot, use ggsave
-    test_save <- ggplot2::ggsave(
-      filename = fn,
-      plot = obj,
-      width = width,
-      height = height,
-      units=units,
-      dpi = dpi,
-      bg = bg,
-      ...
-    ) %>% catch_err()
-# Determine if is an output of gp_footer that is a grid object
-  } else if (inherits(obj, "graf_w_footer")) {
+#   # Determine if the object is a ggplot
+#   if (inherits(obj, "ggplot")) {
+#     # If it's a ggplot, use ggsave
+#     test_save <- ggplot2::ggsave(
+#       filename = fn,
+#       plot = obj,
+#       width = width,
+#       height = height,
+#       units=units,
+#       dpi = dpi,
+#       bg = bg,
+#       ...
+#     ) %>% catch_err()
+# # Determine if is an output of gp_footer that is a grid object
+#   } else if (inherits(obj, "graf_w_footer")) {
+
     # If it's a grob, use png()
-    png(filename = fn, width = width, height = height, res = dpi, bg = bg,units=units)
+    {
+    png(filename = fn, width = width, height = height, res = dpi, bg = bg,units=units,type="quartz")
     plot(obj)
     dev.off()
-    test_save <- TRUE
-  } else {
-    stop("The object must be either a ggplot or a grob.")
-  }
+    } %>% catch_err()
+
 
   # Check if save was successful
   if (test_save) {

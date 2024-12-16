@@ -8,6 +8,7 @@ gp_api_unit_replace(
   WD = "?",
   prompt_user = TRUE,
   dev = NULL,
+  verbosity = 1,
   print_output = TRUE
 )
 }
@@ -17,6 +18,8 @@ gp_api_unit_replace(
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 
 \item{dev}{logical; default (NULL) modifies both production and dev gp-catalogs. FALSE modifies the production gp-catalog. TRUE modifies only the dev catalog. supplying c(TRUE,TRUE) is the same as NULL}
+
+\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
 
 \item{print_output}{logical; print result to user? default=TRUE}
 }

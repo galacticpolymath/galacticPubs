@@ -9,7 +9,8 @@ publish(
   recompile = FALSE,
   commit_msg = NULL,
   prompt_user = TRUE,
-  dev = NULL
+  dev = NULL,
+  verbosity = 1
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ publish(
 \item{prompt_user}{logical; do you want to ask user for confirmation before doing things? default=TRUE}
 
 \item{dev}{logical; if FALSE, gets catalog from the production gp-catalog. Otherwise, from the dev catalog. NULL (default) will apply to both dev and prod catalogs.}
+
+\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
 }
 \description{
 Update the unit locally with \code{\link[=update_fm]{update_fm()}} and online. Will update the online catalog according to whether it already exists using helpers \code{\link[=gp_api_unit_insert]{gp_api_unit_insert()}} or \code{\link[=gp_api_unit_replace]{gp_api_unit_replace()}}

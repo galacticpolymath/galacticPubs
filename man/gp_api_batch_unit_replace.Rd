@@ -4,7 +4,7 @@
 \alias{gp_api_batch_unit_replace}
 \title{batch replace units}
 \usage{
-gp_api_batch_unit_replace(shared_drive = "?", dev = NULL)
+gp_api_batch_unit_replace(shared_drive = "?", dev = NULL, verbosity = 1)
 }
 \arguments{
 \item{shared_drive}{passed to \code{\link[=pick_lesson]{pick_lesson()}} which shared drive do you want to find the lessons in? default= "s" Options:
@@ -14,6 +14,8 @@ gp_api_batch_unit_replace(shared_drive = "?", dev = NULL)
 }}
 
 \item{dev}{logical; if NULL (default), updates both production and dev catalogs. FALSE=just production; TRUE=just dev.}
+
+\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
 }
 \description{
 Deletes and replaces the selected units
