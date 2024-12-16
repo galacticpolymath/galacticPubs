@@ -12,9 +12,10 @@
 #' @param data_attrib_scale default=0.6 from 0 to 1, how much smaller to scale attribution text?
 #' @param data_attrib_x where do you want to place the right edge of the data attribution text (0 to 1); default= 0.75
 #' @param logo default="black"; which GP logo do you want to use?
+#' @param logo_scale on a scale of 0 to 1 (npc units), how high to make the logo in footer? default=0.7
 #' @param border_col_graph color of border around main plot. default="#363636"; put "transparent" to remove border
 #' @param border_col_foot color of border around plot footer. default="#363636"; put "transparent" to remove border
-#' @param fill_col fill color for caption at bottom; default is gpColors("sparkle white")
+#' @param fill_col fill color for caption at bottom; default is "gray90"
 #' @param show_plot logical; plot resulting figure? default=T
 #'
 #' @export
@@ -35,7 +36,8 @@ gp_footer <- function(obj,
                       data_attrib_scale = 0.9,
                       data_attrib_x=0.75,
                       logo = "black",
-                      fill_col = "#D3D3D3",
+                      logo_scale=0.7,
+                      fill_col = "gray90",
                       show_plot = TRUE,
                       clear_cache=FALSE) {
 
@@ -74,7 +76,7 @@ gp_footer <- function(obj,
   logo_png <- png::readPNG(logo_path, native = TRUE)
 
   # Set logo height proportional to text size
-  logo_height <- grid::unit(text_size * 1.2, "points")  # Adjust multiplier for finer control
+  logo_height <- grid::unit(1 * logo_scale, "npc")  # Adjust multiplier for finer control
 
   logo_grob <- grid::rasterGrob(
     logo_png,
@@ -139,88 +141,3 @@ gp_footer <- function(obj,
 
 
 
-
-#Old code written by Matt that doesn't play well with ggplot
-#
-# gp_footer <-
-#   function(obj,
-#            caption=NULL,
-#            x = 0.01,
-#            y = 0.05,
-#            text_size = 9,
-#            border_col="black",
-#            text_col = "#363636",
-#            data_attrib = NULL,
-#            data_attrib_scale = 0.9,
-#            logo = "black",
-#            fill_col = gpColors("sparkle"),
-#            show_plot=TRUE) {
-#     checkmate::assert_choice(logo, "black")
-#
-#     logo_fullname = switch(logo, black = "GP_horiz_logo+wordmark_black.png")
-#     logo_url <- paste0("https://storage.googleapis.com/gp-cloud/logos/",
-#                        logo_fullname)
-#     logo_png <-
-#       png::readPNG(RCurl::getURLContent(logo_url), native = T)
-#
-#
-#     # Capture all output ------------------------------------------------------
-#     G <- grid::grid.grabExpr({
-#       ###Plot background object
-#       grid::grid.draw(obj)
-#
-#       #Make background for plot
-#       grid::grid.rect(
-#         x = .5,
-#         y = 0,
-#         width = 1,
-#         height = y,
-#         just = "bottom",
-#         gp = grid::gpar(
-#           col=border_col,
-#           fill = fill_col)
-#       ) #"#090816"
-#
-#       # grid::grid.lines(
-#       #   x = c(0, 1),
-#       #   y = c(.06, .06),
-#       #   gp = grid::gpar(col = "white")
-#       # )
-#       if (!is.null(caption)) {
-#         grid::grid.text(
-#           label = caption,
-#           x = x,
-#           y = y / 2,
-#           just = c("left", "center"),
-#           gp = grid::gpar(
-#             col = text_col,
-#             fontsize = text_size,
-#             font = 2
-#           )
-#         )
-#       }
-#
-#       if (!is.null(data_attrib)) {
-#         grid::grid.text(
-#           label = paste0("Data: ", data_attrib),
-#           x = 0.75,
-#           y = y / 2,
-#           just = c("right", "center"),
-#           gp = grid::gpar(col = text_col, fontsize = text_size * data_attrib_scale)
-#         )
-#       }
-#
-#       grid::grid.raster(
-#         logo_png,
-#         x = grid::unit(0.98, "npc"),
-#         y = grid::unit(y / 2, "npc"),
-#         height = grid::unit(y * 0.6, "npc"),
-#         just = c("right", "center")
-#       )
-#     })
-#     if(show_plot){
-#     grid::grid.draw(G)
-#     }
-#     G
-#
-#   }

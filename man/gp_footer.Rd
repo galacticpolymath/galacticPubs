@@ -19,6 +19,7 @@ gp_footer(
   data_attrib_scale = 0.9,
   data_attrib_x = 0.75,
   logo = "black",
+  logo_scale = 0.7,
   fill_col = "#D3D3D3",
   show_plot = TRUE,
   clear_cache = FALSE
@@ -46,6 +47,8 @@ gp_footer(
 \item{data_attrib_x}{where do you want to place the right edge of the data attribution text (0 to 1); default= 0.75}
 
 \item{logo}{default="black"; which GP logo do you want to use?}
+
+\item{logo_scale}{on a scale of 0 to 1 (npc units), how high to make the logo in footer? default=0.7}
 
 \item{fill_col}{fill color for caption at bottom; default is gpColors("sparkle white")}
 

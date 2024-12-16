@@ -27,20 +27,22 @@ gpsave <- function(filename,
                    dpi = 300,
                    open = FALSE,
                    bg = "transparent",
-                   units="in",
+                   units = "in",
                    ...) {
   WD = parse_wd(WD)
 
-  if(is.null(obj)){
+  if (is.null(obj)) {
     message("You might need to specify 'obj'")
   }
   fn <- fs::path(WD, "assets", "_R_outputs", filename)
 
-  checkmate::test_class(obj,c( "graf_w_footer","ggplot"))
+  isgraf <- inherits(obj, what=c("graf_w_footer", "ggplot"))
+  if (!isgraf) {
     stop("The object must be either a ggplot or a grob.")
+  }
 
   # Set default width if no dims supplied
-  if(is.null(height) & is.null(width)) {
+  if (is.null(height) & is.null(width)) {
     width = 7
   }
 
@@ -52,35 +54,49 @@ gpsave <- function(filename,
     width = height * aspect
   }
 
-#   # Determine if the object is a ggplot
-#   if (inherits(obj, "ggplot")) {
-#     # If it's a ggplot, use ggsave
-#     test_save <- ggplot2::ggsave(
-#       filename = fn,
-#       plot = obj,
-#       width = width,
-#       height = height,
-#       units=units,
-#       dpi = dpi,
-#       bg = bg,
-#       ...
-#     ) %>% catch_err()
-# # Determine if is an output of gp_footer that is a grid object
-#   } else if (inherits(obj, "graf_w_footer")) {
+  #   # Determine if the object is a ggplot
+  #   if (inherits(obj, "ggplot")) {
+  #     # If it's a ggplot, use ggsave
+  #     test_save <- ggplot2::ggsave(
+  #       filename = fn,
+  #       plot = obj,
+  #       width = width,
+  #       height = height,
+  #       units=units,
+  #       dpi = dpi,
+  #       bg = bg,
+  #       ...
+  #     ) %>% catch_err()
+  # # Determine if is an output of gp_footer that is a grid object
+  #   } else if (inherits(obj, "graf_w_footer")) {
 
-    # If it's a grob, use png()
-    {
-    png(filename = fn, width = width, height = height, res = dpi, bg = bg,units=units,type="quartz")
+  # If it's a grob, use png()
+  test_save <- {
+    png(
+      filename = fn,
+      width = width,
+      height = height,
+      res = dpi,
+      bg = bg,
+      units = units,
+      type = "quartz"
+    )
     plot(obj)
     dev.off()
-    } %>% catch_err()
+  } %>% catch_err()
 
 
   # Check if save was successful
   if (test_save) {
     message("@Saved: ", fn)
-    message("with width=", round(width, 2), "  height=", round(height, 2), "  aspect=",
-            MASS::fractions(width / height))
+    message(
+      "with width=",
+      round(width, 2),
+      "  height=",
+      round(height, 2),
+      "  aspect=",
+      MASS::fractions(width / height)
+    )
     if (open) {
       system(sprintf('open %s', shQuote(fn)))
     }
