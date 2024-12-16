@@ -344,6 +344,7 @@ update_teach_links <- function(WD = "?",
     #Assign the inferred data for output if clean==T
     #Do hard_left_join on empty teach_it_in0 to keep .gsheet structure,
     #but none of the data; sort
+
     test_teach_it_out <-
       hard_left_join(teach_it_in[-(1:nrow(teach_it_in)), ],
                      inferred_teach_it,
@@ -366,11 +367,17 @@ update_teach_links <- function(WD = "?",
     # "---"))
 
 
-    test_teach_it_out <- hard_left_join(
-      df1 = teach_it_in %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(
+    #adding envir + grade levels to LINKS allows duplicating resources
+    #across differentiated units
+    DF1 <- teach_it_in %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(.data$`_envir`,.data$`_grades`,
         .data$`_lsn`, .data$`_link`, .data$extLink
-      )),
-      df2 = inferred_teach_it %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(.data$`_lsn`, .data$`_link`)),
+      ))
+    DF2 <-  inferred_teach_it %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(.data$`_envir`,.data$`_grades`,.data$`_lsn`, .data$`_link`))
+
+
+    test_teach_it_out <- hard_left_join(
+      df1 = DF1,
+      df2 =DF2,
       by = "LINKS",
       df1_cols_to_keep = c("title", "description", "extLink"),
       as_char = TRUE

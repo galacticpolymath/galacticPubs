@@ -45,6 +45,7 @@ gp_footer <- function(obj,
   logo_fullname <- switch(logo, black = "GP_horiz_logo+wordmark_black.png")
 
 
+
 # Check for cached logo: --------------------------------------------------
   cached_path <- fs::path(tempdir(),logo_fullname)
   test_cached_logo <- file.exists(cached_path)
@@ -65,6 +66,7 @@ gp_footer <- function(obj,
     if(!test_dl){
       message("Download failed for: ",logo_url)
     }
+    logo_path <- cached_path
     checkmate::assert_file_exists(logo_path)
   }
 
