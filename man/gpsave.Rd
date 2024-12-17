@@ -8,6 +8,7 @@ gpsave(
   filename,
   obj = ggplot2::last_plot(),
   WD = "?",
+  save_dir = "assets/_R_outputs",
   width = NULL,
   height = NULL,
   aspect = 16/9,
@@ -24,6 +25,8 @@ gpsave(
 \item{obj}{ggplot or grid object; default= ggplot2::last_plot()}
 
 \item{WD}{working directory; default="?" or a unit picker dialog}
+
+\item{save_dir}{which subfolder of WD do you want to save file to? default="assets/_R_outputs"}
 
 \item{width}{plot width in inches (default= 7)}
 

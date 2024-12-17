@@ -4,7 +4,7 @@
 \alias{open_wd}
 \title{open_wd}
 \usage{
-open_wd(WD = "?")
+open_wd(subpath = NULL, WD = "?")
 }
 \description{
 open_wd

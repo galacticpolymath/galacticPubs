@@ -7,6 +7,7 @@
 #' @param filename expects filename, with file extension (e.g. "plot.png"); can also include subfolder (e.g. "newfolder/plot.png")
 #' @param obj ggplot or grid object; default= ggplot2::last_plot()
 #' @param WD working directory; default="?" or a unit picker dialog
+#' @param save_dir  which subfolder of WD do you want to save file to? default="assets/_R_outputs"
 #' @param width plot width in inches (default= 7)
 #' @param height plot height in inches default= NULL will calculate from aspect
 #' @param aspect ratio of width to height; default= 16/9; aspect is ignored if width and height are supplied
@@ -21,6 +22,7 @@
 gpsave <- function(filename,
                    obj = ggplot2::last_plot(),
                    WD = "?",
+                   save_dir="assets/_R_outputs",
                    width = NULL,
                    height = NULL,
                    aspect = 16 / 9,
@@ -34,7 +36,10 @@ gpsave <- function(filename,
   if (is.null(obj)) {
     message("You might need to specify 'obj'")
   }
-  fn <- fs::path(WD, "assets", "_R_outputs", filename)
+
+  fn <- fs::path(WD, save_dir, filename)
+  checkmate::assert_access(path_parent_dir(fn),access = "w")
+
 
   isgraf <- inherits(obj, what=c("graf_w_footer", "ggplot"))
   if (!isgraf) {

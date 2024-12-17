@@ -20,7 +20,7 @@ gp_footer(
   data_attrib_x = 0.75,
   logo = "black",
   logo_scale = 0.7,
-  fill_col = "#D3D3D3",
+  fill_col = "gray90",
   show_plot = TRUE,
   clear_cache = FALSE
 )
@@ -50,7 +50,7 @@ gp_footer(
 
 \item{logo_scale}{on a scale of 0 to 1 (npc units), how high to make the logo in footer? default=0.7}
 
-\item{fill_col}{fill color for caption at bottom; default is gpColors("sparkle white")}
+\item{fill_col}{fill color for caption at bottom; default is "gray90"}
 
 \item{show_plot}{logical; plot resulting figure? default=T}
 

@@ -4,9 +4,11 @@
 \alias{open_proj_folder}
 \title{Open project local (virtualized) project folder}
 \usage{
-open_proj_folder(WD = "?")
+open_proj_folder(subpath = NULL, WD = "?")
 }
 \arguments{
+\item{subpath}{subpath to concat to WD path e.g.c("assets","data","teaching-materials"); default=NULL}
+
 \item{WD}{working directory; passed to \code{\link[=parse_wd]{parse_wd()}}.}
 }
 \description{
