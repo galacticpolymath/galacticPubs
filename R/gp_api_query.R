@@ -18,7 +18,7 @@ gp_api_query <- \(
   output_tibble = TRUE,
   dev = FALSE,
   id = NULL,
-  sort_by= "numID"
+  sort_by = "numID"
 ) {
   if (!is.null(numID) & !is.null(id)) {
     stop("Only supply numID OR _id.")
@@ -30,12 +30,16 @@ gp_api_query <- \(
     keys <- "basic"
   }
 
-    catalog_name <- ifelse(dev,"Dev","Prod")
+  catalog_name <- ifelse(dev, "Dev", "Prod")
 
   #construct base request
-  dev_toggle <- ifelse(dev,"dev.","")
+  dev_toggle <- ifelse(dev, "dev.", "")
   req0 <-
-    httr2::request(paste0("https://",dev_toggle,"galacticpolymath.com/api/get-lessons"))
+    httr2::request(paste0(
+      "https://",
+      dev_toggle,
+      "galacticpolymath.com/api/get-lessons"
+    ))
 
   #Add filterObj to query to filter by numID and `_id`
   if (!is.null(id) | !is.null(numID)) {
@@ -81,49 +85,68 @@ gp_api_query <- \(
   req_final %>% httr2::req_dry_run()
 
   #actually run request
-  message("Querying  (",catalog_name,") GP-Catalog...")
+  message("Querying  (", catalog_name, ") GP-Catalog...")
   res <-
     req_final %>% httr2::req_perform() %>% catch_err(keep_results = TRUE)
 
 
-    out <- res$result %>%
-      httr2::resp_body_json() %>% .[[1]]
+  out <- res$result %>%
+    httr2::resp_body_json() %>% .[[1]]
 
-  if (length(out)>0) {
-  names_in_data <- names(out[[1]])
-  checkmate::assert(
-    sum(!keys %in% names_in_data)==0,.var.name = paste0("Keys: \"",paste(keys,collapse=","),"\" found in query response")
+  if (length(out) > 0) {
+    names_in_data <- names(out[[1]])
+    checkmate::assert(
+      sum(!keys %in% names_in_data) == 0,
+      .var.name = paste0(
+        "Keys: \"",
+        paste(keys, collapse = ","),
+        "\" found in query response"
+      )
 
-  )
+    )
     #This will silently leave out columns if they don't fit into a tibble :/
     #Had to learn this again...seriously, if an item is a list of more than 1, it will leave it out
     #e.g. LsnStatuses
     if (output_tibble) {
-
       out2 <-
         out %>% tidyjson::as_tbl_json() %>%  tidyjson::spread_all() %>%
         dplyr::arrange(dplyr::desc(.data$`_id`)) %>%
         dplyr::relocate(keys)
+
+      # Get rid of tibble:json detritus -----------------------------------------
+
+      if (!is.null(out2)) {
+        OUT <- out2 %>% dplyr::as_tibble() %>% dplyr::select(-.data$document.id)
+
+
+        # order by desired column -------------------------------------------------
+        if (nrow(OUT) > 1) {
+
+        if (sort_by %in% names(OUT)) {
+          OUT <- OUT[order(unlist(OUT[sort_by])), ]
+        } else{
+          message("Can't sort by '",
+                  sort_by,
+                  "'. Must include this in 'keys'")
+        }
+      }
+
     } else{
-      out2 <- out
+      OUT <- out2
     }
+
+
   } else{
-    message("No records found for this unit on (",catalog_name,") GP-Catalog.")
-    out2 <- NULL
+    OUT <- out
   }
-  tictoc::toc()
-
-# Get rid of tibble:json detritus -----------------------------------------
-
-  if(!is.null(out2)){
-  out3 <- out2 %>% dplyr::as_tibble() %>% dplyr::select(-.data$document.id)
-
-
-# order by desired column -------------------------------------------------
-  out3[order(unlist(out3[sort_by])),]
-  }else{
-  out2
+} else{
+  message("No records found for this unit on (",
+          catalog_name,
+          ") GP-Catalog.")
+  OUT <- NULL
 }
+tictoc::toc()
+OUT
 
 }
 

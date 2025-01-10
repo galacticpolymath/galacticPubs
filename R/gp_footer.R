@@ -5,6 +5,7 @@
 #' @param obj ggplot object
 #' @param caption plot caption
 #' @param data_attrib concise citation for data source (will be smaller font and follow "Data: ")
+#' @param data_attrib_prefix How to prefix data_attrib text. By default "Data: "
 #' @param x x how much to inset caption as a fraction; default=0.01
 #' @param y y height of box as a fraction; default=0.08;
 #' @param text_size text size; default=9;
@@ -33,6 +34,7 @@ gp_footer <- function(obj,
                       border_width_foot=1,
                       text_col = "#363636",
                       data_attrib = NULL,
+                      data_attrib_prefix="Data: ",
                       data_attrib_scale = 0.9,
                       data_attrib_x=0.75,
                       logo = "black",
@@ -101,7 +103,7 @@ gp_footer <- function(obj,
       gp = grid::gpar(col = text_col, fontsize = text_size, fontface = "bold")
     ),
     if (!is.null(data_attrib)) grid::textGrob(
-      label = paste0("Data: ", data_attrib),
+      label = paste_valid(data_attrib_prefix, data_attrib,collapse = ""),
       x = data_attrib_x, y = 0.5,
       just = c("right", "center"),
       gp = grid::gpar(col = text_col, fontsize = text_size * data_attrib_scale)

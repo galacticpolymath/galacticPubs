@@ -22,7 +22,7 @@
 gpsave <- function(filename,
                    obj = ggplot2::last_plot(),
                    WD = "?",
-                   save_dir="assets/_R_outputs",
+                   save_dir = "assets/_R_outputs",
                    width = NULL,
                    height = NULL,
                    aspect = 16 / 9,
@@ -38,10 +38,13 @@ gpsave <- function(filename,
   }
 
   fn <- fs::path(WD, save_dir, filename)
-  checkmate::assert_access(path_parent_dir(fn),access = "w")
+  if (!fs::dir_exists(path_parent_dir(fn))) {
+    fs::dir_create(path_parent_dir(fn))
+  }
+  checkmate::assert_access(path_parent_dir(fn), access = "w")
 
 
-  isgraf <- inherits(obj, what=c("graf_w_footer", "ggplot"))
+  isgraf <- inherits(obj, what = c("graf_w_footer", "ggplot"))
   if (!isgraf) {
     stop("The object must be either a ggplot or a grob.")
   }

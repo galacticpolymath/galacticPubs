@@ -28,7 +28,7 @@ publish <- function(WD = "?", recompile=FALSE, commit_msg = NULL, prompt_user=TR
 # update front matter, unless recompile queued-----------------------------------------------------
 
 if(recompile){
-  test_compile <- compile_lesson(WD=WD,rebuild = rebuild)
+  test_compile <- compile_lesson(WD=WD,rebuild = recompile)
   test_update <- NA
 }else{
   test_compile <- NA

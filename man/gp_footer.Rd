@@ -16,6 +16,7 @@ gp_footer(
   border_width_foot = 1,
   text_col = "#363636",
   data_attrib = NULL,
+  data_attrib_prefix = "Data: ",
   data_attrib_scale = 0.9,
   data_attrib_x = 0.75,
   logo = "black",
@@ -41,6 +42,8 @@ gp_footer(
 \item{border_col_foot}{color of border around plot footer. default="#363636"; put "transparent" to remove border}
 
 \item{data_attrib}{concise citation for data source (will be smaller font and follow "Data: ")}
+
+\item{data_attrib_prefix}{How to prefix data_attrib text. By default "Data: "}
 
 \item{data_attrib_scale}{default=0.6 from 0 to 1, how much smaller to scale attribution text?}
 
