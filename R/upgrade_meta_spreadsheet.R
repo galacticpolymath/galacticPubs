@@ -53,21 +53,31 @@ upgrade_meta_spreadsheet <- \(WD = "?",
   old_sheet_id <- get_fm(expected_gdriveID_key, WD = WD)
   old_sheet_info <- drive_find_path(old_sheet_id)
 
+  proj <- get_fm("GdriveDirName",WD_git=WD_git)
+
   #read in old sheet ver.
+
   old_template_ver <-
-    googlesheets4::read_sheet(old_sheet_id, sheet = 1, range = "E1") %>%
+    googlesheets4::read_sheet(old_sheet_id, sheet = 1, range = "A1:G1") %>%
     names() %>%
     gsub("ver ?(.*$)", "\\1", ., perl = TRUE) %>%
-    as.numeric()
+    as.numeric() %>%
+    suppressWarnings() %>%
+    unique_sans_na()
 
   new_template_ver <-
     googlesheets4::read_sheet(template$id,
                               sheet = 1,
-                              range = "E1:E1",
+                              range = "A1:G1",
                               col_types = "c") %>%
     names() %>%
     gsub("ver ?(.*$)", "\\1", ., perl = TRUE) %>%
-    as.numeric()
+    as.numeric() %>%
+    suppressWarnings() %>%
+    unique_sans_na()
+
+  checkmate::assert_numeric(old_template_ver,any.missing=F,len = 1)
+  checkmate::assert_numeric(new_template_ver,any.missing=F,len = 1)
 
   #Test if upgrade needed
   needs_upgrade <-
@@ -84,6 +94,7 @@ upgrade_meta_spreadsheet <- \(WD = "?",
 
     # Upgrade spreadsheet -----------------------------------------------------
   } else{
+    message("Attempting to upgrade ",proj," '",root_word,"' template from ",old_template_ver," to ",new_template_ver)
     # Logic for standards -----------------------------------------------------
     if (root_word == "standards") {
       #Read in tabs 1,2 & 4; tab 3 is auto
