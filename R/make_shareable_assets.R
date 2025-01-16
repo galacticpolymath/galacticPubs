@@ -10,13 +10,13 @@
 #'
 
 make_shareable_assets <- \(WD = "?", open_file = TRUE) {
-
   WD <- parse_wd(WD)
   fm <- get_fm(WD = WD)
   ShortTitle <- get_fm("ShortTitle", WD = WD)
   unit_url <- get_fm("URL", WD = WD)
   checkmate::assert_string(unit_url, min.chars = 10)
   unit_name <- basename(WD)
+  upload_assets(WD=WD)
 
   qr_path <- fs::path(WD,
                       "assets",
@@ -30,7 +30,7 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
     message("QR Code generated for ", unit_name, " at:\n", qr_path, "\n")
   }
   #make sure we have updated assets online
-  upload_assets(WD=WD)
+  upload_assets(WD = WD)
 
 
   cloud_assets <- gcs_contents(WD = WD) %>%
@@ -84,9 +84,22 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
     } else{
 
       yt_links <- mlinks2$mainLink
-      yt_codes <- stringr::str_extract(yt_links,
-                                       ".*[youtu.be|youtube.com]\\/s?h?o?r?t?s?\\/?([^\\?]*).*",
-                                       group = 1)
+      #handle weird watchlink format separately
+      #(like https://www.youtube.com/watch?v=DREGrkSnZ2g)
+      yt_codes <- sapply(yt_links, \(link_i) {
+        if (grepl("youtube.com/watch\\?", link_i)) {
+          stringr::str_extract(link_i,
+                               ".*youtube.com/watch\\?v=([^\\?]*).*",
+                               group = 1)
+        } else{
+          stringr::str_extract(
+            yt_links,
+            ".*[youtu.be|youtube.com]\\/s?h?o?r?t?s?\\/?([^\\?]*).*",
+            group = 1
+          )
+        }
+
+      })
       yt_thumbs <- paste0("https://i3.ytimg.com/vi/", yt_codes, "/hqdefault.jpg")
 
       # TODO: create taglist with images and links to YT vids -------------------
@@ -120,7 +133,9 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
     htmltools::h4("SHAREABLE ASSETS FOR:"),
     htmltools::h1(fm$MediumTitle),
     htmltools::h3(htmltools::a(href = fm$URL, fm$URL)),
-    htmltools::h3(htmltools::a(href = fm$ShortURL,gsub("https://(.*)","\\1",fm$ShortURL))),
+    htmltools::h3(htmltools::a(
+      href = fm$ShortURL, gsub("https://(.*)", "\\1", fm$ShortURL)
+    )),
 
   )
   page <- c(head, body)
