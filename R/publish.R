@@ -19,6 +19,9 @@ publish <- function(WD = "?", recompile=FALSE, commit_msg = NULL, prompt_user=TR
   #test that WD is in the root directory with the R Project,
   #but don't throw an error (e.g. if run from galacticPubs)
 
+  #go ahead and renew token if necessary; get it outta the way
+  gp_api_get_token()
+
   is_galacticPubs<-grepl("galacticPubs", WD)
 
   if (!grepl("shiny", getwd()) & !is_galacticPubs) {
@@ -68,7 +71,7 @@ if(recompile){
   dev_to_replace <- ifelse(cat_to_replace=="DEV",TRUE,FALSE) %>% unique_sans_na()
 
   if(length(dev_to_replace)>0){
-    gp_api_unit_replace(WD=WD,dev=dev_to_replace,verbosity=verbosity)
+    gp_api_unit_replace(WD=WD,dev=dev_to_replace,verbosity=verbosity,prompt_user = prompt_user)
   }
 
 

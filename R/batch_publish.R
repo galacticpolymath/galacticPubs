@@ -21,9 +21,9 @@ batch_publish <- function(WD="?",
                           lessons_dir = NULL,
                           verbosity = 1) {
   timer <- FALSE
-  if (grepl("\\?", commit_msg)) {
-    stop("commit_msg comes before WD")
-  }
+  # if (grepl("\\?", commit_msg)) {
+  #   stop("commit_msg comes before WD")
+  # }
   WD0 <- WD
   WD <- parse_wd(WD)
 
@@ -47,13 +47,22 @@ batch_publish <- function(WD="?",
   }
 
 
-  # Now validate these projects as another safeguard
-  good_projects <- projects[validate_lesson_dir(projects)] %>% sort()
+  # Now ignore test repositories
+  ignored <- batch_get_fm("isTestRepo",WD=WD,) %>% dplyr::pull("isTestRepo")
+  good_projects <- projects[!ignored]
 
-  update_list <- lapply(good_projects, function(WD_i) {
+  update_list <- lapply(1:length(good_projects), function(i) {
+
+    WD_i <- good_projects[i]
     message("Publishing: ", basename(WD_i))
+    #only ask user to confirm once
+    if(i==1){prompt_user_once <- TRUE
+    }else{
+      prompt_user_once <- FALSE}
+
     output_i <- publish(WD = WD_i,
                         commit_msg = commit_msg,
+                        prompt_user = prompt_user_once,
                         recompile=recompile,
                         verbosity = verbosity) %>% catch_err(try_harder = try_harder, keep_results = TRUE)
     print(output_i$result)
