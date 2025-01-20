@@ -25,7 +25,7 @@ batch_publish <- function(WD="?",
   #   stop("commit_msg comes before WD")
   # }
   WD0 <- WD
-  WD <- parse_wd(WD)
+  WD <- parse_wd(WD,show_all=TRUE)
 
   # If Suggested tictoc package is available, time how long the rebuild takes
   if (requireNamespace("tictoc")) {
@@ -49,8 +49,9 @@ batch_publish <- function(WD="?",
 
   # Now ignore test repositories
   ignored <- batch_get_fm("isTestRepo",WD=WD,) %>% dplyr::pull("isTestRepo")
-  good_projects <- projects[!ignored]
 
+  good_projects <- projects[!ignored]
+  checkmate::assert_integer(length(good_projects),lower=1,all.missing=FALSE)
   update_list <- lapply(1:length(good_projects), function(i) {
 
     WD_i <- good_projects[i]

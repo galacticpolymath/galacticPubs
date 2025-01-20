@@ -28,7 +28,6 @@ parse_wd <- \(str = NULL,...) {
       user_choice <- str
     }
   }
-  checkmate::assert_character(user_choice, all.missing = FALSE, min.chars = 3)
 
 
   # handle "all" choice -----------------------------------------------------

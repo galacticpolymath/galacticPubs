@@ -49,7 +49,8 @@ pick_lesson <- function(shared_drive = "s",
 
 
 # Lookup numID and publication date ---------------------------------------
-projects <- batch_get_fm(c("numID","ReleaseDate","LastUpdated"),projects0,
+
+projects <- batch_get_fm(key=c("numID","ReleaseDate","LastUpdated"),projects0,
                          output_tibble = TRUE,
                          exclude_TEST = exclude_TEST)
 path_tib <- dplyr::tibble(unit =basename(projects0),path=projects0)
@@ -101,7 +102,8 @@ projects_sorted <- projects[order(unlist(projects[,sort_col]),decreasing=sort_de
     if(pull_path){out <- out%>% dplyr::pull("path")}
 
   } else if (identical(choice, "all")) {
-    out <- d %>%  dplyr::select(-.data$CHOICE)
+    out <- d %>% dplyr::filter(.data$unit!="all") %>%
+      dplyr::select(-.data$CHOICE)
     if(pull_path){out <- out%>% dplyr::pull("path")}
 
     #Return the names of the chosen units if we don't need a full path
