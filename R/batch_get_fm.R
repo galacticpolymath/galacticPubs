@@ -68,7 +68,9 @@ batch_get_fm <- \(
 
 
   if (output_tibble & !is.null(key)) {
+
     res <- dplyr::bind_rows(res0)
+
   } else{
     #add names back to list
     res <- res0

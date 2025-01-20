@@ -14,8 +14,8 @@
 #' @export
 #'
 #'
-batch_publish <- function(commit_msg = NULL,
-                          WD,
+batch_publish <- function(WD="?",
+                          commit_msg = NULL,
                           recompile = FALSE,
                           try_harder = FALSE,
                           lessons_dir = NULL,

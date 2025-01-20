@@ -22,7 +22,7 @@ parse_wd <- \(str = NULL,...) {
       user_choice <- pick_lesson("l",...)
     } else if (str == "???" | str == "?g" | str == "?gp") {
       user_choice <- pick_lesson("gp",...)
-    } else if (str == "??" | str == "?l") {
+    } else if (str == "?!" | str == "sl") {
       user_choice <- pick_lesson("sl",...)
     } else{
       user_choice <- str
