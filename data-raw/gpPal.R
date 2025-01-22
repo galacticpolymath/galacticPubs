@@ -1,5 +1,5 @@
 ## code to prepare `gpPal` dataset goes here
-
+# to update, use run de below
 # usethis::use_data(gpPal, overwrite = TRUE)
 #GP Palette
 gpPal = list(
