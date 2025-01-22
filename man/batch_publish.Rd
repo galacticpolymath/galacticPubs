@@ -5,8 +5,8 @@
 \title{batch_publish}
 \usage{
 batch_publish(
+  WD = "?",
   commit_msg = NULL,
-  WD,
   recompile = FALSE,
   try_harder = FALSE,
   lessons_dir = NULL,
@@ -14,9 +14,9 @@ batch_publish(
 )
 }
 \arguments{
-\item{commit_msg}{What do you want to say about this update? Default=NULL, i.e. "automated galacticPubs::publish()"}
-
 \item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default is WD=getwd()}
+
+\item{commit_msg}{What do you want to say about this update? Default=NULL, i.e. "automated galacticPubs::publish()"}
 
 \item{recompile}{logical; run \code{\link[=compile_lesson]{compile_lesson()}}? default=FALSE}
 

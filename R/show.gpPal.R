@@ -1,4 +1,4 @@
-#' show.gpPal
+#' show_gpPal
 #'
 #' Show the GP palette
 #'
@@ -6,7 +6,7 @@
 #' @param subset the first n colors to show or x1:x2 or c(1,3,5) for a specific subset pal is 1 by default
 #' @param ... additional parameters for \code{\link[colorspace]{swatchplot}}
 #' @export
-show.gpPal<-function(pal=1,subset=NULL,...){
+show_gpPal<-function(pal=1,subset=NULL,...){
   gpPal=NULL
   utils::data(gpPal,package="galacticPubs",envir = environment())
   P<-gpPal[[pal]]$hex
