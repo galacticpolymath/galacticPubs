@@ -1,4 +1,4 @@
-#' Reset Remote GitHub Remote Repository
+#' Reset Remote GitHub Remote Repository (Deprecated function)
 #'
 #' Change the GitHub URL associated with this project (i.e. after you rename the repo on <https://github.com/galacticpolymath>) or after you've "forked" a project to make a new language version of the project. That is, you're specifying an *existing GitHub Repository's URL* that you want your local RStudio session to connect to when tracking changes. You don't have to specify the whole URL, just the specific name of the project (`new_proj_name`) *exactly as it's spelled on GitHub*.
 #'
@@ -11,7 +11,7 @@
 #' @family GitHub Functions
 
 gh_reset_remote<-function(new_proj_name,
-                          WD = getwd(),
+                          WD = "?",
                           check_current_gh = FALSE,
                           run_check_wd = TRUE) {
    WD <- parse_wd(WD)

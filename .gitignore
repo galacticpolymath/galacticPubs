@@ -17,3 +17,4 @@ inst/shiny/gp_editor/www/
 published
 !*/rsrc/
 delete
+.httr-oauth

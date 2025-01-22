@@ -5,24 +5,22 @@
 \title{batch \code{\link[=compile_lesson]{compile_lesson()}}}
 \usage{
 batch_compile(
-  gh_proj_name,
-  lessons_dir = NULL,
-  stage = TRUE,
+  shared_drive = "s",
   change_this = NULL,
-  clean = TRUE,
+  clean = FALSE,
   rebuild = FALSE
 )
 }
 \arguments{
-\item{gh_proj_name}{The unique project title of this lesson which is prefixed on the lesson folder name and the GitHub project. Not necessarily the same as the ShortTitle used in naming lesson presentations and worksheets; probably more specific with underscores; If left off, will try to get this info from the GitHubURL if available in the front-matter.yml.}
-
-\item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default=NULL}
-
-\item{stage}{do you want to call \code{\link[=stage_assets]{stage_assets()}} to stage files in the published/ folder for the lesson (i.e. prep to be published)? default=TRUE}
+\item{shared_drive}{passed to \code{\link[=pick_lesson]{pick_lesson()}} which shared drive do you want to find the lessons in? default= "s" Options:
+\itemize{
+\item "s" or "?" = GP-Studio (draft working directory, many users with access)
+\item "l" or "??" = GP-Live (private, admin only)
+}}
 
 \item{change_this}{A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If gh_proj_name=="all", make sure you set this to something you want to change for everything.}
 
-\item{clean}{Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to \code{\link[=compile_lesson]{compile_lesson()}}). Default=TRUE}
+\item{clean}{Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to \code{\link[=compile_lesson]{compile_lesson()}}). Default=FALSE}
 
 \item{rebuild}{Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to \code{\link[=compile_lesson]{compile_lesson()}})}
 }

@@ -11,7 +11,7 @@ Internal helpers for \code{\link[=compile_teach_it]{compile_teach_it()}}. Change
 }
 \seealso{
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zget_envir}()}
 }
 \concept{Internal helper functions}

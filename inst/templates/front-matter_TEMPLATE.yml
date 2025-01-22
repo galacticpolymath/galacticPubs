@@ -1,8 +1,8 @@
 #DEFAULT VALUES FOR front-matter.
-id: ''
-UniqueID: ''
-ShortTitle: ''
-PublicationStatus: Proto
+numID: ''
+_id: ''
+ShortTitle: 'NameMe'
+PublicationStatus: 'Proto'
 Language: 'English'
 Country: 'United States'
 DefaultLanguage: 'English'
@@ -11,18 +11,21 @@ DefaultCountry: 'United States'
 #!!---> operational variables (that don't have Shiny inputs
 #LastUpdated has to be at the top here
 LastUpdated: ''
+LastUpdated_web: ''
+ReleaseDate: '2050-01-01'
+isTestRepo: false
 FirstPublicationDate: ''
+LsnCount: ''
+LsnStatuses: ''
 MediumTitle: '' # Format: Title + _Subj_ + _Gx-y_+ (Locale)
 lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.5.2
+TemplateVer: 0.6.9
 galacticPubsVer: ''
-isTestRepo: false
 URL: ''
-GPCatalogURL: ''
-GitHubURL: ''
+ShortURL: ''
 GdriveHome: 'GP-Studio'
 GdriveDirName: ''
 GdriveTeachMatPath: ''
@@ -33,24 +36,29 @@ GdriveMetaID: ''
 GdriveTeachItID: ''
 GdriveStandardsID: ''
 GdrivePublishedID: ''
+GdriveTeachItPermissions: 'view'
 GdriveDirURL: ''
 #!!<--- operational variables (that don't have Shiny inputs)
 # RebuildAllMaterials must be top of this list
 RebuildAllMaterials: no
-ReleaseDate: '2050-01-01'
-Title: ''
+Title: 'Title Me!'
 Subtitle: ''
 SponsorName: ''
 SponsoredBy: ''
 SponsorLogo: ''
 LessonBanner: ''
-TargetSubject: ''
+LessonCard: ''
+QRcode: ''
+TargetSubject: 'Science'
 LessonEnvir: ''
 ForGrades: ''
 GradesOrYears: 'Grades'
+#Not exported with header (exported elsewhere)
+LessonTiles: ''
+#Overview section->
 EstLessonTime: ''
 PullStandardsInfoFrom: 'myFile'
-LearningPlotCorrection: TRUE
+LearningPlotCorrection: FALSE
 LearningChartFriendly: ''
 LearningEpaulette: ''
 LearningEpaulette_vert: ''
@@ -61,22 +69,19 @@ LearningChart_params_centralText: NULL
 LearningChart_params_caption: NULL
 LearningChart_params_captionN: !expr formals(learningChart)$captionN
 SupportingMedia: ''
+# The Gist of the lesson
+LearningSummary: ''
 #---> These are combined into "text" overview section in JSON output
 DrivingQ: ''
 EssentialQ: ''
 Hooks: ''
-LearningSummary: ''
 MiscMD: ''
 # <---
 #LearningObj will go in standards section on the web
 LearningObj: ''
 Tags: ''
 Description: ''
-QuickPrep: |
-  1. Check out lesson multimedia below
-  2. Look over [Teaching Materials](#teaching_materials)
-  3. Read our easy [Procedure](#procedure)
-  4. Teach it and [let us know what you think!](#feedback)
+QuickPrep: ''
 Bonus: ''
 Extensions: ''
 Background: ''
@@ -85,35 +90,46 @@ Feedback: |
   ### Please let us know how it went with your class!
   #### We want to know what you (and/or your students) think!
   Share your feedback in < 5 min with these forms:
-  - [For teachers](https://forms.gle/HY1sFxZUH7uG6JqP8)
-  - [For students](https://forms.gle/gwkRYvvZY6Sp2dQb9)
+  - [For teachers]()
+  - [For students]()
 Credits: ''
 Acknowledgments:
   Role:
-  - ''
+  - .na
   Role_def:
-  - ''
+  - .na
   Name:
-  - ''
+  - .na
   Title:
-  - ''
+  - .na
   Affiliation:
-  - ''
+  - .na
   Location:
-  - ''
+  - .na
   Link:
-  - ''
+  - .na
 Versions:
   ver_num:
   - '0.1.0'
   date:
   - !expr format(Sys.Date(), '%B %d, %Y')
   ver_summary:
-  - 'Lesson initialized'
+  - 'Unit initialized'
   ver_notes:
-  - ''
+  - .na
   ver_acknowledgments:
-  - ''
+  - .na
 ScriptsToRun: ''
+GoogleCloudStorage:
+  filename:
+  - NA
+  WD_rel_path:
+  - NA
+  cloud_path:
+  - NA
+  mod_time:
+  - NA
+  last_uploaded:
+  - NA
 ReadyToCompile:
 - Front Matter

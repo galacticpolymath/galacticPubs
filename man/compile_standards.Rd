@@ -4,26 +4,20 @@
 \alias{compile_standards}
 \title{compile_standards}
 \usage{
-compile_standards(
-  WD = getwd(),
-  learningplot_correction = FALSE,
-  targetSubj = NULL
-)
+compile_standards(WD = "?", targetSubj = NULL)
 }
 \arguments{
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); If you put "?", it will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 
-\item{learningplot_correction}{do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=F, the proportions will just be raw proportions of each subject out of total standards aligned. If TRUE, this will scale proportions of subjects by the relative total proportions of standards in each subject.}
-
 \item{targetSubj}{which subject(s) are the focus of the lesson? opts= "math","ela","science","social studies"; default=NULL}
 }
 \value{
-list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
+list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'skip' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 }
 \description{
 Does the following:
 \enumerate{
 \item Compile alignment info from the \code{standards_*.gsheet} in the project's \verb{meta/} folder
-\item Output standards.RDS file with the alignment info (this will be read in by \code{\link[=learningEpaulette]{learningEpaulette()}} and \code{\link[=learningChart]{learningChart()}})
+\item Output standards.RDS file with the alignment info (this will be read in by \code{\link[=learningEpaulette]{learningEpaulette()}} )
 }
 }

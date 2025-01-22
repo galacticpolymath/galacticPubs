@@ -5,7 +5,7 @@
 \title{update_teach_links}
 \usage{
 update_teach_links(
-  WD = getwd(),
+  WD = "?",
   rebuild = NULL,
   rm_missing = TRUE,
   clean = FALSE,
@@ -15,7 +15,7 @@ update_teach_links(
 \arguments{
 \item{WD}{a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" which will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 
-\item{rebuild}{if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL}
+\item{rebuild}{deprecated!! if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL}
 
 \item{rm_missing}{logical; do you want to automatically remove records that are missing (and for which no link was found during crawl of Google Drive folder?); default= TRUE; if FALSE, the link will be left blank}
 

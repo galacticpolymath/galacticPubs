@@ -4,7 +4,7 @@
 \alias{check_wd}
 \title{Check if Working Directory Looks Good}
 \usage{
-check_wd(WD = getwd(), simple_out = TRUE, throw_error = TRUE)
+check_wd(WD = "?", simple_out = TRUE, throw_error = TRUE)
 }
 \arguments{
 \item{WD}{Working directory you want to check. default=getwd()}
@@ -17,5 +17,5 @@ check_wd(WD = getwd(), simple_out = TRUE, throw_error = TRUE)
 depends on simple_out
 }
 \description{
-The working directory gets reset sometimes for unknown reasons after running the editor. This is a routine check. Working directory should contain an .Rproj file and be a subfolder of 'Lessons'.
+The working directory gets reset sometimes for unknown reasons after running the editor. This is a routine check. Working directory should be a subfolder of 'Lessons'.
 }

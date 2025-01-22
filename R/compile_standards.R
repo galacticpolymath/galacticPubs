@@ -2,20 +2,22 @@
 #'
 #' Does the following:
 #' 1. Compile alignment info from the `standards_*.gsheet` in the project's `meta/` folder
-#' 2. Output standards.RDS file with the alignment info (this will be read in by [learningEpaulette()] and [learningChart()])
+#' 2. Output standards.RDS file with the alignment info (this will be read in by [learningEpaulette()] )
 
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); If you put "?", it will invoke [pick_lesson()]
-#' @param learningplot_correction do you want to correct proportions (for learningEpaulette and learningChart) for the total possible standards in each subject? i.e. Common Core Math has a LOT more standards than C3 Social Studies. default=F, the proportions will just be raw proportions of each subject out of total standards aligned. If TRUE, this will scale proportions of subjects by the relative total proportions of standards in each subject.
 #' @param targetSubj which subject(s) are the focus of the lesson? opts= "math","ela","science","social studies"; default=NULL
-#' @return list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'TBD' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
+#' @return list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'skip' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 #' @export
 #'
-compile_standards <- function(WD = getwd(),
-                              learningplot_correction = FALSE,
+compile_standards <- function(WD = "?",
                               targetSubj = NULL) {
   . = NULL #to avoid errors with dplyr syntax
   message("compiling standards...")
+  #The google drive working directory for the project assets
   WD <- parse_wd(WD)
+
+  #The github gp-lessons directory for the code
+  WD_git <- get_wd_git(WD = WD)
 
   #############
   # IMPORTANT: Add Subjects here if you need to align new ones --------------
@@ -28,21 +30,38 @@ compile_standards <- function(WD = getwd(),
       "Social Studies",
       "Art",
       "Sustainability",
+      "SEL",
       "Technology")
   #learning chart/learningEpaulette subject titles (<=5 char)
   ordered_subj_chart <-
-    c("Math", "ELA", "Sci"    , "SocSt",        "Art", "SDGs",          "Tech")
-  #here for legacy reasons
+    c("Math", "ELA", "Sci"    , "SocSt",        "Art", "SDGs", "SEL",         "Tech")
+
+
+
+  #here for legacy reasons (for gpColors)
   ordered_subj <-
-    c("math", "ela", "science", "socstudies",     "art", "sdgs",         "tech")
+    c("math", "ela", "science", "socstudies",    "art", "sust",  "sel",       "tech")
+
+  #custom labels for learning chart quadrants
+  learning_chart_labs <-
+    c("CCSS\nMath","CCSS\nELA","NGSS\nScience","C3\nSoc Studies","Art","SDGs\nSustain.","SEL","Tech")
+
+  #named short and full names for epaulette and learningchart
+  chart_labels <- dplyr::tibble(full_subj=ordered_subjects,
+                                abbrev_subj=ordered_subj_chart,
+                                gp_pal_subj=ordered_subj,
+                                learning_chart_labs=learning_chart_labs
+  )
 
 
+
+  subj_tib <- dplyr::tibble(Subjects=ordered_subjects,Subj=ordered_subj_chart,subj=ordered_subj) %>%
+    dplyr::mutate(n=1:dplyr::n()) %>% dplyr::relocate(.data$n) %>%
+    dplyr::mutate(color=gpColors(.data$subj))
 
 
   #define paths
-  destFolder <- fs::path(WD, "meta", "JSON")
-  standardsFile <-
-    fs::path(WD, "meta", "standards_GSheetsOnly.xlsx")
+  destFolder <- fs::path(WD_git, "JSONs")
 
   #Read in front-matter
   fm <- get_fm(WD = WD)
@@ -60,7 +79,7 @@ compile_standards <- function(WD = getwd(),
     #If targetSubj not provided, use front-matter.yml
     if (missing(targetSubj)) {
       tempSubj <- fm$TargetSubj
-      if (!galacticPubs::is_empty(tempSubj)) {
+      if (!is_empty(tempSubj)) {
         targetSubj <- tolower(tempSubj)
       }
     }
@@ -81,24 +100,25 @@ compile_standards <- function(WD = getwd(),
       .name_repair = "minimal"
     ) %>%
       #Blank column is just used as a flexible marker
-      dplyr::select(1:"blank") %>%
-      dplyr::select(-"blank") %>%
+      dplyr::select(1:"Notes") %>%
+      dplyr::select(-"Notes") %>%
       dplyr::filter(!is.na(.data$`LO#`))
 
-      a_master <- googlesheets4::read_sheet(
-        stnds_drib$id,
-        sheet = "2.Standard-Selection",
-        skip = 1,
-        col_types = "c"
-      ) %>% dplyr::filter(!is.na(.data$Code))
+    a_master <- googlesheets4::read_sheet(
+      stnds_drib$id,
+      sheet = "2.Standard-Selection",
+      skip = 1,
+      col_types = "c"
+    ) %>% dplyr::filter(!is.na(.data$Code))
 
-      # a0 is the "Finalize" tab
-      a0 <- googlesheets4::read_sheet(
-        stnds_drib$id,
-        sheet = "4.Finalize",
-        skip = 1,
-        col_types = "c"
-      ) %>% dplyr::filter(!is.na(.data$Code))
+    # a0 is the "Finalize" tab
+    a0 <- googlesheets4::read_sheet(
+      stnds_drib$id,
+      sheet = "4.Finalize",
+      skip = 1,
+      col_types = "c"
+    ) %>% dplyr::filter(!is.na(.data$Code))
+
 
     is_valid_tab1 <- checkmate::test_data_frame(LOs, min.rows = 1)
     is_valid_tab2 <-
@@ -111,22 +131,22 @@ compile_standards <- function(WD = getwd(),
       message(
         "Found invalid/empty gsheets_link. Trying to reconnect...running update_fm(WD=WD,drive_reconnect=TRUE)."
       )
-      update_fm(WD = WD, drive_reconnect = TRUE)
+      update_fm(WD = WD, drive_reconnect = TRUE,recompile = FALSE)
       stnds_id <- get_fm("GdriveStandardsID" , WD = WD)
       #Try again to import
       stnds_drib <- drive_find_path(stnds_id)
 
       LOs <-    googlesheets4::read_sheet(
-      stnds_drib$id,
-      sheet = 1,
-      skip = 1,
-      col_types = "c",
-      .name_repair = "minimal"
-    ) %>%
-      #Blank column is just used as a flexible marker
-      dplyr::select(1:"blank") %>%
-      dplyr::select(-"blank") %>%
-      dplyr::filter(!is.na(.data$`LO#`))
+        stnds_drib$id,
+        sheet = 1,
+        skip = 1,
+        col_types = "c",
+        .name_repair = "minimal"
+      ) %>%
+        #Blank column is just used as a flexible marker
+        dplyr::select(1:"blank") %>%
+        dplyr::select(-"blank") %>%
+        dplyr::filter(!is.na(.data$`LO#`))
 
       a_master <- googlesheets4::read_sheet(
         stnds_drib$id,
@@ -159,7 +179,11 @@ compile_standards <- function(WD = getwd(),
     # Test if imported standards are initiated --------------------------------
     message("Checking if standards gsheet has been initialized...")
     #check that "Help Text" does not occur anywhere in the Learning Objective statement column in Tab1
-    names(LOs)[2] <- "lo_statement"
+
+    #Rename learning statement to be friendlier, but in a way that's robust to changing the header title
+    lo_col <-
+      stringr::str_detect(names(LOs), "Objective") %>% which()
+    names(LOs)[lo_col] <- "lo_statement"
     tab1_initiated <-
       (LOs %>% dplyr::pull("lo_statement") %>% grepl("^[Hh]elp [Tt]ext", .) %>% sum()) == 0
     #Expect some LO#s
@@ -185,7 +209,7 @@ compile_standards <- function(WD = getwd(),
 
     if (!tab1_initiated | !tab2_initiated | !tab4_initiated) {
       warning("compile_standards() aborted because some tab(s) have not been initiated.")
-      success <- FALSE
+      success <- test_json <- test_save <- FALSE
     } else{
       # Start processing standards ----------------------------------------------
 
@@ -200,7 +224,7 @@ compile_standards <- function(WD = getwd(),
           "lo_stmnt",
           "set",
           "dim",
-          "part",
+          "lsn",
           "target",
           "grp",
           "how"
@@ -211,12 +235,30 @@ compile_standards <- function(WD = getwd(),
 
 
 
+      # Extract learning objectives by lesson -------------------------------------
+      LOs
+      if (nrow(LOs) > 0) {
+        LO_tib <- LOs %>%
+          dplyr::select("LO#", "Lsn", "lo_statement") %>%
+          tidyr::separate_longer_delim(cols = "Lsn", delim = ",") %>%
+          dplyr::arrange(.data$Lsn, .data$`LO#`) %>%
+          dplyr::select(-"LO#")
+        learningObj <- lapply(unique(LO_tib$Lsn), \(i) {
+          LO_tib %>% dplyr::filter(.data$Lsn == i) %>% dplyr::pull("lo_statement")
+        })
+
+      } else{
+        learningObj <- NULL
+      }
+
+
       # Check supported subjects ------------------------------------------------
       supported_subjects <-
         c("ELA",
           "Math",
           "Science",
           "Social Studies",
+          "SEL",
           "Sustainability")
 
       #required subjects for learning chart
@@ -226,6 +268,7 @@ compile_standards <- function(WD = getwd(),
                         "Social Studies")
 
       #supported sets of standards for generating learning chart
+      #Also treated as REQUIRED for learning chart output
       supported_sets <-
         c("Common Core Math", "Common Core ELA", "NGSS", "C3")
 
@@ -258,38 +301,53 @@ compile_standards <- function(WD = getwd(),
       }
 
 
-      # manage TBDs and flagged, undocumented alignments ------------------------
-      tbds <- grepl("tbd", a0$how, ignore.case = TRUE)
-      #a1 does not have records with lo_statements containing "TBD" or no entry for "how"
-      if (sum(tbds) > 0) {
+      # manage "skip" and flagged, undocumented alignments ------------------------
+      #useful if you have multiple locales aligned in same doc.
+      #skip one country's outputs in 1 version
+      skips <- grepl("skip", a0$how, ignore.case = TRUE)
+
+      if (sum(skips) > 0) {
         message(
-          "\nThe following were removed because Learning Objective documentation contained 'TBD':\n\t\u2022",
-          paste0(a0$code[tbds], collapse = "\n\t\u2022"),
+          "\nThe following were removed because Learning Objective documentation contained 'skip':\n\t\u2022",
+          paste0(a0$code[skips], collapse = "\n\t\u2022"),
           "\n"
         )
       } else{
-        tbds <- rep(FALSE, nrow(a0))
+        skips <- rep(FALSE, nrow(a0))
       }
 
       #undocumented alignments
-      #target says "skip" or no "how this lesson aligns"
-      undoc <-
-        (is.na(a0$how) &
-           is.na(a0$grp)) |
-        sapply(a0$target, function(x)
-          identical(x, "skip"), USE.NAMES = F)
+      #target has blank for "how this lesson aligns"
 
-      if (sum(undoc) > 0) {
+      undoc <-
+        (is.na(a0$how))
+      #If you got more than 1 alignment, and they're just not documented yet, don't remove them, just report message
+      # undoc_ok <- sum(undoc)==nrow(a0) & nrow(a0)>1
+
+      #making undoc always ok
+      undoc_ok <- TRUE
+
+      if (sum(undoc) > 0 & !undoc_ok) {
         message(
-          "\nThe following were removed because learning objective was blank or you said 'skip':\n\t\u2022",
+          "\nThe following were removed because 'How does lesson align...' was blank and undoc_ok=FALSE :\n\t\u2022",
           paste0(a0$code[undoc], collapse = "\n\t\u2022"),
           "\n"
         )
-      } else{
+        a1 <- a0[!undoc & !skips,]
+      }else if(undoc_ok){
+        message(
+          "\nWe kept these aligned standards in, but they're NOT been documented! Fill in 'How does lesson align...' for:\n\t\u2022",
+          paste0(a0$code[undoc], collapse = "\n\t\u2022"),
+          "\n"
+        )
+        a1 <- a0[ !skips,]
+      }else{
         undoc <- rep(FALSE, nrow(a0))
+        a1 <- a0[!undoc & !skips,]
       }
 
-      a1 <- a0[!undoc & !tbds, ]
+
+
 
       # a2 has markdown bullets ("- ") added if missing
       # Add markdown bullet to front of lines that don't start with it
@@ -298,9 +356,11 @@ compile_standards <- function(WD = getwd(),
 
       #swap out bullets for - to maintain consistency in markdown syntax
       a2$how <- gsub("\u2022", "-", a2$how)
-      a2$how <-
-        ifelse(!grepl("^- ", a2$how), paste0("- ", a2$how), a2$how)
+      # a2$how <-
+      #   ifelse(!grepl("^- ", a2$how), paste0("- ", a2$how), a2$how)
 
+      #Make sure any blanks have placeholder text
+      a2$how <- ifelse(is.na(a2$how),"'How Aligned' not yet documented.",a2$how)
 
 
 
@@ -321,6 +381,7 @@ compile_standards <- function(WD = getwd(),
       # a3 has logical values for target instead of "n" and blank
       # also added grouping variable
       a3 <- a2
+
       a3$target <-
         ifelse(is.na(a3$target) |
                  tolower(a3$target) == "n", FALSE, TRUE)
@@ -357,8 +418,8 @@ compile_standards <- function(WD = getwd(),
         )
       }
 
-      #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standardsRef)
-      #Remove "Part from a_master to avoid conflicts with changes made in tab 4.Finalize"
+      #A is a merge of the provided alignment and the master reference document (with preference fo code defs, etc. from the provided standards reference Tab 2)
+      #Remove "lsn from a_master to avoid conflicts with changes made in tab 4.Finalize"
       A0 <-
         dplyr::left_join(a3[, c("code_set",
                                 "lo",
@@ -367,8 +428,8 @@ compile_standards <- function(WD = getwd(),
                                 "grp",
                                 "grouping",
                                 "how",
-                                "part")], a_master[-which(tolower(names(a_master)) ==
-                                                            "part")], by = "code_set")
+                                "lsn")], a_master[-which(tolower(names(a_master)) ==
+                                                           "lsn")], by = "code_set")
 
 
       #factor subjects for desired order
@@ -376,21 +437,20 @@ compile_standards <- function(WD = getwd(),
       A0$subject <-
         factor(A0$subject, levels = ordered_subjects, ordered = T)
       A <-
-        A0 %>% dplyr::filter(!is.na(.data$how)) %>%  dplyr::arrange(.data$subject)
+        A0 %>%  dplyr::arrange(.data$subject)
 
 
       # warn if statements missing (indicates bad merge) -----------------------
-      if (nrow(A) == 0) {
+      if (nrow(A) == 0 & !undoc_ok) {
         warning(
-          "Bad merge. No 'Statements' matched standards code for each set. Try changing 'standardsRef' in compile_standards(); currently, standardsRef = '",
-          standardsRef,
-          "'"
+          "Bad merge. No 'Statements' matched standards code for each set."
         )
       }
 
 
 
       # Add dims if only dimensions provided ------------------------------------
+
       A$dim <- sapply(1:nrow(A), function(i) {
         if (is.na(A$dim[i])) {
           if (is.na(A$dimension[i])) {
@@ -472,12 +532,12 @@ compile_standards <- function(WD = getwd(),
                   aNotes = paste0(unique(d_gr$how), collapse = "\n")
                 }
 
-                #Get parts assignments for this standard
-                uniq_parts <-
-                  strsplit(unique(d_gr$part), split = ",") %>% unlist() %>% trimws() %>% unique() %>% sort()
+                #Get lessons assignments for this standard
+                uniq_lessons <-
+                  strsplit(unique(d_gr$lsn), split = ",") %>% unlist() %>% trimws() %>% unique() %>% sort()
 
                 list(
-                  parts = as.list(uniq_parts),
+                  lessons = as.list(uniq_lessons),
                   codes = unique(d_gr$code),
                   #make sure grade is never changed to grades in spreadsheet...
 
@@ -524,11 +584,9 @@ compile_standards <- function(WD = getwd(),
       # Create JSON-style list, but only exported as JSON by compile_lesson() --------
       # Prefix with component and title, and nest output in Data if structuring for web deployment
       out <-
-        list(
-          `__component` = "lesson-plan.standards",
-          LearningObj =  fm$LearningObj,
-          Data = out0
-        )
+        list(`__component` = "lesson-plan.standards",
+             # LearningObj =  fm$LearningObj,
+             Data = out0)
 
 
       # return summary tibble --------------------------------------------------
@@ -537,7 +595,7 @@ compile_standards <- function(WD = getwd(),
         "\nStandards submitted:\t",
         nrow(a0),
         "\nRemoved due to issues:\t",
-        sum(tbds) + sum(undoc),
+        sum(skips) + sum(undoc),
         "\nSuccessfully compiled:\t",
         nrow(A),
         "\n"
@@ -545,12 +603,13 @@ compile_standards <- function(WD = getwd(),
       message(rep("=", 30))
 
 
-      # Prep learningEpaulette data ---------------------------------------------
+
       #create an empty matrix to merge in, in case some subjects are missing
       a_template <-
         a_master %>%
         #Get rid of sets not included in the alignment
-        dplyr::filter(.data$set %in% c(unique(A$set))) %>%
+        #EXCEPT the 4 required sets
+        dplyr::filter(.data$set %in% c(unique(A$set),supported_sets)) %>%
         dplyr::select("subject", "dimension") %>%
         dplyr::distinct() %>% dplyr::mutate(n = 0)
 
@@ -614,107 +673,6 @@ compile_standards <- function(WD = getwd(),
                levels = ordered_subjects,
                ordered = T)
 
-
-      #Calculate corrected proportions if requested
-      proportions0 = a_combined  %>% dplyr::group_by(.data$subject)
-      if (learningplot_correction) {
-        proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop_adj, na.rm =
-                                                                                 T), 2), .groups =
-                                                          "drop")
-      } else{
-        #don't use adjusted proportions if not requested
-        proportions = proportions0 %>% dplyr::summarise(proportion = round(sum(.data$n_prop, na.rm =
-                                                                                 T), 2), .groups =
-                                                          "drop")
-      }
-
-      #Make sure proportions = 100%
-
-      tot_prop <- sum(proportions$proportion)
-      if (tot_prop != 1) {
-        remaining <- 1 - tot_prop
-        where_add <- proportions$proportion %>% which.max()
-        message(
-          "In output for learningEpaulette(), adding ",
-          round(remaining, 2),
-          " to ",
-          proportions$subject[where_add],
-          " so proportions add to 100%"
-        )
-        proportions$proportion[where_add] <-
-          proportions$proportion[where_add] + remaining
-      }
-
-      #Set up vector to recode subject levels according to key (for learning chart subject abbrevs.)
-      convert_labels <- ordered_subj_chart
-      names(convert_labels) <- ordered_subjects
-
-      convert_labels2 <- ordered_subj
-      names(convert_labels2) <- ordered_subjects
-
-      xlabels <- proportions %>%
-        dplyr::rename("subject_orig" = "subject") %>%
-        dplyr::mutate(
-          value = scales::percent(.data$proportion),
-          x.prop = proportion,
-          x = (cumsum(.data$proportion) -
-                 .data$proportion / 2),
-          subject = dplyr::recode(.data$subject_orig, !!!convert_labels),
-          #not sure the next one is necessary...should remove if not
-          subj = dplyr::recode(.data$subject_orig, !!!convert_labels2),
-          lab = paste0(t(.data$value), t(.data$subject)),
-          hjust = 0.5,
-          fontface = "plain",
-          stroke = 1,
-          strokeCol = gpColors(.data$subj),
-          lightCol = colorspace::lighten(strokeCol, 0.8),
-          size = 9,
-          y = 0.6
-        )
-
-
-      #thickness of epaulette bar
-      thickness = 0.2
-
-      #I think learning chart can handle sustainability above...this epaulette code CANNOT...
-
-      epaulette_names <-
-        ordered_subj_chart[match(proportions$subject, ordered_subjects)]
-
-      rectangles <-
-        dplyr::tibble(
-          proportion = proportions$proportion,
-          xmin = c(0, cumsum(proportions$proportion)[-length(proportions$proportion)]),
-          xmax = cumsum(proportions$proportion),
-          ymin = 1 - thickness,
-          ymax = 1,
-          subject = epaulette_names
-        ) %>% dplyr::filter(.data$proportion > 0)
-      rectangles$subject <-
-        factor(rectangles$subject,
-               ordered = T,
-               levels = epaulette_names)
-      rectangles$border <- "transparent"
-
-      #Ensure that xmax[4] is 1, so there's never a gap at the right
-      rectangles$xmax[nrow(rectangles)] <- 1
-
-
-      #boldenize & embiggenate if targetSubj indicated
-      if (!is.null(targetSubj)) {
-        (targetRows <-
-           which(!is.na(charmatch(
-             tolower(xlabels$subj), tolower(targetSubj)
-           ))))
-        xlabels$stroke[targetRows] <- 2
-        xlabels$strokeCol[targetRows] <- gpColors("galactic black")
-        xlabels$fontface[targetRows] <- "bold"
-        xlabels$size[targetRows] <- 11
-        rectangles$border[targetRows] <- gpColors("galactic black")
-      }
-
-
-
       # prep for LearningChart  -------------------------------------------------
 
 
@@ -727,57 +685,66 @@ compile_standards <- function(WD = getwd(),
 
       if (!test_alignment_supported) {
         warning(
-          "No Learning Chart created. Currently supported Standards sets:\n  -",
+          "No Learning Chart will be created. Currently supported Standards sets:\n  -",
           paste(supported_sets, collapse = "\n  -"),
           "\nStandard sets found:\n  -",
           paste(unique_sans_na(A$set),
                 collapse = "\n  -")
         )
-        #Store LearningChart Friendliness in front-matter and also save to RDS file
-        update_fm(change_this = list(LearningChartFriendly = F),
-                  WD = WD)
-        learning_chart_friendly <- FALSE
+        #Save to RDS file
+        update_fm(
+                  WD = WD,recompile = FALSE)
+
         a_combined$dimAbbrev <- NA
+        supported_dims <- NULL
       } else{
-        update_fm(change_this = list(LearningChartFriendly = T),
-                  WD = WD)
-        learning_chart_friendly <- TRUE
+        update_fm(
+                  WD = WD,recompile = FALSE)
+
 
 
 
 
         #Make a custom dimAbbrev tibble for sets supported for learning Chart
-        supported_dims <- a_master %>% dplyr::select(subject,dimension) %>% dplyr::distinct(.data$dimension,.keep_all = T) %>% dplyr::arrange(.data$subject,.data$dimension)
+        supported_dims <-
+          a_master %>% dplyr::select(subject, dimension) %>% dplyr::distinct(.data$dimension, .keep_all = T) %>% dplyr::arrange(.data$subject, .data$dimension)
 
         #Manual abbreviations for long dimensions
-        supported_dims$dimAbbrev <-sapply(supported_dims$dimension,function(x) switch(x,
-            #CCSS Math
-            "Algebra, Geometry, Trig, Calculus & Higher Level Thinking"= "Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math",
-            "Measurement, Data, Probability & Statistics"= "Measurement, Data,\n Probability, Statistics",
-            "Number Systems, Operations & Abstract Representation" ="Number Systems, Operations,\n Symbolic Representation",
-            #CCSS ELA
-            "Language, Speaking & Listening"= "Language, Speaking,\n Listening",
-            "Reading"= "Reading",
-            "Writing" = "Writing",
-            #NGSS
-            "Cross-Cutting Concepts"="Cross-Cutting \n Concepts ",
-            "Disciplinary Core ideas"= "Disciplinary\n Core Ideas",
-            "Science & Engineering Practices"= "Science & Engineering\n Practices",
-            #C3 Soc Studies
-            "Civics, Economics, Geography & History" = "Civics, Economics,\n Geography, History",
-            "Developing Questions & Planning Inquiries" = "Develop Questions,\n Plan Inquiries",
-            "Evaluating Sources, Communicating Conclusions & Taking Action" = "Evaluate, \n Communicate, \n Take Action ",
-            #else
-            x
+        supported_dims$dimAbbrev <-
+          sapply(supported_dims$dimension, function(x)
+            switch(
+              x,
+              #CCSS Math
+              "Algebra, Geometry, Trig, Calculus & Higher Level Thinking" = "Algebra, Geometry,\n Trig, Calculus,\n Other Adv Math",
+              "Measurement, Data, Probability & Statistics" = "Measurement, Data,\n Probability, Statistics",
+              "Number Systems, Operations & Abstract Representation" = "Number Systems, Operations,\n Symbolic Representation",
+              #CCSS ELA
+              "Language, Speaking & Listening" = "Language, Speaking,\n Listening",
+              "Reading" = "Reading",
+              "Writing" = "Writing",
+              #NGSS
+              "Cross-Cutting Concepts" = "Cross-Cutting \n Concepts ",
+              "Disciplinary Core ideas" = "Disciplinary\n Core Ideas",
+              "Science & Engineering Practices" = "Science & Engineering\n Practices",
+              #C3 Soc Studies
+              "Civics, Economics, Geography & History" = "Civics, Economics,\n Geography, History",
+              "Developing Questions & Planning Inquiries" = "Develop Questions,\n Plan Inquiries",
+              "Evaluating Sources, Communicating Conclusions & Taking Action" = "Evaluate, \n Communicate, \n Take Action ",
+              #else
+              x
             )) %>%
-          paste0(" ",.) #pad labels with space for alignment
+          paste0(" ", .) #pad labels with space for alignment
 
       }
 
 
       #Add abbrev to a_combined output
+      if(!is.null(supported_dims)){
       a_out <- a_combined %>% dplyr::full_join(.,
-                                      supported_dims )
+                                               supported_dims)
+      }else{
+        a_out <- a_combined
+      }
 
 
 
@@ -785,47 +752,56 @@ compile_standards <- function(WD = getwd(),
 
       # Save Standards Data -----------------------------------------------------
       toSave <- list(
+        learningObj = learningObj,
         data = list(
           input = dplyr::as_tibble(a0),
           compiled = dplyr::as_tibble(A),
-          problem_entries = dplyr::as_tibble(a0[(tbds + undoc) > 0,]),
+          problem_entries = dplyr::as_tibble(a0[(skips + undoc) > 0, ]),
           gradeBand = gradeBand,
           list_for_json = out
         ),
         a_combined = a_out,
-        xlabels = xlabels,
-        rectangles = rectangles,
-        targetSubj = targetSubj,
-        learning_chart_friendly = learning_chart_friendly
+        chart_labels = chart_labels,
+        targetSubj = targetSubj
       )
       #
-      rds_saveFile <- fs::path(WD, "meta", "standards.RDS")
+
+      rds_saveFile <- fs::path(WD_git, "saves", "standards.RDS")
       message("Saving compiled standards data to '", rds_saveFile, "'")
-      saveRDS(toSave, file = rds_saveFile)
+      test_save <-
+        saveRDS(toSave, file = rds_saveFile) %>% catch_err()
 
-      json_saveFile <-
-        fs::path(WD, "meta", "JSON", "standards.json")
-      message("Saving web-formatted standards to '", json_saveFile, "'")
-      save_json(out, json_saveFile)
+      if (!test_save) {
+        test_json <- FALSE
+        success <- FALSE
+      } else{
+        json_saveFile <-
+          fs::path(WD_git, "JSONs", "standards.json")
+        message("Saving web-formatted standards to '",
+                json_saveFile,
+                "'")
+        test_json <- save_json(out, json_saveFile) %>% catch_err()
 
-      problem_entries <- dplyr::as_tibble(a0[(tbds + undoc) > 0,])
-      #need to build better checks than this
-      success = TRUE
+        problem_entries <-
+          dplyr::as_tibble(a0[(skips + undoc) > 0, ])
+        #need to build better checks than this
+        success <-  TRUE
+      }
     }
   }#End Big else
 
+  message("Standards Compiled: ", success)
   #add grades information to output
-  return(
+  invisible(
     list(
       success = success,
       input = dplyr::as_tibble(a0),
       compiled = dplyr::as_tibble(A),
       problem_entries = problem_entries,
       gradeBand = gradeBand,
-      learningObj = fm$LearningObj,
+      learningObj = learningObj,
       targetSubj = targetSubj,
-      subject_proportions = proportions,
-      learning_chart_friendly = learning_chart_friendly
+      chart_labels = chart_labels
     )
   )
 

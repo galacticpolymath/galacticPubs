@@ -9,7 +9,7 @@
 #' @param grid.col What color do you want the grid to be? Default: same as font (#363636)
 #' @param border.thickness How heavy do you want the plot border to be?
 #' @param border.col  Color of plot border. Default: same as font (#363636)
-#' @param font Google font to use, "Montserrat" by default; see options with sysfonts::font_families_google()
+#' @param font Google font to use, "Noto sans" by default; see options with sysfonts::font_families_google()
 #' @param regular.wt font weight for regular font style
 #' @param bold.wt font weight for bold text
 #' @param font.cex a simple multiplier for scaling all text
@@ -19,7 +19,7 @@
 #' @export
 
 
-ggGalactic<-function(grid.thickness.maj=.7,grid.thickness.min=.4,grid.col="#C3C3C3",border.thickness=1.8,border.col="#6D6D6D",font="Montserrat",regular.wt=400,bold.wt=700,font.cex=1,axis.lab.col="#363636",axis.text.col="#6D6D6D",plot.margin=ggplot2::margin(t=10,r=10,b=10,l=10)){
+ggGalactic<-function(grid.thickness.maj=.7,grid.thickness.min=.4,grid.col="#C3C3C3",border.thickness=1.8,border.col="#6D6D6D",font="Noto sans",regular.wt=300,bold.wt=500,font.cex=1,axis.lab.col="#363636",axis.text.col="#6D6D6D",plot.margin=ggplot2::margin(t=10,r=10,b=10,l=10)){
   gpPal=NULL
   utils::data(gpPal,package="galacticPubs")
   showtext::showtext_auto()

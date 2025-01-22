@@ -4,18 +4,43 @@
 \alias{gpsave}
 \title{gpsave}
 \usage{
-gpsave(filename, width = 7, height = 3.94, dpi = 300, bg = "transparent", ...)
+gpsave(
+  filename,
+  obj = ggplot2::last_plot(),
+  WD = "?",
+  save_dir = "assets/_R_outputs",
+  width = NULL,
+  height = NULL,
+  aspect = 16/9,
+  dpi = 300,
+  open = FALSE,
+  bg = "transparent",
+  units = "in",
+  ...
+)
 }
 \arguments{
 \item{filename}{expects filename, with file extension (e.g. "plot.png"); can also include subfolder (e.g. "newfolder/plot.png")}
 
+\item{obj}{ggplot or grid object; default= ggplot2::last_plot()}
+
+\item{WD}{working directory; default="?" or a unit picker dialog}
+
+\item{save_dir}{which subfolder of WD do you want to save file to? default="assets/_R_outputs"}
+
 \item{width}{plot width in inches (default= 7)}
 
-\item{height}{plot height in inches (default= 3.94, i.e. 16:9 aspect ratio)}
+\item{height}{plot height in inches default= NULL will calculate from aspect}
+
+\item{aspect}{ratio of width to height; default= 16/9; aspect is ignored if width and height are supplied}
 
 \item{dpi}{dots per inch resolution (default= 300); note changing this will unfortunately also change the output relative text size}
 
+\item{open}{logical; open file after save? default=FALSE}
+
 \item{bg}{background color (default= "transparent")}
+
+\item{units}{default= "in"; options c("in", "cm", "mm", "px")}
 
 \item{...}{other parameters from \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}}}
 }
@@ -23,5 +48,5 @@ gpsave(filename, width = 7, height = 3.94, dpi = 300, bg = "transparent", ...)
 Wrapper for \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}} with galacticPubs defaults
 }
 \details{
-Most important thing it does is default to saving in the assets/_R_outputs/ folder and save with reasonable dimensions that maintain large, readable text size of graph labels
+Most important thing it does is default to saving in the assets/_R_outputs/ folder in the unit working directory and save with reasonable dimensions that maintain large, readable text size of graph labels
 }

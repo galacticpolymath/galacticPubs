@@ -20,17 +20,17 @@ ediTable_server <-
                    observe({
                      if (!is.null(rd)) {
                        output$hot <- renderRHandsontable({
-                         tmp <- isolate(rd())#Gotta isolate it or it'll cause infinite loop
+                         tmp0 <- isolate(rd())#Gotta isolate it or it'll cause infinite loop
                          #make sure it's a data frame
-                         if (!is.data.frame(tmp)) {
-                           tmp <- tmp %>% dplyr::as_tibble()
+                         if (!is.data.frame(tmp0)) {
+                           tmp0 <- tmp0 %>% dplyr::as_tibble()
                          }
 
-                         #make default class character if all NAs
-                         if (is_empty(tmp)) {
-                           tmp <-
-                             tmp %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
-                         }
+
+                        tmp <-
+                          tmp0  %>%
+                             #make default class character for empty columns
+                             dplyr::mutate(dplyr::across(dplyr::everything(),~ifelse(is.na(.x),as.character(.x),.x)))
 
 
                          #Necessary to avoid the issue described [here](https://github.com/jrowen/rhandsontable/issues/166)

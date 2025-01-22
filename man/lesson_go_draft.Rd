@@ -4,7 +4,7 @@
 \alias{lesson_go_draft}
 \title{lesson_go_draft}
 \usage{
-lesson_go_draft(WD = getwd())
+lesson_go_draft(WD = "?")
 }
 \arguments{
 \item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \link{pick_lesson(shared_drive = "l")}; default is WD=getwd()}

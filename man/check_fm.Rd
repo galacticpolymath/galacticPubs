@@ -4,7 +4,7 @@
 \alias{check_fm}
 \title{Check front-matter.yml}
 \usage{
-check_fm(WD = getwd(), skip = NULL, throw_error = TRUE)
+check_fm(WD = "?", skip = NULL, throw_error = TRUE)
 }
 \arguments{
 \item{WD}{working directory; default= getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}

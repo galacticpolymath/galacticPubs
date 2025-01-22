@@ -5,12 +5,12 @@
 \title{learningChart}
 \usage{
 learningChart(
-  WD = getwd(),
+  WD = "?",
   caption = NA,
-  captionN = TRUE,
+  captionN = FALSE,
   centralText = NA,
   quotedTitle = NA,
-  centralTextSize = 3.7,
+  centralTextSize = 3.5,
   saveFile = TRUE,
   destFolder,
   fileName = "GP-Learning-Chart",
@@ -20,11 +20,11 @@ learningChart(
 )
 }
 \arguments{
-\item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment)}
+\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling \code{\link[=get_wd_git]{get_wd_git()}}. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.}
 
 \item{caption}{quoted text you want to go at the bottom of the chart}
 
-\item{captionN}{T/F, add the range of the number of standards per grade used to make the plot to caption?}
+\item{captionN}{T/F, add the range of the number of standards per grade used to make the plot to caption? default=FALSE}
 
 \item{centralText}{specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades\verb{\\\\n}5-6")}
 
@@ -48,5 +48,5 @@ learningChart(
 the learning chart plot object (grid format); Result can be plotted with grid::grid.draw(result). The chart file is saved to assets/GP_Learning_Chart.png by default
 }
 \description{
-Make a GP Learning Chart
+Make a GP Learning Chart. Will also run \code{\link[=upload_assets]{upload_assets()}} when it's done.
 }

@@ -4,10 +4,10 @@
 \alias{editor}
 \title{editor}
 \usage{
-editor(WD = getwd(), system_browser = TRUE)
+editor(WD = "?", system_browser = TRUE)
 }
 \arguments{
-\item{WD}{a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default=getwd()}
+\item{WD}{a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default="?"}
 
 \item{system_browser}{logical
 \itemize{

@@ -12,7 +12,7 @@
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [pick_lesson(shared_drive = "l")]; default is WD=getwd()
 #' @export
 
-lesson_go_draft <- \(WD = getwd()) {
+lesson_go_draft <- \(WD = "?") {
   #Force picking from live shared drive
   if (grepl("\\?", WD)) {
     WD <- pick_lesson(shared_drive = "l")

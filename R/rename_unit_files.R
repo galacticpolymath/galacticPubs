@@ -7,10 +7,10 @@
 #' @param dir_path the folder or containing all the files you want to be changed.
 #' @param ignore.case if FALSE, the pattern matching is case sensitive and if TRUE, case is ignored during matching. default= FALSE
 #' @param perl logical. Should Perl-compatible regexps be used? default=TRUE
-#' @param inner logical. Is this being run recursively within a rename_files call? If TRUE, suppresses output. default=FALSE
+#' @param inner logical. Is this being run recursively within a rename_unit_files call? If TRUE, suppresses output. default=FALSE
 #' @export
 
-rename_files <- function(pattern,
+rename_unit_files <- function(pattern,
                          replacement,
                          dir_path,
                          ignore.case = FALSE,
@@ -115,7 +115,7 @@ rename_files <- function(pattern,
     if (length(to_change2) > 0) {
       #recurse if still stuff to change
       change_log <- change_log %>% dplyr::add_row(
-        rename_files(
+        rename_unit_files(
           pattern = pattern,
           replacement = replacement,
           dir_path = dir_path,
@@ -135,7 +135,7 @@ rename_files <- function(pattern,
       failures <- sum(!change_log$success)
     }
     message(
-      "____________________\nrename_files() summary:\n  ",
+      "____________________\nrename_unit_files() summary:\n  ",
       length(filez),
       " files/folders processed. \n  ",
       successes,

@@ -5,12 +5,12 @@
 \title{catalogURL
 Add full url prefix to lesson subdirectory where it will be published at catalog.galacticpolymath.com}
 \usage{
-catalogURL(relative_ref, repo)
+catalogURL(relative_ref, WD)
 }
 \arguments{
 \item{relative_ref}{relative path in the current environment (i.e. the filename of a file in the 'assets/_other-media-to-publish' folder)}
 
-\item{repo}{the name of the current repository e.g. from \code{\link{whichRepo}}}
+\item{WD}{the working directory}
 }
 \description{
 catalogURL

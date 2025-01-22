@@ -13,7 +13,7 @@ convert_T_to_check<-function(x,no_match=NA){
 
   result<-sapply(x, function(x_i) {
 
-    if (is.na(as.logical(x_i))& sum(grepl("\u2713|\u2717",x_i))==0) {
+    if (is.na(as.logical(x_i))& identical(sum(grepl("\u2713|\u2717",x_i)),0)) {
       no_match
     } else{
       switch(as.character(x_i),

@@ -5,9 +5,9 @@
 \alias{fm_compile}
 \title{compile_fm}
 \usage{
-compile_fm(WD = getwd())
+compile_fm(WD = "?")
 
-fm_compile(WD = getwd())
+fm_compile(WD = "?")
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}}}
@@ -21,7 +21,7 @@ compile front-matter found in /meta/front-matter.yml
 alias for for \code{\link[=compile_fm]{compile_fm()}}
 }
 \details{
-Produces the following json outputs in /meta/JSON/:
+Produces the following json outputs in github project \verb{gp-lessons/Lessons/[PROJ_NAME]/JSONs}:
 \itemize{
 \item header.json
 \item overview.json

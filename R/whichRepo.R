@@ -1,6 +1,6 @@
 #' whichRepo
 #'
-#' Get the name of the GitHub repo associated with a project. No error catching at the moment.
+#' Deprecated! Get the name of the GitHub repo associated with a project. No error catching at the moment.
 #'
 #' This assumes you have Google Drive for Desktop set up, permissions to access lesson folder, and git installed and authenticated in Rstudio.
 #'
@@ -11,25 +11,26 @@
 
 
 whichRepo<-function(WD,fullPath=FALSE){
-  if(missing(WD)){
-    WD<-rstudioapi::getActiveProject()
-  }
-
-  WD <- parse_wd(WD)
-
-  origin<-system(paste0("cd '",WD,"' && git remote -v"),intern=TRUE)[1]
-
-  #check that origin is sensible before proceeding
-  checkmate::assert(
-    checkmate::check_character(origin, null.ok=FALSE,any.missing = FALSE),
-    .var.name = "git remote URL"
-  )
-
-  repo<-ifelse(fullPath,gsub(".*(git@github.com:.[^ ]*).*$","\\1",origin),gsub("^.*/(.*)\\.git.*$","\\1", origin))
-  if(is.na(repo)) {
-    warning(
-      "\n No github remote found. Make sure you've set up github right.\n *URLs won't work on live lesson plan (b/c we don't know the subdirectory they live in).*"
-    )
-  }
-  repo
+  stop("This function is deprecated.")
+  # if(missing(WD)){
+  #   WD<-rstudioapi::getActiveProject()
+  # }
+  #
+  # WD <- parse_wd(WD)
+  #
+  # origin<-system(paste0("cd '",WD,"' && git remote -v"),intern=TRUE)[1]
+  #
+  # #check that origin is sensible before proceeding
+  # checkmate::assert(
+  #   checkmate::check_character(origin, null.ok=FALSE,any.missing = FALSE),
+  #   .var.name = "git remote URL"
+  # )
+  #
+  # repo<-ifelse(fullPath,gsub(".*(git@github.com:.[^ ]*).*$","\\1",origin),gsub("^.*/(.*)\\.git.*$","\\1", origin))
+  # if(is.na(repo)) {
+  #   warning(
+  #     "\n No github remote found. Make sure you've set up github right.\n *URLs won't work on live lesson plan (b/c we don't know the subdirectory they live in).*"
+  #   )
+  # }
+  # repo
 }

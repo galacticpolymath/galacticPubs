@@ -11,7 +11,7 @@
 prep_input <- function(input,
                        yaml_path = NULL,
                        existing_current_data = NULL,
-                       WD = getwd()) {
+                       WD = "?") {
   #read in existing front-matter.yml if it exists
   #Need to try_harder in case we need to wait for Google Drive for Desktop to
   #catch up with the folder move during live/draft staging
@@ -22,7 +22,7 @@ prep_input <- function(input,
     saved <- test_saved$result
   } else{
     stop(
-      "Unable to retrieve saved, possibly because you just staged the project to Live and Gdrive for Desktop is cofused. Try again in a minute."
+      "Unable to retrieve saved, possibly because you just staged the project to Live and Gdrive for Desktop is confused. Try again in a minute."
     )
   }
 
@@ -32,7 +32,8 @@ prep_input <- function(input,
       WD = WD,
       save_output = FALSE,
       return_fm = TRUE,
-      reorder = TRUE
+      reorder = TRUE,
+      recompile = FALSE
     ) %>% catch_err(keep_results = TRUE)
 
   #fm_updated is what we want to merge into "current" to trigger a Template needs update message

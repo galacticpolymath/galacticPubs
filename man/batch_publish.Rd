@@ -4,16 +4,27 @@
 \alias{batch_publish}
 \title{batch_publish}
 \usage{
-batch_publish(commit_msg = NULL, WD, try_harder = FALSE, lessons_dir = NULL)
+batch_publish(
+  WD = "?",
+  commit_msg = NULL,
+  recompile = FALSE,
+  try_harder = FALSE,
+  lessons_dir = NULL,
+  verbosity = 1
+)
 }
 \arguments{
+\item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default is WD=getwd()}
+
 \item{commit_msg}{What do you want to say about this update? Default=NULL, i.e. "automated galacticPubs::publish()"}
 
-\item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default is WD=getwd()}
+\item{recompile}{logical; run \code{\link[=compile_lesson]{compile_lesson()}}? default=FALSE}
 
 \item{try_harder}{Do you want the function to retry if it fails? A bit experimental. Gets passed to \code{\link[=catch_err]{catch_err()}}; default=FALSE}
 
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default=NULL}
+
+\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
 }
 \description{
 Publish one or more lessons that have been staged in the published/ folder of a lesson directory

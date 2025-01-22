@@ -109,8 +109,6 @@ hard_left_join <-
 
     }
 
-
-
     final
 
   }

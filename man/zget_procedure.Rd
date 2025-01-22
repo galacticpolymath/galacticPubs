@@ -4,19 +4,21 @@
 \alias{zget_procedure}
 \title{zget_procedure}
 \usage{
-zget_procedure(proc, pext, pinfo, mlinks)
+zget_procedure(proc, lext, uinfo, mlinks, WD_git = NULL)
 }
 \arguments{
 \item{proc}{the procedure file that has already been read in from the teach-it.gsheet, i.e. via \code{\link[=compile_teach_it]{compile_teach_it()}}}
 
-\item{pext}{the extension info read from the teach-it.gsheet}
+\item{lext}{the individual lesson extension info read from the teach-it.gsheet}
 
-\item{pinfo}{the part info read in from the teach-it.gsheet}
+\item{uinfo}{the unit info read in from the teach-it.gsheet}
 
-\item{mlinks}{multimedia info read in from the teach-it.gsheet}
+\item{mlinks}{multimedia info read in from the teach-it.gsheet!Titles tab}
+
+\item{WD_git}{location of gp-lessons github repo. Default=NULL will get this for the current workspace with \code{\link[=get_wd_git]{get_wd_git()}}}
 }
 \value{
-a list of: the procedure chunks and Part-Extension links for each part and a compiled vocab dataframe
+a list of: the procedure chunks and Lesson-Extension links for each lesson and a compiled vocab dataframe
 }
 \description{
 A helper function for \code{\link[=compile_teach_it]{compile_teach_it()}}. Translate the 'Procedure' tab of the lesson's 'teach-it.gsheet' into JSON format.

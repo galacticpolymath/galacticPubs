@@ -4,7 +4,7 @@
 \alias{prep_input}
 \title{Prep Input for Shiny App \code{\link[=editor]{editor()}}}
 \usage{
-prep_input(input, yaml_path = NULL, existing_current_data = NULL, WD = getwd())
+prep_input(input, yaml_path = NULL, existing_current_data = NULL, WD = "?")
 }
 \arguments{
 \item{input}{shiny input variable}

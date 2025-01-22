@@ -3,16 +3,37 @@
 #' A helper function for [compile_teach_it()]. Translate the 'Procedure' tab of the lesson's 'teach-it.gsheet' into JSON format.
 #'
 #' @param proc the procedure file that has already been read in from the teach-it.gsheet, i.e. via [compile_teach_it()]
-#' @param pext the extension info read from the teach-it.gsheet
-#' @param pinfo the part info read in from the teach-it.gsheet
-#' @param mlinks multimedia info read in from the teach-it.gsheet
-#' @returns a list of: the procedure chunks and Part-Extension links for each part and a compiled vocab dataframe
+#' @param lext the individual lesson extension info read from the teach-it.gsheet
+#' @param uinfo the unit info read in from the teach-it.gsheet
+#' @param mlinks multimedia info read in from the teach-it.gsheet!Titles tab
+#' @param WD_git location of gp-lessons github repo. Default=NULL will get this for the current workspace with [get_wd_git()]
+#' @returns a list of: the procedure chunks and Lesson-Extension links for each lesson and a compiled vocab dataframe
 #' @export
 #'
 zget_procedure <- \(proc,
-                    pext,
-                    pinfo,
-                    mlinks) {
+                    lext,
+                    uinfo,
+                    mlinks,
+                    WD_git=NULL) {
+
+
+
+# Import learning objectives (from standards save object) -----------------
+if(is.null(WD_git)){
+  WD_git <- get_wd_git()
+}
+  rds_saveFile <- fs::path(WD_git, "saves", "standards.RDS")
+  standards_saved <- file.exists(rds_saveFile)
+
+  if(standards_saved){
+    learningObj <- readRDS(rds_saveFile)$learningObj
+  }else{
+    warning("Couldn't retrieve Learning Objectives. Try running compile_standards().")
+    learningObj <- NULL
+  }
+
+
+
   #Function to change shorthand word=def into bulleted list with bold word ("- **word:** definition")
   formatVocab <- function(vocabTextVector) {
     sapply(1:length(vocabTextVector), function(i) {
@@ -46,11 +67,11 @@ zget_procedure <- \(proc,
   proc_w_prep <- proc
   proc <- proc %>% dplyr::filter(.data$Step != 0)
 
-  #Expand markdown for PartExt section
-
-  pext <- pext %>%
-    dplyr::mutate(dplyr::across(c("Description","Link"),\(x){parseGPmarkdown(x,mlinks=mlinks)}))
-
+  #Expand markdown for LessonExt section
+  if(nrow(lext)>0){
+  lext <- lext %>%
+    dplyr::mutate(dplyr::across(c("description","link"),\(x){parseGPmarkdown(x,mlinks=mlinks)}))
+}
 
 
 
@@ -73,10 +94,14 @@ zget_procedure <- \(proc,
 
     #make sure each row has an = sign
     has_equal <- grepl(pattern = "=",vocab_df0$x)
+    has_too_many_equal <- grepl(pattern = "=.*=",vocab_df0$x)
 
     if(sum(!has_equal)>0){
       stop("The following vocab entries don't have an = sign:\n -",
            paste0(vocab_df0[!has_equal,"x"]))
+    }else if(sum(has_too_many_equal)>0){
+      stop("The following vocab entries have more than one = sign per line. Need to make a new line inside the cell with ALT + ENTER. :\n -",
+           paste0(vocab_df0[has_too_many_equal,"x"]))
     }
 
     vocab_df <- vocab_df0 %>%
@@ -86,7 +111,7 @@ zget_procedure <- \(proc,
       names = c("term", "definition")
     ) %>%
       #remove repeated definitions, in case repeated in procedure
-      dplyr::distinct(.data$term, .keep_all = T)
+      dplyr::distinct(.data$term, .keep_all = T) %>% catch_err(keep_results=TRUE)
 
     #Parse vocab for Procedure section (change shorthand into reasonably formatted markdown with bullets)
     proc$Vocab <- formatVocab(proc$Vocab)
@@ -97,8 +122,12 @@ zget_procedure <- \(proc,
 
   ####
   #Add Chunk Start Times
-  proc$ChunkStart <- sapply(unique_sans_na(proc$Part), function(p) {
-    p_i <- subset(proc, proc$Part == p)
+  proc$ChunkStart <- sapply(unique_sans_na(proc$lsn), function(p) {
+    p_i <- subset(proc, proc$lsn == p)
+    if(nrow(p_i)<=1){
+      message("Error in Proc for Lsn ",p,": Not enough valid rows.")
+      NA
+    }else{
     newChunkIndx <-
       sapply(1:nrow(p_i), function(i)
         which.max(p_i$Chunk[1:i])) %>% unique()
@@ -108,57 +137,75 @@ zget_procedure <- \(proc,
     chunkStart[newChunkIndx] <-
       cumsum(shiftedChunkDur)
     chunkStart
+    }
   }) %>% unlist()
 
   ####
   #Figure out lesson duration string
-  partDurations <-
-    proc_w_prep$PartDur[which(proc_w_prep$PartDur != "")] %>% as.numeric()
-  lessonDur <-
-    if (length(partDurations) == 1) {
-      paste0(partDurations, " min") #if just 1 part listed, do X min
+  lsnDurations <-
+    proc_w_prep$lsnDur[which(proc_w_prep$lsnDur != "")] %>% as.numeric()
+
+    if (length(lsnDurations) == 1) {
+      lessonDur <-paste0(lsnDurations, " min") #if just 1 lsn listed, do X min
     } else{
-      #if more than 1 part, but they're all the same, combine them
-      if (length(unique(partDurations)) == 1) {
-        paste0(length(partDurations), " x ", partDurations[1], " min")
+      #if more than 1 lsn, but they're all the same, combine them
+      if (length(unique(lsnDurations)) == 1) {
+        lessonDur <-paste0(length(lsnDurations), " x ", lsnDurations[1], " min")
       } else{
         #otherwise average, rounding to 5 min
-        m <- mean(partDurations,na.rm=T)
-        paste0(length(partDurations)," x ~",5*round(m/5)," min")
+        m <- mean(lsnDurations,na.rm=T)
+        lessonDur <-paste0(length(lsnDurations)," x ~",5*round(m/5)," min")
       }
     }
   lessonDur
 
   #Let's make a list that we'll convert to JSON
   out <- list()
-  # pref<-pinfo$LessonPreface[1]
+  # pref<-uinfo$LessonPreface[1]
   # out0$lessonPreface=if(is.na(pref)){}else{pref}
   out$lessonDur = lessonDur
 
 
-  nparts <- max(unique(proc$Part), na.rm = T)
+  nlsns <- max(unique(proc$lsn), na.rm = T)
 
-  #Filter out NAs for placeholder text in Part Info if still present
-  ptitles <- pinfo$PartTitle[!is.na(pinfo$PartTitle)]
-  pprefs <- pinfo$PartPreface[!is.na(pinfo$PartPreface)]
+  #Filter out NAs for placeholder text in lsn Info if still present
+  ptitles <- uinfo$lsnTitle[!is.na(uinfo$lsnTitle)]
+  pprefs <- uinfo$lsnPreface[!is.na(uinfo$lsnPreface)]
   pgradevar <-
-    pinfo$PartGradeVarNotes[!is.na(pinfo$PartGradeVarNotes)]
+    uinfo$lsnGradeVarNotes[!is.na(uinfo$lsnGradeVarNotes)]
 
 
-  # Output data for each part -----------------------------------------------
 
-  out$parts <- lapply(1:nparts, function(i) {
-    partNum <- i
-    partTitle <- ifelse(length(ptitles) < i, NA, ptitles[i])
-    partDur <- proc$PartDur[i]
-    partPreface <- ifelse(length(pprefs) < i, NA, pprefs[i])
 
-    proc_df_i <- subset(proc, proc$Part == i)
+  # Output data for each lsn -----------------------------------------------
+
+  out$lessons <- lapply(1:nlsns, function(i) {
+    lsnNum <- i
+    lsnTitle <- ifelse(length(ptitles) < i, NA, ptitles[i])
+
+    lsnDur <-
+      proc %>%
+      dplyr::filter(.data$lsn == i) %>%
+      dplyr::summarise(sum_chunk_dur =sum(.data$ChunkDur, na.rm = TRUE)) %>%
+      dplyr::pull("sum_chunk_dur")
+
+    lsnPreface <- ifelse(length(pprefs) < i, NA, pprefs[i])
+
+    if(length(learningObj[[1]])==0){
+      learningObj_i <- NULL
+      warning("No learning objectives found for lesson: ",i)
+    }else if(!i%in%1:length(learningObj)){
+      message("No learning objectives found for Lesson ",i)
+      learningObj_i <- NA
+      }else{
+      learningObj_i <- learningObj[[i]]
+    }
+    proc_df_i <- subset(proc, proc$lsn == i)
     prep_row <-
-      subset(proc_w_prep, proc_w_prep$Part == i & proc_w_prep$Step == 0)
-    #If prep missing for part i, nullify it
+      subset(proc_w_prep, proc_w_prep$lsn == i & proc_w_prep$Step == 0)
+    #If prep missing for lsn i, nullify it
     if (nrow(prep_row) == 0) {
-      partPrep <- NULL
+      lsnPrep <- NULL
     } else{
       #Set default Title if missing
       if (!is.na(prep_row$StepQuickDescription) &
@@ -166,20 +213,20 @@ zget_procedure <- \(proc,
         prep_row$StepTitle <- "Prep"
       }
 
-      #Extract prep info for part i
-      partPrep <- list(
-        PrepTitle = prep_row$StepTitle,
-        PrepDur = prep_row$ChunkDur,
-        PrepQuickDescription = prep_row$StepQuickDescription,
-        PrepDetails = prep_row$StepDetails,
-        PrepVariantNotes = prep_row$VariantNotes,
-        PrepTeachingTips = prep_row$TeachingTips
+      #Extract prep info for lsn i
+      lsnPrep <- list(
+        prepTitle = prep_row$StepTitle,
+        prepDur = prep_row$ChunkDur,
+        prepQuickDescription = prep_row$StepQuickDescription,
+        prepDetails = prep_row$StepDetails,
+        prepVariantNotes = prep_row$VariantNotes,
+        prepTeachingTips = prep_row$TeachingTips
       )
     }
 
-    #Get chunk info for this part
+    #Get chunk info for this lsn
     chunks <- lapply(unique(proc_df_i$Chunk), function(chunk_i) {
-      d <- subset(proc, proc$Part == i & proc$Chunk == chunk_i)
+      d <- subset(proc, proc$lsn == i & proc$Chunk == chunk_i)
       chunkTitle <- d$ChunkTitle[1]
       chunkStart <- d$ChunkStart[1]
       chunkDur <- d$ChunkDur[1]
@@ -202,51 +249,54 @@ zget_procedure <- \(proc,
     }) %>% list()
 
 
-    # Extract relevant pext ("Going Further") links ---------------------------
+    # Extract relevant lext ("Going Further") links ---------------------------
 
-    pext_df_i <-
-      pext %>% dplyr::filter(Part == i) %>% dplyr::arrange(.data$Order)
+    lext_df_i <-
+      lext %>% dplyr::filter(lsn == i) %>% dplyr::arrange(.data$order)
 
     #Remove []() markdown links to get bare links in case somebody used shorthand to grab the YouTube link
-    pext_df_i$Link <- ifelse(
-      grepl("\\[", pext_df_i$Link),
+    lext_df_i$link <- ifelse(
+      grepl("\\[", lext_df_i$link),
       #only do gsub if [ notation found in link
       gsub(
         pattern = "[^\\(]*\\(?([^\\)]*)\\)?$",
         replacement = "\\1",
-        pext_df_i$Link
+        lext_df_i$link
       ),
-      pext_df_i$Link
+      lext_df_i$link
     )
-    # stringr::str_extract(pext_df_i$Link,pattern = ".*\\(?([^\\)]*)\\)?$")
+    # stringr::str_extract(lext_df_i$link,pattern = ".*\\(?([^\\)]*)\\)?$")
 
     #Make NA row to avoid errors
-    if (nrow(pext_df_i) == 0) {
-      partExt <- NULL
+
+    if (nrow(lext_df_i) == 0) {
+      lsnExt <- NULL
     } else{
-      partExt <- purrr::map(1:nrow(pext_df_i), \(j) {
+      lsnExt <- purrr::map(1:nrow(lext_df_i), \(j) {
         list(
           item = j,
-          itemTitle = pext_df_i$ItemTitle[j] ,
-          itemDescription = pext_df_i$Description[j],
-          itemLink = pext_df_i$Link[j]
+          itemTitle = lext_df_i$itemTitle[j] ,
+          itemDescription = lext_df_i$description[j],
+          itemLink = lext_df_i$link[j]
         )
       })
 
     }
 
-    #output data for this part
+    #output data for this lsn
     c(
-      partNum = partNum,
-      partTitle = partTitle,
-      partDur = partDur,
-      partPreface = partPreface,
-      partPrep = list(partPrep),
+      lsnNum = lsnNum,
+      lsnTitle = lsnTitle,
+      lsnDur = lsnDur,
+      lsnPreface = lsnPreface,
+      learningObj=list(learningObj_i),
+      lsnPrep = list(lsnPrep),
       chunks = chunks,
-      partExt = list(partExt)
+      lsnExt = list(lsnExt)
     )
 
   })
+
   out$vocab <- vocab_df
 
 

@@ -4,7 +4,7 @@
 \alias{zget_envir}
 \alias{zget_grade_var_notes}
 \alias{zget_grade_bands}
-\alias{zget_parts}
+\alias{zget_lessons}
 \alias{zget_items}
 \title{zget_envir()}
 \usage{
@@ -14,7 +14,7 @@ zget_grade_var_notes(df)
 
 zget_grade_bands(df, fm, assess)
 
-zget_parts(df, fm)
+zget_lessons(df, fm)
 
 zget_items(df, fm)
 }
@@ -39,30 +39,30 @@ Not intended for use outside functions.
 
 \item \code{zget_grade_bands()}: 
 
-\item \code{zget_parts()}: 
+\item \code{zget_lessons()}: 
 
 \item \code{zget_items()}: 
 
 }}
 \seealso{
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 
 Other Internal helper functions: 
-\code{\link{zYTembed}()},
+\code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}
 }
 \concept{Internal helper functions}

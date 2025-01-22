@@ -4,7 +4,7 @@
 \alias{lesson_go_live}
 \title{lesson_go_live}
 \usage{
-lesson_go_live(WD = getwd())
+lesson_go_live(WD = "?")
 }
 \arguments{
 \item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default is WD=getwd()}

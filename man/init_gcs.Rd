@@ -5,9 +5,12 @@
 \alias{gcs_init}
 \title{init_gcs}
 \usage{
-init_gcs()
+init_gcs(bucket = "gp-cloud")
 
-gcs_init()
+gcs_init(bucket = "gp-cloud")
+}
+\arguments{
+\item{bucket}{the cloud storage bucket you want to initialize}
 }
 \value{
 logical; did we succeed in connecting to the cloud?

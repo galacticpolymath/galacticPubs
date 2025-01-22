@@ -5,7 +5,7 @@
 \alias{gpPal}
 \title{Galactic Polymath color stylings}
 \format{
-A list with 3 items. Each item is a data frame with color names, hex and rgb codes
+A list with 4 items. Each item is a data frame with color names, hex and rgb codes
 }
 \usage{
 gpPal

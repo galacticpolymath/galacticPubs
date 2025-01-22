@@ -5,25 +5,9 @@
 \alias{lesson_compile}
 \title{compile_lesson}
 \usage{
-compile_lesson(
-  WD = getwd(),
-  choices,
-  current_data,
-  destFolder,
-  outputFileName = "LESSON.json",
-  clean = FALSE,
-  rebuild = NULL
-)
+compile_lesson(WD = "?", choices, current_data, clean = FALSE, rebuild = NULL)
 
-lesson_compile(
-  WD = getwd(),
-  choices,
-  current_data,
-  destFolder,
-  outputFileName = "LESSON.json",
-  clean = FALSE,
-  rebuild = NULL
-)
+lesson_compile(WD = "?", choices, current_data, clean = FALSE, rebuild = NULL)
 }
 \arguments{
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
@@ -31,10 +15,6 @@ lesson_compile(
 \item{choices}{one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All". If missing, will compile things in the ReadyToCompile entry in front-matter.yml for the WD folder.}
 
 \item{current_data}{the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml}
-
-\item{destFolder}{where you want to save the folder; by default in the "meta/JSON/" folder}
-
-\item{outputFileName}{output file name; default= "processedProcedure.json"}
 
 \item{clean}{delete all JSON files in meta/ and start over? default=FALSE}
 
@@ -51,7 +31,7 @@ Combines functionality of:
 \itemize{
 \item \code{\link[=compile_fm]{compile_fm()}}
 \item \code{\link[=compile_standards]{compile_standards()}}
-\item \code{\link[=learningChart]{learningChart()}} and \code{\link[=learningEpaulette]{learningEpaulette()}}
+\item \code{\link[=learningEpaulette]{learningEpaulette()}}
 \item \code{\link[=compileAcknowledgments]{compileAcknowledgments()}}
 \item \code{\link[=compileVersions]{compileVersions()}}
 \item \code{\link[=compileJSON]{compileJSON()}}

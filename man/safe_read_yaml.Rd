@@ -14,9 +14,9 @@ safe_read_yaml(
 )
 }
 \arguments{
-\item{yaml_path}{full path to the front-matter.yml file (usually in format '/users/lotsaSubfolders/WorkingDirectory/meta/front-matter.yml')}
+\item{yaml_path}{full path to the front-matter.yml file (usually in format '/users/lotsaSubfolders/gp-lessons/front-matter.yml')}
 
-\item{WD}{alternate way to specify location. e.g. use "?" to invoke \code{\link[=pick_lesson]{pick_lesson()}}}
+\item{WD}{Google Drive Working Directory. Can use "?" to pass to \code{\link[=parse_wd]{parse_wd()}}}
 
 \item{eval.expr}{boolean; do you want to evaluate expression in yaml prepended with '!expr '? Default=TRUE}
 

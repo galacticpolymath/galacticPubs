@@ -15,10 +15,11 @@ get_lessons_path(shared_drive = "s")
 \item "s" or "?" = GP-Studio (draft working directory, many users with access)
 \item "l" or "??" = GP-Live (private, admin only)
 \item "gp"= GalacticPolymath (public-facing read-only)
+\item "git" = wd_git (i.e. the github repository for the gp-lessons project)
 }}
 }
 \description{
-Retrieves an environmental variable set with \code{\link[=set_drive_local_credentials]{set_drive_local_credentials()}}
+Retrieves an environmental variable set with \code{\link[=init_galacticPubs]{init_galacticPubs()}}
 }
 \section{Functions}{
 \itemize{

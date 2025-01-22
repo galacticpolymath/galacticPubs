@@ -11,7 +11,7 @@
 #' @export
 #'
 
-check_fm <- function(WD = getwd(),
+check_fm <- function(WD = "?",
                        skip = NULL,
                        throw_error = TRUE) {
 

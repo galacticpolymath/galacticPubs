@@ -29,7 +29,8 @@ parseGPmarkdown <-
     #WD is an optional parameter
     if(!is.null(WD)){
     WD <- parse_wd(WD)
-    cache_path <- fs::path(WD, "meta", "multimedia.RDS")
+    WD_git <- get_wd_git(WD=WD)
+    cache_path <- fs::path(WD_git, "saves", "multimedia.RDS")
     }
 
     # 1. Look for multimedia json if use_cache --------------------------------
@@ -58,8 +59,8 @@ parseGPmarkdown <-
                                   sheet = "Multimedia",
                                   skip = 1,
                                   col_types = "c") %>%
-        dplyr::select(1:dplyr::starts_with("otherLink")) %>%
-        dplyr::filter(!is.na(.data$code))
+        dplyr::select(1:dplyr::starts_with("otherLink"))   %>%
+        dplyr::filter(dplyr::if_any(1,~!is.na(.)))
 
       valid_mm <-
         checkmate::test_data_frame(mlinks, min.rows = 1)
@@ -105,7 +106,7 @@ parseGPmarkdown <-
 
             #extract number from codes
             codeN <-
-              stringr::str_extract(vidLinks$code, "[^\\d]*(\\d*)", group = 1)
+              stringr::str_extract(unlist(vidLinks[,1]), "[^\\d]*(\\d*)", group = 1)
 
             #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
             index <- match(vidN, codeN, nomatch = 999)
@@ -148,8 +149,8 @@ parseGPmarkdown <-
                                                                                 "")
             #extract number from codes
             codeN <-
-              stringr::str_extract(mlinks$code, "[^\\d]*(\\d*)", group = 1)
-            #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
+              stringr::str_extract(unlist(mlinks[,1]), "[^\\d]*(\\d*)", group = 1)
+            #if no {itemX} codes, (i.e. ""), ignore, put NA if no match for the number
             index <- match(itemN, codeN, nomatch = 999)
             if (index != 999 & !is.na(index)) {
               type <- mlinks$type[index] %>% tolower()

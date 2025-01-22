@@ -5,10 +5,10 @@
 \title{compile_teach_it}
 \usage{
 compile_teach_it(
-  WD = getwd(),
+  WD = "?",
   teach_it_drib = NULL,
-  rename_parts = TRUE,
-  prompt_rename = TRUE
+  rename_lessons = TRUE,
+  prompt_rename = FALSE
 )
 }
 \arguments{
@@ -16,13 +16,13 @@ compile_teach_it(
 
 \item{teach_it_drib}{if you already have the teach-it.gsheet dribble looked up from \code{\link[=drive_find_path]{drive_find_path()}}, passing this object can can save some time; default = NULL}
 
-\item{rename_parts}{logical; do you want to rename part folders based on PartTitles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function \code{\link[=zrename_parts]{zrename_parts()}}}
+\item{rename_lessons}{logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function \code{\link[=zrename_lessons]{zrename_lessons()}}}
 
-\item{prompt_rename}{logical, do you want to promput user about whether to rename parts? default=T}
+\item{prompt_rename}{logical, do you want to prompt user about whether to rename lessons? default=FALSE}
 }
 \value{
 tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 }
 \description{
-Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the PartTitles tab and invokes \code{\link[=sweep_teaching_materials]{sweep_teaching_materials()}} to relocate scrap working files.
+Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the Titles tab and invokes \code{\link[=sweep_teaching_materials]{sweep_teaching_materials()}} to relocate scrap working files.
 }

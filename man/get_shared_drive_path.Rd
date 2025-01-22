@@ -10,5 +10,5 @@ get_shared_drive_path()
 virtualized path to Google Shared Drives location
 }
 \description{
-Gets a virtualized path to Google Shared Drives. Uses environmental variables set by \code{\link[=set_drive_local_credentials]{set_drive_local_credentials()}}
+Gets a virtualized path to Google Shared Drives. Uses environmental variables set by \code{\link[=init_galacticPubs]{init_galacticPubs()}}
 }

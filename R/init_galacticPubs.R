@@ -1,10 +1,39 @@
-#' Set up Google Drive local user credentials (and path)
+#' init_galacticPubs()
 #'
-#' Sets environmental variables used to locate the Edu/lessons folder that is emulated by [Google Drive for Desktop](https://www.google.com/drive/download)
+#' Set up environmental variables to store local user credentials and paths to resources. Specifically:
+#' - the local path to GP-Studio/Edu/Lessons, virtualized by [Google Drive for Desktop](https://www.google.com/drive/download)
+#' - the gp-lessons repository
+#' - other things
+#'
 #' @returns table of galacticPubs-related environmental variables, their values, and whether they were successfully set
 #' @export
 
-set_drive_local_credentials <- function() {
+init_galacticPubs <- function() {
+
+# First check that we're in galacticPubs or gp-lessons project ------------
+
+curr_proj_dir <- rstudioapi::getActiveProject()
+proj <- basename(curr_proj_dir)
+if(!proj %in% c("galacticPubs","gp-lessons")){
+  stop("Currently, you can only use galacticPubs from the gp-lessons project.")
+}else{
+  test_git_gp_lessons_dir <- TRUE
+}
+
+if(proj=="gp-lessons"){
+  git_gp_lessons_dir <- curr_proj_dir
+}else{
+  guess_loc <- "/Users/mattwilkins/R-pkg-dev/gp-lessons"
+  message("guessing gp-lessons location")
+  git_gp_lessons_dir <- guess_loc
+}
+
+test_git_gp_lessons_dir <-  checkmate::test_directory_exists(git_gp_lessons_dir)
+
+if(test_git_gp_lessons_dir){
+  Sys.setenv(galacticPubs_git_gp_lessons_dir=git_gp_lessons_dir)
+}
+
   gdrive_dir <-  fs::path(fs::path_home(), "Library", "CloudStorage")
   if (!dir.exists(gdrive_dir)) {
     warning("path not found: ", gdrive_dir)
@@ -58,7 +87,7 @@ set_drive_local_credentials <- function() {
              "Edu",
              "Lessons")
 
-  gp_lessons_dir <-
+  galacticpolymath_lessons_dir <-
     fs::path(gdrive_root_dir,
              "GalacticPolymath")
 
@@ -76,45 +105,23 @@ set_drive_local_credentials <- function() {
   test_root_dir <- dir.exists(gdrive_root_dir)
   test_live_lessons_dir <- dir.exists(live_lessons_dir)
   test_dev_dir <- dir.exists(dev_dir)
-  test_gp_lessons_dir <- dir.exists(gp_lessons_dir)
+  test_galacticpolymath_lessons_dir <- dir.exists(galacticpolymath_lessons_dir)
   test_studio_lessons_dir <- dir.exists(studio_lessons_dir)
-  c_dirs <- c(studio_lessons_dir, live_lessons_dir, gp_lessons_dir)
+  c_dirs <- c(studio_lessons_dir, live_lessons_dir, galacticpolymath_lessons_dir)
 
   if (!(test_live_lessons_dir |
-        test_gp_lessons_dir | test_studio_lessons_dir)) {
+        test_galacticpolymath_lessons_dir | test_studio_lessons_dir)) {
     warning(
       "Lessons Path NOT SET. No lessons folders found at:\n -",
       paste0(c_dirs, collapse = "\n -")
     )
     test_live_lessons_dir <-
-      test_gp_lessons_dir <- test_studio_lessons_dir <- NA
+      test_galacticpolymath_lessons_dir <- test_studio_lessons_dir <- NA
 
     warning("Make sure you have access privileges and Google Drive for Desktop installed.")
   } else{
     message("\nGoogle Drive For Desktop Virtualized Lessons Path(s) set for next time: \n ")
 
-    catalog_dir <-
-      fs::path(
-        fs::path_home(),
-        "Library",
-        "CloudStorage",
-        gdrive_userdir,
-        "Shared drives",
-        "GP-Misc",
-        "GitHub_Meta-Projects",
-        "gp-catalog"
-      )
-    test_catalog_dir <- file.exists(catalog_dir)
-    if (!test_catalog_dir) {
-      warning("Catalog not found. Make sure you have access to 'GP-Misc' Drive.\n -",
-              catalog_dir)
-      catalog_dir <- NA
-    } else{
-      message(
-        "\nGoogle Drive for Desktop Virtualized GP Catalog Path set for next time: \n -",
-        catalog_dir
-      )
-    }
 
     if (!test_dev_dir) {
       message(
@@ -132,9 +139,9 @@ set_drive_local_credentials <- function() {
       galacticPubs_gdrive_live_lessons_dir = ifelse(!test_live_lessons_dir, NA, live_lessons_dir)
     )
     Sys.setenv(
-      galacticPubs_gdrive_gp_lessons_dir = ifelse(!test_gp_lessons_dir, NA, gp_lessons_dir)
+      galacticPubs_gdrive_galacticpolymath_lessons_dir = ifelse(!test_galacticpolymath_lessons_dir, NA, galacticpolymath_lessons_dir)
     )
-    Sys.setenv(galacticPubs_gdrive_catalog_dir = ifelse(!test_catalog_dir, NA, catalog_dir))
+
 
     Sys.setenv(galacticPubs_gdrive_dev_dir = ifelse(!test_dev_dir, NA, dev_dir))
 
@@ -167,34 +174,34 @@ set_drive_local_credentials <- function() {
     out <- dplyr::tibble(
       `Set?` = convert_T_to_check(
         c(
+          test_git_gp_lessons_dir,
           test_gdrive_user,
           test_user_dir,
           test_root_dir,
           test_studio_lessons_dir,
           test_live_lessons_dir,
-          test_gp_lessons_dir,
-          test_catalog_dir,
+          test_galacticpolymath_lessons_dir,
           test_auth_file
         )
       ),
       EnvirVariable = c(
+        "galacticPubs_git_gp_lessons_dir",
         "galacticPubs_gdrive_user",
         "galacticPubs_gdrive_userdir",
         "galacticPubs_gdrive_shared_drives_dir",
         "galacticPubs_gdrive_studio_lessons_dir",
         "galacticPubs_gdrive_live_lessons_dir",
-        "galacticPubs_gdrive_gp_lessons_dir",
-        "galacticPubs_gdrive_catalog_dir",
+        "galacticPubs_gdrive_galacticpolymath_lessons_dir",
         "GCS_AUTH_FILE"
       ),
       Value = c(
+        git_gp_lessons_dir,
         gdrive_user,
         gdrive_userdir,
         gdrive_root_dir,
         studio_lessons_dir,
         live_lessons_dir,
-        gp_lessons_dir,
-        catalog_dir,
+        galacticpolymath_lessons_dir,
         auth_file
       )
     )

@@ -4,10 +4,12 @@
 \alias{init_fm}
 \title{Initialize Front Matter}
 \usage{
-init_fm(WD = getwd())
+init_fm(WD = "?", WD_git = NULL)
 }
 \arguments{
 \item{WD}{the working directory of the lesson project; default=getwd()}
+
+\item{WD_git}{(alternate; do WD OR WD_git, not both); path to root of project in the gp-lessons/Lessons/Project github repo}
 }
 \value{
 logical of success; T= exists or created; F= not found and not created

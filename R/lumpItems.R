@@ -12,34 +12,44 @@
 #' @return The condensed list
 #' @export
 #'
-lumpItems<-function(items,item.labs,list.obj,new.name){
+lumpItems <- function(items, item.labs, list.obj, new.name) {
 
-     applicable00<- match(items,names(list.obj))
-     #remove empty items (not just NA)
-     applicable0 <- sapply(1:length(applicable00), function(i) {
-       if (is_empty(list.obj[applicable00[i]])) {
-         NULL
-       } else{
-         applicable00[i]
-       }
-     }) %>% unlist()
-     applicable <- names(list.obj)[applicable0]
-     applicableLabs<-item.labs[as.vector(stats::na.omit(match(applicable,items)))]
-     lumped<-sapply(1:length(applicable),function(i){
-              # add H4 to label (only if there is a label provided)
-              paste0(ifelse(is_empty(applicableLabs[i]),"",
-                            paste0("#### ",applicableLabs[i],"\n")),
-                     list.obj[applicable[i]])
-              })
-     #remove lumped list items
-     first.applicable<-sort(applicable0)[1]
-     #rearrange to insert the lumped section
-     remaining<-first.applicable:length(list.obj)
-     out<-list.obj[c(1:first.applicable, remaining[!remaining%in%applicable0])]
+    applicable00 <- match(items, names(list.obj))
+    #remove empty items (not just NA)
+    applicable0 <- sapply(1:length(applicable00), function(i) {
+      if (is_empty(list.obj[applicable00[i]])) {
+        NULL
+      } else{
+        applicable00[i]
+      }
+    }) %>% unlist()
+    applicable <- names(list.obj)[applicable0]
+
+    if (length(list.obj[applicable]) == 0) {
+    out <- list.obj
+  } else{
+    applicableLabs <-
+      item.labs[as.vector(stats::na.omit(match(applicable, items)))]
+    lumped <- sapply(1:length(applicable), function(i) {
+      # add H4 to label (only if there is a label provided)
+      paste0(ifelse(
+        is_empty(applicableLabs[i]),
+        "",
+        paste0("#### ", applicableLabs[i], "\n")
+      ),
+      list.obj[applicable[i]])
+    })
+    #remove lumped list items
+    first.applicable <- sort(applicable0)[1]
+    #rearrange to insert the lumped section
+    remaining <- first.applicable:length(list.obj)
+    out <-
+      list.obj[c(1:first.applicable, remaining[!remaining %in% applicable0])]
     #replace first.applicable with lumped
-     out[first.applicable]<-paste0(lumped,collapse="\n")
-     names(out)[first.applicable]<-new.name #rename inserted item according to user defined var new.name
-     #remove remaining lumped columns (by name to avoid index issues)
-
-     out
-    }#end lumpItems()
+    out[first.applicable] <- paste0(lumped, collapse = "\n")
+    names(out)[first.applicable] <-
+      new.name #rename inserted item according to user defined var new.name
+    #remove remaining lumped columns (by name to avoid index issues)
+  }
+  out
+}#end lumpItems()

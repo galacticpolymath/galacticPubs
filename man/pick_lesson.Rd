@@ -7,37 +7,58 @@
 \usage{
 pick_lesson(
   shared_drive = "s",
+  show_all = FALSE,
+  pick_all = FALSE,
   full_path = TRUE,
+  sort_col = "LastUpdated",
+  sort_decr = TRUE,
   lessons_dir = NULL,
-  sort_az = FALSE
+  pull_path = TRUE,
+  exclude_TEST = TRUE
 )
 
 lesson_pick(
   shared_drive = "s",
+  show_all = FALSE,
+  pick_all = FALSE,
   full_path = TRUE,
+  sort_col = "LastUpdated",
+  sort_decr = TRUE,
   lessons_dir = NULL,
-  sort_az = FALSE
+  pull_path = TRUE,
+  exclude_TEST = TRUE
 )
 }
 \arguments{
 \item{shared_drive}{which shared drive do you want to find the lessons in? default= "s" Options:
 \itemize{
-\item "s" = GP-Studio (draft working directory, many users with access)
-\item "l" = GP-Live (private, admin only)
+\item "s" or "?" = GP-Studio (draft working directory, many users with access)
+\item "l" or "??" = GP-Live (private, admin only)
 \item "gp"= GalacticPolymath (public-facing read-only)
+\item "sl" or "?!" = both GP-Studio and GP-Live
 }}
+
+\item{show_all}{show an 'all' option? default=FALSE}
+
+\item{pick_all}{logical; Default=FALSE makes user pick unit. If TRUE, choice is set to "all" and will return paths to all projects in this directory.}
 
 \item{full_path}{do you want a full path to the chosen lesson? default= TRUE}
 
+\item{sort_col}{which column of output to sort by? Default "LastUpdated"; options=c("Unit","numID","ReleaseDate")}
+
+\item{sort_decr}{logical; sort by decreasing order? default= TRUE}
+
 \item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling \code{\link[=lessons_get_path]{lessons_get_path()}}}
 
-\item{sort_az}{logical; sort alphabetically? default =F sorts by last modified}
+\item{pull_path}{logical; do you want to pull (and unlist) only the paths? default= TRUE. FALSE will return the tibble for the selected units}
+
+\item{exclude_TEST}{default=T; excludes test repositories}
 }
 \value{
-the selected lesson name
+the selected path, tibble, or string of names
 }
 \description{
-Interactively lets you pick from a list of published Galactic Polymath lessons and will out put a virtualized Google Drive for Desktop path
+Interactively lets you pick from a list of published Galactic Polymath units and will out put a virtualized Google Drive for Desktop path
 }
 \section{Functions}{
 \itemize{

@@ -1,12 +1,12 @@
 Package: galacticPubs
 Type: Package
 Title: Galactic Polymath Lesson Publishing Tools
-Version: 0.9.6
+Version: 1.1.6
 Author: Matthew R Wilkins, PhD
 Maintainer: Matthew R Wilkins, PhD <matt@galacticpolymath.com>
 Description: Code to enable the GP Nexus education publishing workflow. Outputs are highly structured
              JSON files and custom graphics for visualizing knowledge transferred in lessons. Also includes
-             a Shiny app editor for interfacing with various working documents, previewing lesson plans,
+             a Shiny app editor for interfacing with various working documents, previewing unit plans,
              and staging for publication.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
@@ -24,6 +24,7 @@ Imports:
     googledrive (>= 2.0.0),
     googlesheets4 (>= 1.0.1),
     grid (>= 4.1.1),
+    httr2,
     jsonlite (>= 1.8.0),
     magrittr (>= 2.0.1),
     patchwork (>= 1.1.1),
@@ -40,25 +41,30 @@ Imports:
     rlang (>= 1.0.1),
     rstudioapi (>= 0.13.0),
     shiny (>= 1.7.1),
-    yaml (>= 2.3.5)
+    yaml (>= 2.3.5),
+    tidyr (>= 1.3.0),
+    tidyjson (>= 0.3.2)
 Remotes:
     galacticpolymath/galacticEdTools
 Suggests: 
     colorspace (>= 2.0.0),
     commonmark (>= 1.8.0),
+    htmltools (>= 0.5.8),
+    MASS (>= 7.3),
     rmdformats (>= 1.0.3),
     pacman (>= 0.5.0),
     tictoc (>= 1.0.1),
     ISOcodes (>= 2022.01.10),
     rhandsontable (>= 0.3.8),
     testthat (>= 3.0.0),
+    urlshorteneR (>= 1.5.7),
     usethis (>= 2.1.3),
     shadowtext (>= 0.0.9),
     showtext (>= 0.9.0),
     tools (>= 3.6.0),
     urltools (>= 1.7.3)
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Depends: 
     R (>= 3.5.0)
 Config/testthat/edition: 3

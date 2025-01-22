@@ -6,6 +6,7 @@
 \usage{
 drive_get_info(
   dribble,
+  set_lsn = NULL,
   set_envir = NULL,
   set_grades = NULL,
   validate = FALSE,
@@ -15,6 +16,8 @@ drive_get_info(
 \arguments{
 \item{dribble}{a dribble input (e.g. piped from \code{\link[googledrive:drive_get]{googledrive::drive_get()}}) for a single file}
 
+\item{set_lsn}{set lesson manually (not from file name)}
+
 \item{set_envir}{set envir output manually (not from file name); partial string matching of options "classroom", "remote", "assessments"}
 
 \item{set_grades}{set grade bands manually (not from file name); passed as a string (e.g. "5-9")}
@@ -23,10 +26,10 @@ drive_get_info(
 \itemize{
 \item shortTitle
 \item title
-\item part
-\item grades
-\item itemType
-\item fileType
+\item \verb{_lsn}
+\item \verb{_grades}
+\item \verb{_itemType}
+\item \verb{_fileType}
 }}
 
 \item{all_info}{logical; keep the full drive_resources list with all the dribble meta info for each row item? default=FALSE}
@@ -35,7 +38,7 @@ drive_get_info(
 a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
 }
 \description{
-Extract galacticPubs-relevant information from a GP lesson file, with an expected format of \emph{ShortTitle_P1_G5-9_wksht (TEACHER)}
+Extract galacticPubs-relevant information from a GP lesson file, with an expected format of \emph{ShortTitle_L1_G5-9_wksht (TEACHER)}
 }
 \details{
 Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match TeachMatLinks fields, though they cannot be populated automatically.

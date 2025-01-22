@@ -15,7 +15,7 @@ whichRepo(WD, fullPath = FALSE)
 Either a warning or the name of the github repository connected to the current Rstudio project (extracted from \code{rstudioapi::getActiveProject()} and a call to \verb{git remote -v})
 }
 \description{
-Get the name of the GitHub repo associated with a project. No error catching at the moment.
+Deprecated! Get the name of the GitHub repo associated with a project. No error catching at the moment.
 }
 \details{
 This assumes you have Google Drive for Desktop set up, permissions to access lesson folder, and git installed and authenticated in Rstudio.

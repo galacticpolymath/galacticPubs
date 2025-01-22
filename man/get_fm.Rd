@@ -6,7 +6,9 @@
 \usage{
 get_fm(
   key = NULL,
-  WD = getwd(),
+  WD = "?",
+  WD_git = NULL,
+  yaml_path = NULL,
   checkWD = FALSE,
   auto_init = FALSE,
   check = NULL,
@@ -18,7 +20,11 @@ get_fm(
 \arguments{
 \item{key}{which entry (or entries) do you want to import? default=NULL will import everything; Supports "starts with", case-insensitive matching for a single key if prefixed with '~'}
 
-\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
+\item{WD}{working directory; default=getwd(); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling \code{\link[=get_wd_git]{get_wd_git()}}. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.}
+
+\item{WD_git}{default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.}
+
+\item{yaml_path}{default=NULL. An alternate way to just provide a full path to read in a yml file.}
 
 \item{checkWD}{passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}; default=FALSE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory}
 
@@ -31,6 +37,9 @@ get_fm(
 \item{standardize_NA}{logical; do you want all "",NULL,list(), etc. to be read in as NA using \code{\link[=is_empty]{is_empty()}}? passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}; default=TRUE}
 
 \item{...}{additional args passed to check function}
+}
+\value{
+Tries to cromulently return an appropriate string, tibble, list or vector of values for the associated keys.
 }
 \description{
 Imports meta/front-matter.yml value(s) to environment as a list.

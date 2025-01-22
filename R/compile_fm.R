@@ -2,7 +2,7 @@
 #'
 #' compile front-matter found in /meta/front-matter.yml
 #'
-#' Produces the following json outputs in /meta/JSON/:
+#' Produces the following json outputs in github project `gp-lessons/Lessons/[PROJ_NAME]/JSONs`:
 #' - header.json
 #' - overview.json
 #' - background.json
@@ -14,31 +14,35 @@
 #' @export
 #' @return logical of success
 
-compile_fm <- \(WD = getwd()) {
+compile_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
-  json_dir <- fs::path(WD, "meta", "JSON")
-  fm <- get_fm(WD = WD)
-  fm_keys <- fm %>% names()
-  header <- fm[1:which(fm_keys == "GradesOrYears")]
-  #used for constructing catalog paths
-  repo <- whichRepo(WD = WD)
+  WD_git <- get_wd_git(WD=WD)
+  #just make sure everything's updated in the cloud
+  upload_assets(WD=WD)
+  json_dir <- fs::path(WD_git, "JSONs")
+  fm <- get_fm(WD_git = WD_git)
+  fm_keys <- get_fm_names()
+  which_fm_keys <- fm_keys[1:which(fm_keys == "GradesOrYears")]
+  #Header includes everything up to GradesOrYears
+  header <- fm[which_fm_keys]
+
   # Make a few assertions to require minimally functional header ------------
   checkmate::assert_character(fm$ShortTitle,
                               min.chars = 2,
                               any.missing = F)
-  checkmate::assert_choice(fm$PublicationStatus, c("Draft", "Live"))
-  checkmate::assert_character(fm$Title, min.chars = 4, any.missing = F)
+  checkmate::assert_choice(fm$PublicationStatus,
+                           c("Proto","Hidden","Beta","Coming Soon", "Live","Draft"))#draft deprecated
   checkmate::assert_character(fm$locale, n.chars = 5, any.missing = F)
 
 
-
-  # make full catalog paths following naming conventions the frontend --------
-  header$SponsorImage = list(url = ifelse(is.na(fm$SponsorLogo),
-                                          NA,
-                                          catalogURL(basename(fm$SponsorLogo), repo)))
-  header$CoverImage = list(url = ifelse(is.na(fm$LessonBanner),
-                                        NA,
-                                        catalogURL(basename(fm$LessonBanner), repo)))
+#
+#   # make full catalog paths following naming conventions the frontend --------
+#   header$SponsorImage = list(url = ifelse(is.na(fm$SponsorLogo),
+#                                           NA,
+#                                           catalogURL(basename(fm$SponsorLogo), WD=WD)))
+#   header$CoverImage = list(url = ifelse(is.na(fm$LessonBanner),
+#                                         NA,
+#                                         catalogURL(basename(fm$LessonBanner), WD=WD)))
 
   #output header.json
   save_json(header,
@@ -71,17 +75,10 @@ compile_fm <- \(WD = getwd()) {
     )$Text,
     Tags = lapply(fm$Tags, function(x)
       list(Value = x)),
-    SteamEpaulette = list(url = ifelse(
-      is.na(fm$LearningEpaulette[1]),
-      NA,
-      catalogURL(basename(fm$LearningEpaulette[1]), repo)
-    )),
+    SteamEpaulette =  fm$LearningEpaulette[1],
     #might want to add more complex image handling later),
-    SteamEpaulette_vert = list(url = ifelse(
-      is.na(fm$LearningEpaulette_vert[1]),
-      NA,
-      catalogURL(basename(fm$LearningEpaulette_vert[1]), repo)
-    ))
+    SteamEpaulette_vert = fm$LearningEpaulette_vert[1]
+
     #might want to add more complex image handling later),
   )
 
@@ -103,19 +100,22 @@ compile_fm <- \(WD = getwd()) {
     mm <-
       jsonlite::read_json(fs::path(json_dir, "multimedia.json"), null =
                             "null")
-  }
-
-  if (!mmExists | is_empty(mm)) {
+    if(is_empty(mm)){
+      message("No multimedia found.")
+    }
+  }else{
     mm <- NULL
     message("No multimedia found.")
   }
 
 
 
+
+
   # Create preview.json -----------------------------------------------------
   #Multimedia browser
   preview <- list(
-    `__component` = "lesson-plan.lesson-preview",
+    `__component` = "lesson-plan.unit-preview",
     SectionTitle = "Lesson Preview",
     #allow smooth-scrolling to in-page references (with Anchor Links)
     QuickPrep = fm$QuickPrep %>% fixAnchorLinks(),
@@ -135,7 +135,7 @@ compile_fm <- \(WD = getwd()) {
   bonus_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Bonus Content",
-      Content = expand_md_links(Bonus, repo) %>% fixAnchorLinks(),
+      Content = expand_md_links(Bonus, WD=WD) %>% fixAnchorLinks(),
       #allow smooth-scrolling to in-page references
       InitiallyExpanded = TRUE
     )
@@ -155,7 +155,7 @@ compile_fm <- \(WD = getwd()) {
     extensions_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Extensions",
-      Content = expand_md_links(Extensions, repo) %>% fixAnchorLinks(),
+      Content = expand_md_links(Extensions, WD=WD) %>% fixAnchorLinks(),
       #allow smooth-scrolling to in-page references
       InitiallyExpanded = TRUE
     )
@@ -169,6 +169,7 @@ compile_fm <- \(WD = getwd()) {
   # expand_md_links takes relative links in [](x.jpg) format and makes a full path to GP catalog
   # parseGPmarkdown allows references to {vid1} videos listed in the multimedia tab of the teaching-materials.xlsx file
   # BACKGROUND
+
   Background <- get_fm("Background", WD = WD)
   C2R <- get_fm("ConnectionToResearch", WD = WD)
   if (!is_empty(Background)) {
@@ -185,7 +186,7 @@ compile_fm <- \(WD = getwd()) {
             "\n#### Research Background\n",
             Background
           )
-        ) %>% expand_md_links(repo = repo) %>%
+        ) %>% expand_md_links(WD = WD) %>%
           fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
         InitiallyExpanded = TRUE
       )
@@ -205,7 +206,7 @@ compile_fm <- \(WD = getwd()) {
         `__component` = "lesson-plan.collapsible-text-section",
         SectionTitle = "Feedback",
         Content = expand_md_links(Feedback,
-                                  repo) %>% fixAnchorLinks(),
+                                  WD=WD) %>% fixAnchorLinks(),
         InitiallyExpanded = TRUE
       )
 
@@ -222,8 +223,8 @@ compile_fm <- \(WD = getwd()) {
       list(
         `__component` = "lesson-plan.collapsible-text-section",
         SectionTitle = "Credits",
-        Content = expand_md_links(Credits,
-                                  repo) %>% fixAnchorLinks(),
+        Content = expand_md_links(unlist(Credits),
+                                  WD=WD) %>% fixAnchorLinks(),
         InitiallyExpanded = TRUE
       )
 
@@ -248,20 +249,21 @@ compile_fm <- \(WD = getwd()) {
     for (i in 1:length(roles)) {
       #Also allow {vid} shortcodes
       role_i <-
-        roles[i] %>% parseGPmarkdown(WD = WD) %>% expand_md_links(repo = whichRepo(WD =
-                                                                                     WD))
+        roles[i] %>% parseGPmarkdown(WD = WD) %>%
+        expand_md_links(WD =WD)
       ack_i <- subset(ack, ack$Role == role_i)
       def_i <-
-        ack_i$Role_def[1] %>% parseGPmarkdown(WD = WD) %>% expand_md_links(repo =
-                                                                             whichRepo(WD = WD))
+        ack_i$Role_def[1] %>%
+        parseGPmarkdown(WD = WD) %>%
+        expand_md_links(WD = WD)
       #capitalize first letter if necessary
       if (!substr(def_i, 1, 1) %in% LETTERS) {
         substr(def_i, 1, 1) <- toupper(substr(def_i, 1, 1))
       }
-      #put parentheses around definition if necessary
-      if (substr(def_i, 1, 1) != "(") {
-        def_i <- paste0("(", def_i, ")")
-      }
+      # #put parentheses around definition if necessary
+      # if (substr(def_i, 1, 1) != "(") {
+      #   def_i <- paste0("(", def_i, ")")
+      # }
       persons_i <- lapply(1:nrow(ack_i), function(row) {
         tmp <-
           list(
@@ -296,7 +298,7 @@ compile_fm <- \(WD = getwd()) {
   # versions.json -----------------------------------------------------------
 
   ver <-
-    get_fm("Versions", WD = WD,standardize_NA = TRUE)[[1]] %>% dplyr::as_tibble()
+    get_fm("Versions", WD = WD,standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble()
 
   if (is_empty(ver)) {
     ver_out0 <- NULL
@@ -333,6 +335,7 @@ compile_fm <- \(WD = getwd()) {
         list(major_release = unique(ver$major)[mjr],
              sub_releases = (out_mjr))
     }
+
   }
 
 
@@ -346,6 +349,13 @@ compile_fm <- \(WD = getwd()) {
 
   message("front-matter compiled")
 
+ message("Recombining all JSONs")
+ test_compile <- compile_json(WD = WD) %>% catch_err()
+ if(test_compile){
+   message("SUCCESS! New LESSON.json created for '",basename(WD),"'")
+ }else{
+   message("FAILURE! LESSON.json not regenerated for '",basename(WD),"'")
+ }
 }
 
 #' fm_compile

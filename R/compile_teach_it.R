@@ -1,32 +1,34 @@
 #' compile_teach_it
 #'
-#' Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the PartTitles tab and invokes [sweep_teaching_materials()] to relocate scrap working files.
+#' Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the Titles tab and invokes [sweep_teaching_materials()] to relocate scrap working files.
 #'
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [parse_wd()]; default is WD=getwd()
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
-#' @param rename_parts logical; do you want to rename part folders based on PartTitles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_parts()]
-#' @param prompt_rename logical, do you want to promput user about whether to rename parts? default=T
+#' @param rename_lessons logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_lessons()]
+#' @param prompt_rename logical, do you want to prompt user about whether to rename lessons? default=FALSE
 #' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
 #' @importFrom rlang .data
 #' @export
 
-compile_teach_it <- function(WD = getwd(),
+compile_teach_it <- function(WD = "?",
                              teach_it_drib = NULL,
-                             rename_parts = TRUE,
-                             prompt_rename = TRUE) {
+                             rename_lessons = TRUE,
+                             prompt_rename = FALSE) {
   WD <- parse_wd(WD)
-
+  WD_git <- get_wd_git(WD = WD)
   . = NULL #to avoid errors with dplyr syntax
   #Keep teaching-materials/ folder tidy
   sweep_teaching_materials(WD = WD)
-
+  message("running compile_teach_it()...")
   #Get front matter from the project working directory
-  fm <- get_fm(WD = WD)
-
+  fm <- get_fm(WD_git = WD_git)
 
   status <- fm$PublicationStatus
-  checkmate::assert_choice(status, c("Live", "Draft"))
-  if (status == "Draft") {
+  gdrivehome <- fm$GdriveHome
+  checkmate::assert_choice(status,
+                           c("Proto", "Hidden", "Beta", "Coming Soon", "Live", "Draft", "Upcoming"))#draft deprecated; Upcoming/Coming Soon confusion needs to be sorted out
+  checkmate::assert_choice(gdrivehome, c("GP-Studio", "GP-LIVE"))
+  if (gdrivehome == "GP-Studio") {
     tmID <- fm$GdriveTeachMatID
   } else{
     tmID <- fm$GdrivePublicID
@@ -51,37 +53,44 @@ compile_teach_it <- function(WD = getwd(),
 
     )
 
-  # Handle materials for multiple parts (e.g. P1&2) -------------------------
-  # Want to break up P1&2 entries and repeat data for 1 and 2, so parts
+  #****
+  #It's annoying, but I want to keep the _lsn on the links page
+  #because it distinguishes where the user of the teach-it.gsheet
+  #should type in the lsn number (lsn) and when they should not, b/c it's auto (_lsn)
+
+
+  # Handle materials for multiple lessons (e.g. P1&2) -------------------------
+  # Want to break up L1&2 entries and repeat data for 1 and 2, so lessons
   # get the shared info
   multipart_material <-
-    grepl("&", tlinks0$part) %>% which()
+    grepl("&", tlinks0$`_lsn`) %>% which()
 
   if (length(multipart_material) > 0) {
-    multi_df <- tlinks0[multipart_material, ]
-    nonmulti_df <- tlinks0[-multipart_material, ]
-    parts <- stringr::str_split(multi_df$part, "&")
-    expanded_multi <- lapply(1:length(parts), \(i) {
-      parts_i <- parts[[i]]
-      multi_df_i <- multi_df[rep(i, length(parts_i)), ] %>%
-        dplyr::mutate(part = parts_i)
+    multi_df <- tlinks0[multipart_material,]
+    nonmulti_df <- tlinks0[-multipart_material,]
+    lessons <- stringr::str_split(multi_df$`_lsn`, "&")
+    expanded_multi <- lapply(1:length(lessons), \(i) {
+      lsn_i <- lessons[[i]]
+      multi_df_i <- multi_df[rep(i, length(lsn_i)),] %>%
+        dplyr::mutate(`_lsn` = lsn_i)
     }) %>% dplyr::bind_rows()
     #combine expanded (repeated) data with previous data
     tlinks0 <-
       dplyr::bind_rows(nonmulti_df, expanded_multi) %>%
       #rearrange to preserve order of output
       dplyr::arrange(
-        !.data$itemType == "teachMatDir",
-        .data$envir,
-        .data$grades,
-        .data$itemType != "variantDir",
-        #put variantDir link above all the parts
-        .data$part,
-        .data$fileType
+        !.data$`_itemType` == "teachMatDir",
+        .data$`_envir`,
+        .data$`_grades`,
+        .data$`_itemType` != "variantDir",
+        #put variantDir link above all the lessons
+        .data$`_lsn`,
+        .data$`_fileType`
       )
   }
 
-
+  #rename `_code` to code for ease
+  #and b/c we're not rewriting data to spreadsheet
   mlinks <-
     googlesheets4::read_sheet(
       teach_it_drib,
@@ -89,85 +98,112 @@ compile_teach_it <- function(WD = getwd(),
       skip = 1,
       col_types = "c",
 
-    ) %>% dplyr::filter(!is.na(.data$code)) %>%
+    ) %>%
+    dplyr::rename(code = .data$`_code`) %>%
+    dplyr::filter(!is.na(.data$code)) %>%
+    dplyr::arrange(.data$order) %>%
     dplyr::select(1:dplyr::starts_with("otherLink"))
 
-  pinfo <-
+  #unit info
+  uinfo <-
     googlesheets4::read_sheet(
       teach_it_drib,
-      sheet = "PartTitles",
+      sheet = "Titles",
       skip = 1,
       col_types = "c"
     )
 
-  pext <-
+  lext <-
     googlesheets4::read_sheet(
       teach_it_drib,
-      sheet = "PartExt",
+      sheet = "LsnExt",
       skip = 1,
       col_types = "c"
-    ) %>% dplyr::filter(`REF(Is_initiatialized)` == TRUE &
-                          !is.na(.data$ItemTitle)) %>%
-    dplyr::select("Part", "Order", "ItemTitle", "Description", "Link")
+    ) %>% dplyr::filter(.data$link != "URL" &
+                          !is.na(.data$itemTitle)) %>%
+    dplyr::select("lsn", "order", "itemTitle", "description", "link")
+
+
 
   #bring in procedure
+  #Rename _Step, again, b/c we're not overwriting to spreadsheet
   proc <-
     googlesheets4::read_sheet(teach_it_drib, sheet = "Procedure", skip =
                                 1) %>%
-    dplyr::select(1:.data$PartDur) %>%
+    dplyr::rename(Step = .data$`_Step`) %>%
     dplyr::mutate(
-      Part = as.integer(.data$Part),
+      lsn = as.integer(.data$lsn),
       Chunk = as.integer(.data$Chunk),
       ChunkDur = as.integer(.data$ChunkDur),
-      Step = as.integer(.data$Step),
-      PartN = as.integer(.data$PartN),
-      PartDur = as.integer(.data$PartDur)
-    )
+      Step = as.integer(.data$`Step`),
+      lsnN = as.integer(.data$`_lsnN`),
+      lsnDur = as.integer(.data$lsnDur) #we won't use this, as it's sometimes left blank. Will sum ChunkDurs
+    ) %>%
+    dplyr::select(1:.data$lsnDur) %>%
+    dplyr::filter(!is.na(.data$lsn))
+
 
   # Check and Validate Data Import--------------------------------------------------
-  checkmate::assert_data_frame(tlinks0, min.rows = 1, .var.name = "teach-it.gsheet!TeachMatLinks")
+  checkmate::assert_data_frame(tlinks0, min.rows = 0, .var.name = "teach-it.gsheet!TeachMatLinks")
   checkmate::assert_data_frame(mlinks, min.rows = 0, .var.name = "teach-it.gsheet!Multimedia")#multimedia might be 0 rows
-  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!PartTitles")
-  checkmate::assert_data_frame(pinfo, min.rows = 0, .var.name = "teach-it.gsheet!PartTitles")
-  checkmate::assert_data_frame(proc, min.rows = 1, .var.name = "teach-it.gsheet!Procedure")
-  checkmate::assert_data_frame(pext, min.rows = 0, .var.name = "teach-it.gsheet!PartExt")
+  checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
+  checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
+  checkmate::assert_data_frame(proc, min.rows = 0, .var.name = "teach-it.gsheet!Procedure")
+  checkmate::assert_data_frame(lext, min.rows = 0, .var.name = "teach-it.gsheet!LsnExt")
 
   # Check for template text (uninitialized data) ----------------------------
-  pinfo_titles_initialized <-
-    !grepl("^Part Title", pinfo$PartTitle[1])
-  pinfo_preface_initialized <-
-    !grepl("^Lesson description", pinfo$LessonPreface[1])
-  proc_initialized <-
-    !grepl("^\\*", proc$ChunkTitle[1]) &
-    !grepl("^\\*", proc$ChunkTitle[2])  #FALSE if * found in 1st or second ChunkTitle
-  pext_initialized <- !grepl("^URL", pext$Link[1])
-  mlinks_initialized <- nrow(mlinks) > 0
+  uinfo_titles_initialized <-
+    !grepl("^Lesson Title", uinfo$lsnTitle[1])
+  uinfo_preface_initialized <-
+    !grepl("^Overall description", uinfo$unitPreface[1])
 
+  proc_initialized <-
+    !grepl("\\*\\*\\*", proc$ChunkTitle[2]) |
+    nrow(proc) == 0 #template has *** in second step chunk (D4)
+  proc_errors <-
+    sum(!is.na(proc$`_issues`)) != 0 #FALSE if issues found
+  proj_name <- basename(WD)
+  if (!proc_initialized) {
+    message(proj_name,
+            ": Procedure not processed! Issues found...see teach-it.gsheet")
+    warning(proj_name,
+            ": Procedure not processed! Issues found...see teach-it.gsheet")
+  }
+
+  if (proc_errors) {
+    message(proj_name, ": Procedure issues found...see teach-it.gsheet")
+    warning(proj_name,
+            ": Procedure issues found ! Issues found...see teach-it.gsheet")
+  }
+
+
+  lext_initialized <- !grepl("^URL", lext$link[1])
+  mlinks_initialized <- nrow(mlinks) > 0
 
   # Report uninitialized data -----------------------------------------------
 
-  if (!pext_initialized) {
-    pext <- pext[0,]
-    message("No valid items found on PartExt tab of `teach-it.gsheet`.")
+  if (!lext_initialized) {
+    lext <- lext[0, ]
+    message("No valid items found on LsnExt tab of `teach-it.gsheet`.")
   }
 
-  if (!pinfo_titles_initialized) {
+  if (!uinfo_titles_initialized) {
     warning(
-      "Seems you haven't added Part Titles to `teach-it.gsheet!PartTitles` for `",
+      "Seems you haven't added Lsn Titles to `teach-it.gsheet!Titles` for `",
       fm$ShortTitle,
       "`"
     )
     #Delete filler text
-    pinfo[1:nrow(pinfo), 1:5] <- NA
+    uinfo[1:nrow(uinfo), 1:5] <- NA
   }
-  if (!pinfo_preface_initialized) {
+  if (!uinfo_preface_initialized) {
     warning(
-      "Either add LessonPreface or delete example text from `teach-it.gsheet!PartTitles` for `",
+      "Either add LessonPreface or delete example text from `teach-it.gsheet!Titles` for `",
       fm$ShortTitle,
       "`"
     )
     #Delete filler text
-    pinfo[1:nrow(pinfo), "LessonPreface"] <- NA
+    uinfo[1:nrow(uinfo), "LessonPreface"] <- NA
   }
   if (!proc_initialized) {
     warning(
@@ -182,43 +218,62 @@ compile_teach_it <- function(WD = getwd(),
       fm$ShortTitle,
       "`"
     )
+  }else{
+    cache_path <- fs::path(WD_git, "saves", "multimedia.RDS")
+    test_cache_mm <- saveRDS(mlinks, cache_path) %>% catch_err()
+        message(convert_T_to_check(test_cache_mm),
+                " Cacheing multimedia to: ",
+                cache_path)
   }
+
+
+  # Assign lesson statuses --------------------------------------------------
+  if (!uinfo_titles_initialized) {
+    message("Not assigning lesson statuses because unit info not initialized on teach-it.gsheet")
+  }
+  zassign_lsn_stats(
+    is_initialized = uinfo_titles_initialized,
+    WD_git = WD_git,
+    fm = fm,
+    uinfo = uinfo
+  )
 
   ####
 
   # Figure out lesson duration string ---------------------------------------
-  nparts <-
-    max(1, max(tlinks0$part, na.rm = TRUE), na.rm = TRUE) #how many parts are there in teaching mat? (1 by default)
+  nlessons <-
+    max(1, max(c(uinfo$lsn,tlinks0$`_lsn`), na.rm = TRUE), na.rm = TRUE) #how many lessons are there in teaching mat? (1 by default)
 
 
 
   # Build Classroom Resources List------------------------------------------------
 
 
-  #Add part title and preface to proc tlinks info for convenience
-  if (pinfo_titles_initialized) {
-    # rename Part folders -----------------------------------------------------
-    if (rename_parts) {
-      zrename_parts(pinfo, tmID, prompt_rename = prompt_rename)
+  #Add lesson title and preface to proc tlinks info for convenience
+  if (uinfo_titles_initialized) {
+    # rename Lsn folders -----------------------------------------------------
+    if (rename_lessons) {
+      zrename_lessons(uinfo, tmID, prompt_rename = prompt_rename)
     }
 
     tlinks <-
-      dplyr::left_join(tlinks0, pinfo[, c("Part",
-                                          "PartTitle",
-                                          "PartPreface",
-                                          "PartGradeVarNotes",
-                                          "ActTags")], by = c("part" = "Part"))
+      dplyr::left_join(tlinks0, uinfo[, c("lsn",
+                                          "lsnTitle",
+                                          "lsnPreface",
+                                          "lsnGradeVarNotes",
+                                          "actTags")], by = c("_lsn" = "lsn"))
 
 
   } else{
     tlinks <-
-      tlinks0 %>% dplyr::mutate(
-        Part = NA,
-        PartTitle = NA,
-        PartPreface = NA,
-        PartGradeVarNotes = NA,
-        ActTags = NA
-      )
+      tlinks0
+    # %>% dplyr::mutate(
+    #     `_lsn` = NA,
+    #     lsnTitle = NA,
+    #     lsnPreface = NA,
+    #     lsnGradeVarNotes = NA,
+    #     actTags = NA
+    #   )
   }
 
   # Multimedia --------------------------------------------------------------
@@ -240,10 +295,10 @@ compile_teach_it <- function(WD = getwd(),
       )
 
     multimedia <- lapply(1:nrow(m), function(i) {
-      d <- m[i, ]
+      d <- m[i,]
 
-      mainLink <- zYTembed(d$mainLink) %>%
-        expand_md_links(repo = whichRepo(WD = WD))
+      mainLink <- make_yt_embed(d$mainLink) %>%
+        expand_md_links(WD = WD)
       #if a drive file is supplied, change /edit? or /view? ... to /preview
       #should probably switch all this logic to a function and use urltools
       mainLink_dec <- urltools::url_parse(mainLink)
@@ -275,7 +330,7 @@ compile_teach_it <- function(WD = getwd(),
       list(
         order = d$order,
         type = d$type,
-        forPart = d$forPart,
+        forLsn = d$forLsn,
         title = d$title,
         description = d$description,
         lessonRelevance = d$lessonRelevance,
@@ -291,57 +346,67 @@ compile_teach_it <- function(WD = getwd(),
 
   # Extract majority of Teach-It data ---------------------------------------
   #Get item links for each environment*gradeBand
+
   teach_mat_data <- zget_envir(tlinks, fm = fm)
 
   if (!proc_initialized) {
-    #should change 'parts' to something more like 'procedure'
+    #should change 'lessons' to something more like 'procedure'
     #output NULL structure paralleling real data
     proc_data <- list()
     proc_data$lessonDur <- NULL
-    proc_data$parts <- purrr::map(1:nparts, \(i) {
+    proc_data$lessons <- purrr::map(1:nlessons, \(i) {
       list(
-        partNum = i,
-        partTitle = paste0("Procedure not documented yet"),
-        partDur = NULL,
-        partPreface = NULL,
-        chunks = NULL,
-        partExtension = NULL
+        lsnNum = i,
+        lsnTitle = paste0("Procedure not documented yet"),
+        lsnDur = NULL,
+        lsnPreface = NULL,
+        Chunks = NULL,
+        lsnExtension = NULL
       )
     })
     proc_data$vocab <- NULL
   } else{
-    proc_data <-
+    proc_data_test <-
       zget_procedure(
         proc = proc,
-        pext = pext,
-        pinfo = pinfo,
-        mlinks = mlinks
-      )
+        lext = lext,
+        uinfo = uinfo,
+        mlinks = mlinks,
+        WD_git = WD_git
+      ) %>% catch_err(keep_results = TRUE)
+    if (!proc_data_test$success) {
+      message("FAILED to compile procedures")
+      warning("FAILED to compile procedures")
+      proc_data <- NULL
 
-    #output gathered vocab as csv
-    if (!is.null(proc_data$vocab)) {
-      vocab_outfile <-
-        fs::path(WD, "assets", "_other-media-to-publish", "vocab.csv")
-      vocab_saved <-
-        write.csv(x = proc_data$vocab,
-                  file = vocab_outfile,
-                  row.names = FALSE) %>% catch_err()
-      if (vocab_saved) {
-        message("\nVocab gathered from procedure and saved to ",
-                vocab_outfile,
-                "\n")
-      } else{
-        warning("Vocab was gathered from procedure, but failed to save")
+    } else{
+      proc_data <- proc_data_test$result
+
+      #output gathered vocab as csv
+      if (!is.null(proc_data$vocab)) {
+        vocab_outfile <-
+          fs::path(WD, "assets", "_other-media-to-publish", "vocab.csv")
+        vocab_saved <-
+          write.csv(x = proc_data$vocab,
+                    file = vocab_outfile,
+                    row.names = FALSE) %>% catch_err()
+        if (vocab_saved) {
+          message("\nVocab gathered from procedure and saved to ",
+                  vocab_outfile,
+                  "\n")
+        } else{
+          warning("Vocab was gathered from procedure, but failed to save")
+        }
       }
     }
 
   }
 
   Data <- c(
-    lessonPreface = pinfo$LessonPreface[1],
+    lessonPreface = uinfo$unitPreface[1],
     lessonDur = proc_data$lessonDur,
     teach_mat_data,
-    parts = list(proc_data$parts),
+    lesson = list(proc_data$lessons),
     gatheredVocab = list(proc_data$vocab)
   )
 
@@ -361,11 +426,11 @@ compile_teach_it <- function(WD = getwd(),
 
   # write JSON outputs ------------------------------------------------------
 
-  destFolder <- fs::path(WD, "meta", "JSON")
+  destFolder <- fs::path(WD_git, "JSONs")
   outFile <-
     fs::path(destFolder, "teaching-materials", ext = "json")
 
-  save_json(out, outFile)
+  success <- save_json(out, outFile) %>% catch_err()
   save_json(multimedia, fs::path(destFolder, "multimedia", ext = "json"))
 
 
@@ -377,5 +442,7 @@ compile_teach_it <- function(WD = getwd(),
   message(" JSON file saved\n @ ",
           fs::path(destFolder, "multimedia.json"),
           "\n")
+  message(" Success: ", success)
   message(" ", rep("-", 30))
+
 }

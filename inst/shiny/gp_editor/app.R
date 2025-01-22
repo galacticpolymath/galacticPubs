@@ -29,18 +29,18 @@ if (is_empty(.GlobalEnv$.editor_path)) {
 } else{
   WD0 <- .GlobalEnv$.editor_path
 }
-meta_path <- fs::path(WD0, "meta/")
-yaml_path <- fs::path(meta_path, "front-matter.yml")
-yaml_test <- file.exists(yaml_path)
+meta_path <- fs::path(WD0, "meta")
+
+  #Get path to front-matter path
+  proj <- basename(WD0)
+  # need to find paired yaml_path in github gp-lessons folder
+  WD_git <- get_wd_git(WD=WD0)
+
+  yaml_path <- fs::path(WD_git,"front-matter.yml")
 
 
-y <-
-  safe_read_yaml(
-    yaml_path,
-    eval.expr = TRUE,
-    auto_init = TRUE,
-    standardize_NA = F
-  )
+y <- get_fm(WD = WD0)
+
 
 #Image storage is temporary, in the app working directory (force, so it gets set now in current wd)
 img_loc <- paste0(getwd(), "/www/", collapse = "/")
@@ -208,14 +208,6 @@ ui <- navbarPage(
     ),
     #text block (Driving Questions, etc.)
     htmlOutput("overview_text_block"),
-    textAreaInput(
-      "LearningObj",
-      "Learning Objectives (this will appear in the Standards Section)",
-      value = y$LearningObj,
-      placeholder = "format= '3 x 45 min'",
-      width = "100%",
-      height = 200
-    ),
     selectizeInput(
       "Tags",
       label = "Keywords (Tags):",
@@ -226,14 +218,14 @@ ui <- navbarPage(
       width = "100%"
     ),
 
-    textAreaInput(
-      "Description",
-      label = "Lesson Description: (DEPRECATED)",
-      placeholder = "Try to keep it as short as possible",
-      value = y$Description,
-      height = "300px",
-      width = "100%"
-    ),
+    # textAreaInput(
+    #   "Description",
+    #   label = "Lesson Description: (DEPRECATED)",
+    #   placeholder = "Try to keep it as short as possible",
+    #   value = y$Description,
+    #   height = "300px",
+    #   width = "100%"
+    # ),
     hr(class = "blhr"),
     h3("Lesson Preview"),
     textAreaInput(
@@ -447,56 +439,61 @@ server <- function(input, output, session) {
   })
 
   output$overview_text_block <- renderUI({
-    div(
-      class = "text-block",
-      p(
-        class = "text-block-title",
-        strong("These sections combined in JSON output as 'Text'")
-      ),
-      textAreaInput(
-        "DrivingQ",
-        "Driving question(s) (What scientific problem(s) are we trying to solve?)",
-        y$DrivingQ,
-        width = "100%",
-        height = 100
-      ),
-      textAreaInput(
-        "EssentialQ",
-        a("Essential question(s) (What's the broader point?)",
-          href = "https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
-        y$EssentialQ,
-        width = "100%",
-        height = 100
-      ),
-      textAreaInput(
-        "Hooks",
-        "Hook(s) i.e. How will students be engaged in the lesson?:",
-        y$Hooks,
-        height = "100px",
-        width = "100%"
-      ),
-      textAreaInput(
-        "LearningSummary",
-        paste0(
-          'The Gist (Concise, jargon-free lesson summary. i.e. "The Tweet" )'
+    tagList(
+      div(
+        class = "text-block",
+        textAreaInput(
+          "LearningSummary",
+          paste0(
+            'The Gist (Concise, jargon-free lesson summary. i.e. "The Tweet" )'
+          ),
+          y$LearningSummary,
+          height = 150,
+          width = "100%"
         ),
-        y$LearningSummary,
-        height = 150,
-        width = "100%"
+        div(class = "char-count",
+            renderText(
+              paste0(
+                "Character Count= ",
+                nchar(input$LearningSummary),
+                " of 280 characters"
+              )
+            ))
       ),
-      div(class = "char-count",
-          renderText(
-            paste0(
-              "Character Count= ",
-              nchar(input$LearningSummary),
-              " of 280 characters"
-            )
-          )),
-      textAreaInput(
-        "MiscMD",
-        "Additional text to be added to Overview. (Create header with '#### Header Title:' & start with '- First point' on new line for bullets",
-        y$MiscMD,
-        width = "100%"
+      div(
+        class = "text-block",
+        p(
+          class = "text-block-title",
+          strong("These sections combined in JSON output as 'Text'")
+        ),
+        textAreaInput(
+          "DrivingQ",
+          "Driving question(s) (What scientific problem(s) are we trying to solve?)",
+          y$DrivingQ,
+          width = "100%",
+          height = 100
+        ),
+        textAreaInput(
+          "EssentialQ",
+          a("Essential question(s) (What's the broader point?)",
+            href = "https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
+          y$EssentialQ,
+          width = "100%",
+          height = 100
+        ),
+        textAreaInput(
+          "Hooks",
+          "Hook(s) i.e. How will students be engaged in the lesson?:",
+          y$Hooks,
+          height = "100px",
+          width = "100%"
+        ),
+        textAreaInput(
+          "MiscMD",
+          "Additional text to be added to Overview. (Create header with '#### Header Title:' & start with '- First point' on new line for bullets",
+          y$MiscMD,
+          width = "100%"
+        )
       )
     )
   })
@@ -522,16 +519,15 @@ server <- function(input, output, session) {
   # Monitor whether there are unsaved changes -------------------------------
   observe({
     #don't run until full page rendered
-    if (!is.null(input$DrivingQ)) {
+
+    if (!is.null(input$Feedback)) {
       data_check <-
         prep_input(input,
                    WD = WD())
       #save updated current_data and saved_data to reactive values
-      isolate({
+
         vals$current_data <- data_check$current_data
         vals$saved_data <- data_check$saved_data
-      })
-
 
 
       if (!identical(length(data_check[[1]]), length(data_check[[2]]))) {
@@ -543,13 +539,13 @@ server <- function(input, output, session) {
         #Entries missing (probably in saved_data)
         prob_names
 
-        longer_index <- which(longer_list_names%in%prob_names)
+        longer_index <- which(longer_list_names %in% prob_names)
         outOfDate <- dplyr::tibble(
-          item=prob_names,
+          item = prob_names,
           #If saved is the longer one, output its extra data, otherwise NA
-          saved_data= ifelse(longer_list==1,unlist(data_check[[1]][longer_index]),NA),
+          saved_data = ifelse(longer_list == 1, unlist(data_check[[1]][longer_index]), NA),
           #If current is the longer one, output its data, otherwise NA
-          current_data= ifelse(longer_list==2,unlist(data_check[[2]][longer_index]),NA)
+          current_data = ifelse(longer_list == 2, unlist(data_check[[2]][longer_index]), NA)
         )
         #This is a little awkward, b/c we're storing a NULL value in 1 list as an NA
         #But this only for internal purposes anyway checking if data has been saved.
@@ -571,17 +567,16 @@ server <- function(input, output, session) {
         prob_names <- names(data_check[[1]])[probs]
 
         if (length(prob_names) > 0) {
-        outOfDate <-
-          dplyr::tibble(
-            item = prob_names,
-            saved_data = data_check$saved_data[probs],
-            current_data = data_check$current_data[probs]
-          )
-      } else{
-        outOfDate <- dplyr::tibble(NULL)
+          outOfDate <-
+            dplyr::tibble(
+              item = prob_names,
+              saved_data = data_check$saved_data[probs],
+              current_data = data_check$current_data[probs]
+            )
+        } else{
+          outOfDate <- dplyr::tibble(NULL)
+        }
       }
-      }
-
 
       count_outOfDate <- nrow(outOfDate)
 
@@ -606,21 +601,22 @@ server <- function(input, output, session) {
         vals$saved <- TRUE
       }
 
-      #       #Check if Github link is present
-      #       ## Add github URL if missing in yaml
-      if (is_empty(data_check$saved_data$GitHubURL)) {
-        isolate({
-          vals$current_data$GitHubURL <-
-            whichRepo(WD = WD(), fullPath = TRUE)
-          # #write current data
-          yaml::write_yaml(data_check$current_data,
-                           fs::path(WD(), "meta", "front-matter.yml"))
 
-          vals$yaml_update_txt <-
-            txt <- paste0("Save to attach GitHubRepo:\n",
-                          basename(vals$current_data$GitHubURL))
-        })
-      }
+      # #       #Check if Github link is present
+      # #       ## Add github URL if missing in yaml
+      # if (is_empty(data_check$saved_data$GitHubURL)) {
+      #   isolate({
+      #     vals$current_data$GitHubURL <-
+      #       whichRepo(WD = WD(), fullPath = TRUE)
+      #     # #write current data
+      #     yaml::write_yaml(data_check$current_data,
+      #                      yaml_path)
+      #
+      #     vals$yaml_update_txt <-
+      #       txt <- paste0("Save to attach GitHubRepo:\n",
+      #                     basename(vals$current_data$GitHubURL))
+      #   })
+      # }
       #
     }
 
@@ -642,13 +638,15 @@ server <- function(input, output, session) {
     template_upgraded <-
       vals$current_data$TemplateVer > vals$saved_data$TemplateVer
     # if template upgraded, trigger rebuild of all materials in compile_lesson
+
     if (template_upgraded) {
       vals$current_data$RebuildAllMaterials <- TRUE
     }
 
     #write current data
     yaml::write_yaml(vals$current_data,
-                     fs::path(WD(), "meta", "front-matter.yml"))
+                     yaml_path)
+
     vals$saved <- TRUE
     #synchronize saved and current_data
     vals$saved_data <-
@@ -658,6 +656,7 @@ server <- function(input, output, session) {
         "front-matter.yml updated:<br>",
         format(Sys.time(), "%Y-%b-%d %r")
       ))
+
 
   }) %>% bindEvent(input$save)
 
@@ -711,7 +710,7 @@ server <- function(input, output, session) {
   output$compile <- renderUI({
     #prep stuff
     scriptFiles <-
-      list.files(path = fs::path(WD(), "scripts"),
+      list.files(path = fs::path(WD_git, "code"),
                  pattern = ".R")
 
 
@@ -757,11 +756,6 @@ server <- function(input, output, session) {
             choices = c("myFile", "standardX"),
             selected = isolate(vals$current_data$PullStandardsInfoFrom)
           ),
-          checkboxInput(
-            "LearningPlotCorrection",
-            label = "Correct Learning Plot Proportions by total possible?" ,
-            value = isolate(vals$current_data$LearningPlotCorrection)
-          ),
           p(
             style = "color:gray;margin-top:-5px;font-size:1rem;",
             "Uncheck the above for custom, partial standards alignments."
@@ -776,7 +770,7 @@ server <- function(input, output, session) {
       column(width = 8, {
         #test if standards alignment ready & has already been compiled b4 trying to render images
         stndrds_saved <-
-          file.exists(fs::path(meta_path, "standards.RDS"))
+          file.exists(fs::path(WD_git,"saves", "standards.RDS"))
 
         #Begin conditional pane
         if ("Standards Alignment" %in% isolate(vals$current_data$ReadyToCompile) &
@@ -788,9 +782,11 @@ server <- function(input, output, session) {
               fluidRow(
                 class = "ep-container",
                 div(class = "ep-horiz space-top",
-                    imageOutput("epaulette_fig", inline = T)),
+                    img(src=isolate(vals$current_data$LearningEpaulette),alt="No learning epaulette found")),
+                    #imageOutput("epaulette_fig", inline = T)),
                 div(class = "ep-vert space-top",
-                    imageOutput("epaulette_fig_vert", inline = T))
+                    img(src=isolate(vals$current_data$LearningEpaulette_vert),alt="No learning epaulette found"))
+                    #imageOutput("epaulette_fig_vert", inline = T))
               ),
               # LEARNING EPAULETTE COMPILE PREVIEW
               div(
@@ -826,7 +822,8 @@ server <- function(input, output, session) {
               class = "preview-chart",
               h3("Learning Chart Preview"),
               uiOutput("chart_fig_disclaimer"),
-              plotOutput("chart_fig", width = "500px", height = "300px"),
+              img(src=isolate(vals$current_data$LearningChart),alt="No Learning Chart Found"),
+              # plotOutput("chart_fig", width = "500px", height = "300px"),
               textInput(
                 "LearningChart_params_caption",
                 "Manual caption:",
@@ -869,7 +866,7 @@ server <- function(input, output, session) {
     isolate({
       #Save selections
       current_data <- prep_input(input,  WD = WD())$current_data
-      yaml::write_yaml(current_data, fs::path(WD(), "meta", "front-matter.yml"))
+      yaml::write_yaml(current_data, yaml_path)
 
       scripts <-
         list.files(fs::path(WD(), "scripts"), pattern = ".R")
@@ -884,18 +881,18 @@ server <- function(input, output, session) {
     vals$current_data <-
       prep_input(input,  WD = WD())$current_data
     yaml::write_yaml(vals$current_data,
-                     fs::path(meta_path, "front-matter.yml"))
+                     yaml_path)
     vals$current_data <-
       compile_lesson(choices = input$ReadyToCompile, WD = WD())
     #resave
     yaml::write_yaml(vals$current_data,
-                     fs::path(meta_path, "front-matter.yml"))
+                     yaml_path)
   }) %>% bindEvent(input$compile)
 
 
   #Update Epaulette Previews if remake button pushed
   observe({
-    output$epaulette_fig <- renderImage({
+    # output$epaulette_fig <- renderImage({
       isolate({
         #generate new epaulette image
         learningEpaulette(
@@ -904,40 +901,40 @@ server <- function(input, output, session) {
           heightScalar = input$LearningEpaulette_params_heightScalar,
           randomSeed = input$LearningEpaulette_params_randomSeed
         )
-        #update filenames
-        vals$current_data$LearningEpaulette <-
-          fs::path("assets",
-                   "_learning-plots",
-                   paste0(formals(learningEpaulette)$fileName, ".png"))
-        vals$current_data$LearningEpaulette_vert <-
-          fs::path("assets",
-                   "_learning-plots",
-                   paste0(formals(learningEpaulette)$fileName, "_vert.png"))
+        # #update filenames
+        # vals$current_data$LearningEpaulette <-
+        #   fs::path("assets",
+        #            "_learning-plots",
+        #            paste0(formals(learningEpaulette)$fileName, ".png"))
+        # vals$current_data$LearningEpaulette_vert <-
+        #   fs::path("assets",
+        #            "_learning-plots",
+        #            paste0(formals(learningEpaulette)$fileName, "_vert.png"))
       })
 
-      #copy image to www folder
-      isolate({
-        copy_updated_files(fs::path(WD(),
-                                    c((vals$current_data$LearningEpaulette),
-                                      (vals$current_data$LearningEpaulette_vert)
-                                    )), img_loc)
-      })
+      # #copy image to www folder
+      # isolate({
+      #   copy_updated_files(fs::path(WD(),
+      #                               c((vals$current_data$LearningEpaulette),
+      #                                 (vals$current_data$LearningEpaulette_vert)
+      #                               )), img_loc)
+      # })
 
       # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
 
-      #return file info to UI
-      list(src = fs::path("www", basename(
-        isolate(vals$current_data$LearningEpaulette)
-      )), alt = "Compile Standards to generate epaulette previews")
-
-    }, deleteFile = TRUE)
-
-    #Render vertical epaulette
-    output$epaulette_fig_vert <- renderImage({
-      list(src = fs::path("www", basename(
-        isolate(vals$current_data$LearningEpaulette_vert)
-      )), alt = "vert_epaulette")
-    }, deleteFile = TRUE)
+    #   #return file info to UI
+    #   list(src = fs::path("www", basename(
+    #     isolate(vals$current_data$LearningEpaulette)
+    #   )), alt = "Compile Standards to generate epaulette previews")
+    #
+    # }, deleteFile = TRUE)
+#
+#     #Render vertical epaulette
+#     output$epaulette_fig_vert <- renderImage({
+#       list(src = fs::path("www", basename(
+#         isolate(vals$current_data$LearningEpaulette_vert)
+#       )), alt = "vert_epaulette")
+#     }, deleteFile = TRUE)
   }) %>% bindEvent(input$remake_ep,
                    ignoreInit = T,
                    ignoreNULL = F)
@@ -1084,7 +1081,6 @@ server <- function(input, output, session) {
 
         md_txt('Driving Question(s)', current_data$DrivingQ),
         md_txt('Essential Question(s)', current_data$EssentialQ),
-        md_txt('Learning Objective(s)', current_data$LearningObj),
         if (!is_empty(current_data$MiscMD)) {
           md_txt('', current_data$MiscMD, required = FALSE)
         } else{
@@ -1152,7 +1148,7 @@ server <- function(input, output, session) {
     #Reconcile input and yaml saved data before finalizing
     current_data <-
       prep_input(input,  vals$current_data, WD = WD())$current_data
-    yaml::write_yaml(current_data, fs::path(WD(), "meta", "front-matter.yml"))
+    yaml::write_yaml(current_data, yaml_path)
 
     #If a change in location has been selected, trigger the appropriate function
     if (input$dummy_PublicationStatus != vals$current_data$PublicationStatus) {
@@ -1228,7 +1224,7 @@ server <- function(input, output, session) {
 
     vals$current_data <-
       overwrite_matching(safe_read_yaml(
-        fs::path(WD(), "meta", "front-matter.yml"),
+        yaml_path,
         standardize_NA = F
       ),
       vals$current_data)

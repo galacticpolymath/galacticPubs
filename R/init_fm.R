@@ -3,32 +3,38 @@
 #' Will run [check_fm()] and if meta/front-matter.yml not found, it will create this file from the galacticPubs template.
 #'
 #' @param WD the working directory of the lesson project; default=getwd()
+#' @param WD_git (alternate; do WD OR WD_git, not both); path to root of project in the gp-lessons/Lessons/Project github repo
 #' @returns logical of success; T= exists or created; F= not found and not created
 #' @export
 
-init_fm <- function(WD = getwd()) {
-   WD <- parse_wd(WD)
-  test_check_fm <-
-    suppressWarnings(check_fm(
-      WD = WD,
-      skip = c("gh", "locale"),
-      throw_error = FALSE
-    ))
-  fm_path <- fs::path(WD, "meta", "front-matter.yml")
+init_fm <- function(WD = "?", WD_git = NULL) {
+  if (is.null(WD_git)) {
+    WD <- parse_wd(WD)
+    WD_git <- get_wd_git(WD = WD)
+  }
+
+  fm_path <- fs::path(WD_git, "front-matter.yml")
+
+  #Check that JSONs folder exists
+  json_path <- fs::path(WD_git, "JSONs")
+  test_json_dir <- dir.exists(json_path)
+  if (!test_json_dir) {
+    message("JSON path for project not found. Creating: \n ", json_path)
+    fs::dir_create(json_path, recurse = TRUE)
+  }
+
+  #Check for front-matter.yml
+  test_check_fm <- file.exists(fm_path)
   if (!test_check_fm) {
     message("\nFront matter not found. Trying to create it...")
+
     #use the front matter template supplied with galacticPubs as a starting point
     y <-
       safe_read_yaml(
-        system.file("extdata", "front-matter_TEMPLATE.yml", package =
+        system.file("templates", "front-matter_TEMPLATE.yml", package =
                       "galacticPubs"),
         checkWD = FALSE
       )
-
-    # Guess some fm values ----------------------------------------------------
-    ShortTitle <- gsub("(^\\w*?)_.*", "\\1", basename(WD))
-    y$ShortTitle <- ShortTitle
-
 
     # Write yaml --------------------------------------------------------------
     yaml::write_yaml(y, fm_path)
@@ -41,9 +47,7 @@ init_fm <- function(WD = getwd()) {
       message("\nSuccess! 'front-matter.yml' created from template \n @",
               fm_path,
               "\n")
-      message("Now running update_fm() to fill in missing fields (like GdriveDirName)...")
-      #suppress expected warnings from missing teach-it.gsheet & other missing items at this stage
-      success <- update_fm(WD = WD) %>% base::suppressWarnings()
+      success <- TRUE
 
 
     } else{
@@ -57,7 +61,7 @@ init_fm <- function(WD = getwd()) {
     message("front-matter.yml already found \n @",
             fm_path,
             "\n")
-    success <- TRUE
+    success <- NA
   }
   return(success)
 }

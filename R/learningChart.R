@@ -1,10 +1,10 @@
 #' learningChart
 #'
-#' Make a GP Learning Chart
+#' Make a GP Learning Chart. Will also run [upload_assets()] when it's done.
 #'
-#' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment)
+#' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_wd_git()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
 #' @param caption quoted text you want to go at the bottom of the chart
-#' @param captionN T/F, add the range of the number of standards per grade used to make the plot to caption?
+#' @param captionN T/F, add the range of the number of standards per grade used to make the plot to caption? default=FALSE
 #' @param centralText specify grades the chart is for; by default pulls most common gradeBand from compiledAlignment (e.g. "grades`\\n`5-6")
 #' @param centralTextSize multiplier for font size of centralText
 #' @param quotedTitle the quoted title used to attribute the learning chart (e.g. Knowledge and skills taught by 'quotedTitle')
@@ -19,12 +19,12 @@
 #' @importFrom rlang .data
 
 
-learningChart = function(WD = getwd(),
+learningChart = function(WD = "?",
                          caption = NA,
-                         captionN = TRUE,
+                         captionN = FALSE,
                          centralText = NA,
                          quotedTitle = NA,
-                         centralTextSize = 3.7,
+                         centralTextSize = 3.5,
                          saveFile = TRUE,
                          destFolder,
                          fileName = "GP-Learning-Chart",
@@ -32,6 +32,8 @@ learningChart = function(WD = getwd(),
                          showPlot = TRUE,
                          ...) {
   WD <- parse_wd(WD)
+  WD_git <- get_wd_git(WD = WD)
+
 
   if (missing(destFolder)) {
     destFolder <- fs::path(WD, "assets", "_learning-plots")
@@ -48,13 +50,15 @@ learningChart = function(WD = getwd(),
                                ordered = T)
 
 
-  ShortTitle <- get_fm("ShortTitle", WD)
+  if(is_empty(quotedTitle)){
+  quotedTitle <- get_fm("ShortTitle", WD)
+  }
 
   if (is_empty(quotedTitle)) {
     quotedTitle <-
       "this lesson"
   } else{
-    quotedTitle <- paste0("\"", quotedTitle, "\"")
+    quotedTitle <- paste0("mini-unit: \"", quotedTitle, "\"")
   }
   #deal with missing caption and add sample size if requested
   if (is_empty(caption)) {
@@ -62,7 +66,7 @@ learningChart = function(WD = getwd(),
   }
 
   # Standards exist?
-  standardsFile <- fs::path(WD, "meta", "standards.RDS")
+  standardsFile <- fs::path(WD_git, "saves", "standards.RDS")
   standardsFound <- file.exists(standardsFile)
 
   ###########
@@ -78,7 +82,9 @@ learningChart = function(WD = getwd(),
     # Load compiled standards
     importedData <- readRDS(standardsFile)
     compiledAlignment <- importedData$data
-    a_combined <- importedData$a_combined
+    a_combined0 <- importedData$a_combined%>%
+        dplyr::mutate(dplyr::across(dplyr::starts_with("n"),  ~
+                                                     ifelse(is.na(.), 0, .)))
     targetSubj <- importedData$targetSubj
 
     if (!importedData$learning_chart_friendly) {
@@ -98,6 +104,8 @@ learningChart = function(WD = getwd(),
 
       if (is_empty(centralText)) {
         Gs <- get_fm("ForGrades", WD)
+        #Shorten long words (e.g. "9-university" becomes "9-uni")
+        Gs <- gsub("(^[^-]*-.{1,3}).*$", replacement = "\\1", Gs)
         prefix <- get_fm("GradesOrYears", WD)
 
         centralText <-
@@ -106,16 +114,55 @@ learningChart = function(WD = getwd(),
 
 
 
-      subjPal <- gpColors(c("math", "ela", "science", "socstudies"))
+
+      # Make a Learning Chart --------------------------------------
+
+
+      # Filter out certain incomplete subjects ----------------------------------
+      #Only keep first 4 subjects in order of number of aligments
+
+      ranked_subj_alignments <- a_combined0  %>%
+        dplyr::group_by(.data$subject) %>%
+        dplyr::summarise(N = sum(.data$n, na.rm = TRUE)) %>%
+        dplyr::arrange(dplyr::desc(.data$N))
+
+
+      to_keep <- ranked_subj_alignments$subject[1:4]
+
+
+      a_combined <-
+        a_combined0 %>% dplyr::filter(.data$subject %in% to_keep) %>%
+        dplyr::left_join(., importedData$chart_labels, by = c(subject =
+                                                                "full_subj"))
+
+      unique_subj <- unique(a_combined$gp_pal_subj)
+      subjPal <- gpColors(unique_subj)
       #Need to rename to agree with named subjects
 
       names(subjPal) <-
-        c("Math", "ELA", "Science", "Social Studies")
+        a_combined$subject[match(unique_subj, a_combined$gp_pal_subj)]
 
-      # Make a proportional Learning Chart --------------------------------------
 
-      #val for scale of the biggest ray
-      barScale <- max(a_combined$n_prop_adj, na.rm = T)
+      # # Make sure a_combined 'n' cols have no NA -----------------------------
+      # a_combined <-
+      #   a_combined %>% dplyr::mutate(dplyr::across(dplyr::starts_with("n"),  ~
+      #                                                ifelse(is.na(.), 0, .))) %>%
+      #   dplyr::filter(!is.na(.data$n))
+
+      #Overwrite data (bit messy, but controls for NAs in incoming data)
+      a_combined$id <- 1:nrow(a_combined)
+
+
+      max_n <- max(a_combined$n, na.rm = T)
+
+      # # Rescale n counts of standards to always fit in plot ---------------------
+      a_combined <- a_combined %>%
+        dplyr::mutate(n_rescale = .data$n / max_n)
+      #
+
+      #val for scale of the biggest ray,scaled appropriately
+      barScale <- max(a_combined$n_rescale, na.rm = T)
+
 
       #function for putting things a little beyond the max value in the dataset
       smidge <- function(amt = 1) {
@@ -123,38 +170,19 @@ learningChart = function(WD = getwd(),
       }
 
 
-      # Filter out certain incomplete subjects ----------------------------------
-      # iteratively add subjects in order of preference if they are missing until we get 4 subjects
-      n_subj <- unique(a_combined$subject) %>% length()
-      if (n_subj > 4) {
-        #a_combined %>%dplyr::group_by(.data$subject) %>%  dplyr::summarize(n_sum =sum(.data$n,na.rm=T))
-        #Man, I can't figure out a way to do what I want to do, so I'm just gonna remove sustainability if it's there
-        to_remove <- "Sustainability"
-        a_combined <-
-          a_combined %>% dplyr::filter(!.data$subject %in% to_remove)
-      }
-
-
-      # Make sure a_combined proportions have no NA -----------------------------
-      a_combined <-
-        a_combined %>% dplyr::mutate(dplyr::across(dplyr::starts_with("n_prop"),  ~
-                                                     ifelse(is.na(.), 0, .)))
-      #Overwrite data (bit messy, but controls for NAs in incoming data)
-      a_combined$id <- 1:nrow(a_combined)
-
-
       label_data2 <- a_combined
-
-      label_data2$hjust <-
-        ifelse(360 * (label_data2$id - 0.5) / nrow(label_data2) < 180 , 0, 1)
+      #tweak separation of dots and labels around circle
+      label_data2$hjust <-c(rep(0,6),rep(1,6))
+      label_data2$vjust <- c(0,rep(0.5,4),1,1,rep(0.5,4),0)
+      label_data2$nudgeY <- c(rep(0,7),rep(0.05,4),0)
       label_data2$y <- smidge(2)
-      label_data2$y[c(1, 12)] <- smidge(3)
+      label_data2$y[c(1, nrow(label_data2))] <- smidge(3)
 
       #make background rectangles for each set of dimensions
 
       bgRec2 <-
         dplyr::tibble(
-          subject = c("math", "ela", "science", "social studies"),
+          subject = unique_subj,
           xmin = seq(0.5, 9.5, 3),
           xmax = seq(3.5, 12.5, 3),
           ymin = rep(0, 4),
@@ -162,10 +190,14 @@ learningChart = function(WD = getwd(),
           fill = subjPal
         )
 
+      # size of badge -----------------------------------------------------------
+      badge_scale = 2
+      central_circle_size = 0.4
+
       targetRows <- which(bgRec2$subject %in% tolower(targetSubj))
       outerFill <- bgRec2[targetRows, ]
       outerFill$ymin <- smidge(.1)
-      outerFill$ymax <- 10
+      outerFill$ymax <- 3 * badge_scale
 
 
       # make the badge! ---------------------------------------------------------
@@ -175,9 +207,16 @@ learningChart = function(WD = getwd(),
         badge_prop0 <-
           ggplot2::ggplot(
             a_combined,
-            ggplot2::aes_string(x = "as.factor(id)", y = "n_prop_adj", fill = "subject"),
+            ggplot2::aes_string(x = "as.factor(id)", y = "n_rescale", fill = "subject"),
             col = gpColors("galactic black")
           ) +
+          ggplot2::geom_bar(
+            stat = "identity",
+            col = gpColors("galactic black"),
+            alpha = .9,
+            position = "stack"
+          ) +
+          ggplot2::scale_fill_manual(values = subjPal) +
           galacticEdTools::theme_galactic(font = "sans") +
           ggplot2::theme(
             plot.margin = ggplot2::margin(
@@ -214,29 +253,6 @@ learningChart = function(WD = getwd(),
             # legend.box.spacing=unit(0,"npc"),
             # legend.margin=margin(0,0,0,0),
             # legend.title=element_text(face="bold")
-          )  +
-          ggplot2::geom_bar(
-            stat = "identity",
-            col = gpColors("galactic black"),
-            alpha = .9,
-            position = "stack"
-          ) +
-          ggplot2::scale_fill_manual(values = subjPal) +
-          ggplot2::scale_y_continuous(
-            expand = c(0, 0),
-            breaks = seq(0, barScale, .1),
-            limits = c(-.1, smidge(4))
-          ) +
-          #cover outside circle crap with white box
-          ggplot2::geom_rect(
-            data = NULL,
-            xmin = -Inf,
-            xmax = Inf,
-            ymin = smidge(.1),
-            ymax = 2,
-            fill = "white",
-            col = "transparent",
-            inherit.aes = F
           )
         #suppress NA row warnings
       ) #End badge_prop0 &
@@ -266,8 +282,27 @@ learningChart = function(WD = getwd(),
       #Because \ gets escaped at some point, let's remove that and allow user to add newlines in centralText
       centralText <- gsub("\\n", "\n", centralText, fixed = T)
 
+
+
       suppressWarnings(
-        badge_prop <- badge_prop0 + g_outerFill +
+        badge_prop <- badge_prop0 +
+          #cover outside circle crap with white box
+          ggplot2::geom_rect(
+            data = NULL,
+            xmin = -Inf,
+            xmax = Inf,
+            ymin = 1.002,
+            ymax = smidge(badge_scale * 8),
+            fill = "white",
+            col = "transparent",
+            inherit.aes = F
+          ) +
+          g_outerFill +
+          ggplot2::coord_polar(clip = "off") + ggplot2::guides(fill = "none") +
+          ggplot2::scale_y_continuous(
+            expand = c(0, 0),
+            limits = c(-central_circle_size, smidge(badge_scale * 2))
+          )  +
           #white background at center of circle
           ggplot2::geom_rect(
             data = NULL,
@@ -309,21 +344,24 @@ learningChart = function(WD = getwd(),
           ) +
           ggplot2::labs(x = "", y = "") + #duplicate for...reasons...
           ggplot2::geom_point(
-            y = smidge(),
+            y = smidge(0.75),
             ggplot2::aes_string(fill = "subject"),
             pch = 21,
             size = 2,
             stroke = .5
           ) + #colored bullets
           # Dimension labels
+
           ggplot2::geom_text(
             data = label_data2,
-            ggplot2::aes_string(
-              x = "id",
-              y = "y",
-              label = "dimAbbrev",
-              hjust = "hjust"
+            ggplot2::aes(
+              x = .data$id ,
+              y = smidge(1.5)+ .data$nudgeY,
+              label = .data$dimAbbrev,
+              hjust = .data$hjust,
+              vjust= .data$vjust,
             ),
+
             lineheight = .9,
             col = gpColors("galactic black"),
             fontface = "plain",
@@ -342,9 +380,46 @@ learningChart = function(WD = getwd(),
             fontface = "bold",
             col = gpColors("galactic black"),
             lineheight = 0.7
-          ) +
-          ggplot2::coord_polar(clip = "off") + ggplot2::guides(fill = "none")
+          )
       )
+
+
+      # make data frame to mark target subject(s) -------------------------------
+      targetDF <-
+        dplyr::tibble(
+          subject = unique(label_data2$subject),
+          #c("math", "ela", "science", "social studies"),
+          xText = c(.9, .9, .1, .1),
+          yText = c(.8, .265, .265, .8),
+          xBox = c(.9, .9, .1, .1),
+          yBox = c(.91, .15, .15, .91),
+          hjust = "center",
+          #c("left","left","right","right")
+          vjust = "center",
+          fill = subjPal
+        ) %>%
+        dplyr::left_join(
+          .,
+          y = (
+            importedData$chart_labels %>% dplyr::select("full_subj", "learning_chart_labs")
+          ),
+          by = c("subject" = "full_subj")
+        )
+
+
+
+      # badge_prop +
+      #   ggplot2::geom_label(data=targetDF,
+      #   x = 2.65,
+      #   y = 3.35,
+      #   ggplot2::aes(
+      #   label = .data$learning_chart_labs,
+      #   fill=subject
+      #   ),
+      #   hjust = 1,
+      #   label.padding = ggplot2::unit(0.5,"lines")
+      # )
+
       #geom_label_npc(data=data.frame(x=.5,y=1),aes(npcx=x,npcy=y),label="djskfjadlsjldf")
 
       #MANUALLY (ARG) add labels to corners of badge
@@ -430,20 +505,6 @@ learningChart = function(WD = getwd(),
       logoImg <-
         png::readPNG(RCurl::getURLContent(newURL), native = T)
 
-      #make data frame to mark target subject(s)
-      targetDF <-
-        dplyr::tibble(
-          subject = c("math", "ela", "science", "social studies"),
-          xText = c(.9, .9, .1, .1),
-          yText = c(.8, .265, .265, .8),
-          xBox = c(.9, .9, .1, .1),
-          yBox = c(.91, .15, .15, .91),
-          hjust = "center",
-          #c("left","left","right","right")
-          vjust = "center",
-          fill = subjPal
-        )#c("bottom","top","top","bottom")))
-
 
 
       # build learningChart -----------------------------------------------------
@@ -451,45 +512,19 @@ learningChart = function(WD = getwd(),
 
       G <- grid::grid.grabExpr({
         grid::grid.draw(badge_prop)
-        gridLab(
-          .9,
-          .91,
-          "CC\nMath",
-          subjPal[1],
-          "C3 Soc Studies",
-          outlineCol = gpColors("galactic black") ,
-          outlineThickness = .1
-        ) #old outline color "#090816"
-        gridLab(
-          .9,
-          .15,
-          "CC\nELA",
-          subjPal[2],
-          "C3 Soc Studies",
-          outlineCol = gpColors("galactic black"),
-          outlineThickness = .1
-        )
-        gridLab(
-          .1,
-          .15,
-          "NGSS\nScience",
-          subjPal[3],
-          "C3 Soc Studies",
-          outlineCol = gpColors("galactic black"),
-          outlineThickness = .1
-        )
-        gridLab(
-          .1,
-          .91,
-          "C3\nSoc Studies",
-          subjPal[4],
-          "C3 Soc Studies",
-          outlineCol = gpColors("galactic black"),
-          outlineThickness = .1
-        )
 
-        #outline of plot area
-        # grid::grid.polygon(x=c(0,1,1,0),y=c(1,1,.06,.06),gp=grid::gpar(fill="transparent",col=gpColors("galactic black"),lwd=2))
+        lapply(1:4, \(i) {
+          df_subj_i <- targetDF[i,]
+          gridLab(
+            x = df_subj_i$xBox,
+            y = df_subj_i$yBox,
+            label = df_subj_i$learning_chart_labs,
+            fill = df_subj_i$fill,
+            longestString = "C3 Soc Studies",
+            outlineCol = gpColors("galactic black"),
+            outlineThickness = .1
+          )
+        })
 
         gridFooter(
           caption = caption,
@@ -498,8 +533,8 @@ learningChart = function(WD = getwd(),
           fontsize = 9
         )
 
-        invisible(sapply(targetSubj, function(x) {
-          d = targetDF %>% dplyr::filter(.data$subject == tolower(!!x))
+        (sapply(targetSubj, function(x) {
+          d = targetDF %>% dplyr::filter(tolower(.data$subject) == tolower(x))
           grid::grid.text(
             label = "Target",
             x = grid::unit(d$xText, "npc"),
@@ -564,6 +599,8 @@ learningChart = function(WD = getwd(),
 
       #tell user where file is saved
       message("GP Learning Chart saved\n@ ", outFile)
+      message("Running upload_assets() to upload updated learningChart & add to front-matter")
+      upload_assets(WD = WD)
 
       #return object to user (wrapped in invisible to prevent meaningless gTree obj being printed)
       return(invisible(G))

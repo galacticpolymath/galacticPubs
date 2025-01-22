@@ -5,14 +5,28 @@
 \alias{lesson_init_meta}
 \title{init_lesson_meta()}
 \usage{
-init_lesson_meta(WD = getwd(), overwrite = FALSE)
+init_lesson_meta(
+  WD = "?",
+  overwrite = FALSE,
+  template = NULL,
+  override = FALSE
+)
 
-lesson_init_meta(WD = getwd(), overwrite = FALSE)
+lesson_init_meta(
+  WD = "?",
+  overwrite = FALSE,
+  template = NULL,
+  override = FALSE
+)
 }
 \arguments{
 \item{WD}{the working directory for the virtualized lesson path; default=getwd() if you're working in the lesson's .Rproj. If "?" is supplied, it will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
 
 \item{overwrite}{logical; Do you want to overwrite target if exact file name found? Does not get passed to \code{\link[googledrive:drive_cp]{googledrive::drive_cp()}} because the way this works is stupid and slow. Instead, we check using virtualized Google Drive for Desktop paths and will overwrite the \emph{exact} file name if T. Default= FALSE.}
+
+\item{template}{which template do you want to copy; default=NULL copies all; options= "standards" and "teach-it"}
+
+\item{override}{boolean; do you want to force copying this, overriding the overwrite logic (which only kinda works); default= FALSE}
 }
 \value{
 logical of success; T=template gsheets copied to meta/ and front-matter updated with \code{\link[=update_fm]{update_fm()}}

@@ -11,19 +11,25 @@
 
 # Define f(x)s for extracting nested teach-mat info -----------------------
 zget_envir <- \(df, fm) {
+
   envirs <-
-    unique_sans_na(df$envir) %>% tolower() %>% sort()
-  #Assessments aren't a real environment; we want to concat this info to the end of parts for each envir
+    unique_sans_na(df$`_envir`) %>% tolower() %>% sort()
+  #Assessments aren't a real environment; we want to concat this info to the end of lsns for each envir
   if ("assessments" %in% envirs) {
-    df_assess <- df %>% dplyr::filter(.data$envir == "assessments",.data$fileType!="folder")
-    if(!nrow(df_assess)>0){
+    df_assess <- df %>% dplyr::filter(
+      .data$`_envir` == "assessments",
+      .data$`_fileType` != "folder",
+      .data$`_fileType` != "spreadsheet"
+    )
+    if (!nrow(df_assess) > 0) {
       assess <- list(NULL)
     } else{
-
       assess <- list(
-        part = "last",
+        lsn = "last",
         title = "Assessments",
-        preface = "",
+        tags = NULL,
+        preface = "Editable assessments for evaluating student understanding & STEM identity",
+        tile = "https://storage.googleapis.com/gp-cloud/icons/assessment%20icon.png",
         itemList = zget_items(df_assess, fm = fm)
       )
     }
@@ -34,15 +40,16 @@ zget_envir <- \(df, fm) {
   envirs <- envirs[envirs != "assessments"]
   out <- envirs %>%
     purrr::set_names() %>%
-    #map across learning environments (classroom/remote)
+    #map across (non-assessment) learning environments (classroom/remote)
     purrr::map(., \(envir_i) {
       df_i <- df %>%
-        dplyr::filter(.data$envir == envir_i)
+        dplyr::filter(.data$`_envir` == envir_i |
+                        .data$`_fileType` == "web resource")
 
-        list(
-          gradeVariantNotes=zget_grade_var_notes(df_i),
-          resources=zget_grade_bands(df_i, fm = fm, assess=assess)
-          )
+      list(
+        gradeVariantNotes = zget_grade_var_notes(df_i),
+        resources = zget_grade_bands(df_i, fm = fm, assess = assess)
+      )
 
 
     })
@@ -52,7 +59,7 @@ zget_envir <- \(df, fm) {
 }
 
 
-#' zget_grade_bands
+#' zget_var_notes
 #'
 #'
 #' @describeIn zget_envir
@@ -60,19 +67,17 @@ zget_envir <- \(df, fm) {
 #' @export
 #' @family Internal helper functions
 #'
-zget_grade_var_notes <- \(df){
-  parts<-unique_sans_na(df$part)
-  grade_var_notes_initialized <- !grepl("^Overall",df$PartGradeVarNotes[1])
-  if(!grade_var_notes_initialized){
-   df$PartGradeVarNotes<-NA #Effectively delete the placeholder text that was found
+zget_grade_var_notes <- \(df) {
+  lessons <- unique_sans_na(df$`_lsn`)
+  grade_var_notes_initialized <- !grepl("^Overall", df$lsnGradeVarNotes[1])
+  if (!grade_var_notes_initialized) {
+    df$lsnGradeVarNotes <- NA #Effectively delete the placeholder text that was found
   }
   #output data (whether empty or not)
-  purrr::map(parts,\(i){
-  df_i <- df %>% dplyr::filter(part==i) %>% dplyr::slice(1)
-  list(
-    part=df_i$part,
-    partGradeVarNotes=df_i$PartGradeVarNotes
-  )
+  purrr::map(lessons, \(i) {
+    df_i <- df %>% dplyr::filter(`_lsn` == i) %>% dplyr::slice(1)
+    list(lsn = df_i$`_lsn`,
+         lsnGradeVarNotes = df_i$lsnGradeVarNotes)
   })
 }
 
@@ -87,7 +92,7 @@ zget_grade_var_notes <- \(df){
 #' @family Internal helper functions
 #'
 zget_grade_bands <- \(df, fm, assess) {
-  coveredGrades <- unique_sans_na(df$grades)
+  coveredGrades <- unique_sans_na(df$`_grades`)
 
   grade_yr_term <- fm$GradesOrYears
   out <- coveredGrades %>%
@@ -96,20 +101,21 @@ zget_grade_bands <- \(df, fm, assess) {
     purrr::map(., \(grade_band_i) {
       #Get info for the subfolder
       df_variantDir <-
-        df %>% dplyr::filter(itemType == "variantDir" &
-                               grades == grade_band_i)
+        df %>% dplyr::filter(`_itemType` == "variantDir" &
+                               `_grades` == grade_band_i)
 
       df_materials <-
-        df %>% dplyr::filter(fileType != "folder" &
-                               grades == grade_band_i)
+        df %>% dplyr::filter(`_fileType` != "folder" &
+                               `_grades` == grade_band_i)
       g_pref_i <- paste0(substr(grade_yr_term, 1, 1), grade_band_i)
 
-      #Get data for each part
-      PART_DATA<-zget_parts(df_materials, fm = fm)
+      #Get data for each lsn
+      LSN_DATA <- zget_lessons(df_materials, fm = fm)
 
       #Add assessment data to the end if it's not null
-      if(!is_empty(assess)){
-        PART_DATA<-c(PART_DATA,assess)
+      if (!is_empty(assess)) {
+        cur_len <- length(LSN_DATA)
+        LSN_DATA[[cur_len + 1]] <- assess
       }
 
 
@@ -119,52 +125,76 @@ zget_grade_bands <- \(df, fm, assess) {
         gradePrefix = g_pref_i,
         links = list(
           linkText = paste("Browse & Download All", g_pref_i, "Materials"),
-          url = df_variantDir$link
+          url = df_variantDir$`_link`
         ),
-        parts = PART_DATA
+        lessons = LSN_DATA
       )
 
     })
 
   out
 
-
 }
 
-#' zget_parts
+
+
+#' zget_lessons
 #'
 #' @describeIn zget_envir
 #'
 #' @export
 #' @family Internal helper functions
 #'
-zget_parts <- \(df, fm) {
-  parts <- unique_sans_na(df$part)
-  if (length(parts) == 0) {
-    #make it resilient if there's only 1 implied part
-    parts <- "1"
-  }
-  out <- parts %>%
-    #map across all parts
-    purrr::map(., \(part_i) {
-      #Get info for the subfolder
-      df_part_i <- df %>% dplyr::filter(part == part_i)
+zget_lessons <- \(df, fm) {
+  lessons <- unique_sans_na(df$`_lsn`)
+  #lesson tiles
+  tiles <- fm$LessonTiles
+  tiles_initialized <- !is_empty(tiles)
+  #extract Lnum
+  tile_Ls <- stringr::str_extract(tiles, ".*[Ll](\\d{1,2}).*", group = 1)
 
-      #parse tags
-      part_i_tags0 <- df_part_i$ActTags[1]
-      if(is_empty(part_i_tags0)) {
-        part_i_tags<-NULL
+
+  if (length(lessons) == 0) {
+    #make it resilient if there's only 1 implied lsn
+    lessons <- "1"
+  }
+
+  out <- lessons %>%
+    #map across all lessons
+    purrr::map(., \(lsn_i) {
+      i <- as.numeric(lsn_i)
+      #Get info for the subfolder
+      df_lsn_i <- df %>% dplyr::filter(`_lsn` == lsn_i)
+
+      #handle tiles
+      if (tiles_initialized &
+          i %in% tile_Ls) {
+        tile_i <- tiles[i]
+
       } else{
-        part_i_tags<-stringr::str_split(part_i_tags0, ",") %>% unlist() %>% stringr::str_trim()
+        message("No tile found for L", i, "\n Use name format 'L1_tile.png'")
+        warning("No tile found for L", i, "\n Use name format 'L1_tile.png'")
+        tile_i <- NA
       }
 
-      #output for this part
+      #parse tags
+      lsn_i_tags0 <- df_lsn_i$actTags[1]
+      if (is_empty(lsn_i_tags0)) {
+        lsn_i_tags <- NULL
+      } else{
+        lsn_i_tags <- stringr::str_split(lsn_i_tags0, ",") %>% unlist() %>% stringr::str_trim()
+      }
+
+      items_i <- zget_items(df=df_lsn_i, fm = fm)
+
+      #output for this lesson
       list(
-        part = part_i,
-        title = df_part_i$PartTitle[1],
-        tags= list(part_i_tags),
-        preface = df_part_i$PartPreface[1],
-        itemList = zget_items(df_part_i, fm = fm)
+        lsn = lsn_i,
+        title = df_lsn_i$lsnTitle[1],
+        tags = list(lsn_i_tags),
+        preface = df_lsn_i$lsnPreface[1],
+        tile = tile_i,
+        itemList = items_i
       )
 
 
@@ -174,6 +204,8 @@ zget_parts <- \(df, fm) {
 
 
 }
+
+
 
 #' zget_items
 #'
@@ -185,55 +217,85 @@ zget_parts <- \(df, fm) {
 #' @family Internal helper functions
 #'
 zget_items <- \(df, fm) {
+  df0 <- df
+
+
   #Sort so presentation is first
-  df <- df %>% dplyr::arrange(!.data$fileType == "presentation")
+  df <- df0 %>% dplyr::arrange(
+    !.data$`_fileType` == "presentation",
+    !.data$`_fileType` == "web resource",
+    !.data$`_fileType` == "form"
+  )
   item_counter <- 1:nrow(df)
   status <- fm$PublicationStatus
 
-  #map across all parts
+  #map across all lsns
+  if(length(item_counter)>0){
   out <-  purrr::map(item_counter, \(i) {
     #Get info for the subfolder
-    df_item_i <- df[i,]
-    #Add DRAFT FILE disclaimer to links if Draft status
-    cust_url <- df_item_i$link
-    if (status=="Draft") {
-      disclaimer <- "(DRAFT FILE)"
-    } else{
-      disclaimer <- NA
-    }
+    df_item_i <- df[i, ]
+    cust_url <- ifelse(is_empty(df_item_i$extLink),
+                       df_item_i$`_link`,
+                       df_item_i$extLink)
+
+    # #Add DRAFT FILE disclaimer to links if Draft status
+    # if (status=="Draft") {
+    #   disclaimer <- NA#"(DRAFT FILE)"
+    # } else{
+    #   disclaimer <- NA
+    # }
 
     #Text to label the link on the teaching-materials section of lesson plan
     #allow for flexible item types extracted from file names (e.g. if somebody puts handout worksheet)
-    what_we_want <- if (grepl("handout", df_item_i$itemType) |
-                        grepl("worksheet", df_item_i$itemType) |
-                        grepl("card", df_item_i$itemType)|
-                        grepl("assess", df_item_i$itemType)) {
-      "pdf"
-    } else if (grepl("presentation", df_item_i$itemType)) {
-      "present"
+    if ((
+      grepl("handout", df_item_i$`_itemType`) |
+      grepl("worksheet", df_item_i$`_itemType`) |
+      grepl("card", df_item_i$`_itemType`) |
+      grepl("assess", df_item_i$`_itemType`) |
+      grepl("overview", df_item_i$`_itemType`)
+    ) & df_item_i$`_fileType` != "spreadsheet" &
+    df_item_i$`_fileType` != "form") {
+      what_we_want <- "pdf"
+    } else if (df_item_i$`_fileType` == "web resource") {
+      what_we_want <- "open"
+    } else if (df_item_i$`_fileType` == "form") {
+      what_we_want <- "nothing"
+    } else if (df_item_i$`_fileType` == "spreadsheet") {
+      what_we_want <- "xlsx"
+    } else if (grepl("presentation", df_item_i$`_itemType`)) {
+      what_we_want <- "present"
     } else{
-      "Download"
+      what_we_want <- "pdf"
     }
     #link text for website
-    cust_txt <- switch(what_we_want,
-                       "present" = "Present Now",
-                       "pdf" = "PDF",
-                       "Download")#default
+    cust_txt <- switch(
+      what_we_want,
+      "present" = "Present Now",
+      "open" = "Open This Link",
+      "pdf" = "PDF",
+      "xlsx" = "XLSX",
+      "nothing" = "Not exportable",
+      "PDF"
+    )#default
 
-    full_link_txt <- paste_valid(cust_txt, disclaimer,collapse=" ")
+    full_link_txt <- cust_txt#paste_valid(cust_txt, disclaimer,collapse=" ")
 
     #Revise custom preview/download link based on what_we_want * item_type
     #Necessary b/c some handouts are presentations & exporting to PDF works differently for slides than docs
 
     cust_url2 <- switch(
-      paste(what_we_want, df_item_i$fileType, sep = "-"),
+      paste(what_we_want, df_item_i$`_fileType`, sep = "-"),
       "present-presentation" = paste0(cust_url, "/present"),
+      #nulls for Forms (no PDF or equivalent export file)
+      "nothing-form" = NA,
       #preview link for Slides presentation
       "pdf-presentation" = paste0(cust_url, "/export/pdf"),
       #pdf link for Slides presentation
       "pdf-document" = paste0(cust_url, "/export?format=pdf"),
       #pdf link for Workspace document
       "pdf-docx" = paste0(cust_url, "/export?format=pdf"),
+      #pptx link for spreadsheet
+      "xlsx-spreadsheet" = paste0(cust_url, "/export?format=xlsx"),
       #pdf link for docx Office document
       cust_url #don't modify link otherwise
     )
@@ -241,44 +303,42 @@ zget_items <- \(df, fm) {
     #Now make custom Drive share links
     drive_share_link <-
       ifelse(
-        df_item_i$fileType %in% c("document", "presentation"),
+        df_item_i$`_fileType` %in% c("document", "presentation", "spreadsheet", "form"),
         paste0(cust_url, "/template/preview"),
         cust_url
       )
 
-    drive_share_txt <- paste_valid("Copy/Edit in Google Docs",disclaimer, collapse=" ")
-    #output for this part
+    if (df_item_i$`_fileType` == "web resource") {
+      drive_share_txt <- "Not shareable on GDrive"
+      drive_share_link  <- NULL
+    } else if (df_item_i$`_fileType` == "spreadsheet") {
+      drive_share_txt <- "Preview/Copy in Google Sheets"
+    } else if (df_item_i$`_fileType` == "form") {
+      drive_share_txt <- "Preview/Copy in Google Forms"
+    } else{
+      drive_share_txt <- "Preview/Copy in Google Docs"
+    }
+
+    #output for this lsn
     list(
       itemTitle = df_item_i$title,
       itemDescription = df_item_i$description,
-      itemCat = df_item_i$fileType,
+      itemCat = df_item_i$`_fileType`,
       links = list(
         zcatchLinkNA(linkText = full_link_txt, #preview link
                      url = cust_url2),
-        zcatchLinkNA(linkText = drive_share_txt, #Gdrive template share link
-                     url = drive_share_link)
+        zcatchLinkNA(linkText = drive_share_txt, url = drive_share_link) #Gdrive template share link
       )
     )
 
   })
   out
-
+  }else{
+  out <-NULL
+  message("zget_items(): No Items found.")}
 }
 
 
-#' zYTembed
-#'
-#' Internal helpers for [compile_teach_it()]. Get YT embed code from any Youtube link
-#'
-#' @param link a YouTube link
-#'
-#' @export
-#' @family Internal helper functions
-zYTembed <- function(link) {
-  gsub("^.*(?:v=|youtu.be\\/)([^&]*).*",
-       "https://www.youtube.com/embed/\\1",
-       link)
-}
 
 
 #' zcatchLinkNA
@@ -288,7 +348,7 @@ zYTembed <- function(link) {
 #' @export
 #' @family Internal helper functions
 zcatchLinkNA <- function(linkText, url) {
-  if (is_empty(url)) {
+  if (is_empty(url) & linkText != "Not shareable on GDrive") {
     list(linkText = paste0("ERROR: '", linkText, "' link missing"),
          url = url)
   } else{
