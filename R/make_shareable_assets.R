@@ -92,8 +92,9 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
                                ".*youtube.com/watch\\?v=([^\\?]*).*",
                                group = 1)
         } else{
+
           stringr::str_extract(
-            yt_links,
+            link_i,
             ".*[youtu.be|youtube.com]\\/s?h?o?r?t?s?\\/?([^\\?]*).*",
             group = 1
           )

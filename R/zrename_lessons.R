@@ -12,6 +12,7 @@
 zrename_lessons <- \(uinfo,
                    tmID,
                    prompt_rename = TRUE) {
+
   uinfo_valid <-
     checkmate::test_data_frame(uinfo[, 1:2], min.rows = 1, all.missing = F)
   if (!uinfo_valid) {
