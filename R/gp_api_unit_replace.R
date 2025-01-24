@@ -19,7 +19,7 @@ gp_api_unit_replace <- \(
   WD = "?",
   prompt_user = TRUE,
   dev = NULL,
-  verbosity=1,
+  verbosity = 1,
   print_output = TRUE
 ) {
   WD <- parse_wd(WD)
@@ -27,15 +27,37 @@ gp_api_unit_replace <- \(
   unit_name <-
     get_fm(c("_id", "ShortTitle"), WD = WD) %>% paste(., collapse = " (") %>% paste0(" '", ., ")' ")
 
+  if (prompt_user) {
+    catalog_name <- if (is.null(dev)) {
+      "Dev AND Production"
+    } else if (dev) {
+      "Dev"
+    } else{
+      "Production"
+    }
+
+    message(
+      "\n***********************************\n",
+      " Are you sure you want to replace mini-unit '",
+      unit_name,
+      "' from the (",
+      catalog_name,
+      ") GP-Catalog(s)?"
+    )
+    choice <- readline("(y/n)? >")
+    if (choice != "y") {
+      stop("Unit deletion aborted.")
+    }
+  }
+
 
   #recursive call to gp_api_unit_replace
   #to make changes on both repositories
-  if(is.null(dev)){
+  if (is.null(dev)) {
     dev <- c(TRUE, FALSE)
   }
-# Doesn't matter the order of TRUE, FALSE. Having both values means post to dev and prod collections
-  if (length(dev)==2 & sum(dev)==1) {
-
+  # Doesn't matter the order of TRUE, FALSE. Having both values means post to dev and prod collections
+  if (length(dev) == 2 & sum(dev) == 1) {
     message(
       "For Unit=",
       unit_name,
@@ -43,19 +65,23 @@ gp_api_unit_replace <- \(
     )
 
     result_dev <-
-      gp_api_unit_replace(WD = WD,
-                          prompt_user = prompt_user,
-                          dev = dev[1],
-                          print_output=FALSE,
-                          verbosity=verbosity)#only prompt once max
+      gp_api_unit_replace(
+        WD = WD,
+        prompt_user = FALSE,
+        dev = dev[1],
+        print_output = FALSE,
+        verbosity = verbosity
+      )#only prompt once max
     success_dev <- result_dev$success
 
     result_prod <-
-      gp_api_unit_replace(WD = WD,
-                          prompt_user = FALSE,
-                          dev = dev[2],
-                          print_output=FALSE,
-                          verbosity=verbosity)
+      gp_api_unit_replace(
+        WD = WD,
+        prompt_user = FALSE,
+        dev = dev[2],
+        print_output = FALSE,
+        verbosity = verbosity
+      )
     success_prod <- result_prod$success
 
     comb_success <- success_dev & success_prod
@@ -83,9 +109,9 @@ gp_api_unit_replace <- \(
 
     test_delete <- gp_api_unit_delete(
       unit_id = id,
-      prompt_user = prompt_user,
+      prompt_user = FALSE,
       dev = dev,
-      verbosity=verbosity,
+      verbosity = verbosity,
       WD = WD
     )
 
@@ -93,7 +119,9 @@ gp_api_unit_replace <- \(
       message("Deletion failed for ", id)
       test_insert <- FALSE
     } else{
-      test_insert <- gp_api_unit_insert(WD = WD, dev = dev,verbosity=verbosity)
+      test_insert <- gp_api_unit_insert(WD = WD,
+                                        dev = dev,
+                                        verbosity = verbosity)
 
     }
 
