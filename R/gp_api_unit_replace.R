@@ -28,12 +28,13 @@ gp_api_unit_replace <- \(
     get_fm(c("_id", "ShortTitle"), WD = WD) %>% paste(., collapse = " (") %>% paste0(" '", ., ")' ")
 
   if (prompt_user) {
-    catalog_name <- if (is.null(dev)) {
-      "Dev AND Production"
-    } else if (dev) {
-      "Dev"
+
+    if (is.null(dev)|sum(dev)==1) {
+      catalog_name <- "Dev AND Production"
+    } else if (identical(dev,TRUE)) {
+      catalog_name <- "Dev"
     } else{
-      "Production"
+      catalog_name <- "Production"
     }
 
     message(

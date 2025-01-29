@@ -40,6 +40,7 @@ Which catalog you're modifying is controlled by the dev parameter. Default is to
 Other GP API: 
 \code{\link{gp_api_get_token}()},
 \code{\link{gp_api_query}()},
+\code{\link{gp_api_query_users}()},
 \code{\link{gp_api_unit_delete}()},
 \code{\link{gp_api_unit_insert}()}
 }

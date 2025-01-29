@@ -122,10 +122,12 @@ if(is.null(WD_git)){
 
   ####
   #Add Chunk Start Times
-  proc$ChunkStart <- sapply(unique_sans_na(proc$lsn), function(p) {
+
+  chunk_starts <- lapply(unique_sans_na(proc$lsn), function(p) {
+    message("Processing proc$ChunkStart for lesson ",p)
     p_i <- subset(proc, proc$lsn == p)
     if(nrow(p_i)<=1){
-      message("Error in Proc for Lsn ",p,": Not enough valid rows.")
+      message("Problem in Proc for Lsn ",p,": Not enough valid rows.")
       NA
     }else{
     newChunkIndx <-
@@ -139,6 +141,13 @@ if(is.null(WD_git)){
     chunkStart
     }
   }) %>% unlist()
+
+  proc$ChunkStart <- chunk_starts
+  proc %>%
+    dplyr::select(c("lsn","Chunk","ChunkStart","ChunkDur")) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(ChunkEnd=sum(.data$ChunkStart,.data$ChunkDur,na.rm=T)) %>%
+    print()
 
   ####
   #Figure out lesson duration string

@@ -16,18 +16,15 @@
 
 make_yt_embed <- function(link) {
 
+  yt_pattern <- "(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:[^\\/\\n\\s]+\\/.+\\/|(?:v|embed|shorts|watch|video)\\/|.*[?&]v=)|youtu\\.be\\/|studio\\.youtube\\.com\\/video\\/)([a-zA-Z0-9_-]{11})"
+
+
   out <- sapply(link, \(link_i) {
     #for URLs formatted as "https://www.youtube.com/watch?v=Xr1SstxYW8w", get id from v= part
-    is_already_embed <- grepl("^https://www.youtube.com/embed/",link_i)
 
-    if (grepl("^.*watch\\?v=", link_i) & !is_already_embed) {
-      gsub(".*watch\\?v=([^\\?&]*).*$",
-           "https://www.youtube.com/embed/\\1",
-           link_i,perl = TRUE)
-    } else if (grepl("youtu", link_i) & !is_already_embed) {
-      #for all other urls, ignore anything after?
+    if (grepl(yt_pattern, link_i)) {
       gsub(
-        ".*[youtu.be|youtube.com]\\/s?h?o?r?t?s?\\/?([^\\?]*).*",
+        yt_pattern,
         "https://www.youtube.com/embed/\\1",
         link_i
       )
