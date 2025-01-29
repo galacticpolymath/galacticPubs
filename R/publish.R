@@ -28,6 +28,37 @@ publish <- function(WD = "?", recompile=FALSE, commit_msg = NULL, prompt_user=TR
     check_wd(WD = WD)
   }
 
+
+# prompting user ----------------------------------------------------------
+  unit_name <-
+    get_fm(c("_id", "ShortTitle"), WD = WD) %>% paste(., collapse = " (") %>% paste0(" '", ., ")' ")
+
+  if (prompt_user) {
+
+    if (is.null(dev)|sum(dev)==1) {
+      catalog_name <- "Dev AND Production"
+    } else if (identical(dev,TRUE)) {
+      catalog_name <- "Dev"
+    } else{
+      catalog_name <- "Production"
+    }
+
+    message(
+      "\n***********************************\n",
+      " Are you sure you want to replace mini-unit '",
+      unit_name,
+      "' from the (",
+      catalog_name,
+      ") GP-Catalog(s)?"
+    )
+    choice <- readline("(y/n)? >")
+    if (choice != "y") {
+      stop("Unit deletion aborted.")
+    }
+  }
+
+
+
 # update front matter, unless recompile queued-----------------------------------------------------
 
 if(recompile){
@@ -71,7 +102,7 @@ if(recompile){
   dev_to_replace <- ifelse(cat_to_replace=="DEV",TRUE,FALSE) %>% unique_sans_na()
 
   if(length(dev_to_replace)>0){
-    gp_api_unit_replace(WD=WD,dev=dev_to_replace,verbosity=verbosity,prompt_user = prompt_user)
+    gp_api_unit_replace(WD=WD,dev=dev_to_replace,verbosity=verbosity,prompt_user = FALSE)
   }
 
 
