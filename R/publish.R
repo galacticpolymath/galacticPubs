@@ -45,9 +45,9 @@ publish <- function(WD = "?", recompile=FALSE, commit_msg = NULL, prompt_user=TR
 
     message(
       "\n***********************************\n",
-      " Are you sure you want to replace mini-unit '",
+      " Are you sure you want to replace mini-unit ",
       unit_name,
-      "' from the (",
+      " from the (",
       catalog_name,
       ") GP-Catalog(s)?"
     )
