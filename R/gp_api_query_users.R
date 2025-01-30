@@ -115,4 +115,5 @@ exclude_patt <- c(
   message(rep("-",20))
   message("User summary (galacticpolymath.com):\n- TOTAL: ",total,"\n- new in past week: ",new_7_days,"\n- new in past month: ",new_30_days)
   invisible(out)
-  }
+}
+
