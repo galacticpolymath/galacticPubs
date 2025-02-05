@@ -9,14 +9,16 @@
 #' @param new_proj_name the name of the new locale variant you want to create. Default=NULL will launch a locale picker app.
 #' @param repair logical; if you had failures during initial locale cloning, should we try to do the steps that failed?
 #' @param exclude_TEST default=T; excludes test repositories
-#' @returns summary tibble
+#' @param verbosity passed to [httr2::req_perform()]; default=1
+#' @returns overall success; prints summary tibble
 #' @export
 
 lesson_new_locale <-
   function(WD = "?",
            new_proj_name = NULL,
            repair = FALSE,
-           exclude_TEST = TRUE) {
+           exclude_TEST = TRUE,
+           verbosity = 1) {
     # 1. SETUP ----------------------------------------------------------------
     skip <- NULL
     #get path to lessons on Shared Drive
@@ -37,8 +39,9 @@ lesson_new_locale <-
       new_proj_path <- fs::path(lessons_dir, new_proj_name)
       already_exists <- file.exists(new_proj_path)
       if (already_exists) {
+        new_WD_git <- get_wd_git(new_proj_path)
         skip <- c("user_prompt")
-        fm <- get_fm(WD = WD)
+        fm <- get_fm(WD_git = new_WD_git)
         ShortTitle <- fm$ShortTitle
         locale <- fm$locale
         Language <- fm$Language
@@ -46,6 +49,7 @@ lesson_new_locale <-
         lng <- fm$lng
         Country <- fm$Country
         continue <- choice <- NA
+        new_id <- paste0("lesson", "_", old_numID, "_", locale)
       }
     }
 
@@ -58,16 +62,17 @@ lesson_new_locale <-
       choice <-
         readline("y=accept, n=cancel, or enter custom title w/o quotes >")
     }
+
     if (identical(choice, "n")) {
       warning("Creation of New Lesson Locale Version CANCELED")
       # Make subsequent tests NAs
       test_cloning <-
         test_update_fm <-
-        test_copy_missing <- test_renaming <- test_push <- NA
+        test_copy_missing <- test_renaming <- test_insert <- NA
       # BIG Else...do everything
     } else{
       if ("user_prompt" %in% skip) {
-        new_proj_base <- get_fm(new_proj_path, "ShortTitle")
+        new_proj_base <- get_fm("ShortTitle", WD = new_proj_path)
       } else{
         new_proj_base <- ifelse(choice == "y", ShortTitle, choice)
 
@@ -102,7 +107,7 @@ lesson_new_locale <-
         # Make subsequent tests NAs
         test_cloning <-
           test_update_fm <-
-          test_copy_missing <- test_renaming <- test_push <- NA
+          test_copy_missing <- test_renaming <- test_insert <- NA
       } else{
         #do not allow exact duplication of same numID_locale
         new_id <- paste0("lesson", "_", old_numID, "_", locale)
@@ -120,7 +125,7 @@ lesson_new_locale <-
               warning("Locale already exists:'",
                       new_proj_name,
                       "'! Canceling.")
-              test_cloning <- FALSE
+              test_cloning <- NA
             } else{
               message("\nTrying to repair existing project: ",
                       new_proj_path,
@@ -132,6 +137,7 @@ lesson_new_locale <-
             }
             #if it doesn't exist, clone what you can using local folder copy
           } else{
+            message("Copying local files through Gdrive for Desktop...")
             test_cloning <-
               catch_err(fs::dir_copy(path = WD, new_path =  new_proj_path))
           }
@@ -150,121 +156,146 @@ lesson_new_locale <-
           #Set all nested subsequent tests to NA if cloning didn't work
           warning("Lesson cloning failed :(")
           test_update_fm <-
-            test_copy_missing <- test_renaming <- test_push <- NA
+            test_copy_missing <- test_renaming <- test_insert <- NA
         } else{
           message(
             "Successfully copied folder contents for non-Gdrive files & set up WD_git in gp-lessons local repo."
           )
 
+        }
 
-          test_update_fm <-
-            update_fm(
-              WD_git = new_WD_git,
-              change_this = list(
-                ShortTitle = ShortTitle,
-                `_id` = "",
-                Country = Country,
-                locale = locale,
-                Language = Language,
-                lang = lang,
-                lng = lng,
-                PublicationStatus = "Proto",
-                ReleaseDate = "",
-                LastUpdated = Sys.time(),
-                URL = "",
-                LearningEpaulette = "",
-                LearningChart = "",
-                LearningChartFriendly = ""
+        # Always update fm --------------------------------------------------------
 
-              ),
-              recompile = FALSE
-            ) %>% catch_err()
+        test_update_fm <-
+          update_fm(
+            WD_git = new_WD_git,
+            change_this = list(
+              ShortTitle = ShortTitle,
+              `_id` = "",
+              Country = Country,
+              locale = locale,
+              Language = Language,
+              lang = lang,
+              lng = lng,
+              PublicationStatus = "Proto",
+              ReleaseDate = "",
+              LastUpdated = Sys.time(),
+              URL = "",
+              LearningEpaulette = "",
+              LearningChart = "",
+              LearningChartFriendly = ""
 
+            ),
+            drive_reconnect = TRUE,
+            recompile = FALSE
+          ) %>% catch_err()
 
-          # 4.  Fill in missing files on Google Drive (that aren't on GitHub) -------
-          if (!test_update_fm) {
-            warning("Front Matter Updating of your cloned repo failed for some reason :(")
-            # Make subsequent tests NAs
-            test_copy_missing <- test_renaming <- test_push <- NA
-          } else {
+        compile_json(WD_git = new_WD_git) %>% catch_err()
+
+        # 4.  Fill in missing files on Google Drive (that aren't on GitHub) -------
+        if (!test_update_fm) {
+          warning("Front Matter Updating of your cloned repo failed for some reason :(")
+          # Make subsequent tests NAs
+          test_copy_missing <- test_renaming <- test_insert <- NA
+        } else {
+          message(
+            "-----------------------------\n",
+            "Now to copy missing Google Drive files for the new locale version of '",
+            WD,
+            "' called '",
+            new_proj_name,
+            "'.\n\n *Only type y and enter *after* Gdrive for Desktop has finished syncing."
+          )
+          continue <- readline("(y/n) > ")
+
+          test_copy_missing <- drive_copy_missing_files(
+            from_dir = old_GdriveDirID,
+            to_dir = drive_find_path(paste0(
+              "GP-Studio/Edu/Lessons/", new_proj_name
+            )),
+            try_harder = TRUE
+          ) %>% catch_err()
+        }
+        # 5.  Rename old ShortTitle to NewShortTitle------------------------------
+        if (!test_copy_missing) {
+          warning("Filling in missing files for cloned repo failed for some reason")
+          # Make subsequent tests NAs
+          test_renaming <- test_insert <- NA
+        } else{
+          if (ShortTitle != new_proj_base) {
             message(
-          "-----------------------------\n",
-          "Now to copy missing Google Drive files for the new locale version of '",
-          WD,
-          "' called '",
-          new_proj_name,
-          "'.\n Type y and enter *after* Gdrive for Desktop has finished syncing."
-        )
-        continue <- readline("(y/n) > ")
-            #only go on if front-matter updated
-            test_copy_missing <- drive_copy_missing_files(
-              from_dir = old_GdriveDirID,
-              to_dir = drive_find_path(paste0(
-                "GP-Studio/Edu/Lessons/", new_proj_name
-              )),
-              try_harder = TRUE
-            ) %>% catch_err()
-
-            #This part can also repeat under repair scenario. No additional logic needed
-            if (!test_copy_missing) {
-              warning("Filling in missing files for cloned repo failed for some reason")
-              # Make subsequent tests NAs
-              test_renaming <- test_push <- NA
+              "\n-----------------\n",
+              "Do you want to rename new project ShortTitle prefixes & suffixes from: '",
+              ShortTitle,
+              "' to '",
+              new_proj_base,
+              "'?"
+            )
+            choice_rename <- readline("(y/n) >")
+            if (choice_rename != "y") {
+              message("\nRenaming skipped by user.\n")
+              test_renaming <- NA
             } else{
-              # 5.  Rename old ShortTitle to NewShortTitle ------------------------------
-              if (ShortTitle != new_proj_base) {
-                message(
-                  "\n-----------------\n",
-                  "Do you want to rename new project ShortTitle prefixes & suffixes from: '",
-                  ShortTitle,
-                  "' to '",
-                  new_proj_base,
-                  "'?"
-                )
-                choice_rename <- readline("(y/n) >")
-                if (choice_rename != "y") {
-                  message("\nRenaming skipped by user.\n")
-                  test_renaming <- NA
-                } else{
-                  #If choice_rename "y", rename files (but not project)
+              #If choice_rename "y", rename files (but not project)
 
-                  #pattern matches short titles at the start or end of a string,
-                  #without issue of recursive TEST2222_ happening if you change
-                  #TEST to TEST2. Also avoids overwriting file extensions
-                  patt <- paste0("^(?!",new_proj_base,")",ShortTitle,"|(?<=_)",ShortTitle,"(?=\\.)")
-                  test_renaming <-
-                    rename_unit_files(
-                      pattern = patt,
-                      replacement = new_proj_base,
-                      dir_path= new_proj_path,
-                      ignore.case = TRUE,
-                      perl = TRUE
-                    ) %>% catch_err()
-                  # test_renaming <-
-                  #   lesson_rename(
-                  #     new_proj_name = new_proj_name,
-                  #     WD = new_proj_path,
-                  #     new_ShortTitle = new_proj_base,
-                  #     curr_ShortTitle = ShortTitle,
-                  #     just_files = TRUE
-                  #   ) %>% catch_err()
-                }
-              } else{
-                message("\nRenaming skipped b/c ShortTitle of old and new locale are same\n")
-                test_renaming <- NA
-              }
+              #pattern matches short titles at the start or end of a string,
+              #without issue of recursive TEST2222_ happening if you change
+              #TEST to TEST2. Also avoids overwriting file extensions
+              patt <- paste0("^(?!",
+                             new_proj_base,
+                             ")",
+                             ShortTitle,
+                             "|(?<=_)",
+                             ShortTitle,
+                             "(?=\\.)")
+              test_renaming <-
+                rename_unit_files(
+                  pattern = patt,
+                  replacement = new_proj_base,
+                  dir_path = new_proj_path,
+                  ignore.case = TRUE,
+                  perl = TRUE
+                ) %>% catch_err()
+              # test_renaming <-
+              #   lesson_rename(
+              #     new_proj_name = new_proj_name,
+              #     WD = new_proj_path,
+              #     new_ShortTitle = new_proj_base,
+              #     curr_ShortTitle = ShortTitle,
+              #     just_files = TRUE
+              #   ) %>% catch_err()
+            }
+          } else{
+            message("\nRenaming skipped b/c ShortTitle of old and new locale are same\n")
+            test_renaming <- NA
+          }
 
-            }#end Renaming & Push
-          }#end Copy missing files
-        }#end update front-matter
-      }#end clone repository
-
-    }#End big else
-
-test_push <- NA
+        }#end Renaming & Push
+      }#end Copy missing files
+    }#end update front-matter
 
 
-    # 6. SUMMARY --------------------------------------------------------------
+
+
+    test_insert <- NA
+
+    # 6. Add to gp-catalog -------------------------------------------------------
+    browser()
+    test_query <- gp_api_query(id = new_id) %>% catch_err(keep_results = TRUE)
+    if (!test_query$success) {
+      warning("Querying GP API failed")
+      test_insert <- FALSE
+    } else{
+      if (is_empty(test_query$result)) {
+        message("\n* ",
+                new_id,
+                " doesn't exist in gp-catalog. Trying to add it.\n")
+        test_insert <- gp_api_unit_insert(WD = new_proj_path, verbosity = verbosity) %>% catch_err()
+      }
+    }
+
+
+    # 7. SUMMARY --------------------------------------------------------------
     tests <-
       c(
         test_cloning,
@@ -272,17 +303,19 @@ test_push <- NA
         test_update_fm,
         test_copy_missing,
         test_renaming,
-        test_push
+        test_insert
       )
     successes <- sum(tests, na.rm = TRUE)
+
     NAs <- sum(is.na(tests))
     failures <- sum(!tests, na.rm = TRUE)
+    overall_success <- failures == 0
     message(
       "\n=====================================\n",
       "lesson_new_locale() SUMMARY",
       "\n=====================================\n",
-      "SUCCEEDED?: ",
-      failures == 0,
+      "SUCCEEDED?: ",overall_success
+      ,
       "\n-------------------------------------\n",
       " ",
       convert_T_to_check(test_cloning),
@@ -310,9 +343,11 @@ test_push <- NA
       convert_T_to_check(test_renaming),
       "  Renamed ShortTitle in files\n",
       " ",
-      convert_T_to_check(test_push),
+      convert_T_to_check(test_insert),
       "  Pushed new unit to gp-catalog through the GP API\n",
       "\n=====================================\n"
     )
+
+    invisible(overall_success)
 
   }

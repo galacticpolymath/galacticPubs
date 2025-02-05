@@ -8,15 +8,11 @@ gp_api_query_users(
   WD = "?",
   unit_id = NULL,
   prompt_user = TRUE,
-  dev = TRUE,
+  dev = FALSE,
   verbosity = 1
 )
 }
 \arguments{
-\item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}};default="?"}
-
-\item{unit_id}{instead of supplying WD, you can supply the _id directly for the unit that you want to delete.}
-
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 
 \item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}
@@ -27,7 +23,7 @@ gp_api_query_users(
 success (logical)
 }
 \description{
-Deletes a unit from MongoDB using the GP API. Does not delete it from Google Drive or GitHub gp-lessons project.
+Gets a summary of galacticpolymath.com user accounts through the GP API (needs authenticated user)
 }
 \seealso{
 Other GP API: 

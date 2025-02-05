@@ -95,10 +95,11 @@ gp_api_query_users <- \(
 # Filter out internal accounts --------------------------------------------
 exclude_patt <- c(
       ".*@galacticpolymath.com",
-      "numbatmedia@gmail.com",
+      # "numbatmedia@gmail.com",
       "gtorion97@gmail.com",
       "mrwilkins06@gmail.com",
-      "ellahoulihan9@gmail.com"
+      "ellahoulihan9@gmail.com",
+      "matthew.greig.cowan@gmail.com"
     )
   excluded_emails <-  lapply(out0$email, \(email_i) {
     is_excluded_i <- sum(stringr::str_detect(email_i,exclude_patt),na.rm=TRUE)>0

@@ -12,6 +12,7 @@
 compile_json <- function(WD = NULL,
                          WD_git = NULL,
                          destFolder) {
+  message("Recompiling LESSON.json ")
   if (!is.null(WD)) {
     WD <- parse_wd(WD)
   }
