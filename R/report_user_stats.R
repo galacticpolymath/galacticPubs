@@ -2,13 +2,14 @@
 #'
 #' Provide basic information about users
 #'
+#' @param verbosity passed to [httr2::req_perform()]; default=1
 #' @returns Summary tibble
 #' @export
 #'
 
-report_user_stats <- function() {
+report_user_stats <- function(verbosity=1) {
   # Get the user data
-  users <- gp_api_query_users()
+  users <- gp_api_query_users(verbosity=verbosity)
   # Get the number of active users
   users$active_in_30_days <- users$lastSignIn >= Sys.Date() - 30
   #Make NAs be inactive, cuz they would have this value if they'd signed in recently

@@ -280,7 +280,7 @@ lesson_new_locale <-
     test_insert <- NA
 
     # 6. Add to gp-catalog -------------------------------------------------------
-    browser()
+
     test_query <- gp_api_query(id = new_id) %>% catch_err(keep_results = TRUE)
     if (!test_query$success) {
       warning("Querying GP API failed")
@@ -294,6 +294,12 @@ lesson_new_locale <-
       }
     }
 
+    test_reconnect_gdrive <- update_fm(
+      WD_git = new_WD_git,
+      drive_reconnect = TRUE,
+      recompile = FALSE
+    ) %>% catch_err()
+
 
     # 7. SUMMARY --------------------------------------------------------------
     tests <-
@@ -303,7 +309,9 @@ lesson_new_locale <-
         test_update_fm,
         test_copy_missing,
         test_renaming,
-        test_insert
+        test_insert,
+        test_reconnect_gdrive
+
       )
     successes <- sum(tests, na.rm = TRUE)
 
@@ -345,7 +353,10 @@ lesson_new_locale <-
       " ",
       convert_T_to_check(test_insert),
       "  Pushed new unit to gp-catalog through the GP API\n",
-      "\n=====================================\n"
+      "\n=====================================\n",
+      convert_T_to_check(test_reconnect_gdrive),
+      "  Reconnected Google Drive\n",
+      "\n-------------------------------------\n",
     )
 
     invisible(overall_success)

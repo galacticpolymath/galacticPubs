@@ -17,6 +17,7 @@ compile_standards <- function(WD = "?",
   WD <- parse_wd(WD)
 
   #The github gp-lessons directory for the code
+
   WD_git <- get_wd_git(WD = WD)
 
   #############

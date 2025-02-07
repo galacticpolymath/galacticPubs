@@ -89,7 +89,7 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
       yt_links <- mlinks2$mainLink
       #handle weird watchlink format separately
       #(like https://www.youtube.com/watch?v=DREGrkSnZ2g)
-      yt_pattern <- "(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:[^\\/\\n\\s]+\\/.+\\/|(?:v|embed|shorts|watch|video)\\/|.*[?&]v=)|youtu\\.be\\/|studio\\.youtube\\.com\\/video\\/)([a-zA-Z0-9_-]{11})"
+      yt_pattern <- "(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:[^\\/\\n\\s]+\\/.+\\/|(?:v|embed|shorts|watch|video)\\/|.*[?&]v=)|youtu\\.be\\/|studio\\.youtube\\.com\\/video\\/)([a-zA-Z0-9_-]{11})[^&\\?]?.*$"
       yt_codes <-  sapply(yt_links, \(link_i) {
         #for URLs formatted as "https://www.youtube.com/watch?v=Xr1SstxYW8w", get id from v= part
 

@@ -4,7 +4,10 @@
 \alias{report_user_stats}
 \title{Report information about GP users}
 \usage{
-report_user_stats()
+report_user_stats(verbosity = 1)
+}
+\arguments{
+\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
 }
 \value{
 Summary tibble
