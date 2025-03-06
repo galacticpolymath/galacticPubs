@@ -20,6 +20,7 @@
 #' @param single_result logical; do you want to force a single result (i.e. throw an error if there is more than one match)?; default=TRUE
 #' @param checkWD  do you want to run [check_wd()]? default=TRUE; set to FALSE to suppress warnings if for example you're missing teach-it.gsheet or some other item expected to be in a lesson directory
 #' @param raw_results logical; used for error checking on path resolution. If T, will export the full list of results of found paths, rather than just a tibble of the final target result. Default=FALSE
+#' @param ... other arguments passed to [googledrive::drive_find()]
 #' @examples
 #' \dontrun{
 #' #ABSOLUTE PATHS
@@ -44,7 +45,8 @@ drive_find_path <- function(drive_path,
                             exact_match = TRUE,
                             single_result = TRUE,
                             checkWD = TRUE,
-                            raw_results= FALSE) {
+                            raw_results= FALSE,
+                            ...) {
   is_drib <- googledrive::is_dribble(drive_path)
 
 
@@ -191,7 +193,8 @@ drive_find_path <- function(drive_path,
           results[[i]] <-
             googledrive::drive_find(
               q = paste0(qtoggle, p[i], parents_clause),
-              shared_drive = sharedDrive
+              shared_drive = sharedDrive,
+              ...
             )
           #error handling
 

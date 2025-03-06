@@ -124,7 +124,7 @@ get_fm <-
         if (!test_valid) {
           warning("*  If you meant to do partial key matching, add a '~' prefix.")
           warning("** Try updating your front-matter with update_fm()")
-          browser()
+
           stop("Invalid keys supplied: \n  - ",
                paste0(key[!valid_names], collapse = "\n  -"))
         }

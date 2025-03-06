@@ -4,12 +4,14 @@
 \alias{drive_contents}
 \title{drive_contents}
 \usage{
-drive_contents(dribble, recursive = FALSE)
+drive_contents(dribble, recursive = FALSE, ...)
 }
 \arguments{
 \item{dribble}{a Google drive dribble of a folder (usually the output of \code{\link[=drive_find_path]{drive_find_path()}})}
 
 \item{recursive}{default=FALSE; doesn't really work super well...passed to \code{\link[googledrive:drive_ls]{googledrive::drive_ls()}}.}
+
+\item{...}{other arguments passed to \code{\link[googledrive:drive_find]{googledrive::drive_find()}}}
 }
 \value{
 a dribble showing the contents of the desired folder
