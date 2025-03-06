@@ -1,6 +1,6 @@
 #DEFAULT VALUES FOR front-matter.
-numID: ''
 _id: ''
+numID: ''
 ShortTitle: 'NameMe'
 PublicationStatus: 'Proto'
 Language: 'English'
@@ -17,12 +17,13 @@ isTestRepo: false
 FirstPublicationDate: ''
 LsnCount: ''
 LsnStatuses: ''
+featured_multimedia: ''
 MediumTitle: '' # Format: Title + _Subj_ + _Gx-y_+ (Locale)
 lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.7.1
+TemplateVer: 0.8.0
 galacticPubsVer: ''
 URL: ''
 ShortURL: ''
@@ -59,15 +60,10 @@ LessonTiles: ''
 EstLessonTime: ''
 PullStandardsInfoFrom: 'myFile'
 LearningPlotCorrection: FALSE
-LearningChartFriendly: ''
 LearningEpaulette: ''
 LearningEpaulette_vert: ''
 LearningEpaulette_params_heightScalar: !expr formals(learningEpaulette)$heightScalar
 LearningEpaulette_params_randomSeed: !expr formals(learningEpaulette)$randomSeed
-LearningChart: ''
-LearningChart_params_centralText: NULL
-LearningChart_params_caption: NULL
-LearningChart_params_captionN: !expr formals(learningChart)$captionN
 Accessibility:
   Type: .na
   Description: .na

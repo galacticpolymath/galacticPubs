@@ -87,7 +87,6 @@ compile_json <- function(WD = NULL,
   lesson <- c(
     lesson_data[["header"]],
     Section = lesson_body,
-    CoverImage = lesson_data[["images"]]$CoverImage,
     SponsorImage = lesson_data[["images"]]$SponsorImage
   )
 

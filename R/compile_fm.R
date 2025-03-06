@@ -35,14 +35,6 @@ compile_fm <- \(WD = "?") {
   checkmate::assert_character(fm$locale, n.chars = 5, any.missing = F)
 
 
-#
-#   # make full catalog paths following naming conventions the frontend --------
-#   header$SponsorImage = list(url = ifelse(is.na(fm$SponsorLogo),
-#                                           NA,
-#                                           catalogURL(basename(fm$SponsorLogo), WD=WD)))
-#   header$CoverImage = list(url = ifelse(is.na(fm$UnitBanner),
-#                                         NA,
-#                                         catalogURL(basename(fm$UnitBanner), WD=WD)))
 
   #output header.json
   save_json(header,
