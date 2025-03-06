@@ -24,7 +24,7 @@
         \includegraphics[width=\linewidth]{%
         %>>>>>>>>>>>>>>>>>>>
           % R code injection
-            `r rmarkdown::metadata$LessonBanner`
+            `r rmarkdown::metadata$UnitBanner`
           %<<<<<<<<<<<<<<<<<<<
 }\\
         \parbox[t][0.75in]{\linewidth}{

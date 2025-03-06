@@ -400,12 +400,12 @@ server <- function(input, output, session) {
   output$banner_and_logos <- renderUI({
     tagList(
       checkboxGroupInput(
-        "LessonBanner",
+        "UnitBanner",
         label = "Lesson Banner (found in assets/_banners_logos_etc)",
         choices = matching_files(rel_path = "assets/_banners_logos_etc/",
                                  pattern = "[Bb]anner.*\\.[png|PNG|jpeg|jpg]",
                                  WD()),
-        selected = y$LessonBanner
+        selected = y$UnitBanner
       ),
       selectizeInput(
         "SponsorName",
@@ -1031,7 +1031,7 @@ server <- function(input, output, session) {
         h4(robust_txt(current_data$Subtitle, "Subtitle")),
         robust_img(
           class = "lesson-banner",
-          src = basename(current_data$LessonBanner),
+          src = basename(current_data$UnitBanner),
           label = "Lesson Banner"
         ),
         div(class = "sponsor-section",

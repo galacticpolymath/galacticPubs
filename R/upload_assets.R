@@ -2,7 +2,7 @@
 #'
 #' Upload lesson assets to galacticPubs Google Cloud Storage bucket. It looks for the following patterns in the following folders:
 #' - SponsorLogo  | assets/_banners_logos_etc: anything with 'logo' and .png, .jpg, .webp suffix
-#' - LessonBanner | assets/_banners_logos_etc: ideally just named banner.png; should work with 'ShortTitle_banner.png' and exclude 'old_banner.png'
+#' - UnitBanner | assets/_banners_logos_etc: ideally just named banner.png; should work with 'ShortTitle_banner.png' and exclude 'old_banner.png'
 #' - LessonTiles  | assets/_banners_logos_etc: must be format 'L1_tile.png'; other img formats also supported: .png, .jpeg, .webp
 #' - UnitCard   | assets/_banners_logos_etc: format 'card.png' or 'ShortTitle.png'
 #' - QR-code | assets/_banners_logos_etc: format 'ProjTitle_QR-code.png'
@@ -53,7 +53,7 @@ upload_assets <- \(WD = "?",
       "help.txt",
 
       "2",
-      "LessonBanner",
+      "UnitBanner",
       "assets/_banners_logos_etc",
       paste0("(?!old)_?[Bb]anner[^\\.]*",img_patt,collapse="|"),
       "help.txt|_OLD|_old",

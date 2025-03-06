@@ -44,7 +44,7 @@ TargetSubject: ""
 EstLessonTime: ""
 ForGrades: ""
 SponsorLogo: ""
-LessonBanner: ""
+UnitBanner: ""
 OverviewText: ""
 
 # The header-includes is changed based on function logic for make_printable(); that's

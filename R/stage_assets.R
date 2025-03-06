@@ -38,7 +38,7 @@ stage_assets <-
     #list front-matter items that point to necessary assets for the publishing bundle
     # items2copy <-
     #   c(
-    #     "LessonBanner",
+    #     "UnitBanner",
     #     "SponsorLogo",
     #     "LearningEpaulette",
     #     "LearningEpaulette_vert",

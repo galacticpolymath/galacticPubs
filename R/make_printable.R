@@ -45,8 +45,8 @@ matching_fields<-names(header0)[names(header0)%in%names(fm)]
 header[matching_fields]<-fm[matching_fields]
 
 #Clean up/redefine some things
- if(!is_empty(header$LessonBanner)){
-  header$LessonBanner<-fs::path("dynamic_images",basename(header$LessonBanner))
+ if(!is_empty(header$UnitBanner)){
+  header$UnitBanner<-fs::path("dynamic_images",basename(header$UnitBanner))
  }
  header$SponsorLogo<-basename(header$SponsorLogo[1:3])
  #replace missing logos (up to 3) with spacer PNGs

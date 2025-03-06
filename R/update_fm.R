@@ -248,7 +248,7 @@ update_fm <-
     #make a unique `_id` combining numID & locale
     if (!is_empty(new_yaml$numID)) {
       new_yaml$`_id` <-
-        paste0(c("lesson", new_yaml$numID, new_yaml$locale), collapse = "_")
+        paste0(c("unit", new_yaml$numID, new_yaml$locale), collapse = "_")
     }
 
     # overwrite MediumTitle used for sensible folder naming in public-facing GalacticPolymath network drive

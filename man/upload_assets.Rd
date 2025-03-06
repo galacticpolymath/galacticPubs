@@ -23,7 +23,7 @@ invisibly returns a Tibble with filenames and download links
 Upload lesson assets to galacticPubs Google Cloud Storage bucket. It looks for the following patterns in the following folders:
 \itemize{
 \item SponsorLogo  | assets/_banners_logos_etc: anything with 'logo' and .png, .jpg, .webp suffix
-\item LessonBanner | assets/_banners_logos_etc: ideally just named banner.png; should work with 'ShortTitle_banner.png' and exclude 'old_banner.png'
+\item UnitBanner | assets/_banners_logos_etc: ideally just named banner.png; should work with 'ShortTitle_banner.png' and exclude 'old_banner.png'
 \item LessonTiles  | assets/_banners_logos_etc: must be format 'L1_tile.png'; other img formats also supported: .png, .jpeg, .webp
 \item UnitCard   | assets/_banners_logos_etc: format 'card.png' or 'ShortTitle.png'
 \item QR-code | assets/_banners_logos_etc: format 'ProjTitle_QR-code.png'

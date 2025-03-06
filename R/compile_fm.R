@@ -40,9 +40,9 @@ compile_fm <- \(WD = "?") {
 #   header$SponsorImage = list(url = ifelse(is.na(fm$SponsorLogo),
 #                                           NA,
 #                                           catalogURL(basename(fm$SponsorLogo), WD=WD)))
-#   header$CoverImage = list(url = ifelse(is.na(fm$LessonBanner),
+#   header$CoverImage = list(url = ifelse(is.na(fm$UnitBanner),
 #                                         NA,
-#                                         catalogURL(basename(fm$LessonBanner), WD=WD)))
+#                                         catalogURL(basename(fm$UnitBanner), WD=WD)))
 
   #output header.json
   save_json(header,
