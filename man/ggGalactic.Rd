@@ -10,7 +10,7 @@ ggGalactic(
   grid.col = "#C3C3C3",
   border.thickness = 1.8,
   border.col = "#6D6D6D",
-  font = "Noto Sans",
+  font = "Noto sans",
   regular.wt = 300,
   bold.wt = 500,
   font.cex = 1,
@@ -30,7 +30,7 @@ ggGalactic(
 
 \item{border.col}{Color of plot border. Default: same as font (#363636)}
 
-\item{font}{Google font to use, "Montserrat" by default; see options with sysfonts::font_families_google()}
+\item{font}{Google font to use, "Noto sans" by default; see options with sysfonts::font_families_google()}
 
 \item{regular.wt}{font weight for regular font style}
 

@@ -114,7 +114,7 @@ gp_footer <- function(obj,
   # Add the border to the ggplot object itself
   obj_with_border <- obj +
     theme(
-      plot.margin = unit(c(1, 1, 1, 1), "lines"),  # Add margin around the plot
+      # plot.margin = unit(c(1, 1, 1, 1), "lines"),  # Add margin around the plot
       plot.background = element_rect(color = border_col_graph, size = border_width_graph)  # Border color and size
     )
 

@@ -377,6 +377,7 @@ compile_teach_it <- function(WD = "?",
     if (!proc_data_test$success) {
       message("FAILED to compile procedures")
       warning("FAILED to compile procedures")
+      stop()
       proc_data <- NULL
 
     } else{
@@ -401,6 +402,7 @@ compile_teach_it <- function(WD = "?",
     }
 
   }
+
 
   Data <- c(
     lessonPreface = uinfo$unitPreface[1],

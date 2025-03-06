@@ -109,7 +109,7 @@ drive_copy_missing_files <- function(from_dir,
       message(
         "\n\n drive_copy_missing_files(): \n **Do you want to fill in ",
         nrow(to_copy),
-        " missing\\POTENTIALLY INCOMPLETE item(s)?**\n"
+        " missing\\POTENTIALLY INCOMPLETE item(s)?**\n *** Might want to wait till Gdrive for Desktop finishes syncing ***"
       )
       continue <- readline("(y/n) > ")
     } else{

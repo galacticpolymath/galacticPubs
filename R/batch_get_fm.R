@@ -83,14 +83,22 @@ batch_get_fm <- \(
       out <- out%>%
         dplyr::mutate(unit = unit_name) %>%
         dplyr::relocate("unit")
+
+      #not sure why, but sometimes this isn't present
+      if("ReleaseDate" %in% names(out)){
+      out$ReleaseDate <- out$ReleaseDate %>% as.character()
+      out$LastUpdated <- out$LastUpdated %>% as.character()
+      }
     } else{
       out <- c(unit = unit_name, out)
     }
+    #avoid tibble coercion error
+
     out
   })
 
 
-  if (output_tibble & !is.null(key)) {
+  if (output_tibble ) {
 
     res <- dplyr::bind_rows(res0)
 
@@ -100,9 +108,6 @@ batch_get_fm <- \(
     names(res) <- basename(valid_projects)
   }
 
-  if (is.null(key) & output_tibble) {
-    message("batch_get_fm()|Outputting as list. Can't coerce to tibble if key not supplied.")
-  }
 
   res
 }

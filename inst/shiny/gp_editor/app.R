@@ -227,14 +227,11 @@ ui <- navbarPage(
     #   width = "100%"
     # ),
     hr(class = "blhr"),
-    h3("Lesson Preview"),
-    textAreaInput(
-      "QuickPrep",
-      label = "Teach It in 15 Quick Prep:",
-      value = y$QuickPrep,
-      height = "150px",
-      width = "100%"
-    ),
+
+    #Accessibility
+    h3("Accessibility"),
+    ediTable(id = "Accessibility"),
+    hr(class = "blhr"),
 
     #Supporting Media
     hr(class = "blhr"),
@@ -501,13 +498,14 @@ server <- function(input, output, session) {
   # Server logic for Tab 1 modules ------------------------------------------
   #initialize values
   #define initial reactive values for ediTable
+  accessibility_data <- reactiveVal(y$Accessibility)
   ack_data <- reactiveVal(y$Acknowledgments)
   versions_data <- reactiveVal(y$Versions)
 
 
   #id must match ediTable id in UI section and the key in front-matter.yml (i.e. an item in get_fm())
   #This step prevents trying to load this before data is available
-
+  ediTable_server(id = "Accessibility", rd = accessibility_data)
   ediTable_server(id = "Acknowledgments", rd = ack_data)
   ediTable_server(id = "Versions", rd = versions_data)
 

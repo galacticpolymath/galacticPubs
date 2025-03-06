@@ -16,7 +16,7 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
   unit_url <- get_fm("URL", WD = WD)
   checkmate::assert_string(unit_url, min.chars = 10)
   unit_name <- basename(WD)
-  upload_assets(WD=WD)
+  upload_assets(WD = WD)
 
   qr_path <- fs::path(WD,
                       "assets",
@@ -47,11 +47,15 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
       style = "display: block;",
       htmltools::a(
         href = links[i],
+        target = "_blank",
+        rel = "noopener noreferrer",
         htmltools::img(style = "width: 120px; height:auto; max-height:120px; object-fit: contain;", src =
                          links[i])
       ),
       htmltools::a(
         href = links[i],
+        target = "_blank",
+        rel = "noopener noreferrer",
         htmltools::h3(style = "display:inline;", basename(links[i]))
       )
     )
@@ -82,25 +86,22 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
       message("No valid YouTube vids found")
       body <- gcloud_divs
     } else{
-
       yt_links <- mlinks2$mainLink
       #handle weird watchlink format separately
       #(like https://www.youtube.com/watch?v=DREGrkSnZ2g)
-      yt_codes <- sapply(yt_links, \(link_i) {
-        if (grepl("youtube.com/watch\\?", link_i)) {
-          stringr::str_extract(link_i,
-                               ".*youtube.com/watch\\?v=([^\\?]*).*",
-                               group = 1)
+      yt_pattern <- "(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/(?:[^\\/\\n\\s]+\\/.+\\/|(?:v|embed|shorts|watch|video)\\/|.*[?&]v=)|youtu\\.be\\/|studio\\.youtube\\.com\\/video\\/)([a-zA-Z0-9_-]{11})[^&\\?]?.*$"
+      yt_codes <-  sapply(yt_links, \(link_i) {
+        #for URLs formatted as "https://www.youtube.com/watch?v=Xr1SstxYW8w", get id from v= part
+
+        if (grepl(yt_pattern, link_i)) {
+          gsub(yt_pattern,
+               "\\1",
+               link_i)
         } else{
-
-          stringr::str_extract(
-            link_i,
-            ".*[youtu.be|youtube.com]\\/s?h?o?r?t?s?\\/?([^\\?]*).*",
-            group = 1
-          )
+          link_i
         }
-
       })
+
       yt_thumbs <- paste0("https://i3.ytimg.com/vi/", yt_codes, "/hqdefault.jpg")
 
       # TODO: create taglist with images and links to YT vids -------------------
@@ -109,11 +110,15 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
           style = "display: block;",
           htmltools::a(
             href = yt_links[i],
+            target = "_blank",
+            rel = "noopener noreferrer",
             htmltools::img(style = "width: 120px; height:auto; max-height:120px; object-fit: contain;", src =
                              yt_thumbs[i])
           ),
           htmltools::a(
             href = yt_links[i],
+            target = "_blank",
+            rel = "noopener noreferrer",
             htmltools::h3(style = "display:inline;", mlinks2$title[i])
           )
         )
@@ -133,10 +138,22 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
   head <- htmltools::tagList(
     htmltools::h4("SHAREABLE ASSETS FOR:"),
     htmltools::h1(fm$MediumTitle),
-    htmltools::h3(htmltools::a(href = fm$URL, fm$URL)),
-    htmltools::h3(htmltools::a(
-      href = fm$ShortURL, gsub("https://(.*)", "\\1", fm$ShortURL)
-    )),
+    htmltools::h3(
+      htmltools::a(
+        href = fm$URL,
+        fm$URL,
+        target = "_blank",
+        rel = "noopener noreferrer"
+      )
+    ),
+    htmltools::h3(
+      htmltools::a(
+        href = fm$ShortURL,
+        gsub("https://(.*)", "\\1", fm$ShortURL),
+        target = "_blank",
+        rel = "noopener noreferrer"
+      )
+    ),
 
   )
   page <- c(head, body)

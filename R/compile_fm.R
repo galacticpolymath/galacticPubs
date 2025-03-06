@@ -50,6 +50,7 @@ compile_fm <- \(WD = "?") {
                                 "header", ext = "json"))
 
   # Export overview.json ----------------------------------------------------
+
   overview <- list(
     `__component` = "lesson-plan.overview",
     LearningSummary = fm$LearningSummary,
@@ -73,11 +74,12 @@ compile_fm <- \(WD = "?") {
       list.obj = fm,
       new.name = "Text"
     )$Text,
-    Tags = lapply(fm$Tags, function(x)
-      list(Value = x)),
+    Tags = lapply(fm$Tags, function(x){
+      list(Value = x)}),
     SteamEpaulette =  fm$LearningEpaulette[1],
     #might want to add more complex image handling later),
-    SteamEpaulette_vert = fm$LearningEpaulette_vert[1]
+    SteamEpaulette_vert = fm$LearningEpaulette_vert[1],
+    Accessibility = list(fm$Accessibility)
 
     #might want to add more complex image handling later),
   )

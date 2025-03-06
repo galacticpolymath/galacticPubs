@@ -22,7 +22,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.6.9
+TemplateVer: 0.7.1
 galacticPubsVer: ''
 URL: ''
 ShortURL: ''
@@ -47,7 +47,7 @@ SponsorName: ''
 SponsoredBy: ''
 SponsorLogo: ''
 LessonBanner: ''
-LessonCard: ''
+UnitCard: ''
 QRcode: ''
 TargetSubject: 'Science'
 LessonEnvir: ''
@@ -68,6 +68,11 @@ LearningChart: ''
 LearningChart_params_centralText: NULL
 LearningChart_params_caption: NULL
 LearningChart_params_captionN: !expr formals(learningChart)$captionN
+Accessibility:
+  Type: .na
+  Description: .na
+  Abbrev_Descr: .na
+  Link: .na
 SupportingMedia: ''
 # The Gist of the lesson
 LearningSummary: ''

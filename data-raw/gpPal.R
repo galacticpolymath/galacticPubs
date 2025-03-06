@@ -93,14 +93,16 @@ gpPal = list(
     )
   ),
   subjects = data.frame(
-    name = c("math", "ela", "socstudies", "science", "extra"),
-    hex = c("#db4125", "#eca14d", "#633a9a", "#b798e8", "#f4f0d9"),
+    name = c("math", "ela", "socstudies", "science", "extra","sust","sel"),
+    hex = c("#db4125", "#eca14d", "#633a9a", "#b798e8", "#f4f0d9","#349964","#0070da"),
     rgb = c(
       "rgb(219,65,37,maxColorValue=255))",
       "rgb(236,161,77,maxColorValue=255))",
       "rgb(99,58,154,maxColorValue=255))",
       "rgb(183,152,232,maxColorValue=255)",
-      "rgb(244,240,217,maxColorValue=255))"
+      "rgb(244,240,217,maxColorValue=255))",
+      "",
+      ""
     )
   ),
   discrete = data.frame(

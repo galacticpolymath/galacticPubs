@@ -72,27 +72,27 @@ update_fm <-
 
 
     # TEMP: Migrate some old names to new key names ---------------------------------
-    if ("id" %in% names(old_yaml)) {
-      new_yaml$numID <- old_yaml$id
-    }
-    if ("numId" %in% names(old_yaml)) {
-      new_yaml$numID <- old_yaml$numId
-    }
-
-    if ("UniqueID" %in% names(old_yaml)) {
-      new_yaml$`_id` <- old_yaml$UniqueID
-    }
-
-    if (is_empty(new_yaml$LsnCount)) {
-      count_extracted <- stringr::str_extract(new_yaml$EstLessonTime, "[^\\d]?(\\d*).*",group = 1) %>% as.integer()
-      if(is_empty(count_extracted)){
-        warning("You should manually add LsnCount to front matter. Unable to extract from EstLessonTime for: '",new_yaml$GdriveDirName,"'")
-      }else{
-        new_yaml$LsnCount <- count_extracted
-      }
-    }else{
-      new_yaml$LsnCount <- new_yaml$LsnCount %>% as.integer()
-    }
+    # if ("id" %in% names(old_yaml)) {
+    #   new_yaml$numID <- old_yaml$id
+    # }
+    # if ("numId" %in% names(old_yaml)) {
+    #   new_yaml$numID <- old_yaml$numId
+    # }
+    #
+    # if ("UniqueID" %in% names(old_yaml)) {
+    #   new_yaml$`_id` <- old_yaml$UniqueID
+    # }
+    #
+    # if (is_empty(new_yaml$LsnCount)) {
+    #   count_extracted <- stringr::str_extract(new_yaml$EstLessonTime, "[^\\d]?(\\d*).*",group = 1) %>% as.integer()
+    #   if(is_empty(count_extracted)){
+    #     warning("You should manually add LsnCount to front matter. Unable to extract from EstLessonTime for: '",new_yaml$GdriveDirName,"'")
+    #   }else{
+    #     new_yaml$LsnCount <- count_extracted
+    #   }
+    # }else{
+    #   new_yaml$LsnCount <- new_yaml$LsnCount %>% as.integer()
+    # }
 
 
    #add NAs for new keys that aren't present in old_yaml

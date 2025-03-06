@@ -28,7 +28,11 @@ compile_lesson <-
            rebuild = NULL) {
     WD <- parse_wd(WD)
 
-
+# initiate drive email associations ---------------------------------------
+oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
+checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
+  googledrive::drive_auth(email=oauth_email)
+  googlesheets4::gs4_auth(email=oauth_email)
 
     # Always update front-matter (in case of template updates) ----------------
     update_fm(WD = WD, save_output = TRUE,recompile = FALSE)

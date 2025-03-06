@@ -1,6 +1,7 @@
 #' lesson_rename
 #'
-#' Scenario where working title changes midway through project development. Don't run this from the RStudio session of the lesson you want to rename! Does several things:
+#' Scenario where working title changes midway through project development.
+#'  Does several things:
 #' 1. Renames top-level folder of the lesson with "new_proj_name"
 #' 2. Finds and renames all file names to found in the project folder e.g. OldShortTitle_yadayada.* -> NewShortTitle_yadayada. This is done locally using Google Drive for Desktop virtualization of the Lessons Folder
 #' 3. Changes name of GitHub Repo at galacticpolymath/ and galacticpolymath/catalog to "new_proj_name"
@@ -284,10 +285,11 @@ if(newstr_is_oldstr) {
 
 
 # 3. Change name of WD_git (i.e. GitHub repo) for this project ---------------
+if(!just_files){
 WD_git0 <- WD_git
 WD_git <- gsub(curr_proj_name,new_proj_name,WD_git0)
 test_wdGit_Rename <- file.rename(from=WD_git0,to = WD_git)
-
+}else{test_wdGit_Rename <- NA}
 
 #
 # # # 3. Change name of gp catalog on github (deprecated) --------
@@ -333,7 +335,7 @@ proceed0 <-
   ) %>% stats::na.omit() %>% as.vector
 proceed <-
     eval(parse(text = paste0(as.character(proceed0), collapse = "&")))
-if(proceed){
+if(proceed&!just_files){
   #define things to update, including user-supplied items
   change_this2 <-
     c(change_this,
@@ -355,15 +357,11 @@ if(proceed){
 #'
 
 # 6. rename on gp_catalog through API -------------------------------------
+if(!just_files){
 message("Renaming the unit through the GP Catalog API:\n FROM> ",curr_proj_name,"\n TO> ",new_proj_name)
 test_delete_catalog <- gp_api_unit_delete(unit_id=y$`_id`,verbosity = 3) %>% catch_err()
 test_insert_catalog <- gp_api_unit_insert(WD=new_proj_dir,verbosity = 3) %>% catch_err()
-
-# # 8.   Delete orphaned catalog entry if it exists -------------------------
-# if(!just_files & newstr_is_oldstr){
-# test_cleanup_catalog<-catch_err(gh_remove_from_GPcatalog(curr_proj_name))
-# }else{test_cleanup_catalog<-NA}
-
+}
 
 # 7.  Summarize results ---------------------------------------------------
 

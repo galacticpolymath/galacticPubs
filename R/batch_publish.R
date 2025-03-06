@@ -52,7 +52,7 @@ batch_publish <- function(WD="?",
 
   good_projects <- projects[!ignored]
   checkmate::assert_integer(length(good_projects),lower=1,all.missing=FALSE)
-  update_list <- lapply(1:length(good_projects), function(i) {
+  update_list_try <- lapply(1:length(good_projects), function(i) {
 
     WD_i <- good_projects[i]
     message("Publishing: ", basename(WD_i))
@@ -68,8 +68,22 @@ batch_publish <- function(WD="?",
                         verbosity = verbosity) %>% catch_err(try_harder = try_harder, keep_results = TRUE)
     print(output_i$result)
     output_i$result
-  }) %>% dplyr::bind_rows()
+  })  %>% catch_err(keep_results=TRUE)
 
+  if(!update_list_try$success){
+    update_list <- update_list_try$result
+
+  }else{
+    update_list_tibble_try <- update_list_try$result %>% bind_rows() %>% catch_err(keep_results=TRUE)
+    if(update_list_tibble_try$success){
+      #output tibble-formatted result
+      update_list <- update_list_tibble_try$result
+    }else{
+      message("Unable to bind_rows to summarize update. Some unit output was weird.")
+      #output list formatted result
+      update_list <- update_list_try$result
+    }
+  }
 
 
   # report results

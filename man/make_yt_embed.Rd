@@ -13,9 +13,11 @@ make_yt_embed(link)
 Internal helpers for \code{\link[=compile_teach_it]{compile_teach_it()}}. Get YT embed code from any Youtube link
 }
 \examples{
-#Should give 3 URLs in format www.youtube.com/embed/videoID and 1 original URL (not on YT)
-c("https://youtu.be/mD24yi7uLgU","https://youtu.be/ZAFjYJk27Ug?si=d-MIziNb39ib_8fW",
+#Should give 4 URLs in format www.youtube.com/embed/videoID and 1 original URL (not on YT)
+c("https://youtu.be/mD24yi7uLgU",
+"https://youtu.be/ZAFjYJk27Ug?si=d-MIziNb39ib_8fW",
 "https://www.youtube.com/watch?v=h5eTqjzQZDY",
+"https://www.youtube.com/watch?v=Bk2APxqIhbk&t=1s",
 "https://into-the-dark.galacticpolymath.com/") \%>\% make_yt_embed()
 #should not change anything
 make_yt_embed("https://www.youtube.com/embed/A2FBO8ofEac")

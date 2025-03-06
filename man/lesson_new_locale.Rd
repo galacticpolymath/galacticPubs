@@ -4,7 +4,13 @@
 \alias{lesson_new_locale}
 \title{Make a new locale version of existing lesson}
 \usage{
-lesson_new_locale(WD = "?", new_proj_name = NULL, repair = FALSE)
+lesson_new_locale(
+  WD = "?",
+  new_proj_name = NULL,
+  repair = FALSE,
+  exclude_TEST = TRUE,
+  verbosity = 1
+)
 }
 \arguments{
 \item{WD}{the name of the project as it is on GitHub and Google Drive}
@@ -12,9 +18,13 @@ lesson_new_locale(WD = "?", new_proj_name = NULL, repair = FALSE)
 \item{new_proj_name}{the name of the new locale variant you want to create. Default=NULL will launch a locale picker app.}
 
 \item{repair}{logical; if you had failures during initial locale cloning, should we try to do the steps that failed?}
+
+\item{exclude_TEST}{default=T; excludes test repositories}
+
+\item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
 }
 \value{
-summary tibble
+overall success; prints summary tibble
 }
 \description{
 This function will:

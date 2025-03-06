@@ -9,30 +9,29 @@
 #' @export
 
 init_galacticPubs <- function() {
+  # First check that we're in galacticPubs or gp-lessons project ------------
 
-# First check that we're in galacticPubs or gp-lessons project ------------
+  curr_proj_dir <- rstudioapi::getActiveProject()
+  proj <- basename(curr_proj_dir)
+  if (!proj %in% c("galacticPubs", "gp-lessons")) {
+    stop("Currently, you can only use galacticPubs from the gp-lessons project.")
+  } else{
+    test_git_gp_lessons_dir <- TRUE
+  }
 
-curr_proj_dir <- rstudioapi::getActiveProject()
-proj <- basename(curr_proj_dir)
-if(!proj %in% c("galacticPubs","gp-lessons")){
-  stop("Currently, you can only use galacticPubs from the gp-lessons project.")
-}else{
-  test_git_gp_lessons_dir <- TRUE
-}
+  if (proj == "gp-lessons") {
+    git_gp_lessons_dir <- curr_proj_dir
+  } else{
+    guess_loc <- "/Users/mattwilkins/R-pkg-dev/gp-lessons"
+    message("guessing gp-lessons location")
+    git_gp_lessons_dir <- guess_loc
+  }
 
-if(proj=="gp-lessons"){
-  git_gp_lessons_dir <- curr_proj_dir
-}else{
-  guess_loc <- "/Users/mattwilkins/R-pkg-dev/gp-lessons"
-  message("guessing gp-lessons location")
-  git_gp_lessons_dir <- guess_loc
-}
+  test_git_gp_lessons_dir <-  checkmate::test_directory_exists(git_gp_lessons_dir)
 
-test_git_gp_lessons_dir <-  checkmate::test_directory_exists(git_gp_lessons_dir)
-
-if(test_git_gp_lessons_dir){
-  Sys.setenv(galacticPubs_git_gp_lessons_dir=git_gp_lessons_dir)
-}
+  if (test_git_gp_lessons_dir) {
+    Sys.setenv(galacticPubs_git_gp_lessons_dir = git_gp_lessons_dir)
+  }
 
   gdrive_dir <-  fs::path(fs::path_home(), "Library", "CloudStorage")
   if (!dir.exists(gdrive_dir)) {
@@ -63,13 +62,17 @@ if(test_git_gp_lessons_dir){
 
   #Test user connection
   gdrive_user <- gdrive_accounts[which_user]
-  test_gdrive_user <- checkmate::test_character(gdrive_user,min.chars=3,all.missing = F,pattern="\\w*@[^.]*\\.\\w*$")
+  test_gdrive_user <- checkmate::test_character(
+    gdrive_user,
+    min.chars = 3,
+    all.missing = F,
+    pattern = "\\w*@[^.]*\\.\\w*$"
+  )
   #Set google-associated email
-  Sys.setenv(galacticPubs_gdrive_user=ifelse(test_gdrive_user,gdrive_user,NA))
+  Sys.setenv(galacticPubs_gdrive_user = ifelse(test_gdrive_user, gdrive_user, NA))
   #set the google drive subfolder with this email
   Sys.setenv(galacticPubs_gdrive_userdir = gdrive_accounts_dir[which_user])
-  message("\nGoogle Drive User saved for next time: ",
-          gdrive_user)
+  message("\nGoogle Drive User saved for next time: ", gdrive_user)
 
 
   gdrive_userdir <- Sys.getenv("galacticPubs_gdrive_userdir")
@@ -82,35 +85,32 @@ if(test_git_gp_lessons_dir){
                               gdrive_userdir,
                               "Shared drives")
   live_lessons_dir <-
-    fs::path(gdrive_root_dir,
-             "GP-LIVE",
-             "Edu",
-             "Lessons")
+    fs::path(gdrive_root_dir, "GP-LIVE", "Edu", "Lessons")
 
   galacticpolymath_lessons_dir <-
-    fs::path(gdrive_root_dir,
-             "GalacticPolymath")
+    fs::path(gdrive_root_dir, "GalacticPolymath")
 
 
   studio_lessons_dir <-
-    fs::path(gdrive_root_dir,
-             "GP-Studio",
-             "Edu",
-             "Lessons")
+    fs::path(gdrive_root_dir, "GP-Studio", "Edu", "Lessons")
 
   dev_dir <-
-    fs::path(gdrive_root_dir,
-             "GP-Dev")
+    fs::path(gdrive_root_dir, "GP-Dev")
 
   test_root_dir <- dir.exists(gdrive_root_dir)
   test_live_lessons_dir <- dir.exists(live_lessons_dir)
   test_dev_dir <- dir.exists(dev_dir)
   test_galacticpolymath_lessons_dir <- dir.exists(galacticpolymath_lessons_dir)
   test_studio_lessons_dir <- dir.exists(studio_lessons_dir)
-  c_dirs <- c(studio_lessons_dir, live_lessons_dir, galacticpolymath_lessons_dir)
+  c_dirs <- c(studio_lessons_dir,
+              live_lessons_dir,
+              galacticpolymath_lessons_dir)
 
-  if (!(test_live_lessons_dir |
-        test_galacticpolymath_lessons_dir | test_studio_lessons_dir)) {
+  if (!(
+    test_live_lessons_dir |
+    test_galacticpolymath_lessons_dir |
+    test_studio_lessons_dir
+  )) {
     warning(
       "Lessons Path NOT SET. No lessons folders found at:\n -",
       paste0(c_dirs, collapse = "\n -")
@@ -139,7 +139,11 @@ if(test_git_gp_lessons_dir){
       galacticPubs_gdrive_live_lessons_dir = ifelse(!test_live_lessons_dir, NA, live_lessons_dir)
     )
     Sys.setenv(
-      galacticPubs_gdrive_galacticpolymath_lessons_dir = ifelse(!test_galacticpolymath_lessons_dir, NA, galacticpolymath_lessons_dir)
+      galacticPubs_gdrive_galacticpolymath_lessons_dir = ifelse(
+        !test_galacticpolymath_lessons_dir,
+        NA,
+        galacticpolymath_lessons_dir
+      )
     )
 
 
@@ -149,7 +153,6 @@ if(test_git_gp_lessons_dir){
     # Set link to Google Cloud Authentication json ----------------------------
     #This is for connecting to the galacticPubs Google Cloud Storage bucket
     #This is where we store images and whatnots for lessons
-
     if (!test_dev_dir) {
       message(
         "Can't set GCS_AUTH_FILE for google cloud storage b/c you don't have access to GP-Dev shared drive."
@@ -169,6 +172,28 @@ if(test_git_gp_lessons_dir){
         )
         Sys.setenv("GCS_AUTH_FILE" = NA)
       }
+    }
+
+    # Get Google Analytics info ----------------------------
+    #This is for connecting to the galacticPubs to Google Analytics
+    if (!test_dev_dir) {
+      message(
+        "Can't set galacticPubs_config.yml for Google Analytics b/c you don't have access to GP-Dev shared drive."
+      )
+      test_GA_config <- FALSE
+    } else{
+      GA_config <-
+        fs::path(dev_dir, "do-not-touch", "galacticPubs_config.yml")
+      test_GA_config <- file.exists(GA_config)
+      if (test_GA_config) {
+        Sys.setenv("GA_config" = GA_config)
+      } else{
+        message(
+          "galacticPubs_config.yml file not found. Try reinstalling or updating galacticPubs. Or you may not have access to this by design."
+        )
+        Sys.setenv("GA_config" = NA)
+      }
+
 
     }
     out <- dplyr::tibble(
@@ -181,7 +206,8 @@ if(test_git_gp_lessons_dir){
           test_studio_lessons_dir,
           test_live_lessons_dir,
           test_galacticpolymath_lessons_dir,
-          test_auth_file
+          test_auth_file,
+          test_GA_config
         )
       ),
       EnvirVariable = c(
@@ -192,7 +218,8 @@ if(test_git_gp_lessons_dir){
         "galacticPubs_gdrive_studio_lessons_dir",
         "galacticPubs_gdrive_live_lessons_dir",
         "galacticPubs_gdrive_galacticpolymath_lessons_dir",
-        "GCS_AUTH_FILE"
+        "GCS_AUTH_FILE",
+        "GA_config"
       ),
       Value = c(
         git_gp_lessons_dir,
@@ -202,7 +229,8 @@ if(test_git_gp_lessons_dir){
         studio_lessons_dir,
         live_lessons_dir,
         galacticpolymath_lessons_dir,
-        auth_file
+        auth_file,
+        GA_config
       )
     )
     message("\nSUMMARY", "\n===========")

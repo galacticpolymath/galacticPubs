@@ -47,7 +47,8 @@ lesson_rename(
 \item{exclude_TEST}{default=T; excludes test repositories. Passed to \code{\link[=pick_lesson]{pick_lesson()}}}
 }
 \description{
-Scenario where working title changes midway through project development. Don't run this from the RStudio session of the lesson you want to rename! Does several things:
+Scenario where working title changes midway through project development.
+Does several things:
 \enumerate{
 \item Renames top-level folder of the lesson with "new_proj_name"
 \item Finds and renames all file names to found in the project folder e.g. OldShortTitle_yadayada.* -> NewShortTitle_yadayada. This is done locally using Google Drive for Desktop virtualization of the Lessons Folder
