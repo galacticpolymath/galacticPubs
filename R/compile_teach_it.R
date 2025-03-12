@@ -104,6 +104,8 @@ compile_teach_it <- function(WD = "?",
     dplyr::arrange(.data$order) %>%
     dplyr::select(1:dplyr::starts_with("otherLink"))
 
+  mlinks <- mlinks %>% dplyr::select(-dplyr::starts_with("_"))
+
   #unit info
   uinfo <-
     googlesheets4::read_sheet(
@@ -219,11 +221,8 @@ compile_teach_it <- function(WD = "?",
       "`"
     )
   }else{
-    cache_path <- fs::path(WD_git, "saves", "multimedia.RDS")
-    test_cache_mm <- saveRDS(mlinks, cache_path) %>% catch_err()
-        message(convert_T_to_check(test_cache_mm),
-                " Cacheing multimedia to: ",
-                cache_path)
+
+    update_fm(WD=WD,change_this=list(FeaturedMultimedia=mlinks))
   }
 
 
@@ -433,7 +432,7 @@ compile_teach_it <- function(WD = "?",
     fs::path(destFolder, "teaching-materials", ext = "json")
 
   success <- save_json(out, outFile) %>% catch_err()
-  save_json(multimedia, fs::path(destFolder, "multimedia", ext = "json"))
+
 
 
   # return compiled output --------------------------------------------------
@@ -441,9 +440,6 @@ compile_teach_it <- function(WD = "?",
   message(" Teaching Material Compiled:")
   # print(printToScreenTable)
   message(" JSON file saved\n @ ", outFile, "\n")
-  message(" JSON file saved\n @ ",
-          fs::path(destFolder, "multimedia.json"),
-          "\n")
   message(" Success: ", success)
   message(" ", rep("-", 30))
 

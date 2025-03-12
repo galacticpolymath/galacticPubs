@@ -18,8 +18,7 @@ batch_get_fm <- \(
   output_tibble = TRUE,
   exclude_TEST = TRUE
 ) {
-
-   if (sum(fs::is_absolute_path(WD)) == length(WD)) {
+  if (sum(fs::is_absolute_path(WD)) == length(WD)) {
     projects <- WD
   } else{
     #recursive call to get all lessons
@@ -54,18 +53,17 @@ batch_get_fm <- \(
   key0 <- key
 
   res0 <-  purrr::map(1:length(valid_projects), \(i) {
-
-    if(exclude_TEST){
+    if (exclude_TEST) {
       isTestNotRequested <- !"isTestRepo" %in% key
-    if(isTestNotRequested){
-      key <- c("isTestRepo",key)
-    }
+      if (isTestNotRequested) {
+        key <- c("isTestRepo", key)
+      }
 
     }
 
     out <- get_fm(key = key, WD = valid_projects[i])
     #handle scenario where output is a single vector
-    if(length(out)==1){
+    if (length(out) == 1) {
       out <- dplyr::as_tibble(out)
       names(out) <- key
     }
@@ -74,35 +72,45 @@ batch_get_fm <- \(
     if (output_tibble & !is.null(key)) {
       out <- dplyr::as_tibble(out)
       #modify output to remove test repos
-      if(exclude_TEST){
+      if (exclude_TEST) {
         out <- out %>%
           dplyr::filter(!.data$isTestRepo) %>%
-        dplyr::select(dplyr::any_of(key0))
+          dplyr::select(dplyr::any_of(key0))
       }
       #add unit name
-      out <- out%>%
+      out <- out %>%
         dplyr::mutate(unit = unit_name) %>%
         dplyr::relocate("unit")
 
       #not sure why, but sometimes this isn't present
-      if("ReleaseDate" %in% names(out)){
-      out$ReleaseDate <- out$ReleaseDate %>% as.character()
-      out$LastUpdated <- out$LastUpdated %>% as.character()
-      }
-    } else{
-      out <- c(unit = unit_name, out)
-    }
-    #avoid tibble coercion error
+      if ("ReleaseDate" %in% names(out)) {
 
-    out
+        if (!is_empty(out$ReleaseDate)) {
+          out$ReleaseDate <- out$ReleaseDate %>% as.character()
+        }
+
+        if (!is_empty(out$LastUpdated)) {
+          out$LastUpdated <- out$LastUpdated %>% as.character()
+        }
+
+      }
+
+
+  } else{
+    out <- c(unit = unit_name, out)
+  }
+  #avoid tibble coercion error
+
+  out
   })
 
 
-  if (output_tibble ) {
-
+  if (output_tibble)
+  {
     res <- dplyr::bind_rows(res0)
 
-  } else{
+  } else
+  {
     #add names back to list
     res <- res0
     names(res) <- basename(valid_projects)

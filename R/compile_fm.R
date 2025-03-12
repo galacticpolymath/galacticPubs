@@ -16,9 +16,9 @@
 
 compile_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
-  WD_git <- get_wd_git(WD=WD)
+  WD_git <- get_wd_git(WD = WD)
   #just make sure everything's updated in the cloud
-  upload_assets(WD=WD)
+  upload_assets(WD = WD)
   json_dir <- fs::path(WD_git, "JSONs")
   fm <- get_fm(WD_git = WD_git)
   fm_keys <- get_fm_names()
@@ -31,15 +31,13 @@ compile_fm <- \(WD = "?") {
                               min.chars = 2,
                               any.missing = F)
   checkmate::assert_choice(fm$PublicationStatus,
-                           c("Proto","Hidden","Beta","Coming Soon", "Live","Draft"))#draft deprecated
+                           c("Proto", "Hidden", "Beta", "Coming Soon", "Live", "Draft"))#draft deprecated
   checkmate::assert_character(fm$locale, n.chars = 5, any.missing = F)
 
 
 
   #output header.json
-  save_json(header,
-            filename = fs::path(json_dir,
-                                "header", ext = "json"))
+  save_json(header, filename = fs::path(json_dir, "header", ext = "json"))
 
   # Export overview.json ----------------------------------------------------
 
@@ -53,10 +51,7 @@ compile_fm <- \(WD = "?") {
     #lump the Driving Questions, Essential Questions, Learning Objectives, etc into one text element
 
     Text = lumpItems(
-      c("DrivingQ",
-        "EssentialQ",
-        "Hooks",
-        "MiscMD"),
+      c("DrivingQ", "EssentialQ", "Hooks", "MiscMD"),
       item.labs = c(
         "Driving Question(s):",
         "Essential Question(s):",
@@ -66,8 +61,9 @@ compile_fm <- \(WD = "?") {
       list.obj = fm,
       new.name = "Text"
     )$Text,
-    Tags = lapply(fm$Tags, function(x){
-      list(Value = x)}),
+    Tags = lapply(fm$Tags, function(x) {
+      list(Value = x)
+    }),
     SteamEpaulette =  fm$LearningEpaulette[1],
     #might want to add more complex image handling later),
     SteamEpaulette_vert = fm$LearningEpaulette_vert[1],
@@ -77,65 +73,49 @@ compile_fm <- \(WD = "?") {
   )
 
 
-  save_json(overview,
-            filename = fs::path(json_dir,
-                                "overview", ext = "json"))
+  save_json(overview, filename = fs::path(json_dir, "overview", ext = "json"))
 
 
 
 
-
-
-  # read in multimedia file created from multimedia tab of teach-it. --------
-
-  mmExists <-
-    file.exists(fs::path(json_dir, "multimedia.json"))
-  if (mmExists) {
-    mm <-
-      jsonlite::read_json(fs::path(json_dir, "multimedia.json"), null =
-                            "null")
-    if(is_empty(mm)){
-      message("No multimedia found.")
-    }
-  }else{
-    mm <- NULL
-    message("No multimedia found.")
-  }
-
-
-
-
-
-  # Create preview.json -----------------------------------------------------
-  #Multimedia browser
-  preview <- list(
-    `__component` = "lesson-plan.unit-preview",
-    SectionTitle = "Lesson Preview",
-    #allow smooth-scrolling to in-page references (with Anchor Links)
-    QuickPrep = fm$QuickPrep %>% fixAnchorLinks(),
-    Multimedia = mm,
-    InitiallyExpanded = TRUE
-  )
-
-  #write preview json even if empty
-  save_json(preview,
-            filename = fs::path(json_dir,
-                                "preview", ext = "json"))
+#
+#
+#   # read in multimedia file created from multimedia tab of teach-it. --------
+#
+#   mm <- get_fm("FeaturedMultimedia", WD = WD)
+#
+#   if (is.na(mmExists)) {
+#     message("No multimedia found.")
+#   }
+#
+#
+#   # Create preview.json -----------------------------------------------------
+#   #Multimedia browser
+#   preview <- list(
+#     `__component` = "lesson-plan.unit-preview",
+#     SectionTitle = "Lesson Preview",
+#     #allow smooth-scrolling to in-page references (with Anchor Links)
+#     QuickPrep = fm$QuickPrep %>% fixAnchorLinks(),
+#     Multimedia = mm,
+#     InitiallyExpanded = TRUE
+#   )
+#
+#   #write preview json even if empty
+#   save_json(preview, filename = fs::path(json_dir, "preview", ext = "json"))
 
   #BONUS (optional section)
   # markdown links to supporting materials allowed
   Bonus <- get_fm("Bonus", WD = WD)
-  if(!is_empty(Bonus)){
-  bonus_web <- list(
+  if (!is_empty(Bonus)) {
+    bonus_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Bonus Content",
-      Content = expand_md_links(Bonus, WD=WD) %>% fixAnchorLinks(),
+      Content = expand_md_links(Bonus, WD = WD) %>% fixAnchorLinks(),
       #allow smooth-scrolling to in-page references
       InitiallyExpanded = TRUE
     )
-    save_json(bonus_web,
-              filename = fs::path(json_dir, "bonus", ext = "json"))
-}
+    save_json(bonus_web, filename = fs::path(json_dir, "bonus", ext = "json"))
+  }
 
   # extensions.json ---------------------------------------------------------
 
@@ -149,7 +129,7 @@ compile_fm <- \(WD = "?") {
     extensions_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Extensions",
-      Content = expand_md_links(Extensions, WD=WD) %>% fixAnchorLinks(),
+      Content = expand_md_links(Extensions, WD = WD) %>% fixAnchorLinks(),
       #allow smooth-scrolling to in-page references
       InitiallyExpanded = TRUE
     )
@@ -186,8 +166,7 @@ compile_fm <- \(WD = "?") {
       )
 
     save_json(background_web,
-              fs::path(json_dir,
-                       "background", ext = "json"))
+              fs::path(json_dir, "background", ext = "json"))
   }
 
 
@@ -199,14 +178,11 @@ compile_fm <- \(WD = "?") {
       list(
         `__component` = "lesson-plan.collapsible-text-section",
         SectionTitle = "Feedback",
-        Content = expand_md_links(Feedback,
-                                  WD=WD) %>% fixAnchorLinks(),
+        Content = expand_md_links(Feedback, WD = WD) %>% fixAnchorLinks(),
         InitiallyExpanded = TRUE
       )
 
-    save_json(feedback_web,
-              fs::path(json_dir,
-                       "feedback", ext = "json"))
+    save_json(feedback_web, fs::path(json_dir, "feedback", ext = "json"))
   }
 
 
@@ -217,24 +193,24 @@ compile_fm <- \(WD = "?") {
       list(
         `__component` = "lesson-plan.collapsible-text-section",
         SectionTitle = "Credits",
-        Content = expand_md_links(unlist(Credits),
-                                  WD=WD) %>% fixAnchorLinks(),
+        Content = expand_md_links(unlist(Credits), WD = WD) %>% fixAnchorLinks(),
         InitiallyExpanded = TRUE
       )
 
     save_json(credits_web,
-              filename = fs::path(json_dir,
-                                  "credits", ext = "json"))
+              filename = fs::path(json_dir, "credits", ext = "json"))
   }
 
 
   # acknowledgments.json ----------------------------------------------------
   #
   ack <-
-    get_fm("Acknowledgments", WD = WD,standardize_NA = T)[[1]] %>% dplyr::as_tibble()
+    get_fm("Acknowledgments",
+           WD = WD,
+           standardize_NA = T)[[1]] %>% dplyr::as_tibble()
 
 
-  if (is_empty(ack,names_meaningful = F) ) {
+  if (is_empty(ack, names_meaningful = F)) {
     ack_out0 <- NULL
   } else{
     roles <- unique(ack$Role)
@@ -244,7 +220,7 @@ compile_fm <- \(WD = "?") {
       #Also allow {vid} shortcodes
       role_i <-
         roles[i] %>% parseGPmarkdown(WD = WD) %>%
-        expand_md_links(WD =WD)
+        expand_md_links(WD = WD)
       ack_i <- subset(ack, ack$Role == role_i)
       def_i <-
         ack_i$Role_def[1] %>%
@@ -292,7 +268,7 @@ compile_fm <- \(WD = "?") {
   # versions.json -----------------------------------------------------------
 
   ver <-
-    get_fm("Versions", WD = WD,standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble()
+    get_fm("Versions", WD = WD, standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble()
 
   if (is_empty(ver)) {
     ver_out0 <- NULL
@@ -343,13 +319,15 @@ compile_fm <- \(WD = "?") {
 
   message("front-matter compiled")
 
- message("Recombining all JSONs")
- test_compile <- compile_json(WD = WD) %>% catch_err()
- if(test_compile){
-   message("SUCCESS! New LESSON.json created for '",basename(WD),"'")
- }else{
-   message("FAILURE! LESSON.json not regenerated for '",basename(WD),"'")
- }
+  message("Recombining all JSONs")
+  test_compile <- compile_json(WD = WD) %>% catch_err()
+  if (test_compile) {
+    message("SUCCESS! New LESSON.json created for '", basename(WD), "'")
+  } else{
+    message("FAILURE! LESSON.json not regenerated for '",
+            basename(WD),
+            "'")
+  }
 }
 
 #' fm_compile

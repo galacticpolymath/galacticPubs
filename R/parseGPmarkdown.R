@@ -35,13 +35,14 @@ parseGPmarkdown <-
 
     # 1. Look for multimedia json if use_cache --------------------------------
     if (use_cache & is.null(mlinks)) {
-      if (!file.exists(cache_path)) {
-        message("parseGPmarkdown(): No multimedia info cache found at : ",
-                cache_path)
-        message("Will try to look it up")
-        force_lookup <- TRUE
+      mlinks <- get_fm("FeaturedMultimedia",WD=WD)
+      if (is.na(mlinks)) {
+        message("parseGPmarkdown(): No multimedia info found for : ",
+                basename(WD))
+
       } else{
-        mlinks <- readRDS(cache_path)
+
+        mlinks <- lapply(mlinks,\(x){dplyr::as_tibble(x)}) %>%dplyr::bind_rows()
         checkmate::assert_data_frame(mlinks)
       }
 
@@ -61,7 +62,7 @@ parseGPmarkdown <-
                                   col_types = "c") %>%
         dplyr::select(1:dplyr::starts_with("otherLink"))   %>%
         dplyr::filter(dplyr::if_any(1,~!is.na(.)))
-
+      mlinks <- mlinks %>% dplyr::select(-dplyr::starts_with("_"))
       valid_mm <-
         checkmate::test_data_frame(mlinks, min.rows = 1)
 
@@ -69,10 +70,9 @@ parseGPmarkdown <-
 
 
       if (valid_mm) {
-        test_cache_mm <- saveRDS(mlinks, cache_path) %>% catch_err()
+        test_cache_mm <- update_fm(WD=WD,change_this = list(FeaturedMultimedia=mlinks)) %>% catch_err()
         message(convert_T_to_check(test_cache_mm),
-                " Cacheing multimedia to: ",
-                cache_path)
+                " Saving multimedia for ",basname(WD))
       } else{
         message("Looked on the web at teach-it*.gsheet!Multimedia. Still no valid entries.")
       }
