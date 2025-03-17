@@ -18,6 +18,7 @@ compile_teach_it <- function(WD = "?",
   WD_git <- get_wd_git(WD = WD)
   . = NULL #to avoid errors with dplyr syntax
 
+  #authenticate with default email for this user
   oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
 checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
   googledrive::drive_auth(email=oauth_email)

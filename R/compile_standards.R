@@ -9,8 +9,7 @@
 #' @return list with 4 objects: $success (did it work?); $input (the input file as a tibble); $compiled (the compiled tibble); $problem_entries (a tibble of entries with 'skip' or missing values in the "How this aligns..." column). A JSON is saved to the destFolder location.
 #' @export
 #'
-compile_standards <- function(WD = "?",
-                              targetSubj = NULL) {
+compile_standards <- function(WD = "?", targetSubj = NULL) {
   . = NULL #to avoid errors with dplyr syntax
   message("compiling standards...")
   #The google drive working directory for the project assets
@@ -20,45 +19,73 @@ compile_standards <- function(WD = "?",
 
   WD_git <- get_wd_git(WD = WD)
 
+  #authenticate with default email for this user
+  oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
+  checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
+  googledrive::drive_auth(email = oauth_email)
+  googlesheets4::gs4_auth(email = oauth_email)
+
+
   #############
   # IMPORTANT: Add Subjects here if you need to align new ones --------------
 
 
   ordered_subjects <-
-    c("Math",
+    c(
+      "Math",
       "ELA",
       "Science",
       "Social Studies",
       "Art",
       "Sustainability",
       "SEL",
-      "Technology")
+      "Technology"
+    )
   #learning chart/learningEpaulette subject titles (<=5 char)
   ordered_subj_chart <-
-    c("Math", "ELA", "Sci"    , "SocSt",        "Art", "SDGs", "SEL",         "Tech")
+    c("Math", "ELA", "Sci"    , "SocSt", "Art", "SDGs", "SEL", "Tech")
 
 
 
   #here for legacy reasons (for gpColors)
   ordered_subj <-
-    c("math", "ela", "science", "socstudies",    "art", "sust",  "sel",       "tech")
+    c("math",
+      "ela",
+      "science",
+      "socstudies",
+      "art",
+      "sust",
+      "sel",
+      "tech")
 
   #custom labels for learning chart quadrants
   learning_chart_labs <-
-    c("CCSS\nMath","CCSS\nELA","NGSS\nScience","C3\nSoc Studies","Art","SDGs\nSustain.","SEL","Tech")
+    c(
+      "CCSS\nMath",
+      "CCSS\nELA",
+      "NGSS\nScience",
+      "C3\nSoc Studies",
+      "Art",
+      "SDGs\nSustain.",
+      "SEL",
+      "Tech"
+    )
 
   #named short and full names for epaulette and learningchart
-  chart_labels <- dplyr::tibble(full_subj=ordered_subjects,
-                                abbrev_subj=ordered_subj_chart,
-                                gp_pal_subj=ordered_subj,
-                                learning_chart_labs=learning_chart_labs
+  chart_labels <- dplyr::tibble(
+    full_subj = ordered_subjects,
+    abbrev_subj = ordered_subj_chart,
+    gp_pal_subj = ordered_subj,
+    learning_chart_labs = learning_chart_labs
   )
 
 
 
-  subj_tib <- dplyr::tibble(Subjects=ordered_subjects,Subj=ordered_subj_chart,subj=ordered_subj) %>%
-    dplyr::mutate(n=1:dplyr::n()) %>% dplyr::relocate(.data$n) %>%
-    dplyr::mutate(color=gpColors(.data$subj))
+  subj_tib <- dplyr::tibble(Subjects = ordered_subjects,
+                            Subj = ordered_subj_chart,
+                            subj = ordered_subj) %>%
+    dplyr::mutate(n = 1:dplyr::n()) %>% dplyr::relocate(.data$n) %>%
+    dplyr::mutate(color = gpColors(.data$subj))
 
 
   #define paths
@@ -132,7 +159,9 @@ compile_standards <- function(WD = "?",
       message(
         "Found invalid/empty gsheets_link. Trying to reconnect...running update_fm(WD=WD,drive_reconnect=TRUE)."
       )
-      update_fm(WD = WD, drive_reconnect = TRUE,recompile = FALSE)
+      update_fm(WD = WD,
+                drive_reconnect = TRUE,
+                recompile = FALSE)
       stnds_id <- get_fm("GdriveStandardsID" , WD = WD)
       #Try again to import
       stnds_drib <- drive_find_path(stnds_id)
@@ -263,10 +292,7 @@ compile_standards <- function(WD = "?",
           "Sustainability")
 
       #required subjects for learning chart
-      req_subjects <- c("ELA",
-                        "Math",
-                        "Science",
-                        "Social Studies")
+      req_subjects <- c("ELA", "Math", "Science", "Social Studies")
 
       #supported sets of standards for generating learning chart
       #Also treated as REQUIRED for learning chart output
@@ -334,17 +360,17 @@ compile_standards <- function(WD = "?",
           paste0(a0$code[undoc], collapse = "\n\t\u2022"),
           "\n"
         )
-        a1 <- a0[!undoc & !skips,]
-      }else if(undoc_ok){
+        a1 <- a0[!undoc & !skips, ]
+      } else if (undoc_ok) {
         message(
           "\nWe kept these aligned standards in, but they're NOT been documented! Fill in 'How does lesson align...' for:\n\t\u2022",
           paste0(a0$code[undoc], collapse = "\n\t\u2022"),
           "\n"
         )
-        a1 <- a0[ !skips,]
-      }else{
+        a1 <- a0[!skips, ]
+      } else{
         undoc <- rep(FALSE, nrow(a0))
-        a1 <- a0[!undoc & !skips,]
+        a1 <- a0[!undoc & !skips, ]
       }
 
 
@@ -361,7 +387,7 @@ compile_standards <- function(WD = "?",
       #   ifelse(!grepl("^- ", a2$how), paste0("- ", a2$how), a2$how)
 
       #Make sure any blanks have placeholder text
-      a2$how <- ifelse(is.na(a2$how),"'How Aligned' not yet documented.",a2$how)
+      a2$how <- ifelse(is.na(a2$how), "'How Aligned' not yet documented.", a2$how)
 
 
 
@@ -443,9 +469,7 @@ compile_standards <- function(WD = "?",
 
       # warn if statements missing (indicates bad merge) -----------------------
       if (nrow(A) == 0 & !undoc_ok) {
-        warning(
-          "Bad merge. No 'Statements' matched standards code for each set."
-        )
+        warning("Bad merge. No 'Statements' matched standards code for each set.")
       }
 
 
@@ -585,8 +609,7 @@ compile_standards <- function(WD = "?",
       # Create JSON-style list, but only exported as JSON by compile_lesson() --------
       # Prefix with component and title, and nest output in Data if structuring for web deployment
       out <-
-        list(`__component` = "lesson-plan.standards",
-             # LearningObj =  fm$LearningObj,
+        list(`__component` = "lesson-plan.standards", # LearningObj =  fm$LearningObj,
              Data = out0)
 
 
@@ -610,7 +633,7 @@ compile_standards <- function(WD = "?",
         a_master %>%
         #Get rid of sets not included in the alignment
         #EXCEPT the 4 required sets
-        dplyr::filter(.data$set %in% c(unique(A$set),supported_sets)) %>%
+        dplyr::filter(.data$set %in% c(unique(A$set), supported_sets)) %>%
         dplyr::select("subject", "dimension") %>%
         dplyr::distinct() %>% dplyr::mutate(n = 0)
 
@@ -689,18 +712,15 @@ compile_standards <- function(WD = "?",
           "No Learning Chart will be created. Currently supported Standards sets:\n  -",
           paste(supported_sets, collapse = "\n  -"),
           "\nStandard sets found:\n  -",
-          paste(unique_sans_na(A$set),
-                collapse = "\n  -")
+          paste(unique_sans_na(A$set), collapse = "\n  -")
         )
         #Save to RDS file
-        update_fm(
-                  WD = WD,recompile = FALSE)
+        update_fm(WD = WD, recompile = FALSE)
 
         a_combined$dimAbbrev <- NA
         supported_dims <- NULL
       } else{
-        update_fm(
-                  WD = WD,recompile = FALSE)
+        update_fm(WD = WD, recompile = FALSE)
 
 
 
@@ -740,10 +760,9 @@ compile_standards <- function(WD = "?",
 
 
       #Add abbrev to a_combined output
-      if(!is.null(supported_dims)){
-      a_out <- a_combined %>% dplyr::full_join(.,
-                                               supported_dims)
-      }else{
+      if (!is.null(supported_dims)) {
+        a_out <- a_combined %>% dplyr::full_join(., supported_dims)
+      } else{
         a_out <- a_combined
       }
 
@@ -791,6 +810,50 @@ compile_standards <- function(WD = "?",
     }
   }#End Big else
 
+
+
+
+  # Store Target Standards in fm--------------------------------------------------
+  #only include targeted standards that are explicitly in targetSubj
+  target_standards_df <- A %>% dplyr::filter(.data$target) %>%
+    dplyr::select(c("subject", "code", "set", "dim")) %>%
+    #targetSubj isn't validated, so if socstudies is used, might cause a prob
+    dplyr::filter(tolower(.data$subject) %in% tolower(targetSubj))
+
+
+  #Make into an array needed for front end
+  target_standards_list <- lapply(unique(target_standards_df$set), \(set_i) {
+    df_i <- target_standards_df %>% dplyr::filter(.data$set == set_i)
+    if (nrow(df_i) == 0) {
+      out <- NULL
+    } else{
+      #Custom for NGSS (b/c they don't really have codes; summarize)
+      # Just want to figure out how many SEPs or CCCs there are and count them
+      select_str <- c("SEP", "CCC")
+      if (any(df_i$dim %in% select_str)) {
+        summ_sep_ccc <- df_i %>%
+          dplyr::count(.data$dim) %>%
+          dplyr::mutate(code = dplyr::case_when(
+            dim == "SEP" ~ paste(n, "Science and Engineering Practices (SEPs)"),
+            dim == "CCC" ~ paste(n, "Cross-Cutting Concepts (CCCs)")
+          ),subject="Science",set="NGSS") %>% dplyr::select(-"n")
+
+        df_i <- df_i %>% dplyr::filter(!.data$dim %in% select_str)  %>%
+         dplyr::bind_rows(summ_sep_ccc)
+
+
+      }
+
+      out <- list(df_i %>% as.list() %>% purrr::list_transpose(simplify=FALSE))
+      names(out) <- df_i$set[1]
+    }
+    out
+  }) %>% .[[1]]
+
+  test_save_target_stds <- update_fm(WD=WD,
+                                     change_this=
+                                       list(TargetStandardsCodes=target_standards_list))
+
   message("Standards Compiled: ", success)
   #add grades information to output
   invisible(
@@ -802,6 +865,7 @@ compile_standards <- function(WD = "?",
       gradeBand = gradeBand,
       learningObj = learningObj,
       targetSubj = targetSubj,
+      target_subj_standards = target_standards_df,
       chart_labels = chart_labels
     )
   )
