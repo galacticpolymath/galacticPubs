@@ -2,7 +2,7 @@
 % Please edit documentation in R/open_unit_json.R
 \name{open_unit_json}
 \alias{open_unit_json}
-\title{Open the lesson.json for a Unit}
+\title{Open the UNIT.json for a Unit}
 \usage{
 open_unit_json(WD = "?")
 }

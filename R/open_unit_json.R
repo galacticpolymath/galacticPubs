@@ -1,4 +1,4 @@
-#' Open the lesson.json for a Unit
+#' Open the UNIT.json for a Unit
 #'
 #' Will find the compiled json and open in it in the system editor.
 #'
@@ -8,7 +8,7 @@
 open_unit_json <- \(WD="?"){
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD=WD)
-  json_path <- fs::path(WD_git,"LESSON.json")
+  json_path <- fs::path(WD_git,"UNIT.json")
   system(sprintf('open %s', shQuote(json_path)))
 
 }

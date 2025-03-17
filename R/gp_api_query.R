@@ -62,7 +62,7 @@ gp_api_query <- \(
     if (identical(keys, "basic")) {
       keys <- c("numID", "_id", "Title", "LastUpdated")
     }
-    #this is dumb b/c these keys don't match Lesson.json hierarchy
+    #this is dumb b/c these keys don't match UNIT.json hierarchy
     # lapply(keys, \(x) checkmate::assert_choice(x, get_fm_names()))
 
 

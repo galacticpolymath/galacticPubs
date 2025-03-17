@@ -14,8 +14,8 @@ compile_json(WD = NULL, WD_git = NULL, destFolder)
 \item{destFolder}{where you want to save the folder; by default in the "WD_git" folder}
 }
 \value{
-tibble of the compiled standards data; a JSON is saved to meta/JSON/LESSON.json
+tibble of the compiled standards data; a JSON is saved to meta/JSON/UNIT.json
 }
 \description{
-Combine all JSON components into 1 LESSON.JSON
+Combine all JSON components into 1 UNIT.json
 }

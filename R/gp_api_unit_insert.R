@@ -31,7 +31,7 @@ gp_api_unit_insert <- \(WD = "?",
     .var.name = "_id"
   )
   unit_name <- paste0(unit_id," (",ShortTitle,")")
-  unit_path <- fs::path(WD_git, "LESSON.json")
+  unit_path <- fs::path(WD_git, "UNIT.json")
   unit <- jsonlite::read_json(unit_path)
 
 

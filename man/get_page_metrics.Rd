@@ -5,7 +5,7 @@
 \title{Retrieve Google Analytics Metrics for Specific Page Paths}
 \usage{
 get_page_metrics(
-  property_id,
+  property_id = NULL,
   paths = "/",
   limit = -1,
   metrics = c("screenPageViews", "averageSessionDuration", "sessionsPerUser",

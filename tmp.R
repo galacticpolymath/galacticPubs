@@ -92,7 +92,7 @@ httr2::req_perform(req,verbosity = 3)
 gp_api_query(numID=7,c("Title","Subtitle"))
 
 # Insert Lesson -----------------------------------------------------------
-lsn_path <- fs::path(get_wd_git("?"),"LESSON.json")
+lsn_path <- fs::path(get_wd_git("?"),"UNIT.json")
 lsn <- jsonlite::read_json(lsn_path)
 
 req <-

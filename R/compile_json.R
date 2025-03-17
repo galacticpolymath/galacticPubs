@@ -1,18 +1,18 @@
 #' Compile all the JSONs to create 1 file for the web
 #'
-#' Combine all JSON components into 1 LESSON.JSON
+#' Combine all JSON components into 1 UNIT.json
 #'
 #' @param WD working directory, passed to [parse_wd()]
 #' @param WD_git location of gp-lessons github repo. Default=NULL will get this for the current workspace with [get_wd_git()]
 #' @param destFolder where you want to save the folder; by default in the "WD_git" folder
-#' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/LESSON.json
+#' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/UNIT.json
 #' @importFrom rlang .data
 #' @export
 #'
 compile_json <- function(WD = NULL,
                          WD_git = NULL,
                          destFolder) {
-  message("Recompiling LESSON.json ")
+  message("Recompiling UNIT.json ")
   if (!is.null(WD)) {
     WD <- parse_wd(WD)
   }
@@ -93,7 +93,7 @@ compile_json <- function(WD = NULL,
 
   # create directory if necessary & prep output filename --------------------
   dir.create(destFolder, showWarnings = FALSE, recursive = T)
-  outFile <- fs::path(destFolder, "LESSON.json")
+  outFile <- fs::path(destFolder, "UNIT.json")
 
 
   # Write JSON for GP Simple Lesson Plan -----------------------------------

@@ -27,7 +27,7 @@ gp_api_unit_replace(
 success (logical)
 }
 \description{
-Completely deletes and re-inserts a LESSON.json for the mini-unit on the MongoDB database (aka gp-catalog). There are 2 catalogs:
+Completely deletes and re-inserts a UNIT.json for the mini-unit on the MongoDB database (aka gp-catalog). There are 2 catalogs:
 \itemize{
 \item dev (not public-facing; viewable through the dev.galacticpolymath.com)
 \item production (public facing; live on galacticpolymath.com)

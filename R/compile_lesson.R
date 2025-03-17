@@ -1,6 +1,6 @@
 #' compile_lesson
 #'
-#' Compiles selected sections of a lesson (or "all"). Results in a LESSON.JSON, but files are not staged for publishing. Need to follow with a call to [stage_assets()] and [publish()] to publish these changes to the web. Tries to use cacheing, but sometimes, may need to run a function twice to get efficient time savings because of delay in modTimes with Google Drive for Desktop.
+#' Compiles selected sections of a lesson (or "all"). Results in a UNIT.json, but files are not staged for publishing. Need to follow with a call to [stage_assets()] and [publish()] to publish these changes to the web. Tries to use cacheing, but sometimes, may need to run a function twice to get efficient time savings because of delay in modTimes with Google Drive for Desktop.
 #'
 #' Combines functionality of:
 #' - [compile_fm()]
@@ -16,7 +16,7 @@
 #' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
 #' @param clean delete all JSON files in meta/ and start over? default=FALSE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
-#' @return current_data; also the lesson JSON is saved to `meta/JSON/LESSON.json`
+#' @return current_data; also the lesson JSON is saved to `meta/JSON/UNIT.json`
 #' @importFrom rlang .data
 #' @export
 #'

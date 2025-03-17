@@ -7,5 +7,5 @@
 gp_api_names()
 }
 \description{
-Returns a vector of top-level sections of LESSON.json records in GP's MongoDB catalog.
+Returns a vector of top-level sections of UNIT.json records in GP's MongoDB catalog.
 }

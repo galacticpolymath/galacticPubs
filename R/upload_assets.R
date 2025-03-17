@@ -108,11 +108,11 @@ upload_assets <- \(WD = "?",
     )
 
 
-  # #copy everything except LESSON.json to the cloud
+  # #copy everything except UNIT.json to the cloud
   # assets <- fs::dir_info(fs::path(WD, "published")) %>%
   #   dplyr::mutate(name = basename(.data$path)) %>%
   #   dplyr::relocate(.data$name) %>%
-  #   dplyr::filter(.data$name != "LESSON.json") %>%
+  #   dplyr::filter(.data$name != "UNIT.json") %>%
   #   dplyr::mutate(cloud_path = paste0(paste0(cloud_prefix, "/"), .data$name)) %>%
   #   dplyr::select("name", "path", "modification_time", "size", "cloud_path") %>%
   #   dplyr::arrange(dplyr::desc(.data$size))

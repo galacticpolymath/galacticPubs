@@ -322,9 +322,9 @@ compile_fm <- \(WD = "?") {
   message("Recombining all JSONs")
   test_compile <- compile_json(WD = WD) %>% catch_err()
   if (test_compile) {
-    message("SUCCESS! New LESSON.json created for '", basename(WD), "'")
+    message("SUCCESS! New UNIT.json created for '", basename(WD), "'")
   } else{
-    message("FAILURE! LESSON.json not regenerated for '",
+    message("FAILURE! UNIT.json not regenerated for '",
             basename(WD),
             "'")
   }

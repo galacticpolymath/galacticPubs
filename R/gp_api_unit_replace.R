@@ -1,6 +1,6 @@
 #' Replace a GP unit in the database
 #'
-#' Completely deletes and re-inserts a LESSON.json for the mini-unit on the MongoDB database (aka gp-catalog). There are 2 catalogs:
+#' Completely deletes and re-inserts a UNIT.json for the mini-unit on the MongoDB database (aka gp-catalog). There are 2 catalogs:
 #'  - dev (not public-facing; viewable through the dev.galacticpolymath.com)
 #'  - production (public facing; live on galacticpolymath.com)
 #'

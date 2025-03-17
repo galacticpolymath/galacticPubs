@@ -149,8 +149,8 @@ publish <- function(WD = "?",
   # }
   #   staged_and_up_to_date <-
   #     inSync(
-  #       fs::path(published_path, "LESSON.json"),
-  #       fs::path(meta_path, "JSON", "LESSON.json"),
+  #       fs::path(published_path, "UNIT.json"),
+  #       fs::path(meta_path, "JSON", "UNIT.json"),
   #       WD = WD
   #     )&
   #     #If there are some Supporting Media, test if they're in /published
@@ -170,7 +170,7 @@ publish <- function(WD = "?",
   #   saved_data <-
   #     safe_read_yaml(fs::path(meta_path, "front-matter.yml"))
   #   lesson <-
-  #     jsonlite::read_json(fs::path(published_path, "LESSON.json"), null = "null")
+  #     jsonlite::read_json(fs::path(published_path, "UNIT.json"), null = "null")
   #
   #   #update publication dates, etc
   #   #FirstPublicationDate is set upon first publishing; only changed manually after that
@@ -268,7 +268,7 @@ publish <- function(WD = "?",
   #
   #     #rewrite it before pushing to cloud
   #     save_json(out = lesson,
-  #               filename = fs::path(WD_git, "LESSON.json")
+  #               filename = fs::path(WD_git, "UNIT.json")
   #               )
   #
   #
