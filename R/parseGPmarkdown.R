@@ -35,15 +35,16 @@ parseGPmarkdown <-
 
     # 1. Look for multimedia json if use_cache --------------------------------
     if (use_cache & is.null(mlinks)) {
-      mlinks <- get_fm("FeaturedMultimedia",WD=WD)
-      if (is.na(mlinks)) {
+      mlinks_array <- get_fm("FeaturedMultimedia",WD=WD)
+
+      if (is_empty(mlinks_array)) {
         message("parseGPmarkdown(): No multimedia info found for : ",
                 basename(WD))
+        mlinks <- NA
 
       } else{
-
-        mlinks <- lapply(mlinks,\(x){dplyr::as_tibble(x)}) %>%dplyr::bind_rows()
-        checkmate::assert_data_frame(mlinks)
+        #convert to tibble if read in as array from fm
+        mlinks <- purrr::list_transpose(mlinks_array[[1]]) %>% dplyr::as_tibble()
       }
 
     }
@@ -70,7 +71,10 @@ parseGPmarkdown <-
 
 
       if (valid_mm) {
-        test_cache_mm <- update_fm(WD=WD,change_this = list(FeaturedMultimedia=mlinks)) %>% catch_err()
+        #make mlinks an array when saving to fm
+      mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify=FALSE)
+      names(mlinks_array) <- 1:length(mlinks_array)
+        test_cache_mm <- update_fm(WD=WD,change_this = list(FeaturedMultimedia=mlinks_array)) %>% catch_err()
         message(convert_T_to_check(test_cache_mm),
                 " Saving multimedia for ",basname(WD))
       } else{
@@ -86,6 +90,12 @@ parseGPmarkdown <-
       # message("parseGPmarkdown(): No multimedia found.")
       final <- x
     } else{
+    #   # if read directly in from fm, need to format to tibble
+    #   if(inherits(mlinks,"list")){
+    #     #make mlinks an array
+    # mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose()
+    # names(mlinks_array) <- 1:length(mlinks_array)
+    #   }
       vidLinks <-
         mlinks %>% dplyr::filter(tolower(.data$type) == "video")
 

@@ -17,6 +17,13 @@ compile_teach_it <- function(WD = "?",
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
   . = NULL #to avoid errors with dplyr syntax
+
+  oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
+checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
+  googledrive::drive_auth(email=oauth_email)
+  googlesheets4::gs4_auth(email=oauth_email)
+
+
   #Keep teaching-materials/ folder tidy
   sweep_teaching_materials(WD = WD)
   message("running compile_teach_it()...")
@@ -180,7 +187,7 @@ compile_teach_it <- function(WD = "?",
 
 
   lext_initialized <- !grepl("^URL", lext$link[1])
-  mlinks_initialized <- nrow(mlinks) > 0
+  mlinks_initialized <- is_empty(mlinks)
 
   # Report uninitialized data -----------------------------------------------
 
@@ -221,8 +228,11 @@ compile_teach_it <- function(WD = "?",
       "`"
     )
   }else{
-
-    update_fm(WD=WD,change_this=list(FeaturedMultimedia=mlinks))
+browser()
+    #make mlinks an array
+    mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify=FALSE)
+    names(mlinks_array) <- 1:length(mlinks_array)
+    update_fm(WD=WD,change_this=list(FeaturedMultimedia=mlinks_array))
   }
 
 
