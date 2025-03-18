@@ -188,7 +188,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
 
 
   lext_initialized <- !grepl("^URL", lext$link[1])
-  mlinks_initialized <- is_empty(mlinks)
+  mlinks_initialized <- !is_empty(mlinks)
 
   # Report uninitialized data -----------------------------------------------
 
@@ -222,6 +222,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
       "`"
     )
   }
+
   if (!mlinks_initialized) {
     warning(
       "No multimedia links found at `teach-it.gsheet!Multimedia` for `",
@@ -229,7 +230,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
       "`"
     )
   }else{
-browser()
+
     #make mlinks an array
     mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify=FALSE)
     names(mlinks_array) <- 1:length(mlinks_array)
@@ -376,6 +377,7 @@ browser()
     })
     proc_data$vocab <- NULL
   } else{
+
     proc_data_test <-
       zget_procedure(
         proc = proc,

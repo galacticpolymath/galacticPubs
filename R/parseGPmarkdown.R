@@ -15,18 +15,23 @@
 parseGPmarkdown <-
   function(x,
            WD = NULL,
-           mlinks= NULL,
+           mlinks = NULL,
            force_lookup = FALSE) {
-    if (is.null(WD)&is.null(mlinks)) {
+    if (is.null(WD) & is.null(mlinks)) {
       stop("Must supply WD or mlinks.")
-    } else{
+    }
+    if (!is.null(WD)) {
       WD <- parse_wd(WD)
       WD_git <- get_wd_git(WD = WD)
+      #Look for multimedia in fm
+      mlinks_array <- get_fm("FeaturedMultimedia", WD = WD)
+    } else{
+      mlinks_array <- NULL
     }
 
-    # 1. Look for multimedia in fm --------------------------------
-    mlinks_array <- get_fm("FeaturedMultimedia", WD = WD)
-    if ((is.null(mlinks)&is_empty(mlinks_array)) | force_lookup) {
+    # 1. Look up on teach-it sheet if not found in fm --------------------------------
+
+    if ((is.null(mlinks) & is_empty(mlinks_array)) | force_lookup) {
       message("parseGPmarkdown(): No multimedia info found for : ",
               basename(WD))
       tID <- get_fm("GdriveTeachItID", WD = WD)
@@ -43,16 +48,16 @@ parseGPmarkdown <-
       valid_mm <-
         checkmate::test_data_frame(mlinks, min.rows = 1)
 
-      # cache retrieved mlinks --------------------------------------------------
-
-
+      #Save to front matter
       if (valid_mm) {
         #make mlinks an array when saving to fm
         mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify =
                                                                          FALSE)
         names(mlinks_array) <- 1:length(mlinks_array)
         test_cache_mm <- update_fm(WD = WD,
-                                   change_this = list(FeaturedMultimedia = mlinks_array)) %>% catch_err()
+                                   change_this =
+                                     list(FeaturedMultimedia = mlinks_array)) %>%
+          catch_err()
         message(convert_T_to_check(test_cache_mm),
                 " Saving multimedia for ",
                 basname(WD))
@@ -60,9 +65,13 @@ parseGPmarkdown <-
         message("Looked on the web at teach-it*.gsheet!Multimedia. Still no valid entries.")
       }
       checkmate::assert_data_frame(mlinks)
-    } else{
+
+      # If multimedia found in FM, needs to be reformatted to look like a spreadsheet
+    }
+
+    if(!is.null(mlinks_array)&is.null(mlinks)){
       #convert to tibble if read in as array from fm
-      mlinks <- purrr::list_transpose(mlinks_array[[1]]) %>% dplyr::as_tibble()
+      mlinks <- purrr::map(mlinks_array[[1]],dplyr::as_tibble) %>% purrr::list_rbind()
     }
 
 
@@ -72,12 +81,7 @@ parseGPmarkdown <-
       # message("parseGPmarkdown(): No multimedia found.")
       final <- x
     } else{
-      #   # if read directly in from fm, need to format to tibble
-      #   if(inherits(mlinks,"list")){
-      #     #make mlinks an array
-      # mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose()
-      # names(mlinks_array) <- 1:length(mlinks_array)
-      #   }
+
       vidLinks <-
         mlinks %>% dplyr::filter(tolower(.data$type) == "video")
 

@@ -53,15 +53,19 @@ if(is.null(WD_git)){
   # Expand markdown notation {vid1} -----------------------------------------
   #####
   #Parse all the text columns to expand {vidN} notation into full video links (including for Prep notes)
-  proc[, c("StepQuickDescription",
-           "StepDetails",
-           "VariantNotes",
-           "TeachingTips")] <-
-    apply(proc[, c("StepQuickDescription",
+  proc_parsed <- apply(proc[, c("StepQuickDescription",
                    "StepDetails",
                    "VariantNotes",
                    "TeachingTips")], 2, function(x)
                      parseGPmarkdown(x, mlinks = mlinks))
+
+
+
+  proc[, c("StepQuickDescription",
+           "StepDetails",
+           "VariantNotes",
+           "TeachingTips")] <-proc_parsed
+
 
   #Differentiate tibbles with and without prep info for later
   proc_w_prep <- proc
