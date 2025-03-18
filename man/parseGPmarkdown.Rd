@@ -5,27 +5,14 @@
 \alias{parseGPmarkdown}
 \title{parseGPmarkdown}
 \usage{
-parseGPmarkdown(
-  x,
-  WD = NULL,
-  mlinks = NULL,
-  use_cache = TRUE,
-  force_lookup = FALSE
-)
+parseGPmarkdown(x, WD = NULL, mlinks = NULL, force_lookup = FALSE)
 }
 \arguments{
 \item{x}{a text string to parse}
 
 \item{WD}{working directory; default=NULL}
 
-\item{mlinks}{a tibble read in from the 'multimedia' tab of the 'teach-it.gsheet'. Default=NULL will trigger import of this data, using the front-matter in the provided \strong{WD}.
-\itemize{
-\item This data is used to expand our custom
-markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
-that has order=1
-}}
-
-\item{use_cache}{logical; do you want to use saved multimedia links if they are found at  \code{../meta/multimedia.RDS}? default =T will prefer the cached files. use_cache=FALSE will trigger a time-consuming gdrive lookup to \code{teach-it.gsheet*!multimedia}}
+\item{mlinks}{multimedia info read in from the teach-it.gsheet!Titles tab}
 
 \item{force_lookup}{logical; do you want to force looking up \code{teach-it.gsheet*!multimedia}? default=FALSE}
 }

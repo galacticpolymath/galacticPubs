@@ -4,11 +4,7 @@
 #'
 #' @param x a text string to parse
 #' @param WD working directory; default=NULL
-#' @param mlinks a tibble read in from the 'multimedia' tab of the 'teach-it.gsheet'. Default=NULL will trigger import of this data, using the front-matter in the provided **WD**.
-#' - This data is used to expand our custom
-#' markdown; e.g. "\{vid1\}" will be replaced with a markdown link to the video in the links spreadsheet multimedia tab
-#' that has order=1
-#' @param use_cache logical; do you want to use saved multimedia links if they are found at  `../meta/multimedia.RDS`? default =T will prefer the cached files. use_cache=FALSE will trigger a time-consuming gdrive lookup to `teach-it.gsheet*!multimedia`
+#' @param mlinks multimedia info read in from the teach-it.gsheet!Titles tab
 #' @param force_lookup logical; do you want to force looking up `teach-it.gsheet*!multimedia`? default=FALSE
 #' @family markdown
 #' @return formatted replacement text
@@ -19,40 +15,20 @@
 parseGPmarkdown <-
   function(x,
            WD = NULL,
-           mlinks = NULL,
-           use_cache = TRUE,
-           force_lookup= FALSE) {
-    if (is.null(mlinks) & is.null(WD)) {
-      stop("Must supply either mlinks or WD.")
+           mlinks= NULL,
+           force_lookup = FALSE) {
+    if (is.null(WD)&is.null(mlinks)) {
+      stop("Must supply WD or mlinks.")
+    } else{
+      WD <- parse_wd(WD)
+      WD_git <- get_wd_git(WD = WD)
     }
 
-    #WD is an optional parameter
-    if(!is.null(WD)){
-    WD <- parse_wd(WD)
-    WD_git <- get_wd_git(WD=WD)
-    cache_path <- fs::path(WD_git, "saves", "multimedia.RDS")
-    }
-
-    # 1. Look for multimedia json if use_cache --------------------------------
-    if (use_cache & is.null(mlinks)) {
-      mlinks_array <- get_fm("FeaturedMultimedia",WD=WD)
-
-      if (is_empty(mlinks_array)) {
-        message("parseGPmarkdown(): No multimedia info found for : ",
-                basename(WD))
-        mlinks <- NA
-
-      } else{
-        #convert to tibble if read in as array from fm
-        mlinks <- purrr::list_transpose(mlinks_array[[1]]) %>% dplyr::as_tibble()
-      }
-
-    }
-
-
-    # 2. If mlinks not provided and didn't look at cache, go to gsheet -------------
-    # alternatively, if we looked for cache, but didn't find it, force_lookup
-    if ((is.null(mlinks) & !use_cache) | force_lookup) {
+    # 1. Look for multimedia in fm --------------------------------
+    mlinks_array <- get_fm("FeaturedMultimedia", WD = WD)
+    if ((is.null(mlinks)&is_empty(mlinks_array)) | force_lookup) {
+      message("parseGPmarkdown(): No multimedia info found for : ",
+              basename(WD))
       tID <- get_fm("GdriveTeachItID", WD = WD)
       checkmate::assert_character(tID, all.missing = FALSE)
       message("Looking for multimedia information at teach-it*.gsheet!Multimedia")
@@ -62,7 +38,7 @@ parseGPmarkdown <-
                                   skip = 1,
                                   col_types = "c") %>%
         dplyr::select(1:dplyr::starts_with("otherLink"))   %>%
-        dplyr::filter(dplyr::if_any(1,~!is.na(.)))
+        dplyr::filter(dplyr::if_any(1, ~ !is.na(.)))
       mlinks <- mlinks %>% dplyr::select(-dplyr::starts_with("_"))
       valid_mm <-
         checkmate::test_data_frame(mlinks, min.rows = 1)
@@ -72,15 +48,21 @@ parseGPmarkdown <-
 
       if (valid_mm) {
         #make mlinks an array when saving to fm
-      mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify=FALSE)
-      names(mlinks_array) <- 1:length(mlinks_array)
-        test_cache_mm <- update_fm(WD=WD,change_this = list(FeaturedMultimedia=mlinks_array)) %>% catch_err()
+        mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify =
+                                                                         FALSE)
+        names(mlinks_array) <- 1:length(mlinks_array)
+        test_cache_mm <- update_fm(WD = WD,
+                                   change_this = list(FeaturedMultimedia = mlinks_array)) %>% catch_err()
         message(convert_T_to_check(test_cache_mm),
-                " Saving multimedia for ",basname(WD))
+                " Saving multimedia for ",
+                basname(WD))
       } else{
         message("Looked on the web at teach-it*.gsheet!Multimedia. Still no valid entries.")
       }
       checkmate::assert_data_frame(mlinks)
+    } else{
+      #convert to tibble if read in as array from fm
+      mlinks <- purrr::list_transpose(mlinks_array[[1]]) %>% dplyr::as_tibble()
     }
 
 
@@ -90,12 +72,12 @@ parseGPmarkdown <-
       # message("parseGPmarkdown(): No multimedia found.")
       final <- x
     } else{
-    #   # if read directly in from fm, need to format to tibble
-    #   if(inherits(mlinks,"list")){
-    #     #make mlinks an array
-    # mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose()
-    # names(mlinks_array) <- 1:length(mlinks_array)
-    #   }
+      #   # if read directly in from fm, need to format to tibble
+      #   if(inherits(mlinks,"list")){
+      #     #make mlinks an array
+      # mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose()
+      # names(mlinks_array) <- 1:length(mlinks_array)
+      #   }
       vidLinks <-
         mlinks %>% dplyr::filter(tolower(.data$type) == "video")
 
@@ -116,7 +98,7 @@ parseGPmarkdown <-
 
             #extract number from codes
             codeN <-
-              stringr::str_extract(unlist(vidLinks[,1]), "[^\\d]*(\\d*)", group = 1)
+              stringr::str_extract(unlist(vidLinks[, 1]), "[^\\d]*(\\d*)", group = 1)
 
             #if no {vidX} codes, (i.e. ""), ignore, put NA if no match for the number
             index <- match(vidN, codeN, nomatch = 999)
@@ -159,7 +141,7 @@ parseGPmarkdown <-
                                                                                 "")
             #extract number from codes
             codeN <-
-              stringr::str_extract(unlist(mlinks[,1]), "[^\\d]*(\\d*)", group = 1)
+              stringr::str_extract(unlist(mlinks[, 1]), "[^\\d]*(\\d*)", group = 1)
             #if no {itemX} codes, (i.e. ""), ignore, put NA if no match for the number
             index <- match(itemN, codeN, nomatch = 999)
             if (index != 999 & !is.na(index)) {
