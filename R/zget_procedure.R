@@ -283,9 +283,9 @@ if(is.null(WD_git)){
     #Make NA row to avoid errors
 
     if (nrow(lext_df_i) == 0) {
-      lsnExt <- NULL
+      goingFurther <- NULL
     } else{
-      lsnExt <- purrr::map(1:nrow(lext_df_i), \(j) {
+      goingFurther <- purrr::map(1:nrow(lext_df_i), \(j) {
         list(
           item = j,
           itemTitle = lext_df_i$itemTitle[j] ,
@@ -305,7 +305,7 @@ if(is.null(WD_git)){
       learningObj=list(learningObj_i),
       lsnPrep = list(lsnPrep),
       chunks = chunks,
-      lsnExt = list(lsnExt)
+      goingFurther = list(goingFurther)
     )
 
   })

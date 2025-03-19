@@ -212,6 +212,8 @@ compile_fm <- \(WD = "?") {
     list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Background",
+      sortOrder=0,
+      InitiallyExpanded = TRUE,
       Content = ifelse(
         is.na(C2R),
         Background,
@@ -222,8 +224,7 @@ compile_fm <- \(WD = "?") {
           Background
         )
       ) %>% expand_md_links(WD = WD) %>%
-        fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
-      InitiallyExpanded = TRUE
+        fixAnchorLinks() %>% parseGPmarkdown(WD = WD)
     )
 
   save_json(background_web,
