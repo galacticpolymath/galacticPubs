@@ -432,17 +432,14 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
 
 
   # structure final output --------------------------------------------------
-  out <-
-    list(`__component` = "teaching-resources.teaching-resources",
-         SectionTitle = "Teaching Materials",
-         Data = Data)
+  out <-Data
 
 
   # write JSON outputs ------------------------------------------------------
 
   destFolder <- fs::path(WD_git, "JSONs")
   outFile <-
-    fs::path(destFolder, "teaching-materials", ext = "json")
+    fs::path(destFolder, "teachingMaterials", ext = "json")
 
   success <- save_json(out, outFile) %>% catch_err()
 

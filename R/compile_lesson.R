@@ -180,7 +180,7 @@ compile_lesson <-
     #write standards-header section
     #This header goes before learning chart, which may not always exist...
     sh <- list(`__component` = "lesson-plan.section-heading", SectionTitle = "Learning Standards")
-    save_json(sh, fs::path(destFolder, "standards-header.json"))
+    # save_json(sh, fs::path(destFolder, "standards-header.json"))
 
     save_json(standards,
               fs::path(destFolder, "standards.json"))

@@ -609,7 +609,10 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
       # Create JSON-style list, but only exported as JSON by compile_lesson() --------
       # Prefix with component and title, and nest output in Data if structuring for web deployment
       out <-
-        list(`__component` = "lesson-plan.standards", # LearningObj =  fm$LearningObj,
+        list(`__component` = "lesson-plan.standards",
+             SectionTitle= "Standards Section",
+             sortOrder= 1,
+             InitiallyExpanded=TRUE,
              Data = out0)
 
 
