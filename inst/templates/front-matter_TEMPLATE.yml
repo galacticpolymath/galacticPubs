@@ -59,7 +59,7 @@ GradesOrYears: 'Grades'
 LessonTiles: ''
 LsnStatuses: ''
 #Overview section->
-EstLessonTime: ''
+EstUnitTime: ''
 PullStandardsInfoFrom: 'myFile'
 LearningPlotCorrection: FALSE
 LearningEpaulette: ''
@@ -73,7 +73,7 @@ Accessibility:
   Link: .na
 SupportingMedia: ''
 # The Gist of the lesson
-LearningSummary: ''
+TheGist: ''
 #---> These are combined into "text" overview section in JSON output
 DrivingQ: ''
 EssentialQ: ''

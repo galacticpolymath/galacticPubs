@@ -199,9 +199,9 @@ ui <- navbarPage(
         width = "300px"
       ),
       textInput(
-        "EstLessonTime",
+        "EstUnitTime",
         "Estimated Lesson Time",
-        value = y$EstLessonTime,
+        value = y$EstUnitTime,
         placeholder = "format= '3 x 45 min classes'",
         width = 300
       )
@@ -440,11 +440,11 @@ server <- function(input, output, session) {
       div(
         class = "text-block",
         textAreaInput(
-          "LearningSummary",
+          "TheGist",
           paste0(
             'The Gist (Concise, jargon-free lesson summary. i.e. "The Tweet" )'
           ),
-          y$LearningSummary,
+          y$TheGist,
           height = 150,
           width = "100%"
         ),
@@ -452,7 +452,7 @@ server <- function(input, output, session) {
             renderText(
               paste0(
                 "Character Count= ",
-                nchar(input$LearningSummary),
+                nchar(input$TheGist),
                 " of 280 characters"
               )
             ))
@@ -1067,7 +1067,7 @@ server <- function(input, output, session) {
                 md_txt('Grades', current_data$ForGrades)),
             div(
               class = "triad",
-              md_txt("Est. Lesson Time", current_data$EstLessonTime)
+              md_txt("Est. Lesson Time", current_data$EstUnitTime)
             )
           ),
           robust_img(

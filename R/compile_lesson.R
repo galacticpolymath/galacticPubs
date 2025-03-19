@@ -166,7 +166,7 @@ compile_lesson <-
       if (!compile_standards_output$success) {
         stop("Standards were not compiled successfully.")
       } else{
-        standards <- compile_standards_output$result
+        standards <- compile_standards_output$result$data$list_for_json
 
       }
     } else if (file.exists(compiled_standards_path)) {
@@ -182,7 +182,7 @@ compile_lesson <-
     sh <- list(`__component` = "lesson-plan.section-heading", SectionTitle = "Learning Standards")
     save_json(sh, fs::path(destFolder, "standards-header.json"))
 
-    save_json(saved_standards$data$list_for_json,
+    save_json(standards,
               fs::path(destFolder, "standards.json"))
 
 

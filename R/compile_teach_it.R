@@ -375,7 +375,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
         lsnExtension = NULL
       )
     })
-    proc_data$vocab <- NULL
+    vocab <- NULL
   } else{
 
     proc_data_test <-
@@ -394,13 +394,13 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
 
     } else{
       proc_data <- proc_data_test$result
-
+      vocab <- proc_data$vocab$result
       #output gathered vocab as csv
-      if (!is.null(proc_data$vocab)) {
+      if (!is.null(vocab)) {
         vocab_outfile <-
           fs::path(WD, "assets", "_other-media-to-publish", "vocab.csv")
         vocab_saved <-
-          write.csv(x = proc_data$vocab,
+          write.csv(x = vocab,
                     file = vocab_outfile,
                     row.names = FALSE) %>% catch_err()
         if (vocab_saved) {
@@ -419,7 +419,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
   Data <- c(
     unitPreface = uinfo$unitPreface[1],
     unitDur = proc_data$lessonDur,
-    gatheredVocab = list(proc_data$vocab),
+    gatheredVocab = list(vocab),
     teach_mat_data,
     lesson = list(proc_data$lessons)
   )

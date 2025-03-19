@@ -84,9 +84,9 @@ update_fm <-
     # }
     #
     # if (is_empty(new_yaml$LsnCount)) {
-    #   count_extracted <- stringr::str_extract(new_yaml$EstLessonTime, "[^\\d]?(\\d*).*",group = 1) %>% as.integer()
+    #   count_extracted <- stringr::str_extract(new_yaml$EstUnitTime, "[^\\d]?(\\d*).*",group = 1) %>% as.integer()
     #   if(is_empty(count_extracted)){
-    #     warning("You should manually add LsnCount to front matter. Unable to extract from EstLessonTime for: '",new_yaml$GdriveDirName,"'")
+    #     warning("You should manually add LsnCount to front matter. Unable to extract from EstUnitTime for: '",new_yaml$GdriveDirName,"'")
     #   }else{
     #     new_yaml$LsnCount <- count_extracted
     #   }

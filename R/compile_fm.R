@@ -39,12 +39,65 @@ compile_fm <- \(WD = "?") {
   #output header.json
   save_json(header, filename = fs::path(json_dir, "header", ext = "json"))
 
+  # versions.json -----------------------------------------------------------
+  ver <-
+    get_fm("Versions", WD = WD, standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble()
+
+  if (is_empty(ver)) {
+    ver_out0 <- NULL
+  } else{
+    # ver$date <-
+    #   sapply(ver$date, function(x) {
+    #     as.character(as.Date(as.numeric(x), origin = "1899-12-30"), format = "%b %d, %Y")
+    #   }, USE.NAMES = FALSE)
+    ver$major <- gsub("(^[^\\.]*)\\..*", "\\1", ver$ver_num)
+    #Change 0 release to beta for hierarchy
+    ver$major <-
+      sapply(ver$major, function(x)
+        if (x == 0) {
+          x <- "Beta"
+        } else{
+          x <- x
+        })
+    ver_out0 <- list()
+    for (mjr in 1:length(unique(ver$major))) {
+      ver_mjr <- subset(ver, ver$major == unique(ver$major)[mjr])
+      out_mjr <- list()
+      for (i in 1:nrow(ver_mjr)) {
+        ver_i <- ver_mjr[i, ]
+        out_mjr[[i]] <-
+          list(
+            version = ver_i$ver_num,
+            date = ver_i$date,
+            summary = ver_i$ver_summary,
+            notes = ver_i$ver_notes,
+            acknowledgments = ver_i$ver_acknowledgments
+          )
+      }
+      ver_out0[[mjr]] <-
+        list(major_release = unique(ver$major)[mjr],
+             sub_releases = (out_mjr))
+    }
+
+  }
+
+
+  # # Prefix with component and title, and nest output in Data if structuring for web deployment
+  # ver_out <- list(`__component` = "lesson-plan.versions",
+  #                 SectionTitle = "Version Notes",
+  #                 Data = ver_out0)
+  #
+  # save_json(ver_out, fs::path(json_dir, "versions.json"))
+  #
+
+
+
   # Export overview.json ----------------------------------------------------
 
   overview <- list(
     `__component` = "lesson-plan.overview",
-    LearningSummary = fm$LearningSummary,
-    EstLessonTime = fm$EstLessonTime,
+    TheGist = fm$TheGist,
+    EstUnitTime = fm$EstUnitTime,
     GradesOrYears = fm$GradesOrYears,
     ForGrades = fm$ForGrades,
     TargetSubject = fm$TargetSubject,
@@ -61,14 +114,24 @@ compile_fm <- \(WD = "?") {
       list.obj = fm,
       new.name = "Text"
     )$Text,
-    Tags = lapply(fm$Tags, function(x) {
-      list(Value = x)
-    }),
     SteamEpaulette =  fm$LearningEpaulette[1],
     #might want to add more complex image handling later),
     SteamEpaulette_vert = fm$LearningEpaulette_vert[1],
-    Accessibility = list(fm$Accessibility)
-
+    Accessibility = list(fm$Accessibility),
+    Tags = lapply(fm$Tags, function(x) {
+      list(Value = x)
+    }),
+    versions = ver_out0,
+    rootFieldsToRetrieveForUI=list(
+      list(name="unitBanner",as="unitBannerURL"),
+      list(name="Title",as="unitTitle"),
+      list(name="ForGrades",as="ForGrades"),
+      list(name="TargetSubject",as="TargetSubject"),
+      list(name="GradesOrYears",as="GradesOrYears"),
+      list(name="numID",as="numID"),
+      list(name="locale",as="locale"),
+      list(name="Subtitle",as="Subtitle")
+    )
     #might want to add more complex image handling later),
   )
 
@@ -78,19 +141,19 @@ compile_fm <- \(WD = "?") {
 
 
 
-#
-#
-#   # read in multimedia file created from multimedia tab of teach-it. --------
-#
-#   mm <- get_fm("FeaturedMultimedia", WD = WD)
-#
-#   if (is.na(mmExists)) {
-#     message("No multimedia found.")
-#   }
-#
-#
-#   # Create preview.json -----------------------------------------------------
-#   #Multimedia browser
+  #
+  #
+  #   # read in multimedia file created from multimedia tab of teach-it. --------
+  #
+  #   mm <- get_fm("FeaturedMultimedia", WD = WD)
+  #
+  #   if (is.na(mmExists)) {
+  #     message("No multimedia found.")
+  #   }
+  #
+  #
+  #   # Create preview.json -----------------------------------------------------
+  #   #Multimedia browser
   preview <- list(
     `__component` = "lesson-plan.unit-preview",
     SectionTitle = "Lesson Preview",
@@ -98,22 +161,22 @@ compile_fm <- \(WD = "?") {
     QuickPrep = fm$QuickPrep %>% fixAnchorLinks(),
     InitiallyExpanded = TRUE
   )
-#
-#   #write preview json even if empty
+  #
+  #   #write preview json even if empty
   save_json(preview, filename = fs::path(json_dir, "preview", ext = "json"))
 
   #BONUS (optional section)
   # markdown links to supporting materials allowed
   Bonus <- get_fm("Bonus", WD = WD)
   #always, always include, even if null
-    bonus_web <- list(
-      `__component` = "lesson-plan.collapsible-text-section",
-      SectionTitle = "Bonus Content",
-      Content = expand_md_links(Bonus, WD = WD) %>% fixAnchorLinks(),
-      #allow smooth-scrolling to in-page references
-      InitiallyExpanded = TRUE
-    )
-    save_json(bonus_web, filename = fs::path(json_dir, "bonus", ext = "json"))
+  bonus_web <- list(
+    `__component` = "lesson-plan.collapsible-text-section",
+    SectionTitle = "Bonus Content",
+    Content = expand_md_links(Bonus, WD = WD) %>% fixAnchorLinks(),
+    #allow smooth-scrolling to in-page references
+    InitiallyExpanded = TRUE
+  )
+  save_json(bonus_web, filename = fs::path(json_dir, "bonus", ext = "json"))
 
 
   # extensions.json ---------------------------------------------------------
@@ -125,15 +188,15 @@ compile_fm <- \(WD = "?") {
   Extensions <- get_fm("Extensions", WD = WD)
 
 
-    extensions_web <- list(
-      `__component` = "lesson-plan.collapsible-text-section",
-      SectionTitle = "Extensions",
-      Content = expand_md_links(Extensions, WD = WD) %>% fixAnchorLinks(),
-      #allow smooth-scrolling to in-page references
-      InitiallyExpanded = TRUE
-    )
-    save_json(extensions_web,
-              filename = fs::path(json_dir, "extensions", ext = "json"))
+  extensions_web <- list(
+    `__component` = "lesson-plan.collapsible-text-section",
+    SectionTitle = "Extensions",
+    Content = expand_md_links(Extensions, WD = WD) %>% fixAnchorLinks(),
+    #allow smooth-scrolling to in-page references
+    InitiallyExpanded = TRUE
+  )
+  save_json(extensions_web,
+            filename = fs::path(json_dir, "extensions", ext = "json"))
 
 
   # background.json ---------------------------------------------------------
@@ -145,26 +208,26 @@ compile_fm <- \(WD = "?") {
 
   Background <- get_fm("Background", WD = WD)
   C2R <- get_fm("ConnectionToResearch", WD = WD)
-    background_web <-
-      list(
-        `__component` = "lesson-plan.collapsible-text-section",
-        SectionTitle = "Background",
-        Content = ifelse(
-          is.na(C2R),
-          Background,
-          paste(
-            "#### Connection to Research\n",
-            C2R,
-            "\n#### Research Background\n",
-            Background
-          )
-        ) %>% expand_md_links(WD = WD) %>%
-          fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
-        InitiallyExpanded = TRUE
-      )
+  background_web <-
+    list(
+      `__component` = "lesson-plan.collapsible-text-section",
+      SectionTitle = "Background",
+      Content = ifelse(
+        is.na(C2R),
+        Background,
+        paste(
+          "#### Connection to Research\n",
+          C2R,
+          "\n#### Research Background\n",
+          Background
+        )
+      ) %>% expand_md_links(WD = WD) %>%
+        fixAnchorLinks() %>% parseGPmarkdown(WD = WD),
+      InitiallyExpanded = TRUE
+    )
 
-    save_json(background_web,
-              fs::path(json_dir, "background", ext = "json"))
+  save_json(background_web,
+            fs::path(json_dir, "background", ext = "json"))
 
 
 
@@ -172,31 +235,31 @@ compile_fm <- \(WD = "?") {
   Feedback <- get_fm("Feedback", WD = WD)
 
 
-    feedback_web <-
-      list(
-        `__component` = "lesson-plan.collapsible-text-section",
-        SectionTitle = "Feedback",
-        Content = expand_md_links(Feedback, WD = WD) %>% fixAnchorLinks(),
-        InitiallyExpanded = TRUE
-      )
+  feedback_web <-
+    list(
+      `__component` = "lesson-plan.collapsible-text-section",
+      SectionTitle = "Feedback",
+      Content = expand_md_links(Feedback, WD = WD) %>% fixAnchorLinks(),
+      InitiallyExpanded = TRUE
+    )
 
-    save_json(feedback_web, fs::path(json_dir, "feedback", ext = "json"))
+  save_json(feedback_web, fs::path(json_dir, "feedback", ext = "json"))
 
 
 
   # credits.json ------------------------------------------------------------
   Credits <- get_fm("Credits", WD = WD)
 
-    credits_web <-
-      list(
-        `__component` = "lesson-plan.collapsible-text-section",
-        SectionTitle = "Credits",
-        Content = expand_md_links(unlist(Credits), WD = WD) %>% fixAnchorLinks(),
-        InitiallyExpanded = TRUE
-      )
+  credits_web <-
+    list(
+      `__component` = "lesson-plan.collapsible-text-section",
+      SectionTitle = "Credits",
+      Content = expand_md_links(unlist(Credits), WD = WD) %>% fixAnchorLinks(),
+      InitiallyExpanded = TRUE
+    )
 
-    save_json(credits_web,
-              filename = fs::path(json_dir, "credits", ext = "json"))
+  save_json(credits_web,
+            filename = fs::path(json_dir, "credits", ext = "json"))
 
 
 
@@ -263,68 +326,15 @@ compile_fm <- \(WD = "?") {
 
 
 
-  # versions.json -----------------------------------------------------------
-
-  ver <-
-    get_fm("Versions", WD = WD, standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble()
-
-  if (is_empty(ver)) {
-    ver_out0 <- NULL
-  } else{
-    # ver$date <-
-    #   sapply(ver$date, function(x) {
-    #     as.character(as.Date(as.numeric(x), origin = "1899-12-30"), format = "%b %d, %Y")
-    #   }, USE.NAMES = FALSE)
-    ver$major <- gsub("(^[^\\.]*)\\..*", "\\1", ver$ver_num)
-    #Change 0 release to beta for hierarchy
-    ver$major <-
-      sapply(ver$major, function(x)
-        if (x == 0) {
-          x <- "Beta"
-        } else{
-          x <- x
-        })
-    ver_out0 <- list()
-    for (mjr in 1:length(unique(ver$major))) {
-      ver_mjr <- subset(ver, ver$major == unique(ver$major)[mjr])
-      out_mjr <- list()
-      for (i in 1:nrow(ver_mjr)) {
-        ver_i <- ver_mjr[i, ]
-        out_mjr[[i]] <-
-          list(
-            version = ver_i$ver_num,
-            date = ver_i$date,
-            summary = ver_i$ver_summary,
-            notes = ver_i$ver_notes,
-            acknowledgments = ver_i$ver_acknowledgments
-          )
-      }
-      ver_out0[[mjr]] <-
-        list(major_release = unique(ver$major)[mjr],
-             sub_releases = (out_mjr))
-    }
-
-  }
-
-
-  # Prefix with component and title, and nest output in Data if structuring for web deployment
-  ver_out <- list(`__component` = "lesson-plan.versions",
-                  SectionTitle = "Version Notes",
-                  Data = ver_out0)
-
-  save_json(ver_out, fs::path(json_dir, "versions.json"))
-
-
   message("front-matter compiled")
 
   message("Recombining all JSONs")
+
   test_compile <- compile_json(WD = WD) %>% catch_err()
   if (test_compile) {
     message("SUCCESS! New UNIT.json created for '", basename(WD), "'")
   } else{
-    message("FAILURE! UNIT.json not regenerated for '",
-            basename(WD),
-            "'")
+    message("FAILURE! UNIT.json not regenerated for '", basename(WD), "'")
   }
 }
 

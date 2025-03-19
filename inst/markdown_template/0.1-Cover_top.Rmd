@@ -53,7 +53,7 @@
             \vcenteredinclude{0.17\linewidth}{static_icons/icon_clock.png} \small{%
              %>>>>>>>>>>>>>>>>>>>
           % R code injection
-            `r rmarkdown::metadata$EstLessonTime`
+            `r rmarkdown::metadata$EstUnitTime`
           %<<<<<<<<<<<<<<<<<<<
 }
         \end{center}
