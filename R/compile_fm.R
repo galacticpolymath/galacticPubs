@@ -91,14 +91,13 @@ compile_fm <- \(WD = "?") {
 #
 #   # Create preview.json -----------------------------------------------------
 #   #Multimedia browser
-#   preview <- list(
-#     `__component` = "lesson-plan.unit-preview",
-#     SectionTitle = "Lesson Preview",
-#     #allow smooth-scrolling to in-page references (with Anchor Links)
-#     QuickPrep = fm$QuickPrep %>% fixAnchorLinks(),
-#     Multimedia = mm,
-#     InitiallyExpanded = TRUE
-#   )
+  preview <- list(
+    `__component` = "lesson-plan.unit-preview",
+    SectionTitle = "Lesson Preview",
+    #allow smooth-scrolling to in-page references (with Anchor Links)
+    QuickPrep = fm$QuickPrep %>% fixAnchorLinks(),
+    InitiallyExpanded = TRUE
+  )
 #
 #   #write preview json even if empty
 #   save_json(preview, filename = fs::path(json_dir, "preview", ext = "json"))
