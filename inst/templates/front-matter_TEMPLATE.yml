@@ -16,7 +16,6 @@ ReleaseDate: '2050-01-01'
 isTestRepo: false
 FirstPublicationDate: ''
 LsnCount: ''
-LsnStatuses: ''
 FeaturedMultimedia: ''
 FeaturedPeople: ''
 MediumTitle: '' # Format: Title + _Subj_ + _Gx-y_+ (Locale)
@@ -24,7 +23,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.8.2
+TemplateVer: 0.8.3
 galacticPubsVer: ''
 URL: ''
 ShortURL: ''
@@ -58,6 +57,7 @@ ForGrades: ''
 GradesOrYears: 'Grades'
 #Not exported with header (exported elsewhere)
 LessonTiles: ''
+LsnStatuses: ''
 #Overview section->
 EstLessonTime: ''
 PullStandardsInfoFrom: 'myFile'
@@ -83,6 +83,17 @@ MiscMD: ''
 #LearningObj will go in standards section on the web
 LearningObj: ''
 Tags: ''
+Versions:
+  ver_num:
+  - '0.1.0'
+  date:
+  - !expr format(Sys.Date(), '%B %d, %Y')
+  ver_summary:
+  - 'Unit initialized'
+  ver_notes:
+  - .na
+  ver_acknowledgments:
+  - .na
 Description: ''
 QuickPrep: ''
 Bonus: ''
@@ -110,17 +121,6 @@ Acknowledgments:
   Location:
   - .na
   Link:
-  - .na
-Versions:
-  ver_num:
-  - '0.1.0'
-  date:
-  - !expr format(Sys.Date(), '%B %d, %Y')
-  ver_summary:
-  - 'Unit initialized'
-  ver_notes:
-  - .na
-  ver_acknowledgments:
   - .na
 ScriptsToRun: ''
 GoogleCloudStorage:

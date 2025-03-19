@@ -300,8 +300,8 @@ if(is.null(WD_git)){
     c(
       lsnNum = lsnNum,
       lsnTitle = lsnTitle,
-      lsnDur = lsnDur,
-      lsnPreface = lsnPreface,
+      unitDur = lsnDur,
+      unitPreface = lsnPreface,
       learningObj=list(learningObj_i),
       lsnPrep = list(lsnPrep),
       chunks = chunks,
