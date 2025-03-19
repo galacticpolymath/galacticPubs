@@ -28,14 +28,16 @@ compile_lesson <-
            rebuild = NULL) {
     WD <- parse_wd(WD)
 
-# initiate drive email associations ---------------------------------------
-oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
-checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
-  googledrive::drive_auth(email=oauth_email)
-  googlesheets4::gs4_auth(email=oauth_email)
+    # initiate drive email associations ---------------------------------------
+    oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
+    checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
+    googledrive::drive_auth(email = oauth_email)
+    googlesheets4::gs4_auth(email = oauth_email)
 
     # Always update front-matter (in case of template updates) ----------------
-    update_fm(WD = WD, save_output = TRUE,recompile = FALSE)
+    update_fm(WD = WD,
+              save_output = TRUE,
+              recompile = FALSE)
     #run upload_assets to make sure there's nothing new
     upload_assets(WD = WD)
 
@@ -93,8 +95,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
           "Standards Alignment",
           "Teaching Materials",
           "Acknowledgements",
-          "Versions",
-          "Printable Lesson"
+          "Versions"
         )
     }
 
@@ -107,7 +108,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
     med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
 
     checkmate::assert_choice(status,
-                           c("Proto","Hidden","Beta","Coming Soon", "Live","Draft"))#draft deprecated
+                             c("Proto", "Hidden", "Beta", "Coming Soon", "Live", "Draft"))#draft deprecated
     checkmate::assert_character(med_title, min.chars = 2)
 
     # local path to teaching material
@@ -139,7 +140,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
                                       ext = "gsheet")
 
     compiled_standards_json_path <-
-      fs::path(destFolder,  "standards.json")
+      fs::path(destFolder, "standards.json")
 
     teach_it_path <- fs::path(WD,
                               "meta",
@@ -160,43 +161,33 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
     if ("Standards Alignment" %in% choices &
         (stnds_out_of_date | rebuild)) {
       message("Recompiling standards to reflect newer 'standards*.gsheet'")
-      compile_standards_output <- compile_standards(
-        WD = WD,
-        targetSubj = current_data$TargetSubject
-      ) %>% catch_err(keep_results = T)
+      compile_standards_output <- compile_standards(WD = WD, targetSubj = current_data$TargetSubject) %>% catch_err(keep_results = T)
 
       if (!compile_standards_output$success) {
         stop("Standards were not compiled successfully.")
       } else{
-        alignment <- compile_standards_output$result
+        standards <- compile_standards_output$result
 
       }
+    } else if (file.exists(compiled_standards_path)) {
+      standards <- readRDS(compiled_standards_path)
+    } else{
+      standards <- NULL
     }
 
-    #??Is this why compile_lesson sometimes runs once unnecessarily?
-    if ("Standards Alignment" %in% choices) {
-      # Test if standards are compatible with learning chart --------------------
-      if (!file.exists(compiled_standards_path)) {
-        stop("Standards not found at: ", compiled_standards_path)
-      } else{
-        saved_standards <- readRDS(compiled_standards_path)
-        # generate general standards json files -----------------------------------
+    # generate general standards json files -----------------------------------
 
-        #write standards-header section
-        #This header goes before learning chart, which may not always exist...
-        sh <- list(`__component` = "lesson-plan.section-heading",
-                   SectionTitle = "Learning Standards")
-        save_json(sh,
-                  fs::path(destFolder, "standards-header.json"))
+    #write standards-header section
+    #This header goes before learning chart, which may not always exist...
+    sh <- list(`__component` = "lesson-plan.section-heading", SectionTitle = "Learning Standards")
+    save_json(sh, fs::path(destFolder, "standards-header.json"))
 
-        save_json(saved_standards$data$list_for_json,
-                  fs::path(destFolder, "standards.json"))
-      }
+    save_json(saved_standards$data$list_for_json,
+              fs::path(destFolder, "standards.json"))
 
 
 
 
-    }#end general standards stuff
 
     ep_file <- fs::path(WD,
                         "assets",
@@ -210,10 +201,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
     #Remake Epaulette if out of date or missing
     if ("Standards Alignment" %in% choices &
         (
-          !inSync(ep_file,
-                  ep_vert_file,
-                  standards_gsheet_path,
-                  WD = WD) |
+          !inSync(ep_file, ep_vert_file, standards_gsheet_path, WD = WD) |
           rebuild | is_empty(current_data$LearningEpaulette)
         )) {
       #####################
@@ -258,40 +246,6 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
           skip_update <- FALSE
         }
       }
-      #can't just test "identical b/c there are some slight mod time diffs that are a pain in the ass
-      #to deal with (i.e. google drive might take a minute to sync)
-      #all old files exist in new folder
-      #   old_still_found <-
-      #     prev_update_state$path %in% curr_update_state$path %>% sum() == length(prev_update_state$path)
-      #   if (!old_still_found) {
-      #     skip_update <- FALSE
-      #   } else{
-      #     testL <- lapply(1:nrow(curr_update_state), \(i) {
-      #       curr_file_i <- curr_update_state[i, ]
-      #       matching_old_file_i <-
-      #         prev_update_state %>% dplyr::filter(.data$path == curr_file_i$path)
-      #
-      #       test <- nrow(matching_old_file_i) == 1
-      #       if (test) {
-      #         test2 <- test &
-      #           matching_old_file_i$size == curr_file_i$size &
-      #           #test whether sync time is within 3 minutes;
-      #           #helps deal with annoying difference in mod time b/w cloud and Gdrive for desktop
-      #           difftime(
-      #             curr_file_i$modification_time,
-      #             matching_old_file_i$modification_time ,
-      #             units = "mins"
-      #           ) <= 3
-      #       } else{
-      #         test2 <- test
-      #       }
-      #       test2
-      #     }) %>% unlist()
-      #     skip_update <- sum(testL) == length(testL)
-      #   }
-      # }else{
-      #   skip_update <- FALSE
-      # }
 
       if (!skip_update | rebuild) {
         # update teach_it links and compile ---------------------------------------
@@ -321,25 +275,16 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
 
     # Separate parts of Front Matter ------------------------------------------
 
-    #always rebuild front matter if it's in choices
-    if ("Front Matter" %in% choices) {
-      message("• Running compile_fm()")
-      compile_fm(WD = WD)
-
-    }#End of Front Matter export
-
-    # Printable Lesson --------------------------------------------------------
-
-    if ("Printable Lesson" %in% choices) {
-      message("• Running make_printable()")
-      make_printable(WD = WD, rebuild = rebuild)
-
-    }
+    #always rebuild front matter
+    message("• Running compile_fm()")
+    compile_fm(WD = WD)
 
 
-# Make Shareable Assets ---------------------------------------------------
-message("• Running make_shareable_assets()")
-make_shareable_assets(WD=WD,open_file = FALSE)
+
+
+    # Make Shareable Assets ---------------------------------------------------
+    message("• Running make_shareable_assets()")
+    make_shareable_assets(WD = WD, open_file = FALSE)
 
 
 
@@ -351,7 +296,8 @@ make_shareable_assets(WD=WD,open_file = FALSE)
     #after run, reset rebuild-all trigger
     if (rebuild) {
       message("• Running update_fm()")
-      update_fm(WD_git=WD_git,change_this = list(RebuildAllMaterials=FALSE))
+      update_fm(WD_git = WD_git,
+                change_this = list(RebuildAllMaterials = FALSE))
 
     }
 

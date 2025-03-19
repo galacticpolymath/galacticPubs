@@ -105,7 +105,7 @@ compile_fm <- \(WD = "?") {
   #BONUS (optional section)
   # markdown links to supporting materials allowed
   Bonus <- get_fm("Bonus", WD = WD)
-  if (!is_empty(Bonus)) {
+  #always, always include, even if null
     bonus_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Bonus Content",
@@ -114,7 +114,7 @@ compile_fm <- \(WD = "?") {
       InitiallyExpanded = TRUE
     )
     save_json(bonus_web, filename = fs::path(json_dir, "bonus", ext = "json"))
-  }
+
 
   # extensions.json ---------------------------------------------------------
 
@@ -124,7 +124,7 @@ compile_fm <- \(WD = "?") {
 
   Extensions <- get_fm("Extensions", WD = WD)
 
-  if (!is_empty(Extensions)) {
+
     extensions_web <- list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Extensions",
@@ -134,7 +134,7 @@ compile_fm <- \(WD = "?") {
     )
     save_json(extensions_web,
               filename = fs::path(json_dir, "extensions", ext = "json"))
-  }
+
 
   # background.json ---------------------------------------------------------
   #Combine Sci Background and Lesson Connections to Research
@@ -145,7 +145,6 @@ compile_fm <- \(WD = "?") {
 
   Background <- get_fm("Background", WD = WD)
   C2R <- get_fm("ConnectionToResearch", WD = WD)
-  if (!is_empty(Background)) {
     background_web <-
       list(
         `__component` = "lesson-plan.collapsible-text-section",
@@ -166,13 +165,13 @@ compile_fm <- \(WD = "?") {
 
     save_json(background_web,
               fs::path(json_dir, "background", ext = "json"))
-  }
+
 
 
   # feedback.json -----------------------------------------------------------
   Feedback <- get_fm("Feedback", WD = WD)
 
-  if (!is_empty(Feedback)) {
+
     feedback_web <-
       list(
         `__component` = "lesson-plan.collapsible-text-section",
@@ -182,12 +181,12 @@ compile_fm <- \(WD = "?") {
       )
 
     save_json(feedback_web, fs::path(json_dir, "feedback", ext = "json"))
-  }
+
 
 
   # credits.json ------------------------------------------------------------
   Credits <- get_fm("Credits", WD = WD)
-  if (!is_empty(Credits)) {
+
     credits_web <-
       list(
         `__component` = "lesson-plan.collapsible-text-section",
@@ -198,7 +197,7 @@ compile_fm <- \(WD = "?") {
 
     save_json(credits_web,
               filename = fs::path(json_dir, "credits", ext = "json"))
-  }
+
 
 
   # acknowledgments.json ----------------------------------------------------

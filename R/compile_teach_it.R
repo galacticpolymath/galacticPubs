@@ -417,11 +417,11 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
 
 
   Data <- c(
-    lessonPreface = uinfo$unitPreface[1],
-    lessonDur = proc_data$lessonDur,
+    unitPreface = uinfo$unitPreface[1],
+    unitDur = proc_data$lessonDur,
+    gatheredVocab = list(proc_data$vocab),
     teach_mat_data,
-    lesson = list(proc_data$lessons),
-    gatheredVocab = list(proc_data$vocab)
+    lesson = list(proc_data$lessons)
   )
 
 
