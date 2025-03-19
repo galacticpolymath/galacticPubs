@@ -37,15 +37,13 @@ compile_json <- function(WD = NULL,
       "overview",
       "preview",
       "teachingMaterials",
+      "feedback",
       "extensions",
       "bonus",
       "background",
       "standards",
-      "feedback",
-      "job-viz",
       "credits",
-      "acknowledgments",
-      "versions"
+      "acknowledgments"
     )
 
   potentialFilenames <- paste0(jsonNames, ".json")
