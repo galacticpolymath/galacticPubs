@@ -100,7 +100,7 @@ compile_fm <- \(WD = "?") {
   )
 #
 #   #write preview json even if empty
-#   save_json(preview, filename = fs::path(json_dir, "preview", ext = "json"))
+  save_json(preview, filename = fs::path(json_dir, "preview", ext = "json"))
 
   #BONUS (optional section)
   # markdown links to supporting materials allowed
