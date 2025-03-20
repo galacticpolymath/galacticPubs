@@ -95,7 +95,7 @@ lesson_init <- \(recover=FALSE,WD="?") {
     fs::path(WD, "teaching-materials", teach_mat_envir_dirs)
 
   #Add Assessment folder
-  assess_dir <- fs::path(teach_mat_dir,"assessments")
+  assess_dir <- fs::path(path_parent_dir( teach_mat_dir),"assessments")
 
   #Add Subfolders with Lx if we've specified more than 1 lesson in this unit
   if (inputs$LsnCount > 1) {
