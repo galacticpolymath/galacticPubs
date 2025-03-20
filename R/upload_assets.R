@@ -140,7 +140,8 @@ upload_assets <- \(WD = "?",
         pattern = patt,
         exclude = ex
       )
-    if (!is_empty(res_i$result)) {
+    if (!is_empty(res_i$result) & !inherits(res_i$result,"error")) {
+
       res_i$result %>% dplyr::mutate(key = df_i$key) %>% dplyr::relocate("key")
     }
   })
