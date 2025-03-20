@@ -3,11 +3,12 @@
 #' Provide basic information about users
 #'
 #' @param verbosity passed to [httr2::req_perform()]; default=1
+#' @param view_data logical; do you want to open retrieved user data with [View()]? Default=TRUE
 #' @returns Summary tibble
 #' @export
 #'
 
-report_user_stats <- function(verbosity = 1) {
+report_user_stats <- function(verbosity = 1,view_data=TRUE) {
   # Get the user data
   users <- gp_api_query_users(verbosity = verbosity)
   # Get the number of active users
@@ -75,5 +76,9 @@ report_user_stats <- function(verbosity = 1) {
     )
   plot(user_growth)
 
-  return(summary)
+  if(view_data){View(users2)}
+
+  list(data=users2,
+       graph=user_growth,
+       summary=summary)
 }

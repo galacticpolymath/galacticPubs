@@ -101,7 +101,7 @@ get_page_metrics <- function(property_id=NULL,
     limit = limit,
     dim_filters = path_filter
   )
-
+message("Stats from ",start_date," to ",end_date)
 
 
   # Return the retrieved data
