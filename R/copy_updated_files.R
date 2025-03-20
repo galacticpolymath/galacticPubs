@@ -53,6 +53,9 @@ copy_updated_files<-function(paths,dest_folder,clear=FALSE,verbose=TRUE, WD="?")
     }
 
     #make summary entry
+    if(missing(test_sync)){
+      browser()
+    }
     test_sync$data %>% dplyr::mutate(log=status) %>% dplyr::relocate("log",.after="up_to_date")
 
   }) %>% dplyr::bind_rows() #end out (lapply)
