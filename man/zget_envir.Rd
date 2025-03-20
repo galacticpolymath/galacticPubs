@@ -2,24 +2,27 @@
 % Please edit documentation in R/zget_envir.R
 \name{zget_envir}
 \alias{zget_envir}
-\alias{zget_grade_var_notes}
 \alias{zget_grade_bands}
 \alias{zget_lessons}
 \alias{zget_items}
 \title{zget_envir()}
 \usage{
-zget_envir(df, fm)
+zget_envir(tlinks, proc_data, lesson_statuses, uinfo, fm)
 
-zget_grade_var_notes(df)
+zget_grade_bands(df_i, proc_data, lesson_statuses, fm, uinfo, assess)
 
-zget_grade_bands(df, fm, assess)
-
-zget_lessons(df, fm)
+zget_lessons(df_i, proc_data, lesson_statuses, uinfo, fm)
 
 zget_items(df, fm)
 }
 \arguments{
-\item{df}{a dataframe (tibble)}
+\item{tlinks}{a tibble of the tlinks of imported teach-it.gsheet}
+
+\item{proc_data}{proc_data}
+
+\item{lesson_statuses}{lesson_statuses}
+
+\item{uinfo}{unit info}
 
 \item{fm}{front matter info from \code{\link[=get_fm]{get_fm()}}}
 
@@ -35,8 +38,6 @@ Not intended for use outside functions.
 }
 \section{Functions}{
 \itemize{
-\item \code{zget_grade_var_notes()}: 
-
 \item \code{zget_grade_bands()}: 
 
 \item \code{zget_lessons()}: 
@@ -45,10 +46,6 @@ Not intended for use outside functions.
 
 }}
 \seealso{
-Other Internal helper functions: 
-\code{\link{make_yt_embed}()},
-\code{\link{zcatchLinkNA}()}
-
 Other Internal helper functions: 
 \code{\link{make_yt_embed}()},
 \code{\link{zcatchLinkNA}()}

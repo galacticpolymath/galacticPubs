@@ -15,6 +15,9 @@ zassign_lsn_stats(is_initialized, WD_git, fm, uinfo)
 
 \item{uinfo}{the unit info (tab 1 of teach-it.gsheet)}
 }
+\value{
+lsn statuses object
+}
 \description{
 A helper function for \code{\link[=compile_teach_it]{compile_teach_it()}}. Interprets statuses from Tab 1 of the teach-it.gsheet for a project. Writes these to front-matter with \code{\link[=update_fm]{update_fm()}}.
 }

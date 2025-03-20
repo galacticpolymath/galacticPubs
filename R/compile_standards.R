@@ -825,6 +825,7 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
 
 
   #Make into an array needed for front end
+  browser()
   target_standards_list <- lapply(unique(target_standards_df$set), \(set_i) {
     df_i <- target_standards_df %>% dplyr::filter(.data$set == set_i)
     if (nrow(df_i) == 0) {
@@ -848,7 +849,7 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
       }
 
       out <- list(df_i %>% as.list() %>% purrr::list_transpose(simplify=FALSE))
-      names(out) <- df_i$set[1]
+      # names(out) <- df_i$set[1]
     }
     out
   }) %>% .[[1]]

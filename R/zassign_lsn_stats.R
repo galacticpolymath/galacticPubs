@@ -6,6 +6,7 @@
 #' @param WD_git location of gp-lessons github repo. Default=NULL will get this for the current workspace with [get_wd_git()]
 #' @param fm front-matter from [get_fm()]
 #' @param uinfo the unit info (tab 1 of teach-it.gsheet)
+#' @returns lsn statuses object
 #' @export
 
 zassign_lsn_stats <- \(is_initialized,
@@ -125,11 +126,8 @@ zassign_lsn_stats <- \(is_initialized,
   }
 
   #save statuses to front-matter
-  test_update <- update_fm(WD_git = WD_git,
-                           change_this = list(LsnStatuses = lsnStatuses))
+  # test_update <- update_fm(WD_git = WD_git,
+  #                          change_this = list(LsnStatuses = lsnStatuses))
 
-  message("Lesson statuses update: ",
-          ifelse(test_update, "SUCCEEDED!", "FAILED!"),
-          "\n")
-
+  return(lsnStatuses)
 }

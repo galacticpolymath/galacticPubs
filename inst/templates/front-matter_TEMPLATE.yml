@@ -16,14 +16,14 @@ ReleaseDate: '2050-01-01'
 isTestRepo: false
 FirstPublicationDate: ''
 LsnCount: ''
-FeaturedMultimedia: ''
 FeaturedPeople: ''
+FeaturedMultimedia: ''
 MediumTitle: '' # Format: Title + _Subj_ + _Gx-y_+ (Locale)
 lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.8.3
+TemplateVer: 0.8.4
 galacticPubsVer: ''
 URL: ''
 ShortURL: ''

@@ -20,9 +20,9 @@ compile_teach_it <- function(WD = "?",
 
   #authenticate with default email for this user
   oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
-checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
-  googledrive::drive_auth(email=oauth_email)
-  googlesheets4::gs4_auth(email=oauth_email)
+  checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
+  googledrive::drive_auth(email = oauth_email)
+  googlesheets4::gs4_auth(email = oauth_email)
 
 
   #Keep teaching-materials/ folder tidy
@@ -34,7 +34,15 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
   status <- fm$PublicationStatus
   gdrivehome <- fm$GdriveHome
   checkmate::assert_choice(status,
-                           c("Proto", "Hidden", "Beta", "Coming Soon", "Live", "Draft", "Upcoming"))#draft deprecated; Upcoming/Coming Soon confusion needs to be sorted out
+                           c(
+                             "Proto",
+                             "Hidden",
+                             "Beta",
+                             "Coming Soon",
+                             "Live",
+                             "Draft",
+                             "Upcoming"
+                           ))#draft deprecated; Upcoming/Coming Soon confusion needs to be sorted out
   checkmate::assert_choice(gdrivehome, c("GP-Studio", "GP-LIVE"))
   if (gdrivehome == "GP-Studio") {
     tmID <- fm$GdriveTeachMatID
@@ -74,12 +82,12 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
     grepl("&", tlinks0$`_lsn`) %>% which()
 
   if (length(multipart_material) > 0) {
-    multi_df <- tlinks0[multipart_material,]
-    nonmulti_df <- tlinks0[-multipart_material,]
+    multi_df <- tlinks0[multipart_material, ]
+    nonmulti_df <- tlinks0[-multipart_material, ]
     lessons <- stringr::str_split(multi_df$`_lsn`, "&")
     expanded_multi <- lapply(1:length(lessons), \(i) {
       lsn_i <- lessons[[i]]
-      multi_df_i <- multi_df[rep(i, length(lsn_i)),] %>%
+      multi_df_i <- multi_df[rep(i, length(lsn_i)), ] %>%
         dplyr::mutate(`_lsn` = lsn_i)
     }) %>% dplyr::bind_rows()
     #combine expanded (repeated) data with previous data
@@ -229,20 +237,22 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
       fm$ShortTitle,
       "`"
     )
-  }else{
-
+  } else{
     #make mlinks an array
-    mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify=FALSE)
+    mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify =
+                                                                     FALSE)
     names(mlinks_array) <- 1:length(mlinks_array)
-    update_fm(WD=WD,change_this=list(FeaturedMultimedia=mlinks_array))
+    update_fm(WD = WD,
+              change_this = list(FeaturedMultimedia = mlinks_array))
   }
 
 
   # Assign lesson statuses --------------------------------------------------
   if (!uinfo_titles_initialized) {
+    lesson_statuses <- NULL
     message("Not assigning lesson statuses because unit info not initialized on teach-it.gsheet")
   }
-  zassign_lsn_stats(
+  lesson_statuses <- zassign_lsn_stats(
     is_initialized = uinfo_titles_initialized,
     WD_git = WD_git,
     fm = fm,
@@ -253,7 +263,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
 
   # Figure out lesson duration string ---------------------------------------
   nlessons <-
-    max(1, max(c(uinfo$lsn,tlinks0$`_lsn`), na.rm = TRUE), na.rm = TRUE) #how many lessons are there in teaching mat? (1 by default)
+    max(1, max(c(uinfo$lsn, tlinks0$`_lsn`), na.rm = TRUE), na.rm = TRUE) #how many lessons are there in teaching mat? (1 by default)
 
 
 
@@ -306,7 +316,7 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
       )
 
     multimedia <- lapply(1:nrow(m), function(i) {
-      d <- m[i,]
+      d <- m[i, ]
 
       mainLink <- make_yt_embed(d$mainLink) %>%
         expand_md_links(WD = WD)
@@ -355,10 +365,6 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
     })
   }
 
-  # Extract majority of Teach-It data ---------------------------------------
-  #Get item links for each environment*gradeBand
-
-  teach_mat_data <- zget_envir(tlinks, fm = fm)
 
   if (!proc_initialized) {
     #should change 'lessons' to something more like 'procedure'
@@ -377,7 +383,6 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
     })
     vocab <- NULL
   } else{
-
     proc_data_test <-
       zget_procedure(
         proc = proc,
@@ -415,42 +420,81 @@ checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
 
   }
 
+  # Extract majority of Teach-It data ---------------------------------------
+  #Get item links for each environment*gradeBand
 
-  Data <- c(
-    unitPreface = uinfo$unitPreface[1],
-    unitDur = proc_data$lessonDur,
-    gatheredVocab = list(vocab),
-    teach_mat_data,
-    lesson = list(proc_data$lessons)
-  )
+  teach_mat_data <- zget_envir(tlinks=tlinks,lesson_statuses=lesson_statuses,
+                               proc_data=proc_data,fm = fm, uinfo=uinfo)
+#
+#
+#
+#   n_lessons_try <- teach_mat_data[[1]]$resources[[1]]$lessons %>% length() %>% catch_err(keep_results = TRUE)
+  #
+  # if (!n_lessons_try$success |
+  #     identical(n_lessons_try$result == 0)) {
+  #   interwoven_lesson_data <- NULL
+  # } else{
+  #   #Taking the stupid separate streams of data and weaving them together in a robust way
+  #   interwoven_lesson_data <- lapply(1:n_lessons_try$result, \(i) {
+  #     statuses_i_try <- lesson_statuses[[i]] %>% catch_err(keep_results = TRUE)
+  #     if (statuses_i_try$success) {
+  #       statuses_i <- statuses_i_try$result
+  #     } else{
+  #       statuses_i <- NULL
+  #     }
+  #     gradeVarNotes_i <- uinfo$lsnGradeVarNotes[i]
+  #     resources_i_try <- teach_mat_data$classroom$resources[[i]] %>% catch_err(keep_results = TRUE)
+  #     if (resources_i_try$success) {
+  #       resources_i <- resources_i_try$result
+  #     } else{
+  #       resources_i <- NULL
+  #     }
+      # proc_data_i_try <- proc_data$lessons[[i]] %>% catch_err(keep_results = TRUE)
+      # if (proc_data_i_try$success) {
+      #   proc_data_i <- proc_data_i_try$result
+      # } else{
+      #   proc_data_i <- NULL
+      # }
+
+  #     c(statuses_i, gradeVarNotes_i, resources_i, proc_data_i)
+  #   })
 
 
-  #Compile Procedure if it's been documented
-  if (!proc_initialized) {
-    warning("Seems you haven't documented procedure at `teach-it.gsheet!Procedure` for `")
+    out <- c(
+      `__component` = "teachingMaterials",
+      initiallyExpanded = TRUE,
+      SectionTitle = "Teaching Materials",
+      unitDur = proc_data$lessonDur,
+      unitPreface = uinfo$unitPreface[1],
+      gatheredVocab = list(vocab),
+      teach_mat_data
+    )
+
+
+    #Compile Procedure if it's been documented
+    if (!proc_initialized) {
+      warning("Seems you haven't documented procedure at `teach-it.gsheet!Procedure` for `")
+    }
+
+
+
+
+    # write JSON outputs ------------------------------------------------------
+
+    destFolder <- fs::path(WD_git, "JSONs")
+    outFile <-
+      fs::path(destFolder, "teachingMaterials", ext = "json")
+
+    success <- save_json(out, outFile) %>% catch_err()
+
+
+
+    # return compiled output --------------------------------------------------
+    message(" ", rep("-", 30))
+    message(" Teaching Material Compiled:")
+    # print(printToScreenTable)
+    message(" JSON file saved\n @ ", outFile, "\n")
+    message(" Success: ", success)
+    message(" ", rep("-", 30))
+
   }
-
-
-  # structure final output --------------------------------------------------
-  out <-Data
-
-
-  # write JSON outputs ------------------------------------------------------
-
-  destFolder <- fs::path(WD_git, "JSONs")
-  outFile <-
-    fs::path(destFolder, "teachingMaterials", ext = "json")
-
-  success <- save_json(out, outFile) %>% catch_err()
-
-
-
-  # return compiled output --------------------------------------------------
-  message(" ", rep("-", 30))
-  message(" Teaching Material Compiled:")
-  # print(printToScreenTable)
-  message(" JSON file saved\n @ ", outFile, "\n")
-  message(" Success: ", success)
-  message(" ", rep("-", 30))
-
-}

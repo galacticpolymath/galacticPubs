@@ -298,8 +298,8 @@ if(is.null(WD_git)){
 
     #output data for this lsn
     c(
-      lsnNum = lsnNum,
-      lsnTitle = lsnTitle,
+      # lsnNum = lsnNum,
+      # lsnTitle = lsnTitle,
       lsnDur = lsnDur,
       lsnPreface = lsnPreface,
       learningObj=list(learningObj_i),

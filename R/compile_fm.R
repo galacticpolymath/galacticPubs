@@ -121,18 +121,8 @@ compile_fm <- \(WD = "?") {
     Tags = lapply(fm$Tags, function(x) {
       list(Value = x)
     }),
-    versions = ver_out0,
-    rootFieldsToRetrieveForUI=list(
-      list(name="unitBanner",as="unitBannerURL"),
-      list(name="Title",as="unitTitle"),
-      list(name="ForGrades",as="ForGrades"),
-      list(name="TargetSubject",as="TargetSubject"),
-      list(name="GradesOrYears",as="GradesOrYears"),
-      list(name="numID",as="numID"),
-      list(name="locale",as="locale"),
-      list(name="Subtitle",as="Subtitle")
-    )
-    #might want to add more complex image handling later),
+    versions = ver_out0
+
   )
 
 
