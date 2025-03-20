@@ -825,7 +825,7 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
 
 
   #Make into an array needed for front end
-  browser()
+
   target_standards_list <- lapply(unique(target_standards_df$set), \(set_i) {
     df_i <- target_standards_df %>% dplyr::filter(.data$set == set_i)
     if (nrow(df_i) == 0) {
@@ -838,9 +838,10 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
         summ_sep_ccc <- df_i %>%
           dplyr::count(.data$dim) %>%
           dplyr::mutate(code = dplyr::case_when(
-            dim == "SEP" ~ paste(n, "Science and Engineering Practices (SEPs)"),
-            dim == "CCC" ~ paste(n, "Cross-Cutting Concepts (CCCs)")
-          ),subject="Science",set="NGSS") %>% dplyr::select(-"n")
+            .data$dim == "SEP" ~ paste(n, "Science and Engineering Practices (SEPs)"),
+            .data$dim == "CCC" ~ paste(n, "Cross-Cutting Concepts (CCCs)")
+          ),subject="Science",set="NGSS") %>% dplyr::select(-"n") %>%
+          dplyr::filter(!is.na(.data$code))
 
         df_i <- df_i %>% dplyr::filter(!.data$dim %in% select_str)  %>%
          dplyr::bind_rows(summ_sep_ccc)
