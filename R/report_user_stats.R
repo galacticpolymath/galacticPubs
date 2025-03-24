@@ -40,7 +40,7 @@ report_user_stats <- function(verbosity = 1) {
   )
 
   # Create a summary tibble
-  summary <- tibble(
+  summary <- dplyr::tibble(
     total_users = num_users,
     n_subscribed = num_subscribed,
     n_teachers = num_teacher_users,
@@ -62,10 +62,10 @@ report_user_stats <- function(verbosity = 1) {
 
   #ggplot stuff
   user_growth <- users2 %>%
-    ggplot2::ggplot(aes(x = .data$Created)) +
+    ggplot2::ggplot(ggplot2::aes(x = .data$Created)) +
     galacticEdTools::theme_galactic(base.theme = "bw") +
     ggplot2::geom_bar() +
-    ggplot2::geom_text(stat = "count",y=1,colour="white",size=7, aes(label = ggplot2::after_stat(.data$count)), vjust = -0.5) +
+    ggplot2::geom_text(stat = "count",y=1,colour="white",size=7, ggplot2::aes(label = ggplot2::after_stat(.data$count)), vjust = -0.5) +
     ggplot2::labs(
       subtitle = "GP User accounts created per month",
       x = "",
