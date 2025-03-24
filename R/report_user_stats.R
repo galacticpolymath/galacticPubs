@@ -63,9 +63,9 @@ report_user_stats <- function(verbosity = 1) {
   #ggplot stuff
   user_growth <- users2 %>%
     ggplot2::ggplot(aes(x = .data$Created)) +
-    theme_galactic(base.theme = "bw") +
+    galacticEdTools::theme_galactic(base.theme = "bw") +
     ggplot2::geom_bar() +
-    geom_text(stat = "count",y=1,colour="white",size=7, aes(label = ggplot2::after_stat(.data$count)), vjust = -0.5) +
+    ggplot2::geom_text(stat = "count",y=1,colour="white",size=7, aes(label = ggplot2::after_stat(.data$count)), vjust = -0.5) +
     ggplot2::labs(
       subtitle = "GP User accounts created per month",
       x = "",

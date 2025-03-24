@@ -86,8 +86,8 @@ gp_api_query_users <- \(
     tidyjson::spread_all() %>%
     dplyr::arrange(dplyr::desc(.data$document.id)) %>%
     #format date so important info doesn't get truncated when printed
-    mutate(account_age=today-as.Date(.data$createdAt)) %>%
-    mutate(createdAt = format(as.Date(.data$createdAt), "%d-%b-%Y")) %>%
+    dplyr::mutate(account_age=today-as.Date(.data$createdAt)) %>%
+    dplyr::mutate(createdAt = format(as.Date(.data$createdAt), "%d-%b-%Y")) %>%
     dplyr::as_tibble() %>% dplyr::select(-c(.data$`_id`, .data$document.id)) %>% dplyr::relocate(cols_of_interest)
 
   out0
