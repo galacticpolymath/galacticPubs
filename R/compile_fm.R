@@ -300,7 +300,8 @@ compile_fm <- \(WD = "?") {
   # versions.json -----------------------------------------------------------
 
   ver <-
-    get_fm("Versions", WD = WD,standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble()
+    get_fm("Versions", WD = WD,standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble() %>%
+    dplyr::arrange(.data$ver_num)#ensure latest entry always at bottom
 
   if (is_empty(ver)) {
     ver_out0 <- NULL
