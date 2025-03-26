@@ -317,6 +317,62 @@ compile_fm <- \(WD = "?") {
 
 
 
+<<<<<<< HEAD
+=======
+  # versions.json -----------------------------------------------------------
+
+  ver <-
+    get_fm("Versions", WD = WD,standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble() %>%
+    dplyr::arrange(.data$ver_num)#ensure latest entry always at bottom
+
+  if (is_empty(ver)) {
+    ver_out0 <- NULL
+  } else{
+    # ver$date <-
+    #   sapply(ver$date, function(x) {
+    #     as.character(as.Date(as.numeric(x), origin = "1899-12-30"), format = "%b %d, %Y")
+    #   }, USE.NAMES = FALSE)
+    ver$major <- gsub("(^[^\\.]*)\\..*", "\\1", ver$ver_num)
+    #Change 0 release to beta for hierarchy
+    ver$major <-
+      sapply(ver$major, function(x)
+        if (x == 0) {
+          x <- "Beta"
+        } else{
+          x <- x
+        })
+    ver_out0 <- list()
+    for (mjr in 1:length(unique(ver$major))) {
+      ver_mjr <- subset(ver, ver$major == unique(ver$major)[mjr])
+      out_mjr <- list()
+      for (i in 1:nrow(ver_mjr)) {
+        ver_i <- ver_mjr[i, ]
+        out_mjr[[i]] <-
+          list(
+            version = ver_i$ver_num,
+            date = ver_i$date,
+            summary = ver_i$ver_summary,
+            notes = ver_i$ver_notes,
+            acknowledgments = ver_i$ver_acknowledgments
+          )
+      }
+      ver_out0[[mjr]] <-
+        list(major_release = unique(ver$major)[mjr],
+             sub_releases = (out_mjr))
+    }
+
+  }
+
+
+  # Prefix with component and title, and nest output in Data if structuring for web deployment
+  ver_out <- list(`__component` = "lesson-plan.versions",
+                  SectionTitle = "Version Notes",
+                  Data = ver_out0)
+
+  save_json(ver_out, fs::path(json_dir, "versions.json"))
+
+
+>>>>>>> main
   message("front-matter compiled")
 
   message("Recombining all JSONs")
