@@ -82,7 +82,7 @@ projects_sorted <- projects[order(unlist(projects[,sort_col]),decreasing=sort_de
       `?!` = "GP-Studio & GP-LIVE",
       gp = "GalacticPolymath"
     ), "/")
-    message(utils::capture.output(print(d, row.names = F), type = "message"))
+    message(utils::capture.output(print(d), type = "message"))
     num0 <-
       readline("Which lesson? (separate multiple with ',') > ") #%>% as.integer()
 

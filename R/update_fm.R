@@ -110,6 +110,7 @@ update_fm <-
     # change_this: Make manual changes if requested ----------------------------------------
     if (!is.null(change_this)) {
       checkmate::assert_list(change_this, .var.name = "change_this")
+
       change_keys <- names(change_this)
       valid_names <- change_keys %in% names(galacticPubs_template)
       test_valid <- sum(valid_names) == length(change_keys)

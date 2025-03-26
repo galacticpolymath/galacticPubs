@@ -18,6 +18,7 @@ compile_fm <- \(WD = "?") {
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
   #just make sure everything's updated in the cloud
+
   upload_assets(WD = WD)
   json_dir <- fs::path(WD_git, "JSONs")
   fm <- get_fm(WD_git = WD_git)
@@ -317,8 +318,7 @@ compile_fm <- \(WD = "?") {
 
 
 
-<<<<<<< HEAD
-=======
+
   # versions.json -----------------------------------------------------------
 
   ver <-
@@ -372,7 +372,6 @@ compile_fm <- \(WD = "?") {
   save_json(ver_out, fs::path(json_dir, "versions.json"))
 
 
->>>>>>> main
   message("front-matter compiled")
 
   message("Recombining all JSONs")

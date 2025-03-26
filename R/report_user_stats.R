@@ -8,7 +8,8 @@
 #' @export
 #'
 
-report_user_stats <- function(verbosity = 1,view_data=TRUE) {
+report_user_stats <- function(verbosity = 1,
+                              view_data = TRUE) {
   # Get the user data
   users <- gp_api_query_users(verbosity = verbosity)
   # Get the number of active users
@@ -55,7 +56,7 @@ report_user_stats <- function(verbosity = 1,view_data=TRUE) {
     dplyr::mutate(createdAt_date = as.Date(.data$createdAt, format = "%d-%b-%Y")) %>%
     dplyr::mutate(Year = lubridate::year(.data$createdAt_date)) %>%
     dplyr::mutate(Month = sprintf("%02d", lubridate::month(.data$createdAt_date))) %>%
-    dplyr::mutate(Created = paste0(sprintf(.data$Month, fmt =), "-", .data$Year))
+    dplyr::mutate(Created = paste0(sprintf(.data$Month, fmt = ), "-", .data$Year))
 
   users2$Created <- factor(users2$Created,
                            levels = rev(unique(users2$Created)),
@@ -66,13 +67,17 @@ report_user_stats <- function(verbosity = 1,view_data=TRUE) {
     ggplot2::ggplot(ggplot2::aes(x = .data$Created)) +
     galacticEdTools::theme_galactic(base.theme = "bw") +
     ggplot2::geom_bar() +
-<<<<<<< HEAD
-    ggplot2::geom_text(stat = "count",y=1,colour="white",size=7,
-                       ggplot2::aes(label =
-                                      ggplot2::after_stat(.data$count)), vjust = -0.5) +
-=======
-    ggplot2::geom_text(stat = "count",y=1,colour="white",size=7, ggplot2::aes(label = ggplot2::after_stat(.data$count)), vjust = -0.5) +
->>>>>>> main
+
+    ggplot2::geom_text(
+      stat = "count",
+      y = 1,
+      colour = "white",
+      size = 7,
+      ggplot2::aes(label =
+                     ggplot2::after_stat(.data$count)),
+      vjust = -0.5
+    ) +
+
     ggplot2::labs(
       subtitle = "GP User accounts created per month",
       x = "",
@@ -80,9 +85,11 @@ report_user_stats <- function(verbosity = 1,view_data=TRUE) {
     )
   plot(user_growth)
 
-  if(view_data){View(users2)}
+  if (view_data) {
+    View(users2)
+  }
 
-  list(data=users2,
-       graph=user_growth,
-       summary=summary)
+  list(data = users2,
+       graph = user_growth,
+       summary = summary)
 }
