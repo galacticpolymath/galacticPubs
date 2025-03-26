@@ -239,9 +239,9 @@ compile_teach_it <- function(WD = "?",
     )
   } else{
     #make mlinks an array
-    mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify =
-                                                                     FALSE)
-    names(mlinks_array) <- 1:length(mlinks_array)
+    mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify =FALSE)
+
+
     update_fm(WD = WD,
               change_this = list(FeaturedMultimedia = mlinks_array))
   }
