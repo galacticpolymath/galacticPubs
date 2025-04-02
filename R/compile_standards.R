@@ -849,11 +849,13 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
 
       }
 
-      out <- list(df_i %>% as.list() %>% purrr::list_transpose(simplify=FALSE))
+      out <- df_i %>% as.list() %>% purrr::list_transpose(simplify=FALSE)
       # names(out) <- df_i$set[1]
     }
     out
   }) %>% .[[1]]
+
+
 
   test_save_target_stds <- update_fm(WD=WD,
                                      change_this=

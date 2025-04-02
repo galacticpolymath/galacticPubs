@@ -7,8 +7,8 @@
 #' @export
 #'
 
-open_proj_folder <- \(subpath=NULL,
-                      WD="?"
+open_proj_folder <- \(WD="?",
+                      subpath=NULL
                       ){
   WD <- parse_wd(WD)
   if(!is.null(subpath)){
