@@ -8,6 +8,7 @@
 #' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
 #' @param id is a vector of `_id`s for unit(s) you want. default=NULL returns all units
 #' @param sort_by a character giving the column name to sort by. Default="numID"
+#' @param verbosity verbosity passed to [httr2::req_perform()]
 #' @return list of results or tbl_json
 #' @family GP API
 #' @export
@@ -18,7 +19,8 @@ gp_api_query <- \(
   output_tibble = TRUE,
   dev = FALSE,
   id = NULL,
-  sort_by = "numID"
+  sort_by = "numID",
+  verbosity=NULL
 ) {
   if (!is.null(numID) & !is.null(id)) {
     stop("Only supply numID OR _id.")
@@ -87,7 +89,7 @@ gp_api_query <- \(
   #actually run request
   message("Querying  (", catalog_name, ") GP-Catalog...")
   res <-
-    req_final %>% httr2::req_perform() %>% catch_err(keep_results = TRUE)
+    req_final %>% httr2::req_perform(verbosity=verbosity) %>% catch_err(keep_results = TRUE)
 
 
   out <- res$result %>%

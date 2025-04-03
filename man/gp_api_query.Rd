@@ -11,7 +11,8 @@ gp_api_query(
   output_tibble = TRUE,
   dev = FALSE,
   id = NULL,
-  sort_by = "numID"
+  sort_by = "numID",
+  verbosity = NULL
 )
 
 query_gp_api(
@@ -20,7 +21,8 @@ query_gp_api(
   output_tibble = TRUE,
   dev = FALSE,
   id = NULL,
-  sort_by = "numID"
+  sort_by = "numID",
+  verbosity = NULL
 )
 }
 \arguments{
@@ -35,6 +37,8 @@ query_gp_api(
 \item{id}{is a vector of \verb{_id}s for unit(s) you want. default=NULL returns all units}
 
 \item{sort_by}{a character giving the column name to sort by. Default="numID"}
+
+\item{verbosity}{verbosity passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}}
 }
 \value{
 list of results or tbl_json
