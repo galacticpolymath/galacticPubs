@@ -16,7 +16,7 @@ publish(
 \arguments{
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); passed to \code{\link[=parse_wd]{parse_wd()}}}
 
-\item{recompile}{logical; run \code{\link[=compile_lesson]{compile_lesson()}}? default=FALSE}
+\item{recompile}{logical; run \code{\link[=compile_unit]{compile_unit()}}? default=FALSE}
 
 \item{commit_msg}{Deprecated; What do you want to say about this update? Default= "automated galacticPubs::publish()"}
 

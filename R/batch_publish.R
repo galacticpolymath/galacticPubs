@@ -6,7 +6,7 @@
 #'
 #' @param commit_msg What do you want to say about this update? Default=NULL, i.e. "automated galacticPubs::publish()"
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [pick_lesson()]; default is WD=getwd()
-#' @param recompile logical; run [compile_lesson()]? default=FALSE
+#' @param recompile logical; run [compile_unit()]? default=FALSE
 #' @param try_harder Do you want the function to retry if it fails? A bit experimental. Gets passed to [catch_err()]; default=FALSE
 #' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default=NULL
 #' @param verbosity passed to [httr2::req_perform()]; default=1

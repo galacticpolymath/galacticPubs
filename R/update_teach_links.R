@@ -11,7 +11,7 @@
 #' 4. Get Gdrive links for downloads, classroom- and remote- lessons, and assessments.
 #' 5. Merge results with manually entered titles and such in 'meta/teach-it.gsheet TeachMatLinks tab'
 #' 6. Save 'meta/teach-it.gsheet'
-#' 7. Save teach-it_state.RDS that stores info about the teaching-materials folder at the time of the last update. [compile_lesson()] uses [get_state()] to check if the current state is identical to the state at the time of the last update to skip this update_teach_links call.
+#' 7. Save teach-it_state.RDS that stores info about the teaching-materials folder at the time of the last update. [compile_unit()] uses [get_state()] to check if the current state is identical to the state at the time of the last update to skip this update_teach_links call.
 #'
 #' @param WD a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" which will invoke [pick_lesson()]
 #' @param rebuild deprecated!! if T, rebuild everything; overrides checks of last modified times before updating links and teach-it.gsheet; default= NULL
@@ -623,7 +623,7 @@ update_teach_links <- function(WD = "?",
 
 
 
-  # save directory state information for use by compile_lesson() ------------
+  # save directory state information for use by compile_unit() ------------
   # Save state for both teach_it.gsheet AND teaching-materials contents
   test_savestate <-
     get_state(path = c(teach_it_path, tm_local),

@@ -37,7 +37,7 @@ GP-Studio shared drive and a web connection. Steps:
 \item Get Gdrive links for downloads, classroom- and remote- lessons, and assessments.
 \item Merge results with manually entered titles and such in 'meta/teach-it.gsheet TeachMatLinks tab'
 \item Save 'meta/teach-it.gsheet'
-\item Save teach-it_state.RDS that stores info about the teaching-materials folder at the time of the last update. \code{\link[=compile_lesson]{compile_lesson()}} uses \code{\link[=get_state]{get_state()}} to check if the current state is identical to the state at the time of the last update to skip this update_teach_links call.
+\item Save teach-it_state.RDS that stores info about the teaching-materials folder at the time of the last update. \code{\link[=compile_unit]{compile_unit()}} uses \code{\link[=get_state]{get_state()}} to check if the current state is identical to the state at the time of the last update to skip this update_teach_links call.
 }
 }
 \seealso{

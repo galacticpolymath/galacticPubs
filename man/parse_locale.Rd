@@ -13,5 +13,5 @@ parse_locale(current_data)
 current data with locale added
 }
 \description{
-Takes the language and country chosen in the \code{\link[=editor]{editor()}} and creates a locale with a 3 digit language code and (if applicable), 2 digit country code. Only meant to run in the \code{\link[=compile_lesson]{compile_lesson()}} function.
+Takes the language and country chosen in the \code{\link[=editor]{editor()}} and creates a locale with a 3 digit language code and (if applicable), 2 digit country code. Only meant to run in the \code{\link[=compile_unit]{compile_unit()}} function.
 }

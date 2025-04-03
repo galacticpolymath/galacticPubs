@@ -3,7 +3,7 @@
 #' Update the unit locally with [update_fm()] and online. Will update the online catalog according to whether it already exists using helpers [gp_api_unit_insert()] or [gp_api_unit_replace()]
 #'
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); passed to [parse_wd()]
-#' @param recompile logical; run [compile_lesson()]? default=FALSE
+#' @param recompile logical; run [compile_unit()]? default=FALSE
 #' @param commit_msg Deprecated; What do you want to say about this update? Default= "automated galacticPubs::publish()"
 #' @param prompt_user logical; do you want to ask user for confirmation before doing things? default=TRUE
 #' @param dev logical; if FALSE, gets catalog from the production gp-catalog. Otherwise, from the dev catalog. NULL (default) will apply to both dev and prod catalogs.
@@ -67,7 +67,7 @@ publish <- function(WD = "?",
   # update front matter, unless recompile queued-----------------------------------------------------
 
   if (recompile) {
-    test_compile <- compile_lesson(WD = WD, rebuild = recompile)
+    test_compile <- compile_unit(WD = WD, rebuild = recompile)
     test_update <- NA
   } else{
     test_compile <- NA

@@ -21,7 +21,7 @@ update_fm(
 
 \item{WD_git}{default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.}
 
-\item{change_this}{A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when \code{\link[=compile_lesson]{compile_lesson()}} is run and change the Language and locale.}
+\item{change_this}{A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when \code{\link[=compile_unit]{compile_unit()}} is run and change the Language and locale.}
 
 \item{save_output}{do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE}
 

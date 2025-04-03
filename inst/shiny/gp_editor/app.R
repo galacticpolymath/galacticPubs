@@ -635,7 +635,7 @@ server <- function(input, output, session) {
   observe({
     template_upgraded <-
       vals$current_data$TemplateVer > vals$saved_data$TemplateVer
-    # if template upgraded, trigger rebuild of all materials in compile_lesson
+    # if template upgraded, trigger rebuild of all materials in compile_unit
 
     if (template_upgraded) {
       vals$current_data$RebuildAllMaterials <- TRUE
@@ -881,7 +881,7 @@ server <- function(input, output, session) {
     yaml::write_yaml(vals$current_data,
                      yaml_path)
     vals$current_data <-
-      compile_lesson(choices = input$ReadyToCompile, WD = WD())
+      compile_unit(choices = input$ReadyToCompile, WD = WD())
     #resave
     yaml::write_yaml(vals$current_data,
                      yaml_path)

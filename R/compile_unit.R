@@ -1,4 +1,4 @@
-#' compile_lesson
+#' compile_unit
 #'
 #' Compiles selected sections of a lesson (or "all"). Results in a UNIT.json, but files are not staged for publishing. Need to follow with a call to [stage_assets()] and [publish()] to publish these changes to the web. Tries to use cacheing, but sometimes, may need to run a function twice to get efficient time savings because of delay in modTimes with Google Drive for Desktop.
 #'
@@ -20,7 +20,7 @@
 #' @importFrom rlang .data
 #' @export
 #'
-compile_lesson <-
+compile_unit <-
   function(WD = "?",
            choices,
            current_data,
@@ -309,8 +309,8 @@ compile_lesson <-
 
 #' lesson_compile
 #'
-#' @describeIn compile_lesson
+#' @describeIn compile_unit
 #'
 #' @export
 
-lesson_compile <- compile_lesson
+unit_compile <- compile_unit

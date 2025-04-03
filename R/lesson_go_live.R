@@ -184,16 +184,16 @@ lesson_go_live <- \(WD = "?") {
         test_fm2 <- NA
       }
 
-      # Run compile_lesson() to affect new locations of files -------------------
+      # Run compile_unit() to affect new locations of files -------------------
 
       if (live_success &
           gp_success &
           shortcut_success &
           made_public_success & test_fm1 & test_fm2) {
-        message("Running compile_lesson() to make sure the lesson is up-to-date.")
-        update_success <- compile_lesson(WD = WD) %>% catch_err()
+        message("Running compile_unit() to make sure the lesson is up-to-date.")
+        update_success <- compile_unit(WD = WD) %>% catch_err()
       } else{
-        message("Skipping compile_lesson() b/c of step failures. Run manually if necessary.")
+        message("Skipping compile_unit() b/c of step failures. Run manually if necessary.")
         update_success <- FALSE
       }
 
@@ -227,7 +227,7 @@ lesson_go_live <- \(WD = "?") {
         gpID,
         "' and GdriveTeachMatID= NA"
       ),
-      "compile_lesson()"
+      "compile_unit()"
     )
   )
 

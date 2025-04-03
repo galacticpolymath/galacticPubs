@@ -18,7 +18,7 @@ batch_publish(
 
 \item{commit_msg}{What do you want to say about this update? Default=NULL, i.e. "automated galacticPubs::publish()"}
 
-\item{recompile}{logical; run \code{\link[=compile_lesson]{compile_lesson()}}? default=FALSE}
+\item{recompile}{logical; run \code{\link[=compile_unit]{compile_unit()}}? default=FALSE}
 
 \item{try_harder}{Do you want the function to retry if it fails? A bit experimental. Gets passed to \code{\link[=catch_err]{catch_err()}}; default=FALSE}
 

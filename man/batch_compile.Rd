@@ -2,7 +2,7 @@
 % Please edit documentation in R/batch_compile.R
 \name{batch_compile}
 \alias{batch_compile}
-\title{batch \code{\link[=compile_lesson]{compile_lesson()}}}
+\title{batch \code{\link[=compile_unit]{compile_unit()}}}
 \usage{
 batch_compile(
   shared_drive = "s",
@@ -20,9 +20,9 @@ batch_compile(
 
 \item{change_this}{A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If gh_proj_name=="all", make sure you set this to something you want to change for everything.}
 
-\item{clean}{Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to \code{\link[=compile_lesson]{compile_lesson()}}). Default=FALSE}
+\item{clean}{Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to \code{\link[=compile_unit]{compile_unit()}}). Default=FALSE}
 
-\item{rebuild}{Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to \code{\link[=compile_lesson]{compile_lesson()}})}
+\item{rebuild}{Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to \code{\link[=compile_unit]{compile_unit()}})}
 }
 \description{
 Function to rebuild a lesson or lessons that found in a virtualized Google Drive for Desktop folder. It will also stage the lesson in the published folder if requested, but will not publish. To do that, you should call \code{\link[=batch_publish]{batch_publish()}}

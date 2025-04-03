@@ -1,4 +1,4 @@
-#' batch [compile_lesson()]
+#' batch [compile_unit()]
 #'
 #' Function to rebuild a lesson or lessons that found in a virtualized Google Drive for Desktop folder. It will also stage the lesson in the published folder if requested, but will not publish. To do that, you should call [batch_publish()]
 #'
@@ -8,8 +8,8 @@
 #' - "s" or "?" = GP-Studio (draft working directory, many users with access)
 #' - "l" or "??" = GP-Live (private, admin only)
 #' @param change_this A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If gh_proj_name=="all", make sure you set this to something you want to change for everything.
-#' @param clean Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to [compile_lesson()]). Default=FALSE
-#' @param rebuild Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to [compile_lesson()])
+#' @param clean Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to [compile_unit()]). Default=FALSE
+#' @param rebuild Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to [compile_unit()])
 #'
 #' @export
 #'
@@ -40,7 +40,7 @@ batch_compile <-
     update_list <- lapply(projects, function(WD) {
       #1. compile all lessons of the unit
       compile_success <-
-        compile_lesson(
+        compile_unit(
           WD = WD,
           rebuild = rebuild,
           clean = clean

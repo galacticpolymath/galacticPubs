@@ -606,7 +606,7 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
       out0 <- do.call(c, l_ta)
 
 
-      # Create JSON-style list, but only exported as JSON by compile_lesson() --------
+      # Create JSON-style list, but only exported as JSON by compile_unit() --------
       # Prefix with component and title, and nest output in Data if structuring for web deployment
       out <-
         list(`__component` = "lesson-plan.standards",
