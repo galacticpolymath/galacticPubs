@@ -80,7 +80,7 @@ gp_api_unit_insert <- \(WD = "?",
       httr2::request(paste0(
         "https://",
         dev_toggle,
-        "galacticpolymath.com/api/insert-lesson"
+        "galacticpolymath.com/api/insert-unit"
       ))
 
     req <-

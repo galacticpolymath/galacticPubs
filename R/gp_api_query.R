@@ -38,7 +38,7 @@ gp_api_query <- \(
     httr2::request(paste0(
       "https://",
       dev_toggle,
-      "galacticpolymath.com/api/get-lessons"
+      "galacticpolymath.com/api/get-units"
     ))
 
   #Add filterObj to query to filter by numID and `_id`

@@ -48,7 +48,7 @@ gp_api_unit_delete <- \(WD = "?",
 
     dev_toggle <- ifelse(dev,"dev.","www.")
     req0 <-
-    httr2::request(paste0("https://",dev_toggle,"galacticpolymath.com/api/delete-lesson"))
+    httr2::request(paste0("https://",dev_toggle,"galacticpolymath.com/api/delete-unit"))
 
     req <-
       req0 %>%
