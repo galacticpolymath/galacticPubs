@@ -90,7 +90,10 @@ gp_api_query <- \(
   message("Querying  (", catalog_name, ") GP-Catalog...")
   res <-
     req_final %>% httr2::req_perform(verbosity=verbosity) %>% catch_err(keep_results = TRUE)
-
+  if(!res$success){
+    message("Error in request: ", res$error)
+    return(NULL)
+  }
 
   out <- res$result %>%
     httr2::resp_body_json() %>% .[[1]]

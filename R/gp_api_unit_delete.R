@@ -71,7 +71,7 @@ gp_api_unit_delete <- \(WD = "?",
     }
 
     test_request <-
-      httr2::req_perform(req, verbosity = 2) %>% catch_err()
+      httr2::req_perform(req, verbosity = verbosity) %>% catch_err()
 
     test_delete <-
       gp_api_query(id = unit_id, c("numID","Title", "Subtitle"),dev=dev) %>% is_empty()

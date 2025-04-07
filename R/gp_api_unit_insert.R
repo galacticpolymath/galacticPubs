@@ -87,7 +87,7 @@ gp_api_unit_insert <- \(WD = "?",
       req0 %>%
       httr2::req_auth_bearer_token(token = token) %>%
       httr2::req_method("POST") %>%
-      httr2::req_body_json(data = list(lesson = unit))
+      httr2::req_body_json(data = list(unit = unit))
 
     res <- httr2::req_perform(req, verbosity = verbosity) %>%
       catch_err(keep_results = TRUE)
@@ -98,7 +98,7 @@ gp_api_unit_insert <- \(WD = "?",
       message(
         "Code=",
         res$result$status,
-        "  Failed to insert lesson for '",
+        "  Failed to insert unit for '",
         basename(WD),
         "' aka '",
         unit_id,
