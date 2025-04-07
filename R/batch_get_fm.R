@@ -82,27 +82,25 @@ batch_get_fm <- \(
         dplyr::mutate(unit = unit_name) %>%
         dplyr::relocate("unit")
 
-      #not sure why, but sometimes this isn't present
+      #Prevent issue if calling function expects these keys, but not requested
       if ("ReleaseDate" %in% names(out)) {
+        out$ReleaseDate <- out$ReleaseDate %>% as.character()
+      }
 
-        if (!is_empty(out$ReleaseDate)) {
-          out$ReleaseDate <- out$ReleaseDate %>% as.character()
-        }
-
-        if (!is_empty(out$LastUpdated)) {
-          out$LastUpdated <- out$LastUpdated %>% as.character()
-        }
-
+      if ("LastUpdated" %in% names(out)) {
+        out$LastUpdated <- out$LastUpdated %>% as.character()
       }
 
 
-  } else{
-    out <- c(unit = unit_name, out)
-  }
-  #avoid tibble coercion error
 
-  out
-  })
+
+    } else{
+      out <- c(unit = unit_name, out)
+    }
+    #avoid tibble coercion error
+
+    out
+  })#end map (definition of res0)
 
 
   if (output_tibble)

@@ -60,7 +60,7 @@ parseGPmarkdown <-
           catch_err()
         message(convert_T_to_check(test_cache_mm),
                 " Saving multimedia for ",
-                basname(WD))
+                basename(WD))
       } else{
         message("Looked on the web at teach-it*.gsheet!Multimedia. Still no valid entries.")
       }
