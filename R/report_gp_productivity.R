@@ -9,15 +9,19 @@
 report_gp_productivity <- \(){
 
   df <- batch_get_fm(c("PublicationStatus","numID","LsnCount","ReleaseDate"),"?!")
-  unique_units <- df %>%
+  gp_units <- df %>%
+    dplyr::arrange(dplyr::desc(as.Date(.data$ReleaseDate))) %>%
     dplyr::mutate(num_locales=
                     unlist(purrr::map(.data$numID,~sum(df$numID==.x)))) %>%
     dplyr::distinct(.data$numID,.keep_all = TRUE)
 
+  gp_units_published <- gp_units%>%  dplyr::filter(.data$PublicationStatus=="Live") %>% dplyr::summarise(num_units=length(.data$unit),num_lessons = sum(.data$LsnCount),num_multilocale_units=sum(.data$num_locales>1))
 
-  x%>%  dplyr::group_by(.data$PublicationStatus) %>% dplyr::summarise(num_units=dplyr::n(.data$length(.data$unit)),num_lessons = sum(.data$LsnCount))
-  tot_num_lessons <- sum(num_lessons)
-
-  tot_num_units <-x
+  in_development <- df %>% dplyr::filter(.data$PublicationStatus=="Proto")
+  message("****Published units: ******")
+  message(capture.output(print(as.data.frame(gp_units_published)),type = "message"))
+  message("****In development units: ****")
+  message(capture.output(print(as.data.frame(in_development)),type = "message"))
+  message("******************************")
 
 }
