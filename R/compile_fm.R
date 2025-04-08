@@ -27,6 +27,13 @@ compile_fm <- \(WD = "?") {
   #Header includes everything up to GradesOrYears
   header <- fm[which_fm_keys]
 
+  #modify FeaturedMultimedia to be an array instead of a tibble
+  #make mlinks an array when saving to fm
+  mlinks_array <- header$FeaturedMultimedia %>% as.list() %>% purrr::list_transpose(simplify =
+                                                                                      FALSE)
+  checkmate::assert_list(mlinks_array)
+  header$FeaturedMultimedia <- mlinks_array
+
   # Make a few assertions to require minimally functional header ------------
   checkmate::assert_character(fm$ShortTitle,
                               min.chars = 2,
@@ -132,16 +139,7 @@ compile_fm <- \(WD = "?") {
 
 
 
-  #
-  #
-  #   # read in multimedia file created from multimedia tab of teach-it. --------
-  #
-  #   mm <- get_fm("FeaturedMultimedia", WD = WD)
-  #
-  #   if (is.na(mmExists)) {
-  #     message("No multimedia found.")
-  #   }
-  #
+
   #
   #   # Create preview.json -----------------------------------------------------
   #   #Multimedia browser
@@ -203,7 +201,7 @@ compile_fm <- \(WD = "?") {
     list(
       `__component` = "lesson-plan.collapsible-text-section",
       SectionTitle = "Background",
-      sortOrder=0,
+      sortOrder = 0,
       InitiallyExpanded = TRUE,
       Content = ifelse(
         is.na(C2R),
@@ -322,7 +320,7 @@ compile_fm <- \(WD = "?") {
   # versions.json -----------------------------------------------------------
 
   ver <-
-    get_fm("Versions", WD = WD,standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble() %>%
+    get_fm("Versions", WD = WD, standardize_NA = FALSE)[[1]] %>% dplyr::as_tibble() %>%
     dplyr::arrange(.data$ver_num)#ensure latest entry always at bottom
 
   if (is_empty(ver)) {

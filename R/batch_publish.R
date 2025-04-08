@@ -10,6 +10,7 @@
 #' @param try_harder Do you want the function to retry if it fails? A bit experimental. Gets passed to [catch_err()]; default=FALSE
 #' @param lessons_dir path to the virtualized folder Edu/lessons, where all the lessons are found; default=NULL
 #' @param verbosity passed to [httr2::req_perform()]; default=1
+#' @param dev logical; if FALSE, gets catalog from the production gp-catalog. Otherwise, from the dev catalog. NULL (default) will apply to both dev and prod catalogs.
 #'
 #' @export
 #'
@@ -19,7 +20,8 @@ batch_publish <- function(WD="?",
                           recompile = FALSE,
                           try_harder = FALSE,
                           lessons_dir = NULL,
-                          verbosity = 1) {
+                          verbosity = 1,
+                          dev= NULL) {
   timer <- FALSE
   # if (grepl("\\?", commit_msg)) {
   #   stop("commit_msg comes before WD")
@@ -48,7 +50,7 @@ batch_publish <- function(WD="?",
 
 
   # Now ignore test repositories
-  ignored <- batch_get_fm("isTestRepo",WD=WD,) %>% dplyr::pull("isTestRepo")
+  ignored <- batch_get_fm("isTestRepo",WD=WD) %>% dplyr::pull("isTestRepo")
 
   good_projects <- projects[!ignored]
   checkmate::assert_integer(length(good_projects),lower=1,all.missing=FALSE)
@@ -65,7 +67,8 @@ batch_publish <- function(WD="?",
                         commit_msg = commit_msg,
                         prompt_user = prompt_user_once,
                         recompile=recompile,
-                        verbosity = verbosity) %>% catch_err(try_harder = try_harder, keep_results = TRUE)
+                        verbosity = verbosity,
+                        dev=dev) %>% catch_err(try_harder = try_harder, keep_results = TRUE)
     print(output_i$result)
     output_i$result
   })  %>% catch_err(keep_results=TRUE)
@@ -74,11 +77,13 @@ batch_publish <- function(WD="?",
     update_list <- update_list_try$result
 
   }else{
+    browser()
     update_list_tibble_try <- update_list_try$result %>% dplyr::bind_rows() %>% catch_err(keep_results=TRUE)
     if(update_list_tibble_try$success){
       #output tibble-formatted result
       update_list <- update_list_tibble_try$result
     }else{
+
       message("Unable to bind_rows to summarize update. Some unit output was weird.")
       #output list formatted result
       update_list <- update_list_try$result

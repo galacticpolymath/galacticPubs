@@ -40,7 +40,7 @@ publish <- function(WD = "?",
     get_fm(c("_id", "ShortTitle"), WD = WD) %>% paste(., collapse = " (") %>% paste0(" '", ., ")' ")
 
   if (prompt_user) {
-    if (is.null(dev) | sum(dev) == 1) {
+    if (is.null(dev) | sum(dev) == 2) {
       catalog_name <- "Dev AND Production"
     } else if (identical(dev, TRUE)) {
       catalog_name <- "Dev"
@@ -78,6 +78,9 @@ publish <- function(WD = "?",
   fm <- get_fm(WD_git = WD_git)
   fm_id <- fm$`_id`
 
+
+# By default replace for both prod & dev repos ----------------------------
+
   if (is.null(dev0)) {
     # null means we want to check existence of project on prod and dev
     # then insert or replace the unit as needed
@@ -87,7 +90,7 @@ publish <- function(WD = "?",
   # check if exists online, and if not, insert ------------------------------
   # Create vector to determine if replacement needed
 
-  cat_to_replace <- lapply(dev, \(dev_i) {
+  findings <- lapply(dev, \(dev_i) {
     cat_type = switch(as.character(dev_i),
                       "FALSE" = "PROD",
                       "TRUE" = "DEV")
@@ -102,11 +105,19 @@ publish <- function(WD = "?",
         cat_type,
         " Catalog.\n***Inserting new record...\n"
       )
-      insert_success <- gp_api_unit_insert(WD = WD,
+      test_insert <- gp_api_unit_insert(WD = WD,
                                            dev = dev_i,
-                                           verbosity = verbosity)
+                                           verbosity = verbosity) %>%
+        catch_err(keep_results = TRUE)
+      insert_success <- test_insert$success
+      if(inherits(test_insert$result,"error")){
+        message("Error inserting unit: ", test_insert$result$message)
+
+      } else{
+        message("Unit inserted successfully.\n")
+      }
       #assume insert_successful, don't replace, return NA
-      out <- NA
+      out <- NA #replacement not needed if inserted
     } else{
       message("**",
               fm_id,
@@ -115,21 +126,37 @@ publish <- function(WD = "?",
               "' found in ",
               cat_type,
               " Catalog.\n")
-      out <- cat_type #cat_type is easier to understand
+      insert_success <- NA
     }
-    out
-  }) %>% unlist()
+    dplyr::tibble(
+      cat_type = cat_type,
+      exists_online = exists_online,
+      to_replace=exists_online,
+      insert_success = insert_success
+    )
+  })
 
+findings <- findings%>% dplyr::bind_rows()
+  replace_these <- findings %>% dplyr::filter(.data$to_replace) %>%
+    dplyr::pull(.data$cat_type)
   #interpret cat_type
-  dev_to_replace <- ifelse(cat_to_replace == "DEV", TRUE, FALSE) %>% unique_sans_na()
+  dev_to_replace <- ifelse(replace_these == "DEV", TRUE, FALSE) %>% unique_sans_na()
 
   if (length(dev_to_replace) > 0) {
-    gp_api_unit_replace(
+    test_replacement<- gp_api_unit_replace(
       WD = WD,
       dev = dev_to_replace,
       verbosity = verbosity,
       prompt_user = FALSE
-    )
+    ) %>% catch_err(keep_results = TRUE)
+    replacement_success <- test_replacement$success
+
+    if(inherits(test_replacement$result,"error")){
+        message("Error inserting unit: ", test_replacement$result$message)
+    }
+
+  } else{
+    replacement_success <- NA
   }
 
 
@@ -284,18 +311,19 @@ publish <- function(WD = "?",
   #   }
   #
 
-  #
-  #   out_summary <-
-  #     dplyr::tibble(
-  #       repo = basename(WD),
-  #       SUCCESS = convert_T_to_check(test_commit &
-  #                                      test_push & test_status2),
-  #       commit = convert_T_to_check(test_commit),
-  #       push = convert_T_to_check(test_push),
-  #       git_status = convert_T_to_check(test_status2),
-  #       path = WD
-  #     )
-  #
-  #   return(out_summary)
+
+  message("replacement success may not be accurate..needs a refactor")
+  success <- sum(c(!findings$insert_success,!replacement_success), na.rm = TRUE) == 0
+  out_summary <-
+    dplyr::tibble(
+      repo = basename(WD),
+      success=convert_T_to_check(success),
+      insert_prod= convert_T_to_check(findings$insert_success[2]),
+      replace_prod=convert_T_to_check(replacement_success),
+      insert_dev = convert_T_to_check(findings$insert_success[1]),
+      replace_dev = convert_T_to_check(replacement_success)
+    )
+
+  return(out_summary)
 
 }

@@ -24,14 +24,13 @@ parseGPmarkdown <-
       WD <- parse_wd(WD)
       WD_git <- get_wd_git(WD = WD)
       #Look for multimedia in fm
-      mlinks_array <- get_fm("FeaturedMultimedia", WD = WD)
-    } else{
-      mlinks_array <- NULL
+
+      mlinks <- get_fm("FeaturedMultimedia", WD = WD)[[1]] %>% dplyr::as_tibble()
     }
 
     # 1. Look up on teach-it sheet if not found in fm --------------------------------
 
-    if ((is.null(mlinks) & is_empty(mlinks_array)) | force_lookup) {
+    if (is_empty(mlinks) | force_lookup) {
       message("parseGPmarkdown(): No multimedia info found for : ",
               basename(WD))
       tID <- get_fm("GdriveTeachItID", WD = WD)
@@ -41,22 +40,22 @@ parseGPmarkdown <-
         googlesheets4::read_sheet(tID,
                                   sheet = "Multimedia",
                                   skip = 1,
-                                  col_types = "c") %>%
-        dplyr::select(1:dplyr::starts_with("otherLink"))   %>%
-        dplyr::filter(dplyr::if_any(1, ~ !is.na(.)))
+                                  col_types = "c")  %>%
+        dplyr::filter(dplyr::if_any(1, ~ !is.na(.))) %>%
+        dplyr::rename(code = .data$`_code`) %>%
+        dplyr::filter(!is.na(.data$code)) %>%
+        dplyr::arrange(.data$order) %>%
+        dplyr::select(1:dplyr::starts_with("otherLink"))
+
       mlinks <- mlinks %>% dplyr::select(-dplyr::starts_with("_"))
       valid_mm <-
         checkmate::test_data_frame(mlinks, min.rows = 1)
 
       #Save to front matter
       if (valid_mm) {
-        #make mlinks an array when saving to fm
-        mlinks_array <- mlinks %>% as.list() %>% purrr::list_transpose(simplify =
-                                                                         FALSE)
-        names(mlinks_array) <- 1:length(mlinks_array)
         test_cache_mm <- update_fm(WD = WD,
                                    change_this =
-                                     list(FeaturedMultimedia = mlinks_array)) %>%
+                                     list(FeaturedMultimedia = mlinks)) %>%
           catch_err()
         message(convert_T_to_check(test_cache_mm),
                 " Saving multimedia for ",
@@ -69,19 +68,12 @@ parseGPmarkdown <-
       # If multimedia found in FM, needs to be reformatted to look like a spreadsheet
     }
 
-    if(!is.null(mlinks_array)&is.null(mlinks)){
-      #convert to tibble if read in as array from fm
-      mlinks <- purrr::map(mlinks_array[[1]],dplyr::as_tibble) %>% purrr::list_rbind()
-    }
-
-
 
 
     if (is_empty(mlinks)) {
       # message("parseGPmarkdown(): No multimedia found.")
       final <- x
     } else{
-
       vidLinks <-
         mlinks %>% dplyr::filter(tolower(.data$type) == "video")
 
