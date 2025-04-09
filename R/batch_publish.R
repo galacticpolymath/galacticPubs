@@ -77,7 +77,7 @@ batch_publish <- function(WD="?",
     update_list <- update_list_try$result
 
   }else{
-    browser()
+
     update_list_tibble_try <- update_list_try$result %>% dplyr::bind_rows() %>% catch_err(keep_results=TRUE)
     if(update_list_tibble_try$success){
       #output tibble-formatted result

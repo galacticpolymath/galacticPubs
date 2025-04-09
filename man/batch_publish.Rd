@@ -10,7 +10,8 @@ batch_publish(
   recompile = FALSE,
   try_harder = FALSE,
   lessons_dir = NULL,
-  verbosity = 1
+  verbosity = 1,
+  dev = NULL
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ batch_publish(
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default=NULL}
 
 \item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
+
+\item{dev}{logical; if FALSE, gets catalog from the production gp-catalog. Otherwise, from the dev catalog. NULL (default) will apply to both dev and prod catalogs.}
 }
 \description{
 Publish one or more lessons that have been staged in the published/ folder of a lesson directory

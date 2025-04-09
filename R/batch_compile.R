@@ -40,11 +40,9 @@ batch_compile <-
     update_list <- lapply(projects, function(WD) {
       #1. compile all lessons of the unit
       compile_success <-
-        compile_unit(
-          WD = WD,
-          rebuild = rebuild,
-          clean = clean
-        ) %>% catch_err()
+        compile_unit(WD = WD,
+                     rebuild = rebuild,
+                     clean = clean) %>% catch_err()
 
       dplyr::tibble(Compiled = convert_T_to_check(compile_success),
                     Lesson = basename(WD))
@@ -62,7 +60,16 @@ batch_compile <-
 
     #turn off timer if it was started
     if (timer) {
-      tictoc::toc()
+      # Stop the timer and capture the output
+      elapsed_time <- tictoc::toc(TRUE)$toc - tictoc::toc(TRUE)$tic
+
+      # Convert to minutes and format the output
+      minutes <- floor(elapsed_time / 60)
+      seconds <- round(elapsed_time %% 60, 2)
+
+      # Display the output
+      cat(sprintf("%d minutes and %f seconds elapsed", minutes, seconds),
+          "\n")
     }
     invisible(update_list)
 

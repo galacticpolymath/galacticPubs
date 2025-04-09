@@ -29,9 +29,14 @@ compile_fm <- \(WD = "?") {
 
   #modify FeaturedMultimedia to be an array instead of a tibble
   #make mlinks an array when saving to fm
-  mlinks_array <- header$FeaturedMultimedia %>% as.list() %>% purrr::list_transpose(simplify =
-                                                                                      FALSE)
+  if(header$FeaturedMultimedia %>% is_empty()){
+    mlinks_array <- NA
+  }else{
+  mlinks_array <- header$FeaturedMultimedia %>% as.list() %>%
+    purrr::list_transpose(simplify =FALSE)
   checkmate::assert_list(mlinks_array)
+  }
+
   header$FeaturedMultimedia <- mlinks_array
 
   # Make a few assertions to require minimally functional header ------------
