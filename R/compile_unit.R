@@ -166,7 +166,7 @@ compile_unit <-
       if (!compile_standards_output$success) {
         stop("Standards were not compiled successfully.")
       } else{
-        standards <- compile_standards_output$result$data$list_for_json
+        standards <- compile_standards_output$result$list_for_json
 
       }
     } else if (file.exists(compiled_standards_path)) {

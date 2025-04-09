@@ -610,8 +610,7 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
       # Prefix with component and title, and nest output in Data if structuring for web deployment
       out <-
         list(`__component` = "lesson-plan.standards",
-             SectionTitle= "Standards Section",
-             sortOrder= 1,
+             SectionTitle= "Standards",
              InitiallyExpanded=TRUE,
              Data = out0)
 
@@ -868,6 +867,7 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
       success = success,
       input = dplyr::as_tibble(a0),
       compiled = dplyr::as_tibble(A),
+      list_for_json = out,
       problem_entries = problem_entries,
       gradeBand = gradeBand,
       learningObj = learningObj,
