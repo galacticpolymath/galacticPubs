@@ -27,16 +27,82 @@ compile_fm <- \(WD = "?") {
   #Header includes everything up to GradesOrYears
   header <- fm[which_fm_keys]
 
+
+
   #modify FeaturedMultimedia to be an array instead of a tibble
   #make mlinks an array when saving to fm
-  if(header$FeaturedMultimedia %>% is_empty()){
+  mlinks <- header$FeaturedMultimedia %>% dplyr::as_tibble()
+  if (mlinks %>% is_empty()) {
     mlinks_array <- NA
-  }else{
-  mlinks_array <- header$FeaturedMultimedia %>% as.list() %>%
-    purrr::list_transpose(simplify =FALSE)
-  checkmate::assert_list(mlinks_array)
+  } else{
+    # Handle FeaturedMultimedia---------------------------------------------------
+
+    # if "by" is left blank, add Galactic Polymath by default
+
+    mlinks$by <-
+      ifelse(is.na(mlinks$by), "Galactic Polymath", mlinks$by)
+    #if byLink is blank, but by is galactic polymath, add our Youtube channel
+    mlinks$byLink <-
+      ifelse(
+        is.na(mlinks$byLink) &
+          !is.na(mlinks$by),
+        "https://www.youtube.com/@galacticpolymath",
+        mlinks$byLink
+      )
+
+    #make youtube embeds and expanded markdown shorthand links
+    mlinks_modified <-  mlinks$mainLink %>%
+      make_yt_embed() %>%
+      expand_md_links(WD = WD) %>%
+
+      #breaking apart the URL into parts, edit the paths, then reassemble
+      urltools::url_parse() %>%
+      #if a drive file is supplied, change /edit? or /view? ... to /preview
+      dplyr::mutate(path=gsub("/edit.*|/view.*|/preview.*|/$",
+               "/preview",
+               .data$path)) %>%
+       #if link is a google docs domain & bare url supplied (with no /), add preview suffix
+      dplyr::mutate(path = ifelse(
+        .data$domain %in%
+          c("docs.google.com", "drive.google.com"),
+        gsub("/$", "", .data$path),
+        .data$path
+      )) %>%
+      #if no slash, add one (for all cases)
+      dplyr::mutate(path = sub("([^/])$", "\\1/", .data$path)) %>%
+      # if link is a google docs domain & no preview suffix, add it
+      dplyr::mutate(path = ifelse(
+        .data$domain %in%
+          c("docs.google.com", "drive.google.com") &
+          !grepl("/preview/$", .data$path),
+        gsub("/$", "/preview/", .data$path),
+        .data$path
+      )) %>%
+      #now remove the terminal /
+      dplyr::mutate(path = gsub("/$", "", .data$path)) %>%
+      # for google docs domains, add ?rm=minimal that simplifies the preview
+      dplyr::mutate(parameter = ifelse(
+        .data$domain %in%
+          c("docs.google.com", "drive.google.com"),
+        "rm=minimal",
+        .data$parameter
+      )) %>%
+      #recompose the edited URLs
+      urltools::url_compose()
+
+
+    checkmate::assert_character(mlinks_modified)
+    mlinks$mainLink <- mlinks_modified
+
+
+
+    # now turn the tibble to a list for json
+    mlinks_array <- mlinks %>% as.list() %>%
+      purrr::list_transpose(simplify = FALSE)
+    checkmate::assert_list(mlinks_array)
   }
 
+  # Overwrite FeaturedMultimedia for export
   header$FeaturedMultimedia <- mlinks_array
 
   # Make a few assertions to require minimally functional header ------------

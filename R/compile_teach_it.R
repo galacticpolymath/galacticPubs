@@ -294,73 +294,6 @@ compile_teach_it <- function(WD = "?",
     #   )
   }
 
-  # Multimedia --------------------------------------------------------------
-  # Outputs to separate multimedia JSON
-  # if "by" is left blank, add Galactic Polymath by default
-  if (!mlinks_initialized) {
-    multimedia <- list(NULL)
-  } else{
-    m <- mlinks
-    m$by <-
-      ifelse(is.na(m$by), "Galactic Polymath", m$by)
-    #if byLink is blank, but by is galactic polymath, add our Youtube channel
-    m$byLink <-
-      ifelse(
-        is.na(m$byLink) &
-          !is.na(m$by),
-        "https://www.youtube.com/channel/UCfyBNvN3CH4uWmwOCQVhmhg/featured",
-        m$byLink
-      )
-
-    multimedia <- lapply(1:nrow(m), function(i) {
-      d <- m[i, ]
-
-      mainLink <- make_yt_embed(d$mainLink) %>%
-        expand_md_links(WD = WD)
-      #if a drive file is supplied, change /edit? or /view? ... to /preview
-      #should probably switch all this logic to a function and use urltools
-      mainLink_dec <- urltools::url_parse(mainLink)
-
-      if (mainLink_dec$domain %in% c("docs.google.com", "drive.google.com")) {
-        #remove edit/
-        mainLink_dec$path <-
-          gsub("/edit.*|/view.*|/preview.*|/$",
-               "/preview",
-               mainLink_dec$path)
-        #if bare url supplied (with no /), add preview suffix
-        if (!grepl("/preview", mainLink_dec$path)) {
-          pth <- mainLink_dec$path
-
-          #if no slash, add one
-          if (substr(pth, nchar(pth), nchar(pth)) != "/") {
-            pth <- paste0(pth, "/")
-          }
-          #now add preview, having controlled for presence/absence of terminal /
-          mainLink_dec$path <- paste0(pth, "preview")
-        }
-
-        mainLink_dec$parameter <- "rm=minimal"
-        mainLink <- urltools::url_compose(mainLink_dec)
-
-      }
-
-
-      list(
-        order = d$order,
-        type = d$type,
-        forLsn = d$forLsn,
-        title = d$title,
-        description = d$description,
-        lessonRelevance = d$lessonRelevance,
-        by = d$by,
-        #if byLink left blank, but
-        byLink = d$byLink,
-        #Change YouTube links to be embeds & turn {filename.png} links to files found in assets/_other-media-to-publish into catalog.galacticpolymath.com links
-        mainLink = mainLink,
-        otherLink = d$otherLink
-      )
-    })
-  }
 
 
   if (!proc_initialized) {
@@ -458,7 +391,7 @@ compile_teach_it <- function(WD = "?",
 
 
     out <- c(
-      `__component` = "teachingMaterials",
+      `__component` = "teaching-resources.teaching-resources",
       initiallyExpanded = TRUE,
       SectionTitle = "Teaching Materials",
       unitDur = proc_data$lessonDur,
