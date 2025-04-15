@@ -182,8 +182,7 @@ compile_unit <-
     sh <- list(`__component` = "lesson-plan.section-heading", SectionTitle = "Learning Standards")
     # save_json(sh, fs::path(destFolder, "standards-header.json"))
 
-    save_json(standards,
-              fs::path(destFolder, "standards.json"))
+    save_json(standards, fs::path(destFolder, "standards.json"))
 
 
 
@@ -225,52 +224,50 @@ compile_unit <-
 
     # Process Teaching Materials if Out of Date -------------------------------
 
+    #check if previous save file exists
+    save_path <-
+      fs::path(WD_git, "saves", "save-state_teach-it.RDS")
+    test_save_exists <- file.exists(save_path)
+    if (!test_save_exists) {
+      skip_update <- FALSE
+    } else{
+      #compare current timestamps and file counts from last update to current
+      prev_update_state <- readRDS(save_path)
+      #get state for teach-it.gsheet AND all teaching-materials/ contents
+      curr_update_state <-
+        get_state(c(teach_it_path, tm_path_full), save_path = NULL)
 
-    if ("Teaching Materials" %in% choices) {
-      #check if previous save file exists
-      save_path <-
-        fs::path(WD_git, "saves", "save-state_teach-it.RDS")
-      test_save_exists <- file.exists(save_path)
-      if (!test_save_exists) {
+      if (identical(prev_update_state, curr_update_state)) {
+        skip_update <- TRUE
+      } else{
         skip_update <- FALSE
-      } else{
-        #compare current timestamps and file counts from last update to current
-        prev_update_state <- readRDS(save_path)
-        #get state for teach-it.gsheet AND all teaching-materials/ contents
-        curr_update_state <-
-          get_state(c(teach_it_path, tm_path_full), save_path = NULL)
-
-        if (identical(prev_update_state, curr_update_state)) {
-          skip_update <- TRUE
-        } else{
-          skip_update <- FALSE
-        }
       }
-
-      if (!skip_update | rebuild) {
-        # update teach_it links and compile ---------------------------------------
-        message("Changes to `../teaching-materials/` detected...")
-        message("Running update_teach_links() and compile_teach-it()")
-
-        test_update_teach_it <-
-          update_teach_links(WD = WD) %>% catch_err()
-        test_compile_teach_it <-
-          compile_teach_it(WD = WD) %>% catch_err()
-
-
-        #update the cache of the teaching-material state of things
-        get_state(
-          path = c(teach_it_path, tm_path_full),
-          save_path = save_path,
-          path1_modTime_diff = 2
-        )
-      } else{
-        message("No changes to `../teaching-materials/` detected...")
-        message("Skipping update_teach_links() and compile_teach-it()")
-      }
-
-
     }
+
+    if (!skip_update | rebuild) {
+      # update teach_it links and compile ---------------------------------------
+      message("Changes to `../teaching-materials/` detected...")
+      message("Running update_teach_links() and compile_teach-it()")
+
+      test_update_teach_it <-
+        update_teach_links(WD = WD) %>% catch_err()
+      test_compile_teach_it <-
+        compile_teach_it(WD = WD) %>% catch_err()
+
+
+      #update the cache of the teaching-material state of things
+      get_state(
+        path = c(teach_it_path, tm_path_full),
+        save_path = save_path,
+        path1_modTime_diff = 2
+      )
+    } else{
+      message("No changes to `../teaching-materials/` detected...")
+      message("Skipping update_teach_links() and compile_teach-it()")
+    }
+
+
+
 
 
     # Separate parts of Front Matter ------------------------------------------

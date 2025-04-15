@@ -23,7 +23,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.8.4
+TemplateVer: 0.8.5
 galacticPubsVer: ''
 URL: ''
 ShortURL: ''
@@ -101,11 +101,10 @@ Extensions: ''
 Background: ''
 ConnectionToResearch: ''
 Feedback: |
-  ### Please let us know how it went with your class!
-  #### We want to know what you (and/or your students) think!
-  Share your feedback in < 5 min with these forms:
+  #### 🙏 Help us keep this unit free 🚀
+  Share your feedback in < 5 min to help us demonstrate impact to funders:
   - [For teachers]()
-  - [For students]()
+  - To share student learning and feedback, please use the digital assessment (Google Form) in the Assessments section. Then share the link to results with feedback@galacticpolymath.com.
 Credits: ''
 Acknowledgments:
   Role:

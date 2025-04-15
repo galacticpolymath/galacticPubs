@@ -31,21 +31,30 @@ update_teach_links <- function(WD = "?",
 
   checkmate::assert(check_wd(WD = WD, throw_error = FALSE), combine = "and")
 
-  gID <- get_fm("GdriveDirID", WD = WD)
-  meta_id <-
-    get_fm("GdriveMetaID", WD = WD, checkWD = F)#only need to check_wd once
-  proj_dir <- get_fm("GdriveDirName", WD = WD, checkWD = F)
-  status <- get_fm("PublicationStatus", WD = WD, checkWD = F)
+  # Get front matter info ---------------------------------------------------
+  fm <- get_fm(WD = WD, checkWD = F)
+  teach_it_prepared <- "Teaching Materials" %in%  fm$ReadyToCompile
+  if (!teach_it_prepared) {
+    message(
+      fm$MediumTitle,
+      " Teaching Materials not ready to compile. Skipping update_teach_links()."
+    )
+    return(NULL)
+  }
+  gID <- fm$GdriveDirID
+  meta_id <-fm$GdriveMetaID
+  proj_dir <- fm$GdriveDirName
+  status <- fm$PublicationStatus
   #teaching materials are located in different shared drives depending
   #on PublicationStatus
 
-  med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
-  short_title <- get_fm("ShortTitle", WD = WD, checkWD = F)
-  GdriveHome <- get_fm("GdriveHome", WD = WD, checkWD = F)
+  med_title <- fm$MediumTitle
+  short_title <- fm$ShortTitle
+  GdriveHome <- fm$GdriveHome
   if (GdriveHome == "GP-Studio") {
-    tm_dir_id <- get_fm("GdriveTeachMatID", WD = WD, checkWD = F)
+    tm_dir_id <- fm$GdriveTeachMatID
   } else{
-    tm_dir_id <- get_fm("GdrivePublicID", WD = WD, checkWD = F)
+    tm_dir_id <- fm$GdrivePublicID
   }
 
   checkmate::assert(
