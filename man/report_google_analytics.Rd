@@ -4,7 +4,12 @@
 \alias{report_google_analytics}
 \title{Make a markdown report for Google Analytics for GP's website}
 \usage{
-report_google_analytics(start_date = NULL, end_date = NULL, paths = NULL)
+report_google_analytics(
+  start_date = NULL,
+  end_date = NULL,
+  paths = NULL,
+  property_id = NULL
+)
 }
 \arguments{
 \item{start_date}{start date in "2020/01/01" format; if left blank will be today()-90}
@@ -12,6 +17,8 @@ report_google_analytics(start_date = NULL, end_date = NULL, paths = NULL)
 \item{end_date}{end date in "2020/01/01" format; if left blank will be today()}
 
 \item{paths}{URLs}
+
+\item{property_id}{an optional parameter passed to \code{\link[=get_page_metrics]{get_page_metrics()}}}
 }
 \description{
 Make a markdown report for Google Analytics for GP's website
