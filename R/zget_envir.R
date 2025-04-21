@@ -27,7 +27,7 @@ zget_envir <- \(tlinks, proc_data, lesson_statuses,uinfo, fm) {
       assess <- list(NULL)
     } else{
       assess <- list(
-        lsn = "last",
+        lsn = 100,
         title = "Assessments",
         tags = NULL,
         preface = "Editable assessments for evaluating student understanding & STEM identity",

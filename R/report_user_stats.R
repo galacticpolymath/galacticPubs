@@ -41,6 +41,27 @@ report_user_stats <- function(verbosity = 1,
     "reasonsForSiteVisit.reason-for-visit-0"
   )
 
+
+# Add inferred location from zip codes ------------------------------------
+
+
+  #stupid fix for bad programming; writing my own code
+  zip2city <- \(zip){
+  zip_code_db <- zipcodeR::zip_code_db
+  output <- zip_code_db %>% dplyr::filter(.data$zipcode == zip) %>%
+    dplyr::pull(.data$post_office_city)
+  if(length(output) == 0){
+    output <- NA
+  }
+  output
+  }
+
+  users <- users  %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(zip_city=zip2city(.data$zipCode)) %>%
+    dplyr::mutate(state=stringr::str_extract(.data$zip_city,", (\\w{2})",1 )) %>%
+    dplyr::relocate("zip_city", .after = "mailingListStatus")
+
   # Create a summary tibble
   summary <- dplyr::tibble(
     total_users = num_users,
@@ -52,7 +73,6 @@ report_user_stats <- function(verbosity = 1,
   )
 
   users2 <- users %>%
-    dplyr::filter(!is.na(.data$createdAt)) %>%
     dplyr::mutate(createdAt_date = as.Date(.data$createdAt, format = "%d-%b-%Y")) %>%
     dplyr::mutate(Year = lubridate::year(.data$createdAt_date)) %>%
     dplyr::mutate(Month = sprintf("%02d", lubridate::month(.data$createdAt_date))) %>%
@@ -64,6 +84,7 @@ report_user_stats <- function(verbosity = 1,
 
   #ggplot stuff
   user_growth <- users2 %>%
+    dplyr::filter(!is.na(.data$createdAt_date)) %>%
     ggplot2::ggplot(ggplot2::aes(x = .data$Created)) +
     galacticEdTools::theme_galactic(base.theme = "bw") +
     ggplot2::geom_bar() +
