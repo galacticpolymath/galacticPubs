@@ -156,27 +156,30 @@ if(is.null(WD_git)){
   ####
   #Figure out lesson duration string
   lsnDurations <-
-    proc_w_prep$lsnDur[which(proc_w_prep$lsnDur != "")] %>% as.numeric()
+    proc_w_prep %>% dplyr::filter(!is.na(.data$`_lsnN`)&
+                                  .data$lsnDur != "") %>%
+    dplyr::pull("lsnDur") %>%as.numeric()
+
 
     if (length(lsnDurations) == 1) {
-      lessonDur <-paste0(lsnDurations, " min") #if just 1 lsn listed, do X min
+      unitDur <-paste0(lsnDurations, " min") #if just 1 lsn listed, do X min
     } else{
       #if more than 1 lsn, but they're all the same, combine them
       if (length(unique(lsnDurations)) == 1) {
-        lessonDur <-paste0(length(lsnDurations), " x ", lsnDurations[1], " min")
+        unitDur <-paste0(length(lsnDurations), " x ", lsnDurations[1], " min")
       } else{
         #otherwise average, rounding to 5 min
         m <- mean(lsnDurations,na.rm=T)
-        lessonDur <-paste0(length(lsnDurations)," x ~",5*round(m/5)," min")
+        unitDur <-paste0(length(lsnDurations)," x ~",5*round(m/5)," min")
       }
     }
-  lessonDur
+  unitDur
 
   #Let's make a list that we'll convert to JSON
   out <- list()
   # pref<-uinfo$LessonPreface[1]
   # out0$lessonPreface=if(is.na(pref)){}else{pref}
-  out$lessonDur = lessonDur
+  out$unitDur = unitDur
 
 
   nlsns <- max(unique(proc$lsn), na.rm = T)

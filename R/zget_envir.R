@@ -13,7 +13,7 @@
 #' @family Internal helper functions
 
 # Define f(x)s for extracting nested teach-mat info -----------------------
-zget_envir <- \(tlinks, proc_data, lesson_statuses,uinfo, fm) {
+zget_envir <- \(tlinks, proc_data, lesson_statuses, uinfo, fm) {
   envirs <-
     unique_sans_na(tlinks$`_envir`) %>% tolower() %>% sort()
   #Assessments aren't a real environment; we want to concat this info to the end of lsns for each envir
@@ -50,11 +50,11 @@ zget_envir <- \(tlinks, proc_data, lesson_statuses,uinfo, fm) {
 
       list(
         resources = zget_grade_bands(
-          df_i=df_i,
+          df_i = df_i,
           proc_data = proc_data,
           lesson_statuses = lesson_statuses,
           fm = fm,
-          uinfo=uinfo,
+          uinfo = uinfo,
           assess = assess
         )
       )
@@ -78,7 +78,7 @@ zget_envir <- \(tlinks, proc_data, lesson_statuses,uinfo, fm) {
 #' @export
 #' @family Internal helper functions
 #'
-zget_grade_bands <- \(df_i, proc_data, lesson_statuses, fm,uinfo, assess) {
+zget_grade_bands <- \(df_i, proc_data, lesson_statuses, fm, uinfo, assess) {
   coveredGrades <- unique_sans_na(df_i$`_grades`)
 
   grade_yr_term <- fm$GradesOrYears
@@ -89,18 +89,18 @@ zget_grade_bands <- \(df_i, proc_data, lesson_statuses, fm,uinfo, assess) {
       #Get info for the subfolder
       df_variantDir <-
         df_i %>% dplyr::filter(`_itemType` == "variantDir" &
-                                   `_grades` == grade_band_i)
+                                 `_grades` == grade_band_i)
 
       df_materials <-
         df_i %>% dplyr::filter(`_fileType` != "folder" &
-                                   `_grades` == grade_band_i)
+                                 `_grades` == grade_band_i)
       g_pref_i <- paste0(substr(grade_yr_term, 1, 1), grade_band_i)
 
       #Get data for each lsn
       LSN_DATA <- zget_lessons(
         df_i = df_materials,
         proc_data = proc_data,
-        uinfo=uinfo,
+        uinfo = uinfo,
         lesson_statuses = lesson_statuses,
         fm = fm
       )
@@ -139,13 +139,14 @@ zget_grade_bands <- \(df_i, proc_data, lesson_statuses, fm,uinfo, assess) {
 #' @family Internal helper functions
 #'
 zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
-  lessons <- unique_sans_na(df_i$`_lsn`)
+  #get sequence of lessons (including upcoming (that have no teaching materials in df_i))
+  lessons <- 1:max(df_i$`_lsn`, uinfo$lsn, na.rm = TRUE) %>% as.numeric()
   #lesson tiles
   tiles <- fm$LessonTiles
   tiles_initialized <- !is_empty(tiles)
   #extract Lnum
   tile_Ls <- stringr::str_extract(tiles, ".*[Ll](\\d{1,2}).*", group = 1)
-
+  df_i0 <- df_i
 
   if (length(lessons) == 0) {
     #make it resilient if there's only 1 implied lsn
@@ -154,19 +155,50 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
 
   out <- lessons %>%
     #map across all lessons
-    purrr::map(., \(lsn_i) {
-      i <- as.numeric(lsn_i)
+    purrr::map(., \(i) {
+
+      not_built <- i > max(df_i0$`_lsn`, na.rm = TRUE)
+      # Add row for upcoming lesson
+      if (not_built) {
+        df_i <- df_i0 %>%
+          dplyr::add_row(
+            `_envir` = df_i0$`_envir`[i - 1],
+            `_lsn` = as.character(i),
+            `_itemType` = "placeholder",
+            lsnTitle = uinfo$lsnTitle[i],
+            lsnPreface = uinfo$lsnPreface[i],
+            actTags = uinfo$actTags[i]
+          )
+      }
+
+
+      # if(not_built){
+      #   message("No teaching materials found for L", i, "\n Probably b/c it is upcoming?'")
+      #  return(c(
+      #   title = uinfo$lsnTitle[i],
+      #   as.vector(lsn_status_info_i),
+      #   tags = list(lsn_i_tags),
+      #   gradeVarNote=gradeVarNote_i,
+      #   preface = df_lsn_i$lsnPreface[1],
+      #   tile = tile_i,
+      #   itemList = NULL,
+      #   proc_data_i
+      # ))
+      # }
       #Get info for the subfolder
-      df_lsn_i <- df_i %>% dplyr::filter(`_lsn` == lsn_i)
+      df_lsn_i <- df_i %>% dplyr::filter(`_lsn` == i)
 
       #handle tiles
       if (tiles_initialized &
           i %in% tile_Ls) {
         tile_i <- tiles[i]
 
-      } else{
+      } else if(!not_built){
+        #only warn if this is a unit there should be a tile for (that's been started)
         message("No tile found for L", i, "\n Use name format 'L1_tile.png'")
         warning("No tile found for L", i, "\n Use name format 'L1_tile.png'")
+        tile_i <- NA
+      }else{
         tile_i <- NA
       }
 
@@ -178,13 +210,26 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
         lsn_i_tags <- stringr::str_split(lsn_i_tags0, ",") %>% unlist() %>% stringr::str_trim()
       }
 
-      items_i <- zget_items(df = df_lsn_i, fm = fm)
+      #get items for real entries, not for upcoming, placeholder entries
+      if (df_lsn_i$`_itemType`[1] == "placeholder") {
+        items_i <- NULL
+
+      } else{
+        items_i <- zget_items(df = df_lsn_i, fm = fm)
+      }
 
 
-      gradeVarNote_i <- if(uinfo$lsnGradeVarNotes[i] %>% catch_err()){uinfo$lsnGradeVarNotes[i]}else{NULL}
+      if (uinfo$lsnGradeVarNotes[i] %>% catch_err()) {
+        gradeVarNote_i <- uinfo$lsnGradeVarNotes[i]
+      } else{
+        gradeVarNote_i <-  NULL
+      }
 
-      lsn_status_info_i <- if(lesson_statuses[[i]]%>% catch_err()){
-        lesson_statuses[[i]]}else{NULL}
+      if (lesson_statuses[[i]] %>% catch_err()) {
+        lsn_status_info_i <- lesson_statuses[[i]]
+      } else{
+        lsn_status_info_i <- NULL
+      }
 
       proc_data_i_try <- proc_data$lessons[[i]] %>% catch_err(keep_results = TRUE)
       if (proc_data_i_try$success) {
@@ -199,7 +244,7 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
         title = df_lsn_i$lsnTitle[1],
         as.vector(lsn_status_info_i),
         tags = list(lsn_i_tags),
-        gradeVarNote=gradeVarNote_i,
+        gradeVarNote = gradeVarNote_i,
         preface = df_lsn_i$lsnPreface[1],
         tile = tile_i,
         itemList = items_i,

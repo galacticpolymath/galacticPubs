@@ -280,9 +280,7 @@ compile_teach_it <- function(WD = "?",
 
     ####
 
-    # Figure out lesson duration string ---------------------------------------
-    nlessons <-
-      max(1, max(c(uinfo$lsn, tlinks0$`_lsn`), na.rm = TRUE), na.rm = TRUE) #how many lessons are there in teaching mat? (1 by default)
+
 
 
 
@@ -387,11 +385,12 @@ compile_teach_it <- function(WD = "?",
     )
 
 
+
     out <- c(
       `__component` = "teaching-resources.teaching-resources",
       initiallyExpanded = TRUE,
       SectionTitle = "Teaching Materials",
-      unitDur = proc_data$lessonDur,
+      unitDur = proc_data$unitDur,
       unitPreface = uinfo$unitPreface[1],
       gatheredVocab = list(vocab),
       teach_mat_data
