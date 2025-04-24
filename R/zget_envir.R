@@ -24,7 +24,7 @@ zget_envir <- \(tlinks, proc_data, lesson_statuses, uinfo, fm) {
       .data$`_fileType` != "spreadsheet"
     )
     if (!nrow(df_assess) > 0) {
-      assess <- list(NULL)
+      assess <- NULL
     } else{
       assess <- list(
         lsn = 100,
@@ -37,7 +37,7 @@ zget_envir <- \(tlinks, proc_data, lesson_statuses, uinfo, fm) {
     }
   } else{
     message("No assessments found.")
-    assess <- list(NULL)
+    assess <- NULL
   }
   envirs <- envirs[envirs != "assessments"]
   out <- envirs %>%
@@ -386,11 +386,12 @@ zget_items <- \(df, fm) {
       )
 
     })
-    list(out)
+  out
   } else{
-    out <- list(NULL)
+    out <- NULL
     message("zget_items(): No Items found.")
   }
+
 }
 
 

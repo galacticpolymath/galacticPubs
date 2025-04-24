@@ -72,12 +72,12 @@ update_fm <-
 
 
     # TEMP: Migrate some old names to new key names ---------------------------------
-    # if ("id" %in% names(old_yaml)) {
-    #   new_yaml$numID <- old_yaml$id
-    # }
-    # if ("numId" %in% names(old_yaml)) {
-    #   new_yaml$numID <- old_yaml$numId
-    # }
+    if ("LearningSummary" %in% names(old_yaml)) {
+      new_yaml$TheGist <- old_yaml$LearningSummary
+    }
+    if ("EstLessonTime" %in% names(old_yaml)) {
+      new_yaml$EstUnitTime <- old_yaml$EstLessonTime
+    }
     #
     # if ("UniqueID" %in% names(old_yaml)) {
     #   new_yaml$`_id` <- old_yaml$UniqueID
