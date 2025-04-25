@@ -256,8 +256,10 @@ compile_teach_it <- function(WD = "?",
       warning(
         "No multimedia links found at `teach-it.gsheet!Multimedia` for `",
         fm$ShortTitle,
-        "`"
-      )
+        "`"      )
+      #Overwrite for rare instances where you had something and then delete it
+      update_fm(WD = WD,
+                change_this = list(FeaturedMultimedia = NA))
     } else{
       update_fm(WD = WD,
                 change_this = list(FeaturedMultimedia = mlinks))

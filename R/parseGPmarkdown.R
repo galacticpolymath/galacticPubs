@@ -24,13 +24,14 @@ parseGPmarkdown <-
       WD <- parse_wd(WD)
       WD_git <- get_wd_git(WD = WD)
       #Look for multimedia in fm
-
+      if(is.null(mlinks)){
       mlinks <- get_fm("FeaturedMultimedia", WD = WD)[[1]] %>% dplyr::as_tibble()
+      }
     }
 
     # 1. Look up on teach-it sheet if not found in fm --------------------------------
 
-    if (is_empty(mlinks) | force_lookup) {
+    if (is_empty(mlinks) & force_lookup) {
       message("parseGPmarkdown(): No multimedia info found for : ",
               basename(WD))
       tID <- get_fm("GdriveTeachItID", WD = WD)

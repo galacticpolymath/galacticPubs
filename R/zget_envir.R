@@ -191,7 +191,8 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
       #handle tiles
       if (tiles_initialized &
           i %in% tile_Ls) {
-        tile_i <- tiles[i]
+
+        tile_i <- ifelse(i<=length(tiles),tiles[i],NA)
 
       } else if(!not_built){
         #only warn if this is a unit there should be a tile for (that's been started)
@@ -247,7 +248,7 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
         gradeVarNote = gradeVarNote_i,
         preface = df_lsn_i$lsnPreface[1],
         tile = tile_i,
-        itemList = items_i,
+        itemList = list(items_i),
         proc_data_i
       )
 

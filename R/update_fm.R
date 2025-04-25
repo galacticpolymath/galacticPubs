@@ -303,13 +303,15 @@ update_fm <-
     # remove the following deprecated variables -------------------------------
 
     deprecated <-
-      c("GitHubPath",
-        "GPCatalogPath",
-        "test",
-        "id",
-        "numId",
-        "UniqueID",
-        "GdriveTeachMat")
+      c("EstLessonTime",
+        "LearningSummary",
+        "LessonBanner",
+        "LearningChartFriendly",
+        "LearningChart",
+        "LearningChart_params_centralText",
+        "LearningChart_params_caption",
+        "LearningChart_params_captionN",
+        "LearningObj")
     remove_deez <- which(names(new_yaml) %in% deprecated)
     if (length(remove_deez) > 0) {
       message(

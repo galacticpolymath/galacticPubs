@@ -1067,7 +1067,7 @@ server <- function(input, output, session) {
                 md_txt('Grades', current_data$ForGrades)),
             div(
               class = "triad",
-              md_txt("Est. Lesson Time", current_data$EstUnitTime)
+              md_txt("Est. Unit Time", current_data$EstUnitTime)
             )
           ),
           robust_img(

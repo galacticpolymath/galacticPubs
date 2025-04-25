@@ -57,7 +57,9 @@ if(is.null(WD_git)){
                    "StepDetails",
                    "VariantNotes",
                    "TeachingTips")], 2, function(x)
-                     parseGPmarkdown(x, mlinks = mlinks))
+                     parseGPmarkdown(x,
+                                     mlinks = mlinks,
+                                     force_lookup = FALSE))
 
 
 
