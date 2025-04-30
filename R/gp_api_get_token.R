@@ -57,7 +57,7 @@ gp_api_get_token <- \(refresh = FALSE,
     oauth_id <-
       httr2::obfuscated("pbuXrrB6NXdjDA8wdOSQyZqi_gWYYHm_Pl4wslxx8rmkCl8MO_vaG4DggCR2z4RV6ogxWgKs9Cgw7Q91o4g3SjejvJVhb8Bm1ghmz6Y722QbBhdESwqqa98")
 
-    dev_toggle <- ifelse(dev,"https://dev.galacticpolymath.com","https://www.galacticpolymath.com")
+    dev_toggle <- ifelse(dev,"https://dev.galacticpolymath.com","https://teach.galacticpolymath.com")
 
     oauth_client_obj <- httr2::oauth_client(id = oauth_id,
                                             token_url = paste0(dev_toggle,"/api/get-jwt-token"),

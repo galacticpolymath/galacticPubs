@@ -46,7 +46,7 @@ gp_api_query_users <- \(
   #   test_request <- test_delete <- FALSE
   # } else{
 
-  dev_toggle <- ifelse(dev, "dev.", "www.")
+  dev_toggle <- ifelse(dev, "dev.", "teach.")
   req0 <-
     httr2::request(paste0(
       "https://",

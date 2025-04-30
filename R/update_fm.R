@@ -221,7 +221,7 @@ update_fm <-
       new_yaml$URL <-
         paste0(
           c(
-            "https://www.galacticpolymath.com/lessons",
+            "https://teach.galacticpolymath.com/units",
             new_yaml$locale,
             new_yaml$numID
           ),
