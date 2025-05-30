@@ -97,6 +97,7 @@ exclude_patt <- c(
       ".*@galacticpolymath.com",
       # "numbatmedia@gmail.com",
       "gtorion97@gmail.com",
+      "gtorionnotion@gmail.com",
       "mrwilkins06@gmail.com",
       "ellahoulihan9@gmail.com",
       "matthew.greig.cowan@gmail.com"

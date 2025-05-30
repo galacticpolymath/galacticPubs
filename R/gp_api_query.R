@@ -35,7 +35,7 @@ gp_api_query <- \(
   catalog_name <- ifelse(dev, "Dev", "Prod")
 
   #construct base request
-  dev_toggle <- ifelse(dev, "dev.", "")
+  dev_toggle <- ifelse(dev, "dev.", "teach.")
   req0 <-
     httr2::request(paste0(
       "https://",

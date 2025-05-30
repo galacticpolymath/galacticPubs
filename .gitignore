@@ -18,3 +18,4 @@ published
 !*/rsrc/
 delete
 .httr-oauth
+.Renviron

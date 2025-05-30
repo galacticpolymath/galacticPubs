@@ -13,6 +13,7 @@
 #' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=F
 #' @param try_harder passed to [catch_err()] specifically when we look for GdriveDir, just in case the Google Drive for Desktop and Web are out of sync, it'll try after a series of intervals. Default= FALSE.
 #' @param recompile logical; if TRUE (default), runs [compile_fm()] and [compile_JSON()]
+#' @param force_upgrade logical; used to bypass checks for a custom change to the front-matter template version. If TRUE, will run a temporary section of code with |force_upgrade logic; Default=FALSE.
 #' @return returns logical of success
 #' @export
 #'
@@ -26,7 +27,8 @@ update_fm <-
            reorder = TRUE,
            drive_reconnect = FALSE,
            try_harder = FALSE,
-           recompile = TRUE) {
+           recompile = TRUE,
+           force_upgrade = FALSE) {
     if (!is.null(WD_git)) {
       fm <- get_fm(WD_git = WD_git)
       WD <- fs::path(
@@ -48,12 +50,14 @@ update_fm <-
 
     #these are keys we want to handle as dataframes
     df_keys <-
-      c("Versions",
+      c(
+        "Versions",
         "Authors",
         "Credits",
         #deprecated
         "Acknowledgments",
-        "GoogleCloudStorage")
+        "GoogleCloudStorage"
+      )
 
     #safe_read_yaml will create yaml if it's missing
     old_yaml <-
@@ -95,7 +99,7 @@ update_fm <-
     # }
 
 
-   #add NAs for new keys that aren't present in old_yaml
+    #add NAs for new keys that aren't present in old_yaml
 
     new_names_indx <- which(!names(new_yaml) %in% names(old_yaml))
     if (length(new_names_indx) > 0) {
@@ -147,7 +151,7 @@ update_fm <-
         }
       }
 
-      #If
+
 
       if (sum(test_changes, na.rm = T) > 0) {
         # Set up output of changes
@@ -217,7 +221,8 @@ update_fm <-
     new_yaml <- new_yaml %>% parse_locale()
 
     #Add URL for this locale
-    if (is_empty(new_yaml$URL) | is_empty(new_yaml$ShortURL)) {
+    if (is_empty(new_yaml$URL) |
+        is_empty(new_yaml$ShortURL) | force_upgrade) {
       new_yaml$URL <-
         paste0(
           c(
@@ -245,6 +250,20 @@ update_fm <-
       }
 
     }
+
+    #Make a QR code
+    unit_name <- basename(WD)
+    qr_path <- fs::path(WD,
+                      "assets",
+                      "_banners_logos_etc",
+                      paste0(unit_name, "__QR-code.png"))
+
+  if (!file.exists(qr_path)|force_upgrade) {
+    grDevices::png(qr_path)
+    plot(qrcode::qr_code(new_yaml$URL))
+    grDevices::dev.off()
+    message("QR Code generated for ", unit_name, " at:\n", qr_path, "\n")
+  }
 
     #make a unique `_id` combining numID & locale
     if (!is_empty(new_yaml$numID)) {
@@ -303,7 +322,8 @@ update_fm <-
     # remove the following deprecated variables -------------------------------
 
     deprecated <-
-      c("EstLessonTime",
+      c(
+        "EstLessonTime",
         "LearningSummary",
         "LessonBanner",
         "LearningChartFriendly",
@@ -311,7 +331,8 @@ update_fm <-
         "LearningChart_params_centralText",
         "LearningChart_params_caption",
         "LearningChart_params_captionN",
-        "LearningObj")
+        "LearningObj"
+      )
     remove_deez <- which(names(new_yaml) %in% deprecated)
     if (length(remove_deez) > 0) {
       message(
@@ -563,7 +584,7 @@ update_fm <-
     if (save_output) {
       #Change LastUpdated field
 
-      new_yaml$LastUpdated <- Sys.time() %>% round.POSIXt(units="secs") %>%  as.character()
+      new_yaml$LastUpdated <- Sys.time() %>% round.POSIXt(units = "secs") %>%  as.character()
       # need to find yaml_path in git hub gp-lessons folder
       if (is.null(WD_git)) {
         WD_git <- get_wd_git(WD = WD)

@@ -32,6 +32,7 @@ gpsave <- function(filename,
                    units = "in",
                    ...) {
   WD = parse_wd(WD)
+  showtext::showtext_auto()
 
   if (is.null(obj)) {
     message("You might need to specify 'obj'")
@@ -44,9 +45,22 @@ gpsave <- function(filename,
   checkmate::assert_access(path_parent_dir(fn), access = "w")
 
 
-  isgraf <- inherits(obj, what = c("graf_w_footer", "ggplot"))
-  if (!isgraf) {
-    stop("The object must be either a ggplot or a grob.")
+  if (is.list(obj)) {
+    isgraf <- FALSE
+    grob_list_tests <- lapply(1:length(obj), \(i) {
+      isgraf <- inherits(obj[[i]], what = c("grob"))
+      if (!isgraf) {
+        stop("The supplied list must contain all grob layers (nothing else).")
+      }
+      return(isgraf)
+    })
+    is_grob_list <- all(unlist(grob_list_tests))
+  } else{
+    isgraf <- inherits(obj, what = c("graf_w_footer", "ggplot", "grob"))
+  }
+
+  if (!isgraf & !is_grob_list) {
+    stop("The object must be either a ggplot, a grob, or a list of grobs.")
   }
 
   # Set default width if no dims supplied
@@ -62,23 +76,7 @@ gpsave <- function(filename,
     width = height * aspect
   }
 
-  #   # Determine if the object is a ggplot
-  #   if (inherits(obj, "ggplot")) {
-  #     # If it's a ggplot, use ggsave
-  #     test_save <- ggplot2::ggsave(
-  #       filename = fn,
-  #       plot = obj,
-  #       width = width,
-  #       height = height,
-  #       units=units,
-  #       dpi = dpi,
-  #       bg = bg,
-  #       ...
-  #     ) %>% catch_err()
-  # # Determine if is an output of gp_footer that is a grid object
-  #   } else if (inherits(obj, "graf_w_footer")) {
-
-  # If it's a grob, use png()
+  # Save file
   test_save <- {
     png(
       filename = fn,
@@ -89,7 +87,12 @@ gpsave <- function(filename,
       units = units,
       type = "quartz"
     )
-    plot(obj)
+    if (is_grob_list) {
+      grid::grid.newpage()
+      lapply(obj,\(f) grid::grid.draw(f))
+    } else{
+      plot(obj)
+    }
     dev.off()
   } %>% catch_err()
 
