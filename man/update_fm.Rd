@@ -13,7 +13,8 @@ update_fm(
   reorder = TRUE,
   drive_reconnect = FALSE,
   try_harder = FALSE,
-  recompile = TRUE
+  recompile = TRUE,
+  force_upgrade = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ update_fm(
 \item{try_harder}{passed to \code{\link[=catch_err]{catch_err()}} specifically when we look for GdriveDir, just in case the Google Drive for Desktop and Web are out of sync, it'll try after a series of intervals. Default= FALSE.}
 
 \item{recompile}{logical; if TRUE (default), runs \code{\link[=compile_fm]{compile_fm()}} and \code{\link[=compile_JSON]{compile_JSON()}}}
+
+\item{force_upgrade}{logical; used to bypass checks for a custom change to the front-matter template version. If TRUE, will run a temporary section of code with |force_upgrade logic; Default=FALSE.}
 }
 \value{
 returns logical of success

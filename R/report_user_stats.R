@@ -32,13 +32,15 @@ report_user_stats <- function(verbosity = 1,
   num_subscribed <- sum(users$mailingListStatus == "onList", na.rm = TRUE)
 
   # Estimated reach
-  tot_class_size <- sum(users$classroomSize.num, na.rm = TRUE)
+  tot_class_size <- sum(users$classSize, na.rm = TRUE)
 
-  users %>% dplyr::filter(.data$classroomSize.num > 0) %>% dplyr::select(
+  users %>% dplyr::filter(.data$classSize > 0) %>%
+    dplyr::select(
     "email",
-    "classroomSize.num",
+    "classSize",
     "mailingListStatus",
-    "reasonsForSiteVisit.reason-for-visit-0"
+    "siteVisitReasonsDefault",
+    "siteVisitReasonsCustom"
   )
 
 
@@ -62,14 +64,22 @@ report_user_stats <- function(verbosity = 1,
     dplyr::mutate(state=stringr::str_extract(.data$zip_city,", (\\w{2})",1 )) %>%
     dplyr::relocate("zip_city", .after = "mailingListStatus")
 
+  # Set createdAt date to 08-Dec-2024 for accounts added before that key was created
+  users$createdAt <- ifelse(is.na(users$createdAt),
+                            "08-Dec-2024",
+                            users$createdAt)
+
+
   # Create a summary tibble
   summary <- dplyr::tibble(
     total_users = num_users,
     n_subscribed = num_subscribed,
     n_teachers = num_teacher_users,
     class_size = tot_class_size,
+    n_states = length(unique_sans_na(users$state)),
     active_users = num_active_users,
     inactive_users = num_inactive_users
+
   )
 
   users2 <- users %>%
@@ -82,35 +92,89 @@ report_user_stats <- function(verbosity = 1,
                            levels = rev(unique(users2$Created)),
                            ordered = TRUE)
 
+
+
+  #define theme
+  report_theme <-
+    galacticEdTools::theme_galactic(base.theme = "bw") +ggplot2::theme(
+      axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = -20)),
+      axis.title.y = ggplot2::element_text(margin = ggplot2::margin(r = -10))
+    )
+
   #ggplot stuff
   user_growth <- users2 %>%
     dplyr::filter(!is.na(.data$createdAt_date)) %>%
     ggplot2::ggplot(ggplot2::aes(x = .data$Created)) +
-    galacticEdTools::theme_galactic(base.theme = "bw") +
-    ggplot2::geom_bar() +
+    report_theme+
+    ggplot2::geom_bar(fill=gpColors("dark lightning purple")) +
 
     ggplot2::geom_text(
       stat = "count",
-      y = 1,
+      y = 0,
       colour = "white",
-      size = 7,
+      size = 5,
       ggplot2::aes(label =
                      ggplot2::after_stat(.data$count)),
       vjust = -0.5
     ) +
 
     ggplot2::labs(
-      subtitle = "GP User accounts created per month",
+      subtitle =paste0("GP User accounts created per month (Tot=",nrow(users2),")"),
       x = "",
-      caption = paste0("Tot users=", nrow(users), " as of ", lubridate::today())
+      caption = paste0(" as of ", lubridate::today())
     )
-  plot(user_growth)
+
+
+  # make plot of running total of collective class size
+
+
+  running_tot_students <- users2 %>%
+    dplyr::group_by(.data$Created) %>%
+    dplyr::summarise(total_class_size = sum(.data$classSize, na.rm = TRUE)) %>%
+    dplyr::mutate(running_total = cumsum(.data$total_class_size))%>%
+    #plot
+    ggplot2::ggplot(ggplot2::aes(x = .data$Created, y = .data$running_total, group=1)) +
+    report_theme+
+    ggplot2::geom_line(colour=gpColors("flare fucsia"),linewidth=2) +
+    ggplot2::labs(
+      subtitle = paste0("Total class size of GP Teacher Users (",scales::comma(sum(users2$classSize,na.rm=T)),
+                        ")"),
+      x = "",
+      y = "Total class size"
+
+    )
+
+  # stacked combined plot
+  KPIs <- patchwork::wrap_plots(running_tot_students,user_growth, ncol = 1,nrow=2,heights=c(0.7,0.3)) +
+    patchwork::plot_annotation(
+      title = "Galactic Polymath Impact Metrics",
+      subtitle = "Data from teach.galacticpolymath.com"
+    )
+
+
+  plot(KPIs)
 
   if (view_data) {
     View(users2)
   }
-
-  list(data = users2,
-       graph = user_growth,
+  # Return a list with the data, graph, and summary
+  out <- list(data = users2,
+       graph = KPIs,
        summary = summary)
+  print(out)
+    # summary stats -----------------------------------------------------------
+  new_7_days <-sum(users2$account_age<=7,na.rm=T)
+  new_30_days <-sum(users2$account_age<=30,na.rm=T)
+  total <- nrow(users2)
+
+  message(rep("-",20))
+  message("User summary (galacticpolymath.com):\n- TOTAL: ",total,"\n- new in past week: ",new_7_days,"\n- new in past month: ",new_30_days)
+
+  message("- states represented: ",
+          length(unique_sans_na(users$state)),
+          " (",
+          paste0(sort(unique_sans_na(users$state)), collapse = ", "),
+          ")")
+
+ invisible(out)
 }

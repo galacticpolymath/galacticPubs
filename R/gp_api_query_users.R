@@ -64,58 +64,88 @@ gp_api_query_users <- \(
   request <-
     httr2::req_perform(req, verbosity = verbosity) %>% catch_err(keep_results = TRUE)
 
+  checkmate::assert_true(request$success)
+
+  ### handle results with nested array values (ignored by spread_all)
+  ###
+  result_list <- request$result %>%
+    httr2::resp_body_json() %>% .[[1]]
+
+  result_array_collapsed <- purrr::map(result_list, function(user) {
+    reasons <- user$siteVisitReasonsDefault
+    if (!is.null(user$siteVisitReasonsDefault) &&
+        length(user$siteVisitReasonsDefault) > 0) {
+      user$siteVisitReasonsDefault <- stringr::str_c(unlist(user$siteVisitReasonsDefault), collapse = ", ")
+    }
+    return(user)
+  })
+
+
+
+
+
+  result_json <- result_array_collapsed %>%
+    tidyjson::as_tbl_json() %>%
+    tidyjson::spread_all()
+
+  #view names
+  result_json %>% names
 
   # format result -----------------------------------------------------------
+
   cols_of_interest <- c(
-    "name.first",
-    "name.last",
+    "firstName",
+    "lastName",
     "email",
     "createdAt",
     "isTeacher",
     "mailingListStatus",
+    "institution",
+    "schoolTypeDefaultSelection",
     "account_age",
+    "classSize",
+    "siteVisitReasonsDefault",
+    "siteVisitReasonsCustom",
     "totalSignIns",
     "lastSignIn",
     "occupation"
+
+
   )
   today <- lubridate::today()
 
-  out0 <- request$result %>%
-    httr2::resp_body_json() %>% .[[1]] %>%
-    tidyjson::as_tbl_json() %>%
-    tidyjson::spread_all() %>%
+  out0 <- result_json %>%
     dplyr::arrange(dplyr::desc(.data$document.id)) %>%
     #format date so important info doesn't get truncated when printed
-    dplyr::mutate(account_age=today-as.Date(.data$createdAt)) %>%
+    dplyr::mutate(account_age = today - as.Date(.data$createdAt)) %>%
     dplyr::mutate(createdAt = format(as.Date(.data$createdAt), "%d-%b-%Y")) %>%
     dplyr::as_tibble() %>% dplyr::select(-c(.data$`_id`, .data$document.id)) %>% dplyr::relocate(cols_of_interest)
 
   out0
 
-# Filter out internal accounts --------------------------------------------
-exclude_patt <- c(
-      ".*@galacticpolymath.com",
-      # "numbatmedia@gmail.com",
-      "gtorion97@gmail.com",
-      "gtorionnotion@gmail.com",
-      "mrwilkins06@gmail.com",
-      "ellahoulihan9@gmail.com",
-      "matthew.greig.cowan@gmail.com"
-    )
+  # Filter out internal accounts --------------------------------------------
+  exclude_patt <- c(
+    ".*@galacticpolymath.com",
+    "numbatmedia@gmail.com",
+    "gtorion97@gmail.com",
+    "gtorionnotion@gmail.com",
+    "mrwilkins06@gmail.com",
+    "ellahoulihan9@gmail.com",
+    "matthew.greig.cowan@gmail.com"
+  )
   excluded_emails <-  lapply(out0$email, \(email_i) {
-    is_excluded_i <- sum(stringr::str_detect(email_i,exclude_patt),na.rm=TRUE)>0
-    ifelse(is_excluded_i,email_i,NA)
-  }) %>%unlist() %>% as.vector() %>%  unique_sans_na()
-  message("* Ignoring ",length(excluded_emails)," internal emails: ",paste0(excluded_emails,collapse=", "),"\n")
-  out <-   out0 %>% dplyr::filter(!.data$email%in%excluded_emails)
+    is_excluded_i <- sum(stringr::str_detect(email_i, exclude_patt), na.rm =
+                           TRUE) > 0
+    ifelse(is_excluded_i, email_i, NA)
+  }) %>% unlist() %>% as.vector() %>%  unique_sans_na()
+  message(
+    "* Ignoring ",
+    length(excluded_emails),
+    " internal emails: ",
+    paste0(excluded_emails, collapse = ", "),
+    "\n"
+  )
+  out <-   out0 %>% dplyr::filter(!.data$email %in% excluded_emails)
 
-  # summary stats -----------------------------------------------------------
-  new_7_days <-sum(out$account_age<=7,na.rm=T)
-  new_30_days <-sum(out$account_age<=30,na.rm=T)
-  total <- nrow(out)
-  print(out)
-  message(rep("-",20))
-  message("User summary (galacticpolymath.com):\n- TOTAL: ",total,"\n- new in past week: ",new_7_days,"\n- new in past month: ",new_30_days)
   invisible(out)
 }
-
