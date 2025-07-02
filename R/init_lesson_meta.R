@@ -29,6 +29,20 @@ init_lesson_meta <- function(WD = "?",
   GdriveMetaID <- get_fm("GdriveMetaID", WD = WD, checkWD = FALSE)
   ShortTitle <- get_fm("ShortTitle", WD = WD, checkWD = FALSE)
 
+  #If any Gdrive IDs are missing, run update_fm()
+  if(is.na(GdriveDirName) |
+     is.na(GdriveMetaID) |
+     is.na(ShortTitle)) {
+    message("GdriveDirName, GdriveMetaID, or ShortTitle not found in front-matter.yml. Running update_fm() to update front-matter.yml.")
+    test_update <- update_fm(WD = WD, drive_reconnect = TRUE,recompile = FALSE)
+    if (!test_update) {
+      stop("update_fm() failed. Cannot continue with init_lesson_meta().")
+    }
+    # Re-assign after update
+    GdriveDirName <- get_fm("GdriveDirName", WD = WD, checkWD = FALSE)
+    GdriveMetaID <- get_fm("GdriveMetaID", WD = WD, checkWD = FALSE)
+    ShortTitle <- get_fm("ShortTitle", WD = WD, checkWD = FALSE)
+  }
 
   checkmate::assert(
     checkmate::check_character(GdriveMetaID, min.chars = 10, all.missing = F),

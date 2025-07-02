@@ -18,7 +18,7 @@ gp_api_query_users <- \(
   verbosity = 1
 ) {
   # checkmate::assert_choice(dev,c(TRUE,FALSE),null.ok=TRUE)
-  token <- get_gp_api_token()
+  token <- get_gp_api_token(dev=dev)
 
   # if (is.null(unit_id)) {
   #   WD <- parse_wd(WD)

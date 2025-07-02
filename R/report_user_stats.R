@@ -4,14 +4,16 @@
 #'
 #' @param verbosity passed to [httr2::req_perform()]; default=1
 #' @param view_data logical; do you want to open retrieved user data with [View()]? Default=TRUE
+#' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
 #' @returns Summary tibble
 #' @export
 #'
 
 report_user_stats <- function(verbosity = 1,
-                              view_data = TRUE) {
+                              view_data = TRUE,
+                              dev=FALSE) {
   # Get the user data
-  users <- gp_api_query_users(verbosity = verbosity)
+  users <- gp_api_query_users(verbosity = verbosity, dev=dev)
   # Get the number of active users
   users$active_in_30_days <- users$lastSignIn >= Sys.Date() - 30
   #Make NAs be inactive, cuz they would have this value if they'd signed in recently

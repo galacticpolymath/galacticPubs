@@ -45,7 +45,7 @@ gpsave <- function(filename,
   checkmate::assert_access(path_parent_dir(fn), access = "w")
 
 
-  if (is.list(obj)) {
+  if (is.list(obj)&!inherits(obj,"graf_w_footer")) {
     isgraf <- FALSE
     grob_list_tests <- lapply(1:length(obj), \(i) {
       isgraf <- inherits(obj[[i]], what = c("grob"))
@@ -57,6 +57,7 @@ gpsave <- function(filename,
     is_grob_list <- all(unlist(grob_list_tests))
   } else{
     isgraf <- inherits(obj, what = c("graf_w_footer", "ggplot", "grob"))
+    is_grob_list <- FALSE
   }
 
   if (!isgraf & !is_grob_list) {
@@ -88,9 +89,14 @@ gpsave <- function(filename,
       type = "quartz"
     )
     if (is_grob_list) {
-      grid::grid.newpage()
-      lapply(obj,\(f) grid::grid.draw(f))
+      #if object is a graf_w_footer, treat as one object, else go through layers
+
+        message("Trying to draw list of objects with grid::grid.draw()")
+        grid::grid.newpage()
+        lapply(1:length(obj), \(i) grid::grid.draw(obj[[i]]))
+
     } else{
+
       plot(obj)
     }
     dev.off()
@@ -115,7 +121,7 @@ gpsave <- function(filename,
     message("Something went wrong saving ", fn)
   }
 
-  test_save
+  invisible(test_save)
 }
 
 #matt's OG function

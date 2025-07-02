@@ -23,7 +23,7 @@ compile_teach_it <- function(WD = "?",
   if (!teach_it_prepared) {
     message(
       fm$MediumTitle,
-      " Teaching Materials not ready to compile. Skipping compile_teach_it()."
+      " Teaching Materials not set to compile. Skipping compile_teach_it()."
     )
 
     #This is the null output for the JSON
@@ -256,7 +256,8 @@ compile_teach_it <- function(WD = "?",
       warning(
         "No multimedia links found at `teach-it.gsheet!Multimedia` for `",
         fm$ShortTitle,
-        "`"      )
+        "`"
+      )
       #Overwrite for rare instances where you had something and then delete it
       update_fm(WD = WD,
                 change_this = list(FeaturedMultimedia = NA))
@@ -346,9 +347,14 @@ compile_teach_it <- function(WD = "?",
       if (!proc_data_test$success) {
         message("FAILED to compile procedures")
         warning("FAILED to compile procedures")
-        stop()
         proc_data <- NULL
+        stop()
 
+
+      } else if (proc_data_test$result$vocab$success == FALSE) {
+        message("FAILED to compile procedures vocab")
+        proc_data <- NULL
+        stop()
       } else{
         proc_data <- proc_data_test$result
         vocab <- proc_data$vocab$result
@@ -410,11 +416,15 @@ compile_teach_it <- function(WD = "?",
 
   # write JSON outputs ------------------------------------------------------
 
+
   destFolder <- fs::path(WD_git, "JSONs")
   outFile <-
     fs::path(destFolder, "teachingMaterials", ext = "json")
-
-  success <- save_json(out, outFile) %>% catch_err()
+  if (!teach_it_prepared) {
+    success <- FALSE
+  } else{
+    success <- save_json(out, outFile) %>% catch_err()
+  }
 
 
 

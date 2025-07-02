@@ -83,10 +83,11 @@ if(is.null(WD_git)){
 
 
   # Handle Vocab ------------------------------------------------------------
-  if (grepl("TermX", proc$Vocab[1])|grepl("TermX", proc$Vocab[2])) {
+  vocab_is_empty <- unique_sans_na(proc$Vocab) %>% length()==0
+  if (grepl("TermX", proc$Vocab[1])|grepl("TermX", proc$Vocab[2])|vocab_is_empty ) {
     proc$Vocab <- NA
     vocab_df <- NULL
-    message("Uninitialized Vocab data skipped.")
+    message("Uninitialized/Empty Vocab data skipped.")
   } else{
     #Consolidate for separate export (remove duplicates and separate vocab into a nice data frame)
     vocab_vec <-
