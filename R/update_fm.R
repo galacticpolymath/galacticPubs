@@ -254,16 +254,16 @@ update_fm <-
     #Make a QR code
     unit_name <- basename(WD)
     qr_path <- fs::path(WD,
-                      "assets",
-                      "_banners_logos_etc",
-                      paste0(unit_name, "__QR-code.png"))
+                        "assets",
+                        "_banners_logos_etc",
+                        paste0(unit_name, "__QR-code.png"))
 
-  if (!file.exists(qr_path)|force_upgrade) {
-    grDevices::png(qr_path)
-    plot(qrcode::qr_code(new_yaml$URL))
-    grDevices::dev.off()
-    message("QR Code generated for ", unit_name, " at:\n", qr_path, "\n")
-  }
+    if (!file.exists(qr_path) | force_upgrade) {
+      grDevices::png(qr_path)
+      plot(qrcode::qr_code(new_yaml$URL))
+      grDevices::dev.off()
+      message("QR Code generated for ", unit_name, " at:\n", qr_path, "\n")
+    }
 
     #make a unique `_id` combining numID & locale
     if (!is_empty(new_yaml$numID)) {
@@ -577,6 +577,15 @@ update_fm <-
 
     # enforce certain classes -------------------------------------------------
     new_yaml$numID <- as.integer(new_yaml$numID)
+
+
+    # quick fix to deprecate barroque GdriveTeachMatID logic -------------------
+    if (!is.na(new_yaml$GdriveTeachMatID) &
+        is.na(new_yaml$GdrivePublicID)) {
+      #if GdriveTeachMatID is set, but GdrivePublicID is not, then set GdrivePublicID to GdriveTeachMatID
+      message("GdrivePublicID not set, setting it to GdriveTeachMatID")
+    }
+    new_yaml$GdrivePublicID <- new_yaml$GdriveTeachMatID
 
 
 
