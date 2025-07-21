@@ -12,7 +12,7 @@ pacman_test <-
     }
   )
 if (!"error" %in% class(pacman_test)) {
-  p_load(shiny, shinythemes, sortable, rhandsontable)
+  p_load(shiny, shinythemes, sortable, rhandsontable,galacticPubs)
 } else{
   library(shiny)
   library(shinythemes)
@@ -24,11 +24,11 @@ if (!"error" %in% class(pacman_test)) {
 # Initialization ----------------------------------------------------------
 
 # WD is the Rstudio project folder, which is different from the Shiny app's working directory
-if (is_empty(.GlobalEnv$.editor_path)) {
+WD0 <- path <- Sys.getenv("editor_path")
+if (is_empty(WD0)) {
   stop("Editor path not found. Maybe you didn't run the app using editor()?")
-} else{
-  WD0 <- .GlobalEnv$.editor_path
 }
+
 meta_path <- fs::path(WD0, "meta")
 
   #Get path to front-matter path

@@ -38,8 +38,8 @@ compile_unit <-
     update_fm(WD = WD,
               save_output = TRUE,
               recompile = FALSE)
-    #run upload_assets to make sure there's nothing new
-    upload_assets(WD = WD)
+    #run compile_fm & upload_assets to make sure there's nothing new
+    compile_fm(WD = WD)
 
     if (missing(current_data)) {
       current_data <-

@@ -45,7 +45,7 @@ gpsave <- function(filename,
   checkmate::assert_access(path_parent_dir(fn), access = "w")
 
 
-  if (is.list(obj)&!inherits(obj,"graf_w_footer")) {
+  if (is.list(obj)&!inherits(obj,c("graf_w_footer", "ggplot"))) {
     isgraf <- FALSE
     grob_list_tests <- lapply(1:length(obj), \(i) {
       isgraf <- inherits(obj[[i]], what = c("grob"))
@@ -55,8 +55,8 @@ gpsave <- function(filename,
       return(isgraf)
     })
     is_grob_list <- all(unlist(grob_list_tests))
-  } else{
-    isgraf <- inherits(obj, what = c("graf_w_footer", "ggplot", "grob"))
+  } else if(inherits(obj, what = c("graf_w_footer", "ggplot", "grob"))){
+    isgraf <- TRUE
     is_grob_list <- FALSE
   }
 
