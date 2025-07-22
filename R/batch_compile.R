@@ -10,6 +10,7 @@
 #' @param change_this A list of values to change in the front matter before rebuilding. Default=NULL. Example: list(Title="Stormy Misty's Foal") would change the title of the lesson to the name of a horsey novel. If gh_proj_name=="all", make sure you set this to something you want to change for everything.
 #' @param clean Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to [compile_unit()]). Default=FALSE
 #' @param rebuild Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to [compile_unit()])
+#' @param drive_reconnect passed to [update_fm()] to reconnect google drive IDs
 #'
 #' @export
 #'
@@ -18,7 +19,8 @@ batch_compile <-
   function(shared_drive = "s",
            change_this = NULL,
            clean = FALSE,
-           rebuild = FALSE) {
+           rebuild = FALSE,
+           drive_reconnect= FALSE) {
     timer <- FALSE
     #If Suggested tictoc package is available, time how long the rebuild takes
     if (requireNamespace("tictoc")) {
@@ -42,7 +44,8 @@ batch_compile <-
       compile_success <-
         compile_unit(WD = WD,
                      rebuild = rebuild,
-                     clean = clean) %>% catch_err()
+                     clean = clean,
+                     drive_reconnect= drive_reconnect) %>% catch_err()
 
       dplyr::tibble(Compiled = convert_T_to_check(compile_success),
                     Lesson = basename(WD))

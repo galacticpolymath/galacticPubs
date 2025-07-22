@@ -484,19 +484,19 @@ update_fm <-
                    "teaching-materials")
         #shorthand path (usable for drive_find_path()), and more general across others' computers
         tm_path <-
-          fs::path("GP-Studio",
+          fs::path(new_yaml$GdriveHome,
                    "Edu",
                    "Lessons",
                    new_yaml$GdriveDirName,
                    "teaching-materials")
 
-        tmID <-
+        pubID <-tmID <-
           zget_drive_id(
             "../teaching-materials/",
             drive_root = new_yaml$GdriveDirID,
             fm_key = "GdriveTeachMatID"
           )
-        pubID <- NA
+        # pubID <- NA
 
 
         # Differential logic for paths of LIVE projects ---------------------------
@@ -509,8 +509,8 @@ update_fm <-
           fs::path("GalacticPolymath", new_yaml$MediumTitle)
         tm_path_full <-
           fs::path(lessons_get_path("gp"), new_yaml$MediumTitle)
-        tmID <- NA
-        pubID <-
+        # tmID <- NA
+        pubID <-tmID <-
           zget_drive_id(fs::path("GalacticPolymath", new_yaml$MediumTitle),
                         fm_key = "GdrivePublicID")
       }

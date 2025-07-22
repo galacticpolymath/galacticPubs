@@ -16,6 +16,7 @@
 #' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
 #' @param clean delete all JSON files in meta/ and start over? default=FALSE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
+#' @param drive_reconnect passed to [update_fm()] to reconnect google drive IDs
 #' @return current_data; also the lesson JSON is saved to `meta/JSON/UNIT.json`
 #' @importFrom rlang .data
 #' @export
@@ -25,7 +26,8 @@ compile_unit <-
            choices,
            current_data,
            clean = FALSE,
-           rebuild = NULL) {
+           rebuild = NULL,
+           drive_reconnect= FALSE) {
     WD <- parse_wd(WD)
 
     # initiate drive email associations ---------------------------------------
@@ -37,7 +39,8 @@ compile_unit <-
     # Always update front-matter (in case of template updates) ----------------
     update_fm(WD = WD,
               save_output = TRUE,
-              recompile = FALSE)
+              recompile = FALSE,
+              drive_reconnect = drive_reconnect)
     #run compile_fm & upload_assets to make sure there's nothing new
     compile_fm(WD = WD)
 

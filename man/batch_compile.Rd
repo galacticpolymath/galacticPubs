@@ -8,7 +8,8 @@ batch_compile(
   shared_drive = "s",
   change_this = NULL,
   clean = FALSE,
-  rebuild = FALSE
+  rebuild = FALSE,
+  drive_reconnect = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ batch_compile(
 \item{clean}{Do you want to clean the meta/JSON folder and build everything from scratch? (Gets passed to \code{\link[=compile_unit]{compile_unit()}}). Default=FALSE}
 
 \item{rebuild}{Do you want to force rebuild everything (even if a particular item seems up to date?) default=FALSE (This par gets passed on as rebuild to \code{\link[=compile_unit]{compile_unit()}})}
+
+\item{drive_reconnect}{passed to \code{\link[=update_fm]{update_fm()}} to reconnect google drive IDs}
 }
 \description{
 Function to rebuild a lesson or lessons that found in a virtualized Google Drive for Desktop folder. It will also stage the lesson in the published folder if requested, but will not publish. To do that, you should call \code{\link[=batch_publish]{batch_publish()}}

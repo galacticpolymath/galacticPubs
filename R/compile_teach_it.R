@@ -64,11 +64,11 @@ compile_teach_it <- function(WD = "?",
                                "Upcoming"
                              ))#draft deprecated; Upcoming/Coming Soon confusion needs to be sorted out
     checkmate::assert_choice(gdrivehome, c("GP-Studio", "GP-LIVE"))
-    if (gdrivehome == "GP-Studio") {
-      tmID <- fm$GdriveTeachMatID
-    } else{
+    # if (gdrivehome == "GP-Studio") {
+    #   tmID <- fm$GdriveTeachMatID
+    # } else{
       tmID <- fm$GdrivePublicID
-    }
+    # }
     checkmate::assert_character(tmID, min.chars = 6)
 
     if (is.null(teach_it_drib)) {

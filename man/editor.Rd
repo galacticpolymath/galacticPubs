@@ -2,22 +2,43 @@
 % Please edit documentation in R/editor.R
 \name{editor}
 \alias{editor}
-\title{editor}
+\title{Launch the Galactic Polymath Editor Shiny App}
 \usage{
-editor(WD = "?", system_browser = TRUE)
+editor(WD = "?", system_browser = TRUE, run_in_bg = TRUE)
 }
 \arguments{
-\item{WD}{a local virtualized path to a lesson folder where Google Drive (Web) path will be extracted from front matter. Easiest is to pass "?" which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default="?"}
+\item{WD}{Character. A local virtualized path to a lesson folder where Google Drive (Web) path
+will be extracted from front matter. Passing \code{"?"} invokes \code{\link{pick_lesson}()}.
+Default is \code{"?"}.}
 
-\item{system_browser}{logical
-\itemize{
-\item TRUE (default): open in system default web browser
-\item FALSE: open in Rstudio browser pane
-}}
+\item{system_browser}{Logical. If \code{TRUE} (default), the app opens in the system default web browser.
+If \code{FALSE}, it opens in the RStudio viewer pane (if available).}
+
+\item{run_in_bg}{Logical. If \code{TRUE} (default), runs the app in a background R process using \code{callr::r_bg}.
+The app URL will be opened in a browser from the main R session, and the R session remains free.
+If \code{FALSE}, runs the app blocking in the current R session (useful for debugging).}
 }
 \value{
-Outputs to meta/front-matter.yaml
+Invisibly returns the \code{callr} background process object if \code{run_in_bg = TRUE}.
+Returns \code{NULL} invisibly if \code{run_in_bg = FALSE}.
 }
 \description{
-Start a Shiny app to edit front matter for a lesson. Accepts markdown syntax. The code is found in inst/shiny/gp_editor
+Starts the Shiny app for editing front matter of lessons, supporting markdown syntax.
+The app is located in the \code{inst/shiny/gp_editor} directory of the \code{galacticPubs} package.
+}
+\details{
+When run in background mode, the Shiny app runs in a separate R process,
+and the browser window is opened from the main R session.
+The background process will keep running until stopped manually.
+In blocking mode, the app runs in the current session and blocks until closed.
+}
+\examples{
+\dontrun{
+# Run the editor in background mode (default)
+editor()
+
+# Run the editor blocking in the current R session for debugging
+editor(run_in_bg = FALSE)
+}
+
 }

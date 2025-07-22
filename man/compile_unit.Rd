@@ -5,9 +5,23 @@
 \alias{unit_compile}
 \title{compile_unit}
 \usage{
-compile_unit(WD = "?", choices, current_data, clean = FALSE, rebuild = NULL)
+compile_unit(
+  WD = "?",
+  choices,
+  current_data,
+  clean = FALSE,
+  rebuild = NULL,
+  drive_reconnect = FALSE
+)
 
-unit_compile(WD = "?", choices, current_data, clean = FALSE, rebuild = NULL)
+unit_compile(
+  WD = "?",
+  choices,
+  current_data,
+  clean = FALSE,
+  rebuild = NULL,
+  drive_reconnect = FALSE
+)
 }
 \arguments{
 \item{WD}{is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
@@ -19,6 +33,8 @@ unit_compile(WD = "?", choices, current_data, clean = FALSE, rebuild = NULL)
 \item{clean}{delete all JSON files in meta/ and start over? default=FALSE}
 
 \item{rebuild}{if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL}
+
+\item{drive_reconnect}{passed to \code{\link[=update_fm]{update_fm()}} to reconnect google drive IDs}
 }
 \value{
 current_data; also the lesson JSON is saved to \code{meta/JSON/UNIT.json}
