@@ -391,6 +391,13 @@ zget_items <- \(df, fm) {
         NA
       )
 
+      #add externalURL links for files that have it
+      externalURL_i <- ifelse(
+        is_empty(df_item_i$extLink),
+        NA_character_,
+        df_item_i$extLink
+      )
+
       #output for this lsn
       list(
         itemTitle = df_item_i$title,
@@ -399,6 +406,7 @@ zget_items <- \(df, fm) {
         mimeType = mimeType_i,
         gdriveRoot=df_item_i$`_link`,
         isExportable = is_gdrive_file_i, #Can be exported using Gdrive /export?format= URLs
+        externalURL = externalURL_i,
         links = list(
           zcatchLinkNA(linkText = full_link_txt, #preview link
                        url = cust_url2),
