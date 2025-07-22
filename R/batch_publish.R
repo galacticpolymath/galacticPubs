@@ -94,7 +94,7 @@ batch_publish <- function(WD="?",
   # report results
   hl <- paste0(c("\n", rep("_", 30), "\n"), collapse = "")
   message(hl, "Lessons published:\n")
-  print(update_list)
+  print(update_list,n=nrow(update_list))
   message(hl)
   # turn off timer if it was started
   if (timer) {

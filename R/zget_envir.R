@@ -374,11 +374,31 @@ zget_items <- \(df, fm) {
         drive_share_txt <- "Preview/Copy in Google Docs"
       }
 
+      link_i <- df_item_i$`_link`
+
+      is_gdrive_file_i <- identical(TRUE,
+                                    grepl("^https://docs.google.com",link_i)& !is_empty(link_i)& !df_item_i$`_fileType`=="pdf")
+
+      #simplified mimeType for this item (docx, pptx, xlsx, or NA for files that aren't exportable)
+      mimeType_i <- switch(
+        df_item_i$`_fileType`,
+        "document" = "docx",
+        "presentation" = "pptx",
+        "spreadsheet" = "xlsx",
+        "pdf" = "pdf",
+        "form" = NA,
+        "web resource" = NA,
+        NA
+      )
+
       #output for this lsn
       list(
         itemTitle = df_item_i$title,
         itemDescription = df_item_i$description,
         itemCat = df_item_i$`_fileType`,
+        mimeType = mimeType_i,
+        gdriveRoot=df_item_i$`_link`,
+        isExportable = is_gdrive_file_i, #Can be exported using Gdrive /export?format= URLs
         links = list(
           zcatchLinkNA(linkText = full_link_txt, #preview link
                        url = cust_url2),
