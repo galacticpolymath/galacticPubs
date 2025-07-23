@@ -403,6 +403,7 @@ zget_items <- \(df, fm) {
         itemTitle = df_item_i$title,
         itemDescription = df_item_i$description,
         itemCat = df_item_i$`_fileType`,
+        itemType = df_item_i$`_itemType`,
         mimeType = mimeType_i,
         gdriveRoot=df_item_i$`_link`,
         isExportable = is_gdrive_file_i, #Can be exported using Gdrive /export?format= URLs

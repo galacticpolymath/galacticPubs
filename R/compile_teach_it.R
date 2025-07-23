@@ -6,7 +6,7 @@
 #' @param teach_it_drib if you already have the teach-it.gsheet dribble looked up from [drive_find_path()], passing this object can can save some time; default = NULL
 #' @param rename_lessons logical; do you want to rename lesson folders based on Titles tab? default= T takes about 2sec to check if nothing needs changing; uses helper function [zrename_lessons()]
 #' @param prompt_rename logical, do you want to prompt user about whether to rename lessons? default=FALSE
-#' @return tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
+#' @return return success; logical
 #' @importFrom rlang .data
 #' @export
 
@@ -67,7 +67,7 @@ compile_teach_it <- function(WD = "?",
     # if (gdrivehome == "GP-Studio") {
     #   tmID <- fm$GdriveTeachMatID
     # } else{
-      tmID <- fm$GdrivePublicID
+    tmID <- fm$GdrivePublicID
     # }
     checkmate::assert_character(tmID, min.chars = 6)
 
@@ -322,6 +322,7 @@ compile_teach_it <- function(WD = "?",
     if (!proc_initialized) {
       #should change 'lessons' to something more like 'procedure'
       #output NULL structure paralleling real data
+      test_zget_proc <- list(success = NA, result = NULL)
       proc_data <- list()
       proc_data$lessonDur <- NULL
       proc_data$lessons <- purrr::map(1:nlessons, \(i) {
@@ -336,7 +337,7 @@ compile_teach_it <- function(WD = "?",
       })
       vocab <- NULL
     } else{
-      proc_data_test <-
+      test_zget_proc <-
         zget_procedure(
           proc = proc,
           lext = lext,
@@ -344,14 +345,14 @@ compile_teach_it <- function(WD = "?",
           mlinks = mlinks,
           WD_git = WD_git
         ) %>% catch_err(keep_results = TRUE)
-      if (!proc_data_test$success) {
+      if (!test_zget_proc$success) {
         message("FAILED to compile procedures")
         warning("FAILED to compile procedures")
         proc_data <- NULL
         stop()
 
 
-      } else if (proc_data_test$result$vocab$success == FALSE) {
+      } else if (test_zget_proc$result$vocab$success == FALSE) {
         message("FAILED to compile procedures vocab")
         proc_data <- NULL
         stop()
@@ -384,14 +385,15 @@ compile_teach_it <- function(WD = "?",
     # Extract majority of Teach-It data ---------------------------------------
     #Get item links for each environment*gradeBand
 
-    teach_mat_data <- zget_envir(
+    test_zget_envir <- zget_envir(
       tlinks = tlinks,
       lesson_statuses = lesson_statuses,
       proc_data = proc_data,
       fm = fm,
       uinfo = uinfo
-    )
+    ) %>% catch_err(keep_results = TRUE)
 
+    teach_mat_data <- test_zget_envir$result
 
 
     out <- c(
@@ -421,19 +423,39 @@ compile_teach_it <- function(WD = "?",
   outFile <-
     fs::path(destFolder, "teachingMaterials", ext = "json")
   if (!teach_it_prepared) {
-    success <- FALSE
+    test_save <- FALSE
   } else{
-    success <- save_json(out, outFile) %>% catch_err()
+    test_save <- save_json(out, outFile) %>% catch_err()
   }
 
+  # summarize success based on all tests
+  success <- all(test_zget_envir$success,
+                 test_zget_proc$success,
+                 test_save,
+                 na.rm = TRUE)
 
 
-  # return compiled output --------------------------------------------------
+  # print compiled output --------------------------------------------------
   message(" ", rep("-", 30))
   message(" Teaching Material Compiled:")
   # print(printToScreenTable)
   message(" JSON file saved\n @ ", outFile, "\n")
   message(" Success: ", success)
+  #if success is FALSE, print out the errors
+  if (!success) {
+    message("Following Tests failed:\n X-",
+            paste(unique_sans_na(c(
+              ifelse(!test_zget_envir$success, "zget_envir()", NA_character_),
+              ifelse(!test_zget_proc$success, "zget_proc()", NA_character_),
+              ifelse(!test_save, "save_json()", NA_character_)
+            ))
+            , collapse = "\n X-"))
+  }
+
+
   message(" ", rep("-", 30))
+
+
+  return(success)
 
 }

@@ -9,7 +9,7 @@
 #' @importFrom rlang .data
 #' @export
 #'
-compile_json <- function(WD = NULL,
+compile_json <- function(WD = "?",
                          WD_git = NULL,
                          destFolder) {
   message("Recompiling UNIT.json ")

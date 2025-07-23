@@ -37,7 +37,7 @@ unit_compile(
 \item{drive_reconnect}{passed to \code{\link[=update_fm]{update_fm()}} to reconnect google drive IDs}
 }
 \value{
-current_data; also the lesson JSON is saved to \code{meta/JSON/UNIT.json}
+success; logical
 }
 \description{
 Compiles selected sections of a lesson (or "all"). Results in a UNIT.json, but files are not staged for publishing. Need to follow with a call to \code{\link[=stage_assets]{stage_assets()}} and \code{\link[=publish]{publish()}} to publish these changes to the web. Tries to use cacheing, but sometimes, may need to run a function twice to get efficient time savings because of delay in modTimes with Google Drive for Desktop.
