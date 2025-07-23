@@ -17,7 +17,7 @@
 #' @param clean delete all JSON files in meta/ and start over? default=FALSE
 #' @param rebuild if T, rebuild everything; overrides RebuildAllMaterials in front-matter.yml; default= NULL
 #' @param drive_reconnect passed to [update_fm()] to reconnect google drive IDs
-#' @return current_data; also the lesson JSON is saved to `meta/JSON/UNIT.json`
+#' @return success; logical
 #' @importFrom rlang .data
 #' @export
 #'
@@ -27,7 +27,7 @@ compile_unit <-
            current_data,
            clean = FALSE,
            rebuild = NULL,
-           drive_reconnect= FALSE) {
+           drive_reconnect = FALSE) {
     WD <- parse_wd(WD)
 
     # initiate drive email associations ---------------------------------------
@@ -37,10 +37,12 @@ compile_unit <-
     googlesheets4::gs4_auth(email = oauth_email)
 
     # Always update front-matter (in case of template updates) ----------------
-    update_fm(WD = WD,
-              save_output = TRUE,
-              recompile = FALSE,
-              drive_reconnect = drive_reconnect)
+    update_fm(
+      WD = WD,
+      save_output = TRUE,
+      recompile = FALSE,
+      drive_reconnect = drive_reconnect
+    )
     #run compile_fm & upload_assets to make sure there's nothing new
     compile_fm(WD = WD)
 
@@ -259,51 +261,85 @@ compile_unit <-
 
 
       #update the cache of the teaching-material state of things
-      get_state(
-        path = c(teach_it_path, tm_path_full),
-        save_path = save_path,
-        path1_modTime_diff = 2
-      )
+      #(only if succeeded in updating and compiling)
+      if (identical(TRUE, test_update_teach_it &
+                    test_compile_teach_it)) {
+        get_state(
+          path = c(teach_it_path, tm_path_full),
+          save_path = save_path,
+          path1_modTime_diff = 2
+        )
+      }
+
     } else{
+      test_update_teach_it <- test_compile_teach_it <- NA
       message("No changes to `../teaching-materials/` detected...")
       message("Skipping update_teach_links() and compile_teach-it()")
     }
 
 
 
+    #only run if all tests are TRUE or NA to this point
+    if (all(test_update_teach_it, test_compile_teach_it, na.rm = TRUE)) {
+      #always rebuild front matter
+      message("• Running compile_fm()")
+      test_compile_fm <- compile_fm(WD = WD) %>% catch_err()
 
-
-    # Separate parts of Front Matter ------------------------------------------
-
-    #always rebuild front matter
-    message("• Running compile_fm()")
-    compile_fm(WD = WD)
-
-
-
-
-    # Make Shareable Assets ---------------------------------------------------
-    message("• Running make_shareable_assets()")
-    make_shareable_assets(WD = WD, open_file = FALSE)
+      # Make Shareable Assets ---------------------------------------------------
+      message("• Running make_shareable_assets()")
+      test_shareable <- make_shareable_assets(WD = WD, open_file = FALSE)
 
 
 
-    ################################################################
-    # Compile all JSONs ----------------------------------------------
-    message("• Running compile_json()")
-    compile_json(WD_git = WD_git)
 
-    #after run, reset rebuild-all trigger
-    if (rebuild) {
-      message("• Running update_fm()")
-      update_fm(WD_git = WD_git,
-                change_this = list(RebuildAllMaterials = FALSE))
-
+    } else{
+      test_compile_fm <- test_shareable <- NA
+      message("Skipping compileJSON() because previous steps failed.")
     }
 
 
-    invisible(current_data)
-  }
+    # Summarize success as logical of all tests
+    success <- all(
+      test_compile_fm,
+      test_update_teach_it,
+      test_compile_teach_it,
+      test_shareable,
+      na.rm = TRUE
+    )
+
+    if (success & rebuild) {
+      #after run, reset rebuild-all trigger
+      message("• Running update_fm()")
+      test_update <- update_fm(WD_git = WD_git,
+                               change_this = list(RebuildAllMaterials = FALSE)) %>% catch_err()
+
+      SUCCESS <- success&test_update
+    }else{
+      test_update <- update_fm(WD_git = WD_git)
+      SUCCESS <- success&test_update
+    }
+
+    #message user about whether this unit was successfully compiled
+    message(
+      "\n############################################\n",
+      ifelse(SUCCESS, "SUCCEEDED! ", "FAILED! "),
+      "Unit '",
+      basename(WD),
+      "' compilation",
+      #report tests that failed if any
+      ifelse(success, "", paste0(
+        "\n X-", paste(collapse = "\n X-", unique_sans_na(c(
+          ifelse(test_compile_fm, NA, "compile_fm()"),
+          ifelse(test_update_teach_it, NA, "update_teach_links()"),
+          ifelse(test_compile_teach_it, NA, "compile_teach_it()"),
+          ifelse(test_shareable, NA, "make_shareable_assets()")
+        )))
+      )),
+      "\n"
+    )
+
+invisible(SUCCESS)
+}
 
 #alias
 
