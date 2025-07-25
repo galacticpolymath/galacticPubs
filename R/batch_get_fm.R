@@ -7,6 +7,7 @@
 #' @param WD_git default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.
 #' @param output_tibble default=TRUE; try to force output into tibble
 #' @param exclude_TEST default=T; excludes test repositories
+#' @param print_result default=TRUE; print the result to console
 #' @family batch functions
 #' @returns a list of values for the requested keys for each project on the given drive
 #' @export
@@ -16,7 +17,8 @@ batch_get_fm <- \(
   WD = "s",
   WD_git = NULL,
   output_tibble = TRUE,
-  exclude_TEST = TRUE
+  exclude_TEST = TRUE,
+  print_result= TRUE
 ) {
 
   if(!is.null(WD_git)){WD <- get_wd(WD_git=WD_git)}
@@ -117,7 +119,8 @@ batch_get_fm <- \(
     names(res) <- basename(valid_projects)
   }
 
-
+  if(print_result){
   print(res,n=nrow(res))
+  }
   invisible(res)
 }

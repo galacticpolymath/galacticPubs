@@ -64,16 +64,15 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
 
 
   # Create YT previews for youtube vids attached to unit --------------------
-  WD_git <- get_wd_git(WD = WD)
-  cache_path <- fs::path(WD_git, "saves", "multimedia.RDS")
 
+  mlinks <- get_fm("FeaturedMultimedia",WD=WD)[[1]] %>% dplyr::as_tibble()
 
   # Look for multimedia cache file
-  if (!file.exists(cache_path)) {
-    message("No multimedia info cache found at : ", cache_path)
+  if (is_empty(mlinks)) {
+    message("No Featured Multimedia found.")
     body <- gcloud_divs
   } else{
-    mlinks <- readRDS(cache_path)
+
     checkmate::assert_data_frame(mlinks)
     mlinks$isYT <- ifelse(mlinks$type == "video" &
                             grepl("youtu.be|youtube", mlinks$mainLink),

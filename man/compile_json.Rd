@@ -4,7 +4,7 @@
 \alias{compile_json}
 \title{Compile all the JSONs to create 1 file for the web}
 \usage{
-compile_json(WD = NULL, WD_git = NULL, destFolder)
+compile_json(WD = "?", WD_git = NULL, destFolder)
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}}}

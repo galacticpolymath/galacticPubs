@@ -9,7 +9,8 @@ batch_get_fm(
   WD = "s",
   WD_git = NULL,
   output_tibble = TRUE,
-  exclude_TEST = TRUE
+  exclude_TEST = TRUE,
+  print_result = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ batch_get_fm(
 \item{output_tibble}{default=TRUE; try to force output into tibble}
 
 \item{exclude_TEST}{default=T; excludes test repositories}
+
+\item{print_result}{default=TRUE; print the result to console}
 }
 \value{
 a list of values for the requested keys for each project on the given drive

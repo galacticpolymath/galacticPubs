@@ -21,7 +21,7 @@ compile_teach_it(
 \item{prompt_rename}{logical, do you want to prompt user about whether to rename lessons? default=FALSE}
 }
 \value{
-tibble of the compiled standards data; a JSON is saved to meta/JSON/teaching-materials.json
+return success; logical
 }
 \description{
 Compile Teaching Materials from a project's 'teach-it.gsheet'. Also renames folders based on info in the Titles tab and invokes \code{\link[=sweep_teaching_materials]{sweep_teaching_materials()}} to relocate scrap working files.
