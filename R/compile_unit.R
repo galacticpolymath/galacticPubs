@@ -113,7 +113,7 @@ compile_unit <-
     med_title <- get_fm("MediumTitle", WD = WD, checkWD = F)
 
     checkmate::assert_choice(status,
-                             c("Proto", "Hidden", "Beta", "Coming Soon", "Live", "Draft"))#draft deprecated
+                             c("Proto", "Hidden", "Beta", "Upcoming", "Live", "Draft"))#draft deprecated
     checkmate::assert_character(med_title, min.chars = 2)
 
     # local path to teaching material

@@ -4,6 +4,7 @@
 # Load helper functions
 source("helpers.R")
 source("modules.R")
+source("md_input_module.R")
 pacman_test <-
   tryCatch(
     require(pacman),
@@ -92,8 +93,16 @@ ui <- navbarPage(
       "Most text fields accept",
       a("markdown formatting", href = "https://www.markdownguide.org/basic-syntax/")
     ),
+    shiny::selectizeInput(
+        inputId = "PublicationStatus",
+        label = "Publication Status",
+        choices = c("Proto","Hidden","Live", "Upcoming"),
+        selected = y$PublicationStatus,
+        width = "150"
+      ),
     div(
       class = "inline-fields",
+
       textInput(
         inputId = "ShortTitle",
         label = "shortTitle (a unique prefix for key lesson materials)",

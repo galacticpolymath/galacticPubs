@@ -58,7 +58,6 @@ compile_teach_it <- function(WD = "?",
                                "Proto",
                                "Hidden",
                                "Beta",
-                               "Coming Soon",
                                "Live",
                                "Draft",
                                "Upcoming"
@@ -352,13 +351,13 @@ compile_teach_it <- function(WD = "?",
         stop()
 
 
-      } else if (test_zget_proc$result$vocab$success == FALSE) {
+      } else if (identical(test_zget_proc$result$vocab$success, FALSE)) {
         message("FAILED to compile procedures vocab")
         proc_data <- NULL
-        stop()
+
       } else{
-        proc_data <- proc_data_test$result
-        vocab <- proc_data$vocab$result
+        proc_data <- test_zget_proc$result
+        vocab <- test_zget_proc$result$vocab$result
         #output gathered vocab as csv
         if (!is.null(vocab)) {
           vocab_outfile <-

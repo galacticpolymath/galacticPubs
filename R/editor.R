@@ -98,7 +98,7 @@ editor <- function(WD = "?",
 
   } else {
     # Run app blocking in current session (for debugging)
-    assign(".editor_path", WD, envir = .GlobalEnv)
+     Sys.setenv(editor_path = WD)
     shiny::runApp(
       appDir = system.file("shiny", "gp_editor", package = "galacticPubs"),
       host = "127.0.0.1",

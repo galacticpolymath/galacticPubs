@@ -110,7 +110,7 @@ compile_fm <- \(WD = "?") {
                               min.chars = 2,
                               any.missing = F)
   checkmate::assert_choice(fm$PublicationStatus,
-                           c("Proto", "Hidden", "Beta", "Coming Soon", "Live", "Draft"))#draft deprecated
+                           c("Proto", "Hidden", "Beta", "Upcoming", "Live", "Draft"))#draft deprecated
   checkmate::assert_character(fm$locale, n.chars = 5, any.missing = F)
 
 
