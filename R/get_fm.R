@@ -125,9 +125,11 @@ get_fm <-
           warning("*  If you meant to do partial key matching, add a '~' prefix.")
           warning("** Try updating your front-matter with update_fm()")
 
-          stop("Invalid keys supplied: \n  - ",
+          warning("Invalid keys supplied for",basename(WD)," : \n  -",
                paste0(key[!valid_names], collapse = "\n  -"))
-        }
+          warning("If these are common keys, your front-matter.yml may be corrupted.")
+        return(NULL)
+          }
 
         results <- purrr::map(1:length(key), \(i) {
           key_checks_i <- checkmate::test_choice(key[i], KEYS)

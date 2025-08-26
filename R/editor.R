@@ -69,7 +69,7 @@ editor <- function(WD = "?",
     )
 
     # file.show("editor_stdout.log")
-    errlog <- read_file("editor_stderr.log")
+    errlog <- readr::read_file("editor_stderr.log")
 
 
 

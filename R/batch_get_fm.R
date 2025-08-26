@@ -18,10 +18,11 @@ batch_get_fm <- \(
   WD_git = NULL,
   output_tibble = TRUE,
   exclude_TEST = TRUE,
-  print_result= TRUE
+  print_result = TRUE
 ) {
-
-  if(!is.null(WD_git)){WD <- get_wd(WD_git=WD_git)}
+  if (!is.null(WD_git)) {
+    WD <- get_wd(WD_git = WD_git)
+  }
 
   if (sum(fs::is_absolute_path(WD)) == length(WD)) {
     projects <- WD
@@ -67,40 +68,45 @@ batch_get_fm <- \(
     }
 
     out <- get_fm(key = key, WD = valid_projects[i])
-    #handle scenario where output is a single vector
-    if (length(out) == 1) {
-      out <- dplyr::as_tibble(out)
-      names(out) <- key
-    }
-    unit_name <- valid_projects[i] %>% basename()
-    #output as tibble as long as specific keys are supplied (it gets unwieldy otherwise)
-    if (output_tibble & !is.null(key)) {
-      out <- dplyr::as_tibble(out)
-      #modify output to remove test repos
-      if (exclude_TEST) {
-        out <- out %>%
-          dplyr::filter(!.data$isTestRepo) %>%
-          dplyr::select(dplyr::any_of(key0))
-      }
-      #add unit name
-      out <- out %>%
-        dplyr::mutate(unit = unit_name) %>%
-        dplyr::relocate("unit")
-
-      #Prevent issue if calling function expects these keys, but not requested
-      if ("ReleaseDate" %in% names(out)) {
-        out$ReleaseDate <- out$ReleaseDate %>% as.character()
-      }
-
-      if ("LastUpdated" %in% names(out)) {
-        out$LastUpdated <- out$LastUpdated %>% as.character()
-      }
-
-
-
-
+    if (is.null(out)) {
+      warning("Possibly corrupted front matter for: ",
+              basename(valid_projects[i]))
     } else{
-      out <- c(unit = unit_name, out)
+      #handle scenario where output is a single vector
+      if (length(out) == 1) {
+        out <- dplyr::as_tibble(out)
+        names(out) <- key
+      }
+      unit_name <- valid_projects[i] %>% basename()
+      #output as tibble as long as specific keys are supplied (it gets unwieldy otherwise)
+      if (output_tibble & !is.null(key)) {
+        out <- dplyr::as_tibble(out)
+        #modify output to remove test repos
+        if (exclude_TEST) {
+          out <- out %>%
+            dplyr::filter(!.data$isTestRepo) %>%
+            dplyr::select(dplyr::any_of(key0))
+        }
+        #add unit name
+        out <- out %>%
+          dplyr::mutate(unit = unit_name) %>%
+          dplyr::relocate("unit")
+
+        #Prevent issue if calling function expects these keys, but not requested
+        if ("ReleaseDate" %in% names(out)) {
+          out$ReleaseDate <- out$ReleaseDate %>% as.character()
+        }
+
+        if ("LastUpdated" %in% names(out)) {
+          out$LastUpdated <- out$LastUpdated %>% as.character()
+        }
+
+
+
+
+      } else{
+        out <- c(unit = unit_name, out)
+      }
     }
     #avoid tibble coercion error
 
@@ -119,8 +125,9 @@ batch_get_fm <- \(
     names(res) <- basename(valid_projects)
   }
 
-  if(print_result){
-  print(res,n=nrow(res))
+  if (print_result)
+  {
+    print(res, n  =  nrow(res))
   }
   invisible(res)
 }

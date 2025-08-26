@@ -1,22 +1,3 @@
 Loading required package: pacman
 
 Listening on http://127.0.0.1:8080
-Hit a snag with expr: .
-Warning in catch_err(., keep_results = TRUE) :
-  Assertion on 'front-matter.yml: PublicationStatus' failed: Must be element of set {'Proto','Hidden','Beta','Coming Soon','Live','Draft'}, but is 'Upcoming'.
-Warning: Error in prep_input: update_fm() failed for some reason in prep_input() for WD=/Users/mattwilkins/Library/CloudStorage/GoogleDrive-matt@galacticpolymath.com/Shared drives/GP-Studio/Edu/Lessons/BirdsInWinter_en-US
-  63: stop
-  62: prep_input [/Users/mattwilkins/R-pkg-dev/galacticPubs/R/prep_input.R#44]
-  61: observe [/Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library/galacticPubs/shiny/gp_editor/app.R#531]
-  60: <observer>
-  13: shiny::runApp
-  12: <Anonymous>
-  11: <Anonymous>
-  10: base::do.call
-   9: base::saveRDS
-   8: base::withCallingHandlers
-   7: doTryCatch
-   6: tryCatchOne
-   5: tryCatchList
-   2: tryCatchList
-   1: base::tryCatch

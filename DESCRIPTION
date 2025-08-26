@@ -1,7 +1,7 @@
 Package: galacticPubs
 Type: Package
 Title: Galactic Polymath Lesson Publishing Tools
-Version: 1.5.1
+Version: 1.5.2
 Author: Matthew R Wilkins, PhD
 Maintainer: Matthew R Wilkins, PhD <matt@galacticpolymath.com>
 Description: Code to enable the GP Nexus education publishing workflow. Outputs are highly structured
@@ -49,6 +49,7 @@ Imports:
 Remotes:
     galacticpolymath/galacticEdTools
 Suggests: 
+    bslib (>= 0.9.0),
     colorspace (>= 2.0.0),
     commonmark (>= 1.8.0),
     htmltools (>= 0.5.8),
@@ -58,6 +59,7 @@ Suggests:
     tictoc (>= 1.0.1),
     ISOcodes (>= 2022.01.10),
     rhandsontable (>= 0.3.8),
+    shinyAce (>= 0.4.4),
     testthat (>= 3.0.0),
     urlshorteneR (>= 1.5.7),
     usethis (>= 2.1.3),

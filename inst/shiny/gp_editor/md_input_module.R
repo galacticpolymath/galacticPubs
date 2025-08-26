@@ -4,31 +4,41 @@
 # 1. MODULE UI FUNCTION (with improved styling and explicit namespaces)
 # -----------------------------------------------------------------------------
 # This function creates the user interface for our module.
-# It takes one argument, `id`, which is the namespace for the module.
-md_input_ui <- function(id, label = "Enter Markdown", value = "", rows = 8) {
+md_input_ui <- function(id, label = "Enter Markdown", value = "", rows = 8, width = NULL, height = NULL, placeholder = NULL,theme="solarized_light" ) {
   # Get the namespace for the module's UI elements
   ns <- shiny::NS(id)
 
   # Define CSS styles for better UX/UI.
-  # We use paste0 to dynamically create the correct CSS selectors for the namespaced IDs.
   ui_styling <- shiny::tags$style(shiny::HTML(paste0("
-    /* Style for the text input area */
-    #", ns('text_input'), " {
-      border: 1px solid #ced4da;
+    /* Style for the main container box */
+    #", ns('container'), " {
+      border: 2px solid #363636;
       border-radius: 0.25rem;
-      font-family: monospace;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      padding: 0.5rem 0.75rem;
+      padding: 0.5rem;
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.1); /* Added subtle drop shadow */
     }
 
-    /* Style for the preview output area */
+    /* Style for the aceEditor container */
+    #", ns('text_input'), " {
+      border: none;
+      border-bottom: 1px solid #e9ecef; /* Separator line */
+      border-radius: 0;
+      margin-bottom: 0.5rem;
+      width: 100% !important; /* Ensure it fills the container */
+    }
+
+    /* Style for the preview output area (no border) */
     #", ns('preview_output'), " {
       background-color: #f8f9fa;
-      border: 1px solid #e9ecef;
       padding: 1rem 1.5rem;
-      border-radius: 0.25rem;
       min-height: 100px; /* Give it some height even when empty */
+    }
+
+    /* Style for images inside the preview to make them responsive */
+    #", ns('preview_output'), " img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.25rem;
     }
   ")))
 
@@ -37,21 +47,27 @@ md_input_ui <- function(id, label = "Enter Markdown", value = "", rows = 8) {
     # Add our custom CSS to the page's head
     shiny::tags$head(ui_styling),
 
-    # A standard text area for the user to type in
-    shiny::textAreaInput(
-      inputId = ns("text_input"),
-      label = shiny::h4(label),
-      value = value,
-      width = "100%",
-      rows = rows
-    ),
+    # Add the main label for the entire component
+    shiny::h4(label),
 
-    # A horizontal line to separate the input from the preview
-    shiny::hr(),
+    # Create a div to act as the bordered container
+    shiny::div(
+      id = ns("container"),
 
-    # The area where the rendered HTML preview will be displayed
-    shiny::h4("Live Preview"),
-    shiny::uiOutput(ns("preview_output"))
+      # Use shinyAce::aceEditor for syntax highlighting
+      shinyAce::aceEditor(
+        outputId = ns("text_input"),
+        value = value,
+        mode = "markdown",
+        theme = theme,
+        height = height,
+        placeholder = placeholder,
+        wordWrap = TRUE # Enable word wrapping
+      ),
+
+      # The preview area, directly below the input
+      shiny::uiOutput(ns("preview_output"))
+    )
   )
 }
 
@@ -65,22 +81,19 @@ md_input_server <- function(id) {
 
     # This reactive expression renders the HTML preview
     output$preview_output <- shiny::renderUI({
-      # Using `input$text_input` directly is fine, but for text that might be empty,
-      # it's good practice to validate it. An empty string is falsy for req().
-      # To show an empty preview for empty text, we can use a slightly different check.
+      # The input from aceEditor is accessed the same way: input$text_input
       if (is.null(input$text_input) || input$text_input == "") {
         return(NULL) # Return nothing if the input is empty
       }
 
-      # Convert the raw Markdown text to HTML
-      html_content <- commonmark::markdown_html(input$text_input)
+      # This correctly processes both standard Markdown and raw HTML tags.
+      html_content <- markdown::markdownToHTML(text = input$text_input, fragment.only = TRUE)
 
       # Tell Shiny to treat the string as raw HTML
       shiny::HTML(html_content)
     })
 
     # RETURN the reactive value of the raw text input.
-    # This allows the parent app to access the Markdown content.
     return(
       shiny::reactive({ input$text_input })
     )
@@ -88,38 +101,55 @@ md_input_server <- function(id) {
 }
 
 # -----------------------------------------------------------------------------
-# 3. EXAMPLE SHINY APP
+# 3. EXAMPLE SHINY APP (Corrected to match user's code)
 # -----------------------------------------------------------------------------
-# This is a minimal app to demonstrate how to use the module.
+# This is a minimal app to demonstrate how to use the module correctly.
+# NOTE: bslib, markdown, and shinyAce are now required.
+# install.packages(c("bslib", "markdown", "shinyAce"))
 ui <- shiny::fluidPage(
+  theme = bslib::bs_theme(version = 5), # Use a Bootstrap 5 theme
+
   shiny::titlePanel("Markdown Module Example"),
 
-  # Use the module's UI function. We'll give it the namespace "my_editor".
+  # Use the module's UI function with the user's specific parameters.
   md_input_ui(
-    id = "my_editor",
-    label = "Your Markdown Content",
-    value = "## Hello, Module!\n\n*This is a list.*\n\n1. One\n2. Two"
+    id = "Bonus",
+    label = "Bonus Material (Easter eggs and tidbits that aren't a whole extension lesson)",
+    placeholder = "Optional. Start typing here...",
+    value = '<figure class="figure float-md-end ms-md-3 mb-3" style=" max-width: min(40vw, 400px);">
+  <img
+    src="https://storage.googleapis.com/gp-cloud/lessons/FairyWrens_en-US/Copy-of-Copy-of-PBFW-square.jpg"
+    class="img-fluid"
+    style="height: auto;"
+    alt="Purple-backed fairywren illustration">
+  <figcaption class="figure-caption text-end fst-italic small">
+    Purple-backed fairywren illustration by Dr. Allison Johnson
+  </figcaption>
+</figure>
+This unit features photos, video footage, and real data collected by a team of researchers studying evolution of behavior and group size in [fairywrens](https://en.wikipedia.org/wiki/Malurus)—a group of colorful Australian birds in the genus *Malurus*. These adorable birds are inherently fun to watch, and serve as a gateway for students to get curious about animal behavior and practice being observant and asking questions. The unit also features amazing scientific illustrations by Dr. Allison Johnson sprinkled throughout videos and teaching materials!',
+    height = "350px",
+    width = "100%"
   ),
 
   shiny::hr(),
 
   # This section is just to prove that the main app can access the module's data
-  shiny::h3("Output from Module"),
+  shiny::h3("Output from Module (in main app)"),
   shiny::p("The following text is the raw Markdown content being returned by the module:"),
-  shiny::verbatimTextOutput("raw_text_output")
+  shiny::verbatimTextOutput("bonus_output")
 )
 
 server <- function(input, output, session) {
 
-  # Call the module's server function and store its return value.
-  # The `markdown_content` variable will be a reactive expression
-  # holding the raw text from the text area.
-  markdown_content <- md_input_server(id = "my_editor")
+  # 1. Call the module's server function ONCE at the top level.
+  #    Store the returned reactive value in a variable.
+  bonus_content <- md_input_server(id = "Bonus")
 
-  # Use the returned reactive value in the main app
-  output$raw_text_output <- shiny::renderText({
-    # To access the value of a reactive, you call it like a function
-    markdown_content()
+  # 2. Now you can USE the returned value in any render expression.
+  #    The module's own preview will render automatically because of the call above.
+  output$bonus_output <- shiny::renderText({
+    # To get the current text from the module, call the reactive like a function.
+    bonus_content()
   })
 }
 

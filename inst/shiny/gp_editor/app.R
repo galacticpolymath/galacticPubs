@@ -256,16 +256,16 @@ ui <- navbarPage(
 
     hr(class = "blhr"),
     h3("But wait, there's more!"),
-    textAreaInput(
-      "Bonus",
+    md_input_ui(
+      id="Bonus",
       label = "Bonus Material (Easter eggs and tidbits that aren't a whole extension lesson)",
       placeholder = "Optional.",
       value = y$Bonus,
       height = "150px",
       width = "100%"
     ),
-    textAreaInput(
-      "Extensions",
+    md_input_ui(
+      id="Extensions",
       label = "Extensions (Full spin-off lessons, activities, and assessments)",
       placeholder = "Optional.",
       value = y$Extensions,
@@ -276,16 +276,16 @@ ui <- navbarPage(
     h3("Background and Research Connections"),
     #Research background
     #Connection to Research
-    textAreaInput(
-      "ConnectionToResearch",
+    md_input_ui(
+      id="ConnectionToResearch",
       label = "Connection to Research",
       placeholder = "#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
       value = y$ConnectionToResearch,
       height = "150px",
       width = "100%"
     ),
-    textAreaInput(
-      "Background",
+    md_input_ui(
+      id="Background",
       label = "Research Background:",
       placeholder = "![Journal article image](ScreenShotOfStudy.png)\n[Link to Original Study](StudyURL)\n#### Scientific Background\nVery accessible explanation of this line of research and why it matters.\n#### Further Reading\n- [Link to relevant thing 1](url1)\n- [Link to relevant thing 2](url2)",
       value = y$Background,
@@ -296,15 +296,15 @@ ui <- navbarPage(
     hr(class = "blhr"),
     h3("Feedback & Credits"),
     #Feedback
-    textAreaInput(
-      "Feedback",
+    md_input_ui(
+      id="Feedback",
       label = "Feedback",
       placeholder = "### Got suggestions or feedback?\n#### We want to know what you think!\n[Please share your thoughts using this form](Add form link) and we will use it to improve this and other future lessons.",
       value = y$Feedback,
       height = "150px",
       width = "100%"
     ),
-    textAreaInput(
+    md_input_ui(
       "Credits",
       label = "Credits",
       placeholder = "#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
@@ -505,7 +505,37 @@ server <- function(input, output, session) {
   })
 
   # Server logic for Tab 1 modules ------------------------------------------
-  #initialize values
+
+  # Markdown fields with Preview
+  # 1. Call the module's server function ONCE at the top level.
+  #    Store the returned reactive value in a variable.
+  bonus_content <- md_input_server(id = "Bonus")
+  extensions_content <- md_input_server(id = "Extensions")
+  connection_content <- md_input_server(id = "ConnectionToResearch")
+  background_content <- md_input_server(id = "Background")
+  feedback_content <- md_input_server(id = "Feedback")
+  credits_content <- md_input_server(id = "Credits")
+
+
+  # 2. Now you can USE the returned value in any render expression.
+  #    The module's own preview will render automatically because of the call above.
+  output$bonus_output <- shiny::renderText({
+    # To get the current text from the module, call the reactive like a function.
+    bonus_content()
+  })
+  output$extensions_output <- shiny::renderText({
+    extensions_content()})
+  output$connection_output <- shiny::renderText({
+    connection_content()})
+  output$background_output <- shiny::renderText({
+    background_content()})
+  output$feedback_output <- shiny::renderText({
+    feedback_content()})
+  output$credits_output <- shiny::renderText({
+    credits_content()})
+
+
+   #initialize values
   #define initial reactive values for ediTable
   accessibility_data <- reactiveVal(y$Accessibility)
   ack_data <- reactiveVal(y$Acknowledgments)
@@ -642,13 +672,24 @@ server <- function(input, output, session) {
   #######################################
   # Save YAML when save button clicked -------------------------------------------
   observe({
+
     template_upgraded <-
       vals$current_data$TemplateVer > vals$saved_data$TemplateVer
     # if template upgraded, trigger rebuild of all materials in compile_unit
 
     if (template_upgraded) {
       vals$current_data$RebuildAllMaterials <- TRUE
-    }
+  }
+
+    #assert that some basic fields are filled before saving
+    checkmate::assert(
+      checkmate::check_choice(vals$current_data$PublicationStatus, c("Proto","Hidden","Live", "Upcoming")),
+      checkmate::check_string(vals$current_data$ShortTitle),
+      checkmate::assert_date(vals$current_data$ReleaseDate),
+      checkmate::assert_string(vals$current_data$Title),
+      checkmate::assert_string(vals$current_data$ForGrades),
+      checkmate::assert_string(vals$current_data$EstUnitTime)
+    )
 
     #write current data
     yaml::write_yaml(vals$current_data,
