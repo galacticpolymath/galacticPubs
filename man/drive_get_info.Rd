@@ -44,7 +44,9 @@ Extract galacticPubs-relevant information from a GP lesson file, with an expecte
 Also extracts the modification datetime and drive link. 'title' and 'description' are also included to match TeachMatLinks fields, though they cannot be populated automatically.
 }
 \examples{
+\dontrun{
   drive_find_path("GP-Studio/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
+  }
 
 }
 \seealso{

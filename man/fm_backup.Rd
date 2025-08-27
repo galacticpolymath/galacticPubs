@@ -13,5 +13,5 @@ fm_backup(WD = "?")
 logical; success of the backup
 }
 \description{
-This function keeps 20 of the most recent backup copies of the front matter file
+This function keeps 40 of the most recent backup copies of the front matter file
 }

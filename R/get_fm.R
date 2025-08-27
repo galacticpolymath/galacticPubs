@@ -16,11 +16,13 @@
 #' @param ... additional args passed to check function
 #' @returns Tries to cromulently return an appropriate string, tibble, list or vector of values for the associated keys.
 #' @examples
+#' \dontrun{
 #' get_fm()
 #' get_fm(key=c("Title","ShortTitle","locale"))
 #' get_fm(key="Title",WD=pick_lesson())
 #' #partial matching for all front-matter entries starting with 'gdrive' (case insensitive)
 #' get_fm("gdrive","?")
+#' }
 #' @export
 
 get_fm <-
@@ -34,18 +36,17 @@ get_fm <-
            always_list = FALSE,
            standardize_NA = TRUE,
            ...) {
+
     WD0 <- WD #backup
     #In case key isn't supplied, interpret "?" as WD
     if (!is.null(key) & identical(TRUE, key %in% c("?", "??"))) {
-      WD = key
-      key = NULL
-      message("you put '?' for key. It should be key first")
+      stop("you put '?' for key. It should be key first, then WD!")
     }
 
     #if yaml_path not supplied, look it up
     if (is.null(yaml_path)) {
       if (is.null(WD_git)) {
-        #WD is for the google drive side of things (not the gp-lessons dir)
+        #WD is for the Google drive side of things (not the gp-lessons dir)
         WD <- parse_wd(WD)
         WD_git <- get_wd_git(WD=WD)
       }

@@ -48,9 +48,11 @@ Imports meta/front-matter.yml value(s) to environment as a list.
 If you ask for only one key, output will be a vector, rather than a list
 }
 \examples{
+\dontrun{
 get_fm()
 get_fm(key=c("Title","ShortTitle","locale"))
 get_fm(key="Title",WD=pick_lesson())
 #partial matching for all front-matter entries starting with 'gdrive' (case insensitive)
 get_fm("gdrive","?")
+}
 }
