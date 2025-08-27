@@ -34,10 +34,12 @@ get_fm <-
            always_list = FALSE,
            standardize_NA = TRUE,
            ...) {
+    WD0 <- WD #backup
     #In case key isn't supplied, interpret "?" as WD
     if (!is.null(key) & identical(TRUE, key %in% c("?", "??"))) {
       WD = key
       key = NULL
+      message("you put '?' for key. It should be key first")
     }
 
     #if yaml_path not supplied, look it up
@@ -45,9 +47,7 @@ get_fm <-
       if (is.null(WD_git)) {
         #WD is for the google drive side of things (not the gp-lessons dir)
         WD <- parse_wd(WD)
-        #Basename must always match b/w Google Drive & gp-lessons
-        WD_git_root <- get_wd_git()
-        WD_git <- fs::path(WD_git_root, "Lessons", basename(WD))
+        WD_git <- get_wd_git(WD=WD)
       }
 
       if(checkWD){

@@ -555,9 +555,10 @@ server <- function(input, output, session) {
 
   # Monitor whether there are unsaved changes -------------------------------
   observe({
+    #!!!!!!!!!!!!!!!! IMPORTANT
     #don't run until full page rendered
-
-    if (!is.null(input$Feedback)) {
+    # versions_data must not be changed or this can royally screw up the file upon save
+    if (isolate(!is.null(versions_data))) {
       data_check <-
         prep_input(input,
                    WD = WD())
