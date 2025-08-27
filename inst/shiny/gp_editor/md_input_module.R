@@ -19,7 +19,7 @@ md_input_ui <- function(id, label = "Enter Markdown", value = "", rows = 8, widt
     }
 
     /* Style for the aceEditor container */
-    #", ns('text_input'), " {
+    #", ns('markdown_input'), " {
       border: none;
       border-bottom: 1px solid #e9ecef; /* Separator line */
       border-radius: 0;
@@ -56,7 +56,7 @@ md_input_ui <- function(id, label = "Enter Markdown", value = "", rows = 8, widt
 
       # Use shinyAce::aceEditor for syntax highlighting
       shinyAce::aceEditor(
-        outputId = ns("text_input"),
+        outputId = ns("markdown_input"),
         value = value,
         mode = "markdown",
         theme = theme,
@@ -81,13 +81,13 @@ md_input_server <- function(id) {
 
     # This reactive expression renders the HTML preview
     output$preview_output <- shiny::renderUI({
-      # The input from aceEditor is accessed the same way: input$text_input
-      if (is.null(input$text_input) || input$text_input == "") {
+      # The input from aceEditor is accessed the same way: input$markdown_input
+      if (is.null(input$markdown_input) || input$markdown_input == "") {
         return(NULL) # Return nothing if the input is empty
       }
 
       # This correctly processes both standard Markdown and raw HTML tags.
-      html_content <- markdown::markdownToHTML(text = input$text_input, fragment.only = TRUE)
+      html_content <- markdown::markdownToHTML(text = input$markdown_input, fragment.only = TRUE)
 
       # Tell Shiny to treat the string as raw HTML
       shiny::HTML(html_content)
@@ -95,7 +95,7 @@ md_input_server <- function(id) {
 
     # RETURN the reactive value of the raw text input.
     return(
-      shiny::reactive({ input$text_input })
+      shiny::reactive({ input$markdown_input })
     )
   })
 }

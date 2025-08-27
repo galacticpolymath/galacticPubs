@@ -56,6 +56,15 @@ prep_input <- function(input,
   #Remove -hot objects from output which aren't directly interpretable
   hot_names <-
     names(Y00)[sapply(names(Y00), \(x) grepl("-hot", x)) %>% unlist() %>% which()]
+
+
+# Handle "md_input()" markdown elements -----------------------------------
+
+  #remove -markdown_input objects too, since they are not interpretable
+  md_input_names <-
+    names(Y00)[sapply(names(Y00), \(x) grepl("-markdown_input", x)) %>% unlist() %>% which()]
+
+
   #Extract -handsontable data and add to Y0; -hot objects will be removed in next step
   Y0 <- Y00
   if (!is_empty(hot_names)) {
@@ -73,11 +82,20 @@ prep_input <- function(input,
     }
   }
 
+  #Do the same process for markdown_inputs
+  if(!is_empty(md_input_names)){
+    for(i in 1:length(md_input_names)){
+      fm_key2<-gsub("-markdown_input","",md_input_names[i])
+      Y0[[fm_key2]]<-Y0[[md_input_names[i]]]
+    }
+  }
+
+
 
   # Remove uninterpretable shiny functions from output ------------------------
   # figure out which are shiny operational variables in input & ignore em
   #add manual inputs to ignore (will catch any names containing these strings)
-  ignore_pattern <- c("commit_msg", "-hot", "dummy_")
+  ignore_pattern <- c("commit_msg", "-hot", "dummy_", "-markdown_input")
 
   input_op_var <- lapply(1:length(Y0), function(i) {
     name_i <- names(Y0)[[i]]

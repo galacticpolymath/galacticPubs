@@ -519,7 +519,7 @@ server <- function(input, output, session) {
 
   # 2. Now you can USE the returned value in any render expression.
   #    The module's own preview will render automatically because of the call above.
-  output$Bonus <- shiny::renderText({
+  output$bonus_output <- shiny::renderText({
     # To get the current text from the module, call the reactive like a function.
     bonus_content()
   })
@@ -531,7 +531,7 @@ server <- function(input, output, session) {
     background_content()})
   output$feedback_output <- shiny::renderText({
     feedback_content()})
-  output$Credits <- shiny::renderText({
+  output$credits_output <- shiny::renderText({
     credits_content()})
 
 
