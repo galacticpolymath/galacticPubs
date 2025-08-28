@@ -21,6 +21,7 @@ compile_teach_it <- function(WD = "?",
   fm <- get_fm(WD_git = WD_git)
   teach_it_prepared <- "Teaching Materials" %in%  fm$ReadyToCompile
   if (!teach_it_prepared) {
+    warning("X FAILED to compile teach-it for ",basename(WD))
     message(
       fm$MediumTitle,
       " Teaching Materials not set to compile. Skipping compile_teach_it()."
@@ -54,14 +55,7 @@ compile_teach_it <- function(WD = "?",
     status <- fm$PublicationStatus
     gdrivehome <- fm$GdriveHome
     checkmate::assert_choice(status,
-                             c(
-                               "Proto",
-                               "Hidden",
-                               "Beta",
-                               "Live",
-                               "Draft",
-                               "Upcoming"
-                             ))#draft deprecated; Upcoming/Coming Soon confusion needs to be sorted out
+                             c("Proto", "Hidden", "Beta", "Live", "Draft", "Upcoming"))#draft deprecated; Upcoming/Coming Soon confusion needs to be sorted out
     checkmate::assert_choice(gdrivehome, c("GP-Studio", "GP-LIVE"))
     # if (gdrivehome == "GP-Studio") {
     #   tmID <- fm$GdriveTeachMatID
@@ -422,38 +416,38 @@ compile_teach_it <- function(WD = "?",
   outFile <-
     fs::path(destFolder, "teachingMaterials", ext = "json")
   if (!teach_it_prepared) {
-    test_save <- FALSE
+    success <-  FALSE
   } else{
     test_save <- save_json(out, outFile) %>% catch_err()
+    # summarize success based on all tests
+    success <- all(test_zget_envir$success,
+                   test_zget_proc$success,
+                   test_save,
+                   na.rm = TRUE)
+    # print compiled output --------------------------------------------------
+    message(" ", rep("-", 30))
+    message(" Teaching Material Compiled:")
+    # print(printToScreenTable)
+    message(" JSON file saved\n @ ", outFile, "\n")
+    message(" Success: ", success)
+    #if success is FALSE, print out the errors
+    if (!success) {
+      message("Following Tests failed:\n X-",
+              paste(unique_sans_na(c(
+                ifelse(
+                  !test_zget_envir$success,
+                  "zget_envir()",
+                  NA_character_
+                ),
+                ifelse(!test_zget_proc$success, "zget_proc()", NA_character_),
+                ifelse(!test_save, "save_json()", NA_character_)
+              ))
+              , collapse = "\n X-"))
+    }
+
+
+    message(" ", rep("-", 30))
   }
-
-  # summarize success based on all tests
-  success <- all(test_zget_envir$success,
-                 test_zget_proc$success,
-                 test_save,
-                 na.rm = TRUE)
-
-
-  # print compiled output --------------------------------------------------
-  message(" ", rep("-", 30))
-  message(" Teaching Material Compiled:")
-  # print(printToScreenTable)
-  message(" JSON file saved\n @ ", outFile, "\n")
-  message(" Success: ", success)
-  #if success is FALSE, print out the errors
-  if (!success) {
-    message("Following Tests failed:\n X-",
-            paste(unique_sans_na(c(
-              ifelse(!test_zget_envir$success, "zget_envir()", NA_character_),
-              ifelse(!test_zget_proc$success, "zget_proc()", NA_character_),
-              ifelse(!test_save, "save_json()", NA_character_)
-            ))
-            , collapse = "\n X-"))
-  }
-
-
-  message(" ", rep("-", 30))
-
 
   return(success)
 

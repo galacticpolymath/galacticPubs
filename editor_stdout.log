@@ -1,0 +1,92 @@
+# A tibble: 73 × 4
+   changed key                    old_value                            new_value
+   <chr>   <chr>                  <chr>                                <chr>    
+ 1 ✓       SponsorLogo            assets/_banners_logos_etc/Copy-of-N… https://…
+ 2 <NA>    UnitBanner             <NA>                                 https://…
+ 3 ✗       LessonTiles            https://storage.googleapis.com/gp-c… https://…
+ 4 ✓       LessonTiles            https://storage.googleapis.com/gp-c… https://…
+ 5 ✓       LessonTiles            https://storage.googleapis.com/gp-c… https://…
+ 6 ✗       LessonTiles            https://storage.googleapis.com/gp-c… https://…
+ 7 ✗       QRcode                 https://storage.googleapis.com/gp-c… https://…
+ 8 ✗       LearningEpaulette      https://storage.googleapis.com/gp-c… https://…
+ 9 ✗       LearningEpaulette_vert https://storage.googleapis.com/gp-c… https://…
+10 ✗       SupportingMedia        https://storage.googleapis.com/gp-c… https://…
+# ℹ 63 more rows
+# A tibble: 2 × 2
+  success task                            
+  <chr>   <chr>                           
+1 ✓       synced assets with the cloud    
+2 ✓       updated all URLs in front-matter
+[1] "classroom_grades_6-8"
+[1] "assessments"
+# A tibble: 11 × 4
+   changed key                old_value new_value                               
+   <lgl>   <chr>              <lgl>     <chr>                                   
+ 1 NA      FeaturedMultimedia NA        "c(\"{vid1}\", \"{vid2}\", \"{vid3}\")" 
+ 2 NA      FeaturedMultimedia NA        "c(\"video\", \"video\", \"video\")"    
+ 3 NA      FeaturedMultimedia NA        "c(\"1\", \"2\", \"3\")"                
+ 4 NA      FeaturedMultimedia NA        "c(\"1\", \"1\", \"2\")"                
+ 5 NA      FeaturedMultimedia NA        "c(\"The Fairywren Challenge: Ask Quest…
+ 6 NA      FeaturedMultimedia NA        "c(\"Introduces the fairywrens and scaf…
+ 7 NA      FeaturedMultimedia NA        "c(NA, NA, NA)"                         
+ 8 NA      FeaturedMultimedia NA        "c(NA, NA, NA)"                         
+ 9 NA      FeaturedMultimedia NA        "c(NA, NA, NA)"                         
+10 NA      FeaturedMultimedia NA        "c(\"https://youtube.com/shorts/gm6wZFS…
+11 NA      FeaturedMultimedia NA        "c(NA, NA, \"https://www.youtube.com/wa…
+# A tibble: 2 × 2
+  success task                            
+  <chr>   <chr>                           
+1 ✓       synced assets with the cloud    
+2 ✓       updated all URLs in front-matter
+# A tibble: 0 × 0
+# A tibble: 9 × 5
+# Rowwise: 
+    lsn Chunk ChunkStart ChunkDur ChunkEnd
+  <int> <int>      <dbl>    <int>    <dbl>
+1     1     1          0        5        5
+2     1     2          5       10       15
+3     1     3         15       10       25
+4     1     3         NA       10       10
+5     1     4         25       10       35
+6     2     1          0        5        5
+7     2     2          5       20       25
+8     2     3         25       15       40
+9     2     4         40        5       45
+  file_n                                    newer   by units
+1      1 assets/_other-media-to-publish/vocab.csv 19.9  days
+# A tibble: 1 × 4
+  success filename  cloud_path                         download_url             
+  <chr>   <chr>     <chr>                              <chr>                    
+1 ✓       vocab.csv lessons/FairyWrens_en-US/vocab.csv https://storage.googleap…
+# A tibble: 2 × 2
+  success task                            
+  <chr>   <chr>                           
+1 ✓       synced assets with the cloud    
+2 ✓       updated all URLs in front-matter
+# A tibble: 2 × 2
+  success task                            
+  <chr>   <chr>                           
+1 ✓       synced assets with the cloud    
+2 ✓       updated all URLs in front-matter
+# A tibble: 2 × 2
+  success task                            
+  <chr>   <chr>                           
+1 ✓       synced assets with the cloud    
+2 ✓       updated all URLs in front-matter
+# A tibble: 2 × 2
+  success task                            
+  <chr>   <chr>                           
+1 ✓       synced assets with the cloud    
+2 ✓       updated all URLs in front-matter
+# A tibble: 9 × 3
+  success item               ID                                                 
+  <chr>   <chr>              <chr>                                              
+1 ✓       GdriveDirID        1ALf0yOAFV6Dg7MF_NovX0V9lPVrmIWG9                  
+2 ✓       GdriveDirURL       https://drive.google.com/drive/folders/1ALf0yOAFV6…
+3 ✓       GdriveMetaID       1gTgTxclMYWRkRQEniFYbL-2rXUCveMOT                  
+4 ✗       GdriveTeachItID    <NA>                                               
+5 ✗       GdriveStandardsID  <NA>                                               
+6 ✓       GdrivePublishedID  1E3RG-gVbYnXF3GfMV0wh8YBF9IDXFcbH                  
+7 ✓       GdriveTeachMatPath GP-Studio/Edu/Lessons/FairyWrens_en-US/teaching-ma…
+8 ✓       GdriveTeachMatID   1Mu4U2Iuxvd8N_9cQpXtF8B8hkr9b_2XX                  
+9 ✓       GdrivePublicID     1Mu4U2Iuxvd8N_9cQpXtF8B8hkr9b_2XX                  

@@ -10,7 +10,9 @@ safe_read_yaml(
   eval.expr = TRUE,
   checkWD = TRUE,
   auto_init = TRUE,
-  standardize_NA = FALSE
+  standardize_missing = FALSE,
+  missing_value = NA,
+  names_meaningful = TRUE
 )
 }
 \arguments{
@@ -24,8 +26,12 @@ safe_read_yaml(
 
 \item{auto_init}{logical; do you want to automatically create a front-matter.yml file if it's not found? Runs \code{\link[=init_fm]{init_fm()}}; default=TRUE}
 
-\item{standardize_NA}{logical; do you want all "",NULL,list(), etc. to be read in as NA using \code{\link[=is_empty]{is_empty()}}? default=FALSE}
+\item{standardize_missing}{logical; do you want all "",NULL,list(), etc. to be read in as NA using \code{\link[=is_empty]{is_empty()}}?; default=FALSE}
+
+\item{missing_value}{how do you want missing values to be represented? default=NA; also accepts NULL; passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}}
+
+\item{names_meaningful}{logical; passed to \code{\link[=is_empty]{is_empty()}}; default=TRUE}
 }
 \description{
-Wrapper for \link[yaml:read_yaml]{read_yaml} that simplifies all null and missing data to NA. Creates front-matter.yml if not found
+Wrapper for \link[yaml:read_yaml]{read_yaml} that simplifies all null and missing data to NA or NULL. Creates front-matter.yml if not found
 }

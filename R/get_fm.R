@@ -12,7 +12,8 @@
 #' @param auto_init logical; do you want to automatically create a front-matter.yml file if it's not found? Runs [init_fm()]; default=FALSE
 #' @param check string referring to a check function(x) to pass to [checkmate::assert()]; e.g. check="checkmate::check_character(x,min.chars=10)" will throw an error if an output is not a string of at least 10 characters. default=NULL
 #' @param always_list logical; do you want to always return a list? default=FALSE will unlist() the result if it seems to be a single item
-#' @param standardize_NA logical; do you want all "",NULL,list(), etc. to be read in as NA using [is_empty()]? passed to [safe_read_yaml()]; default=TRUE
+#' @param standardize_missing logical; do you want all "",NULL,list(), etc. to be read in as NA using [is_empty()]? passed to [safe_read_yaml()]; default=TRUE
+#' @param missing_value how do you want missing values to be represented? default=NA; also accepts NULL; passed to [safe_read_yaml()]
 #' @param ... additional args passed to check function
 #' @returns Tries to cromulently return an appropriate string, tibble, list or vector of values for the associated keys.
 #' @examples
@@ -34,9 +35,9 @@ get_fm <-
            auto_init = FALSE,
            check = NULL,
            always_list = FALSE,
-           standardize_NA = TRUE,
+           standardize_missing = TRUE,
+           missing_value = NA,
            ...) {
-
     WD0 <- WD #backup
     #In case key isn't supplied, interpret "?" as WD
     if (!is.null(key) & identical(TRUE, key %in% c("?", "??"))) {
@@ -48,33 +49,36 @@ get_fm <-
       if (is.null(WD_git)) {
         #WD is for the Google drive side of things (not the gp-lessons dir)
         WD <- parse_wd(WD)
-        WD_git <- get_wd_git(WD=WD)
+        WD_git <- get_wd_git(WD = WD)
       }
 
-      if(checkWD){
-      checkmate::assert_directory_exists(
-        WD_git,
-        .var.name = paste0(
-          "Check for 'gp-lessons' folder matching Gdrive lesson project: '",
-          basename(WD_git),
-          "'"
+      if (checkWD) {
+        checkmate::assert_directory_exists(
+          WD_git,
+          .var.name = paste0(
+            "Check for 'gp-lessons' folder matching Gdrive lesson project: '",
+            basename(WD_git),
+            "'"
+          )
         )
-      )
       }
 
 
       y <- safe_read_yaml(
-        yaml_path = fs::path(WD_git,"front-matter.yml"),
+        yaml_path = fs::path(WD_git, "front-matter.yml"),
         checkWD = checkWD,
         auto_init = auto_init,
-        standardize_NA = standardize_NA
+        standardize_missing = standardize_missing,
+        missing_value = missing_value
       )
+      #else if yaml_path supplied,use that
     } else{
       y <- safe_read_yaml(
         yaml_path = yaml_path,
         checkWD = checkWD,
         auto_init = auto_init,
-        standardize_NA = standardize_NA
+        standardize_missing = standardize_missing,
+        missing_value = missing_value
       )
     }
     KEYS <- names(y)
@@ -84,15 +88,13 @@ get_fm <-
       results <- y
 
       #otherwise check for key existence & output
-
     } else{
       checkmate::assert_vector(key, .var.name = "key")
 
       # check for partial matching prefix '~' only if length==1 -----------------
       if (length(key) == 1 & substr(key[1], 1, 1) == "~") {
         #check starts with; case insensitive, removing ~)
-        matches <- startsWith(x = tolower(KEYS),
-                              prefix = tolower(gsub("~", "", key[1]))) %>%
+        matches <- startsWith(x = tolower(KEYS), prefix = tolower(gsub("~", "", key[1]))) %>%
           which()
 
         if (length(matches) > 0) {
@@ -100,7 +102,7 @@ get_fm <-
           results <-  y[KEYS[matches]]
 
 
-          if (is_empty(results) & standardize_NA) {
+          if (is_empty(results) & standardize_missing) {
             results <- NA
           }
           if (is.null(names(results))) {
@@ -111,7 +113,7 @@ get_fm <-
           warning("\nNo partial matching results for keys using string: ",
                   key)
           warning(
-            "** Fix your key string, rerun with standardize_NA=T, or try updating your front-matter with update_fm()"
+            "** Fix your key string, rerun with standardize_missing=T, or try updating your front-matter with update_fm()"
           )
 
         }
@@ -126,17 +128,21 @@ get_fm <-
           warning("*  If you meant to do partial key matching, add a '~' prefix.")
           warning("** Try updating your front-matter with update_fm()")
 
-          warning("Invalid keys supplied for",basename(WD)," : \n  -",
-               paste0(key[!valid_names], collapse = "\n  -"))
+          warning(
+            "Invalid keys supplied for",
+            basename(WD),
+            " : \n  -",
+            paste0(key[!valid_names], collapse = "\n  -")
+          )
           warning("If these are common keys, your front-matter.yml may be corrupted.")
-        return(NULL)
-          }
+          return(NULL)
+        }
 
         results <- purrr::map(1:length(key), \(i) {
           key_checks_i <- checkmate::test_choice(key[i], KEYS)
           if (key_checks_i) {
             res_i <- y[[key[i]]]
-            if (is_empty(res_i) & standardize_NA) {
+            if (is_empty(res_i) & standardize_missing) {
               res_i <- NA
             }
           } else{
@@ -160,14 +166,14 @@ get_fm <-
 
     if (!is.null(check)) {
       results %>%  purrr::map(\(x) {
-        checkmate::assert(eval(parse(text = check)),
-                          .var.name = x[1])
+        checkmate::assert(eval(parse(text = check)), .var.name = x[1])
 
       })
 
     }
 
     #Don't return a list unless more than one item AND contains nested list
+    #or if always_list=FALSE
     if (length(results) == 1 &
         !is.list(results[[1]]) & !always_list) {
       unlist(results)
@@ -175,22 +181,28 @@ get_fm <-
       # Output certain keys as dataframes ---------------
       #these are keys we want to handle as dataframes
       df_keys <-
-        c("Versions",
+        c(
+          "Versions",
           "Authors",
-          "Credits",#deprecated
+          "Credits",
+          #deprecated
           "Acknowledgments",
-          "GoogleCloudStorage")
-
+          "GoogleCloudStorage"
+        )
+      if(!always_list & !is.null(missing_value)){
+        #make select keys into tibbles if possible (not possible with missing_value==NULL)
       results2 <- purrr::map(1:length(results), \(i) {
-          res_i <- results[[i]]
-          if (!is.null(res_i) & names(results)[i] %in% df_keys) {
-            res_i <- dplyr::as_tibble(res_i)
-          }else{
+        res_i <- results[[i]]
+        if (!is.null(res_i) & names(results)[i] %in% df_keys) {
+          res_i <- dplyr::as_tibble(res_i)
+        } else{
           res_i
-          }
-        })
+        }
+      })
       names(results2) <- names(results)
-
+      } else{
+        results2 <- results
+      }
       results2
 
 

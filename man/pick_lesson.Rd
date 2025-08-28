@@ -14,6 +14,7 @@ pick_lesson(
   sort_decr = TRUE,
   lessons_dir = NULL,
   pull_path = TRUE,
+  use_wd_git = FALSE,
   exclude_TEST = TRUE
 )
 
@@ -26,6 +27,7 @@ lesson_pick(
   sort_decr = TRUE,
   lessons_dir = NULL,
   pull_path = TRUE,
+  use_wd_git = FALSE,
   exclude_TEST = TRUE
 )
 }
@@ -51,6 +53,8 @@ lesson_pick(
 \item{lessons_dir}{the path to the directory where lessons are held (make sure it leads with a /); default=NULL will resolve by calling \code{\link[=lessons_get_path]{lessons_get_path()}}}
 
 \item{pull_path}{logical; do you want to pull (and unlist) only the paths? default= TRUE. FALSE will return the tibble for the selected units}
+
+\item{use_wd_git}{if TRUE, will use the git root of the current working directory as the base path for relative paths. Makes no expectation that front-matter.yml is present or working (useful in combination with \code{\link[=fm_restore]{fm_restore()}} when YML is corrupted)}
 
 \item{exclude_TEST}{default=T; excludes test repositories}
 }

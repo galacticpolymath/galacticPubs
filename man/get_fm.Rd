@@ -13,7 +13,8 @@ get_fm(
   auto_init = FALSE,
   check = NULL,
   always_list = FALSE,
-  standardize_NA = TRUE,
+  standardize_missing = TRUE,
+  missing_value = NA,
   ...
 )
 }
@@ -34,7 +35,9 @@ get_fm(
 
 \item{always_list}{logical; do you want to always return a list? default=FALSE will unlist() the result if it seems to be a single item}
 
-\item{standardize_NA}{logical; do you want all "",NULL,list(), etc. to be read in as NA using \code{\link[=is_empty]{is_empty()}}? passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}; default=TRUE}
+\item{standardize_missing}{logical; do you want all "",NULL,list(), etc. to be read in as NA using \code{\link[=is_empty]{is_empty()}}? passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}; default=TRUE}
+
+\item{missing_value}{how do you want missing values to be represented? default=NA; also accepts NULL; passed to \code{\link[=safe_read_yaml]{safe_read_yaml()}}}
 
 \item{...}{additional args passed to check function}
 }
