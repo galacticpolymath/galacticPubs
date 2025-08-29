@@ -14,13 +14,11 @@ fm_backup <- \(WD = "?") {
   fm <- yaml::read_yaml(file = fm_path)
   #make basic assertions about front matter, just like in update_fm()
 
-#  make assertions on basic properties of new_yaml ------------------------
-  checkmate::assert_list(
-    fm,
-    .var.name = "front-matter.yml",
-    all.missing = FALSE,
-    min.len = 40
-  )
+  #  make assertions on basic properties of new_yaml ------------------------
+  checkmate::assert_list(fm,
+                         .var.name = "front-matter.yml",
+                         all.missing = FALSE,
+                         min.len = 40)
   #assert that basic keys are present
   checkmate::assert_names(
     names(fm),
@@ -64,17 +62,19 @@ fm_backup <- \(WD = "?") {
     last_saved_fm <- (fm_backups[[1]]$fm[[1]])
 
     same <- identical(curr_fm, last_saved_fm)
-    waldo::compare(last_saved_fm, curr_fm)
 
 
     if (same) {
       message("No changes to front matter since last backup; skipping backup")
       return(TRUE)
     } else{
+      changes <- waldo::compare(last_saved_fm, curr_fm)
+      # New backup
       new_fm <- list(
         list(
           save_date = save_date,
           galacticPubs_version = galacticPubs_version,
+          changes = changes,
           fm = list(fm)
         )
       )
@@ -84,12 +84,19 @@ fm_backup <- \(WD = "?") {
   } else{
     message("Creating first backup front matter for '", proj, "'")
     n_backups <- 0
-    to_save <- list(list(save_date = save_date, fm = list(fm)))
+    to_save <- list(
+      list(
+        save_date = save_date,
+        galacticPubs_version = galacticPubs_version,
+        changes = NA_character_,
+        fm = list(fm)
+      )
+    )
   }
 
   #report to user that we're adding a backup to the archive (x total)
   message(paste0("Backing up '", proj, "' front matter (", n_backups + 1, " total)"))
-  to_save2 <- to_save[1:min(40, length(to_save))] #keep only the 40 most recent
+  to_save2 <- to_save[1:min(50, length(to_save))] #keep only the 40 most recent
   test_save <- yaml::write_yaml(
     x = to_save2,
     file = backup_path,

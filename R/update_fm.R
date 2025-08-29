@@ -484,13 +484,15 @@ update_fm <-
                    "teaching-materials")
         #shorthand path (usable for drive_find_path()), and more general across others' computers
         tm_path <-
-          fs::path(new_yaml$GdriveHome,
-                   "Edu",
-                   "Lessons",
-                   new_yaml$GdriveDirName,
-                   "teaching-materials")
+          fs::path(
+            new_yaml$GdriveHome,
+            "Edu",
+            "Lessons",
+            new_yaml$GdriveDirName,
+            "teaching-materials"
+          )
 
-        pubID <-tmID <-
+        pubID <- tmID <-
           zget_drive_id(
             "../teaching-materials/",
             drive_root = new_yaml$GdriveDirID,
@@ -510,7 +512,7 @@ update_fm <-
         tm_path_full <-
           fs::path(lessons_get_path("gp"), new_yaml$MediumTitle)
         # tmID <- NA
-        pubID <-tmID <-
+        pubID <- tmID <-
           zget_drive_id(fs::path("GalacticPolymath", new_yaml$MediumTitle),
                         fm_key = "GdrivePublicID")
       }
@@ -600,7 +602,12 @@ update_fm <-
       }
       checkmate::assert_directory_exists(WD_git)
       # make assertions on basic properties of new_yaml
-      checkmate::assert_list(new_yaml, .var.name = "front-matter.yml",all.missing = FALSE,min.len = 40)
+      checkmate::assert_list(
+        new_yaml,
+        .var.name = "front-matter.yml",
+        all.missing = FALSE,
+        min.len = 40
+      )
       #assert that basic keys are present
       checkmate::assert_names(
         names(new_yaml),
@@ -626,6 +633,14 @@ update_fm <-
       yaml_write_path <-
         fs::path(WD_git, "front-matter.yml")
 
+      #before writing, backup yml
+      test_backup <- fm_backup(WD = WD)
+      if (!test_backup) {
+        warning("front-matter.yml backup failed for ",
+                basename(WD),
+                "Aborting update_fm().")
+        return(FALSE)
+      }
       test_write <-
         yaml::write_yaml(new_yaml, yaml_write_path) %>% catch_err()
 
