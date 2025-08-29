@@ -1,7 +1,7 @@
 Package: galacticPubs
 Type: Package
 Title: Galactic Polymath Lesson Publishing Tools
-Version: 1.5.2
+Version: 1.5.3
 Author: Matthew R Wilkins, PhD
 Maintainer: Matthew R Wilkins, PhD <matt@galacticpolymath.com>
 Description: Code to enable the GP Nexus education publishing workflow. Outputs are highly structured
@@ -50,6 +50,7 @@ Suggests:
     commonmark (>= 1.8.0),
     gert (>= 1.6.0),
     ggrepel (>= 0.9.1),
+    googleAnalyticsR (>= 1.2.0),
     htmltools (>= 0.5.8),
     MASS (>= 7.3),
     rmdformats (>= 1.0.3),
@@ -66,6 +67,7 @@ Suggests:
     showtext (>= 0.9.0),
     tools (>= 3.6.0),
     urltools (>= 1.7.3),
+    waldo (>= 0.6.2),
     zipcodeR (>= 0.3.5)
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
 RoxygenNote: 7.3.2
