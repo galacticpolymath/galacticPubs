@@ -1,12 +1,12 @@
 #' Convert logical values to checks and exes
 #'
-#' Takes logical T and F and returns ✓ and ✗, respectively. If not logical, returns NA
+#' Takes logical T and F and returns \u2713 and \u2717, respectively. If not logical, returns NA
 #'
-#' It can handle existing ✓ and ✗, so you can run result through convert_T_to_check without problem
+#' It can handle existing \u2713 and \u2717, so you can run result through convert_T_to_check without problem
 #'
 #' @param x a logical value or vector of logical values
 #' @param no_match  what to put if there's no match (e.g. non-logical argument)? default=NA
-#' @returns ✓ if TRUE and ✗ if FALSE. If not logical, returns NA or another string supplied by no_match
+#' @returns \u2713 if TRUE and \u2717 if FALSE. If not logical, returns NA or another string supplied by no_match
 #' @export
 
 convert_T_to_check<-function(x,no_match=NA){
