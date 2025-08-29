@@ -2,7 +2,7 @@
 #'
 #' Initialize connection to Google Cloud Storage galacticPubs buckets
 #'
-#' This function uses {googleCloudStorageR} functions to read/write image files to our asset server. To authenticate, it needs access to a JSON file stored in the GP-Dev folder. To have access to this, you need to have Google Drive for Desktop installed and to be in the galacticPubs-user Google Group with our organization. You also need a galacticpolymath.com email address.
+#' This function uses 'googleCloudStorageR' functions to read/write image files to our asset server. To authenticate, it needs access to a JSON file stored in the GP-Dev folder. To have access to this, you need to have Google Drive for Desktop installed and to be in the galacticPubs-user Google Group with our organization. You also need a galacticpolymath.com email address.
 #' @param bucket the cloud storage bucket you want to initialize
 #' @return logical; did we succeed in connecting to the cloud?
 #' @export

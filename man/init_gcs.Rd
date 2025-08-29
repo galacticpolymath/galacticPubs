@@ -19,7 +19,7 @@ logical; did we succeed in connecting to the cloud?
 Initialize connection to Google Cloud Storage galacticPubs buckets
 }
 \details{
-This function uses {googleCloudStorageR} functions to read/write image files to our asset server. To authenticate, it needs access to a JSON file stored in the GP-Dev folder. To have access to this, you need to have Google Drive for Desktop installed and to be in the galacticPubs-user Google Group with our organization. You also need a galacticpolymath.com email address.
+This function uses 'googleCloudStorageR' functions to read/write image files to our asset server. To authenticate, it needs access to a JSON file stored in the GP-Dev folder. To have access to this, you need to have Google Drive for Desktop installed and to be in the galacticPubs-user Google Group with our organization. You also need a galacticpolymath.com email address.
 }
 \section{Functions}{
 \itemize{

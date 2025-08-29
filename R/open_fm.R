@@ -14,6 +14,7 @@ open_fm <- \(WD = "?") {
     fs::path(gp_lessons_dir, "Lessons", proj, "front-matter.yml")
 
   checkmate::assert_file_exists(yaml_path)
+
   usethis::edit_file(yaml_path)
 
 }

@@ -12,11 +12,11 @@ convert_T_to_check(x, no_match = NA)
 \item{no_match}{what to put if there's no match (e.g. non-logical argument)? default=NA}
 }
 \value{
-\u2713 if TRUE and \u2717 if FALSE. If not logical, returns NA or another string supplied by no_match
+✓ if TRUE and ✗ if FALSE. If not logical, returns NA or another string supplied by no_match
 }
 \description{
-Takes logical T and F and returns \u2713 and \u2717, respectively. If not logical, returns NA
+Takes logical T and F and returns ✓ and ✗, respectively. If not logical, returns NA
 }
 \details{
-It can handle existing \u2713 and \u2717, so you can run result through convert_T_to_check without problem
+It can handle existing ✓ and ✗, so you can run result through convert_T_to_check without problem
 }

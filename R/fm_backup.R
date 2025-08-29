@@ -44,11 +44,12 @@ fm_backup <- \(WD = "?") {
 
   backup_path <- fs::path(WD_git, "saves", "front_matter_backup.yml")
   save_date <- Sys.time() %>% as.character()
+
   galacticPubs_version <- as.character(utils::packageVersion("galacticPubs"))
   if (file.exists(backup_path)) {
     fm_backups <- yaml::read_yaml(file = backup_path)
     # checkmate::assert_list(fm_backups, all.missing = FALSE)
-    #
+
     n_backups <- length(fm_backups)
     #Test if current fm is identical to last saved
 
