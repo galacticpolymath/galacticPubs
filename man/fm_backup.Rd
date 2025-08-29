@@ -2,9 +2,12 @@
 % Please edit documentation in R/fm_backup.R
 \name{fm_backup}
 \alias{fm_backup}
+\alias{backup_fm}
 \title{Back up the front matter}
 \usage{
 fm_backup(WD = "?")
+
+backup_fm(WD = "?")
 }
 \arguments{
 \item{WD}{Working directory}
@@ -15,3 +18,8 @@ logical; success of the backup
 \description{
 This function keeps 40 of the most recent backup copies of the front matter file
 }
+\section{Functions}{
+\itemize{
+\item \code{backup_fm()}: 
+
+}}

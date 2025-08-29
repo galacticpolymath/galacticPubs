@@ -25,7 +25,7 @@ drive_copy_missing_files <- function(from_dir,
                                      ...) {
   timer <- FALSE
   # If Suggested tictoc package is available, time how long the rebuild takes
-  if (requireNamespace("tictoc")) {
+  if (library("tictoc",logical.return = T)) {
     tictoc::tic()
     timer <- TRUE
   }

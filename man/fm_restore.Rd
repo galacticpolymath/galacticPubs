@@ -2,13 +2,23 @@
 % Please edit documentation in R/fm_restore.R
 \name{fm_restore}
 \alias{fm_restore}
+\alias{restore_fm}
 \title{Restore front-matter from a backup JSON file in WD Git}
 \usage{
 fm_restore()
+
+restore_fm()
 }
 \value{
 success; logical
 }
 \description{
 This function restores the front-matter of a specified file from a backup JSON file created with \code{\link[=fm_backup]{fm_backup()}} stored in the WD Git repository.
+
+Alias for \code{fm_restore()}
 }
+\section{Functions}{
+\itemize{
+\item \code{restore_fm()}: Alias for \code{fm_restore()}
+
+}}

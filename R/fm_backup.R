@@ -61,6 +61,11 @@ fm_backup <- \(WD = "?") {
 
     last_saved_fm <- (fm_backups[[1]]$fm[[1]])
 
+    #Avoid last Updated (change in time stamp only) being a difference
+    #curr_fm just used for testing. fm for storing.
+    curr_fm$LastUpdated <- NULL
+    last_saved_fm$LastUpdated <- NULL
+
     same <- identical(curr_fm, last_saved_fm)
 
 
@@ -78,6 +83,8 @@ fm_backup <- \(WD = "?") {
           fm = list(fm)
         )
       )
+      #name with rounded savetime
+      names(new_fm) <- format(Sys.time(), "%Y-%m-%d %H:%M:%S") %>% as.character()
       to_save <- c(new_fm, fm_backups)
     }
 
@@ -92,11 +99,12 @@ fm_backup <- \(WD = "?") {
         fm = list(fm)
       )
     )
+    names(to_save) <- format(Sys.time(), "%Y-%m-%d %H:%M:%S") %>% as.character()
   }
 
   #report to user that we're adding a backup to the archive (x total)
   message(paste0("Backing up '", proj, "' front matter (", n_backups + 1, " total)"))
-  to_save2 <- to_save[1:min(50, length(to_save))] #keep only the 40 most recent
+  to_save2 <- to_save[1:min(50, length(to_save))] #keep only the 50 most recent
   test_save <- yaml::write_yaml(
     x = to_save2,
     file = backup_path,
@@ -119,3 +127,14 @@ fm_backup <- \(WD = "?") {
   }
   return(test_save)
 }
+
+#alias
+
+#' backup_fm
+#'
+#' @describeIn fm_backup
+#'
+#' @export
+
+
+backup_fm <- fm_backup #alias

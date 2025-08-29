@@ -100,6 +100,16 @@ ui <- navbarPage(
         selected = y$PublicationStatus,
         width = "150"
       ),
+    shiny::checkboxGroupInput(
+            "ReadyToCompile",
+            "(Which items are ready to be compiled?)",
+            choices = c(
+              "Standards Alignment",
+              "Teaching Materials",
+              "Procedure"
+            ),
+            selected = y$ReadyToCompile
+          ),
     div(
       class = "inline-fields",
 
@@ -789,13 +799,9 @@ server <- function(input, output, session) {
             "ReadyToCompile",
             "(Which items are ready to be compiled?)",
             choices = c(
-              "Front Matter",
               "Standards Alignment",
               "Teaching Materials",
-              "Procedure",
-              "Acknowledgments",
-              "Versions",
-              "Printable Lesson"
+              "Procedure"
             ),
             selected = isolate(vals$current_data$ReadyToCompile)
           ),

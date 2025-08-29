@@ -20,12 +20,18 @@ gp_api_query <- \(
   dev = FALSE,
   id = NULL,
   sort_by = "numID",
-  verbosity=NULL
+  verbosity = NULL
 ) {
   if (!is.null(numID) & !is.null(id)) {
     stop("Only supply numID OR _id.")
   }
-  tictoc::tic()
+  if (library("tictoc", logical.return = T)) {
+    timer <- TRUE
+    tictoc::tic()
+  } else{
+    timer <- FALSE
+  }
+
 
   #return basic results for all units if no keys and no ids provided
   if (is.null(keys) & is.null(numID) & is.null(id)) {
@@ -89,8 +95,8 @@ gp_api_query <- \(
   #actually run request
   message("Querying  (", catalog_name, ") GP-Catalog...")
   res <-
-    req_final %>% httr2::req_perform(verbosity=verbosity) %>% catch_err(keep_results = TRUE)
-  if(!res$success){
+    req_final %>% httr2::req_perform(verbosity = verbosity) %>% catch_err(keep_results = TRUE)
+  if (!res$success) {
     message("Error in request: ", res$error)
     return(NULL)
   }
@@ -126,33 +132,40 @@ gp_api_query <- \(
 
         # order by desired column -------------------------------------------------
         if (nrow(OUT) > 1) {
-
-        if (sort_by %in% names(OUT)) {
-          OUT <- OUT[order(unlist(OUT[sort_by])), ]
-        } else{
-          message("Can't sort by '",
-                  sort_by,
-                  "'. Must include this in 'keys'")
+          if (sort_by %in% names(OUT)) {
+            OUT <- OUT[order(unlist(OUT[sort_by])), ]
+          } else{
+            message("Can't sort by '",
+                    sort_by,
+                    "'. Must include this in 'keys'")
+          }
         }
+
+      } else{
+        OUT <- out2
       }
 
+
     } else{
-      OUT <- out2
+      OUT <- out
     }
-
-
   } else{
-    OUT <- out
+    message("No records found for this unit on (",
+            catalog_name,
+            ") GP-Catalog.")
+    OUT <- NULL
   }
-} else{
-  message("No records found for this unit on (",
-          catalog_name,
-          ") GP-Catalog.")
-  OUT <- NULL
-}
-tictoc::toc()
-OUT
+  if (timer) {
+    tictoc::toc()
+  }
 
+  if (length(out) > 0) {
+    print(OUT, n = length(out),na.print=NULL)
+    invisible(OUT)
+
+  }else{
+  OUT
+  }
 }
 
 #' query_gp_api alias

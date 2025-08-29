@@ -5,9 +5,9 @@
 \alias{gcs_upload_assets}
 \title{Synchronize media assets with the cloud}
 \usage{
-upload_assets(WD = "?", bucket = "gp-cloud", clear = FALSE)
+upload_assets(WD = "?", bucket = "gp-cloud", clear = FALSE, backup = FALSE)
 
-gcs_upload_assets(WD = "?", bucket = "gp-cloud", clear = FALSE)
+gcs_upload_assets(WD = "?", bucket = "gp-cloud", clear = FALSE, backup = FALSE)
 }
 \arguments{
 \item{WD}{WD working directory, passed to \code{\link[=parse_wd]{parse_wd()}}}
@@ -15,6 +15,8 @@ gcs_upload_assets(WD = "?", bucket = "gp-cloud", clear = FALSE)
 \item{bucket}{which bucket? default= "gp-cloud"}
 
 \item{clear}{do you want to clear all existing files for this project before uploading? default=FALSE}
+
+\item{backup}{passed to \code{\link[=update_fm]{update_fm()}}; do you want to back up front-matter.yml before updating it with new URLs? default=FALSE to prevent too many backups}
 }
 \value{
 invisibly returns a Tibble with filenames and download links

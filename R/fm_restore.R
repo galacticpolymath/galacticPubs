@@ -59,3 +59,12 @@ fm_restore <- \(){
 
   }
 }
+
+#make an alias for restore_fm
+#' restore_fm
+#'
+#' Alias for `fm_restore()`
+#' @export
+#' @describeIn fm_restore Alias for `fm_restore()`
+
+restore_fm <- fm_restore

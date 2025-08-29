@@ -341,7 +341,7 @@ invisible(SUCCESS)
 
 #alias
 
-#' lesson_compile
+#' unit_compile
 #'
 #' @describeIn compile_unit
 #'

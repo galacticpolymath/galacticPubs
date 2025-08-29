@@ -10,9 +10,10 @@
 #' @param save_output do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE
 #' @param return_fm logical; if TRUE, returns the the updated front-matter; if FALSE (default), returns TRUE/FALSE of success
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
-#' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=F
+#' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=FALSE
 #' @param try_harder passed to [catch_err()] specifically when we look for GdriveDir, just in case the Google Drive for Desktop and Web are out of sync, it'll try after a series of intervals. Default= FALSE.
 #' @param recompile logical; if TRUE (default), runs [compile_fm()] and [compile_json()]
+#' @param backup logical; do you want to back up front-matter.yml before updating it with new URLs? passed to [fm_backup()] default=TRUE
 #' @param force_upgrade logical; used to bypass checks for a custom change to the front-matter template version. If TRUE, will run a temporary section of code with |force_upgrade logic; Default=FALSE.
 #' @return returns logical of success
 #' @export
@@ -28,6 +29,7 @@ update_fm <-
            drive_reconnect = FALSE,
            try_harder = FALSE,
            recompile = TRUE,
+           backup = TRUE,
            force_upgrade = FALSE) {
     if (!is.null(WD_git)) {
       fm <- get_fm(WD_git = WD_git)
@@ -633,23 +635,31 @@ update_fm <-
       yaml_write_path <-
         fs::path(WD_git, "front-matter.yml")
 
-      #before writing, backup yml
-      test_backup <- fm_backup(WD = WD)
-      if (!test_backup) {
-        warning("front-matter.yml backup failed for ",
-                basename(WD),
-                "Aborting update_fm().")
-        return(FALSE)
-      }
+
+      # Backup front matter before writing, if requested ------------------------
+      if (backup) {
+        test_backup <- fm_backup(WD = WD)
+        if (!test_backup) {
+          warning("front-matter.yml backup failed for ",
+                  basename(WD),
+                  "Aborting update_fm().")
+          return(FALSE)
+        }
+      }else{test_backup <- NA}
+
       test_write <-
         yaml::write_yaml(new_yaml, yaml_write_path) %>% catch_err()
 
+      message("\n@ update_fm() for '", proj, ":")
       if (test_write) {
         success <- TRUE
-        message("\n@ Updated meta/front-matter.yml saved to disk.")
+        message("- old front-matter.yml backed up: ", convert_T_to_check(test_backup))
+        message("- new front-matter.yml saved    : ", convert_T_to_check(test_write))
       } else{
         warning("\n meta/front-matter.yml failed to save")
         success <- FALSE
+        message("- old front-matter.yml backed up: ", convert_T_to_check(test_backup))
+        message("- new front-matter.yml saved    : ", convert_T_to_check(test_write))
       }
     } else{
       #assume successful if it makes it here, until I write a better validity test

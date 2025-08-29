@@ -30,7 +30,7 @@ batch_publish <- function(WD="?",
   WD <- parse_wd(WD,show_all=TRUE)
 
   # If Suggested tictoc package is available, time how long the rebuild takes
-  if (requireNamespace("tictoc")) {
+  if (library("tictoc",logical.return = T)) {
     tictoc::tic()
     timer <- TRUE
   }

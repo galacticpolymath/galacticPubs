@@ -14,13 +14,15 @@
 #' @param WD WD working directory, passed to [parse_wd()]
 #' @param bucket which bucket? default= "gp-cloud"
 #' @param clear do you want to clear all existing files for this project before uploading? default=FALSE
+#' @param backup passed to [update_fm()]; do you want to back up front-matter.yml before updating it with new URLs? default=FALSE to prevent too many backups
 #' @returns invisibly returns a Tibble with filenames and download links
 #' @family google cloud storage
 #' @export
 
 upload_assets <- \(WD = "?",
                    bucket = "gp-cloud",
-                   clear = FALSE) {
+                   clear = FALSE,
+                   backup=FALSE) {
   WD <- parse_wd(WD)
 
   test_init <- init_gcs(bucket = bucket)
@@ -292,7 +294,7 @@ upload_assets <- \(WD = "?",
       })
 
     test_fm_update <-
-      update_fm(WD = WD, change_this = fm_update_list,recompile = FALSE)
+      update_fm(WD = WD, change_this = fm_update_list,recompile = FALSE,backup=FALSE)
 
     summ <-
       dplyr::tibble(
