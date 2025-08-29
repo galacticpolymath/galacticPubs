@@ -12,7 +12,7 @@
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
 #' @param drive_reconnect logical; do you want to re-look-up all `Gdrive*` keys? (might be useful if old files have been replaced instead of updated and `Gdrive*` keys point to a trashed file); default=F
 #' @param try_harder passed to [catch_err()] specifically when we look for GdriveDir, just in case the Google Drive for Desktop and Web are out of sync, it'll try after a series of intervals. Default= FALSE.
-#' @param recompile logical; if TRUE (default), runs [compile_fm()] and [compile_JSON()]
+#' @param recompile logical; if TRUE (default), runs [compile_fm()] and [compile_json()]
 #' @param force_upgrade logical; used to bypass checks for a custom change to the front-matter template version. If TRUE, will run a temporary section of code with |force_upgrade logic; Default=FALSE.
 #' @return returns logical of success
 #' @export
@@ -599,6 +599,29 @@ update_fm <-
         WD_git <- get_wd_git(WD = WD)
       }
       checkmate::assert_directory_exists(WD_git)
+      # make assertions on basic properties of new_yaml
+      checkmate::assert_list(new_yaml, .var.name = "front-matter.yml",all.missing = FALSE,min.len = 40)
+      #assert that basic keys are present
+      checkmate::assert_names(
+        names(new_yaml),
+        must.include = c(
+          "Title",
+          "ShortTitle",
+          "GdriveDirName",
+          "GdriveDirID",
+          "GdriveHome",
+          "PublicationStatus",
+          "Language",
+          "Country",
+          "locale",
+          "numID",
+          "MediumTitle",
+          "_id",
+          "TemplateVer",
+          "galacticPubsVer"
+        ),
+        .var.name = "front-matter.yml keys"
+      )
 
       yaml_write_path <-
         fs::path(WD_git, "front-matter.yml")

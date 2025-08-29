@@ -48,12 +48,10 @@ Combines functionality of:
 \item \code{\link[=compile_fm]{compile_fm()}}
 \item \code{\link[=compile_standards]{compile_standards()}}
 \item \code{\link[=learningEpaulette]{learningEpaulette()}}
-\item \code{\link[=compileAcknowledgments]{compileAcknowledgments()}}
-\item \code{\link[=compileVersions]{compileVersions()}}
-\item \code{\link[=compileJSON]{compileJSON()}}
+\item \code{\link[=compile_json]{compile_json()}}
 }
 
-Intended for a single lesson in the current RStudio project. Use \code{\link[=batch_rebuild]{batch_rebuild()}} to compile and rebuild more than one lesson (or a single lesson outside the current project).
+Intended for a single lesson in the current RStudio project. Use \code{\link[=batch_compile]{batch_compile()}} to compile and rebuild more than one lesson (or a single lesson outside the current project).
 }
 \section{Functions}{
 \itemize{

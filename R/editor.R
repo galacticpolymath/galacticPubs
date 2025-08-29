@@ -63,13 +63,13 @@ editor <- function(WD = "?",
           launch.browser = FALSE
         )
       },
-      args = list(WD = WD),
-      stdout = "editor_stdout.log",
-      stderr = "editor_stderr.log"
+      args = list(WD = WD)
+      # stdout = "editor_stdout.log",
+      # stderr = "editor_stderr.log"
     )
 
     # file.show("editor_stdout.log")
-    errlog <- readr::read_file("editor_stderr.log")
+    # errlog <- readr::read_file("editor_stderr.log")
 
 
 
@@ -78,7 +78,7 @@ editor <- function(WD = "?",
 
     # Check for startup errors
     if (!editor_sess$is_alive()) {
-      cat("❌ Editor failed to launch.\n")
+      cat("X Editor failed to launch.\n")
       cat("Error output:\n")
       cat(editor_sess$read_error_lines(), sep = "\n")
       stop("Shiny app failed to start in background.")

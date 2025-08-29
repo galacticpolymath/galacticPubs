@@ -65,7 +65,8 @@ pick_lesson <- function(shared_drive = "s",
       key = c("numID", "ReleaseDate", "LastUpdated"),
       projects0,
       output_tibble = TRUE,
-      exclude_TEST = exclude_TEST
+      exclude_TEST = exclude_TEST,
+      print_result= FALSE
     )
     path_tib <- dplyr::tibble(unit = basename(projects0), path = projects0)
 

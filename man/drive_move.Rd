@@ -21,7 +21,7 @@ drive_move(
 
 \item{name}{new name after move— passed to \code{\link[googledrive:drive_mv]{googledrive::drive_mv()}}; default =NULL}
 
-\item{shortcut_name}{basis of the shortcut name. e.g. if "teaching-materials" supplied, the shortcut will be called "teaching-materials \link{Shortcut}"; default=NULL means it will be the name derived from the original 'from' path + "\link{Shortcut}"}
+\item{shortcut_name}{basis of the shortcut name. e.g. if "teaching-materials" supplied, the shortcut will be called "teaching-materials \verb{[Shortcut]}"; default=NULL means it will be the name derived from the original 'from' path + "\verb{[Shortcut]}"}
 
 \item{drop_shortcut}{logical; if TRUE, will drop a shortcut to the moved file in the parent of the from directory; default=FALSE}
 

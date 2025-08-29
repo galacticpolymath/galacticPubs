@@ -6,11 +6,9 @@
 #' - [compile_fm()]
 #' - [compile_standards()]
 #' - [learningEpaulette()]
-#' - [compileAcknowledgments()]
-#' - [compileVersions()]
-#' - [compileJSON()]
+#' - [compile_json()]
 #'
-#' Intended for a single lesson in the current RStudio project. Use [batch_rebuild()] to compile and rebuild more than one lesson (or a single lesson outside the current project).
+#' Intended for a single lesson in the current RStudio project. Use [batch_compile()] to compile and rebuild more than one lesson (or a single lesson outside the current project).
 #' @param WD is working directory of the project (useful to supply for shiny app, which has diff. working environment); if "?" supplied, will invoke [pick_lesson()]
 #' @param choices one or more of the following: c("Front Matter","Standards Alignment","Teaching Materials","Procedure","Acknowledgements","Versions"); or "All". If missing, will compile things in the ReadyToCompile entry in front-matter.yml for the WD folder.
 #' @param current_data the reconciled data including yaml and input from the shiny app environment; if current_data=NULL, read in front-matter.yml
@@ -282,11 +280,11 @@ compile_unit <-
     #only run if all tests are TRUE or NA to this point
     if (all(test_update_teach_it, test_compile_teach_it, na.rm = TRUE)) {
       #always rebuild front matter
-      message("• Running compile_fm()")
+      message("* Running compile_fm()")
       test_compile_fm <- compile_fm(WD = WD) %>% catch_err()
 
       # Make Shareable Assets ---------------------------------------------------
-      message("• Running make_shareable_assets()")
+      message("* Running make_shareable_assets()")
       test_shareable <- make_shareable_assets(WD = WD, open_file = FALSE)
 
 
@@ -309,7 +307,7 @@ compile_unit <-
 
     if (success & rebuild) {
       #after run, reset rebuild-all trigger
-      message("• Running update_fm()")
+      message("* Running update_fm()")
       test_update <- update_fm(WD_git = WD_git,
                                change_this = list(RebuildAllMaterials = FALSE)) %>% catch_err()
 

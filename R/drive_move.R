@@ -5,7 +5,7 @@
 #' @param from source item; a path fed into [drive_find_path()]
 #' @param to new location; a path fed into [drive_find_path()]; either target path or parent directory should exist
 #' @param name new name after move— passed to [googledrive::drive_mv()]; default =NULL
-#' @param shortcut_name basis of the shortcut name. e.g. if "teaching-materials" supplied, the shortcut will be called "teaching-materials [Shortcut]"; default=NULL means it will be the name derived from the original 'from' path + "[Shortcut]"
+#' @param shortcut_name basis of the shortcut name. e.g. if "teaching-materials" supplied, the shortcut will be called "teaching-materials `[Shortcut]`"; default=NULL means it will be the name derived from the original 'from' path + "`[Shortcut]`"
 #' @param drop_shortcut logical; if TRUE, will drop a shortcut to the moved file in the parent of the from directory; default=FALSE
 #' @param make_public after move; do you want this object to be viewable to anyone with the link? default=F
 #' @param prompt_user logical; adds a confirmation step before moving something; default = TRUE

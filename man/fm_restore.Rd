@@ -4,10 +4,7 @@
 \alias{fm_restore}
 \title{Restore front-matter from a backup JSON file in WD Git}
 \usage{
-fm_restore(WD = "?")
-}
-\arguments{
-\item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=parse_wd]{parse_wd()}}; default is WD=getwd()}
+fm_restore()
 }
 \value{
 success; logical

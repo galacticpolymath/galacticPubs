@@ -7,7 +7,7 @@
 lesson_go_draft(WD = "?")
 }
 \arguments{
-\item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \link{pick_lesson(shared_drive = "l")}; default is WD=getwd()}
+\item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \verb{[pick_lesson(shared_drive = "l")]}; default is WD=getwd()}
 }
 \description{
 Unstage a lesson (i.e. remove public access and make it editable again). Does the following:

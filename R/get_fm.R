@@ -193,7 +193,9 @@ get_fm <-
         #make select keys into tibbles if possible (not possible with missing_value==NULL)
       results2 <- purrr::map(1:length(results), \(i) {
         res_i <- results[[i]]
+        #if it's one of the df_keys & not NULL, try to make it a tibble
         if (!is.null(res_i) & names(results)[i] %in% df_keys) {
+          # if(i==77){browser()}
           res_i <- dplyr::as_tibble(res_i)
         } else{
           res_i

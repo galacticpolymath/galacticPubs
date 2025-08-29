@@ -9,7 +9,7 @@
 #'    - GdriveHome: 'GP-Studio'
 #'    - GdrivePublicID: NA
 #'
-#' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [pick_lesson(shared_drive = "l")]; default is WD=getwd()
+#' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke `[pick_lesson(shared_drive = "l")]`; default is WD=getwd()
 #' @export
 
 lesson_go_draft <- \(WD = "?") {

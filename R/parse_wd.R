@@ -1,21 +1,22 @@
 #' parse_wd
 #'
 #' Helper function to handle Working Directory strings. Here's what happens when you supply the following:
-#' - "?" or "?s": invokes [pick_lesson("s")] to choose from among lessons in the 'GP-Studio' shared drive.
-#' - "??" or "?l": invokes [pick_lesson("l")] to pick a path to lessons on the 'GP-LIVE' drive.
-#' - "???" or "?gp": gives you [pick_lesson("gp")] to pick a path to lesson teaching materials found on 'GalacticPolymath' drive
-#' - "?!" or "sl": invokes [pick_lesson("sl")] to pick from units on 'GP-Studio' and 'GP-LIVE'
+#' - "?" or "?s": invokes `[pick_lesson("s")]` to choose from among lessons in the 'GP-Studio' shared drive.
+#' - "??" or "?l": invokes `[pick_lesson("l")]` to pick a path to lessons on the 'GP-LIVE' drive.
+#' - "???" or "?gp": gives you `[pick_lesson("gp")]` to pick a path to lesson teaching materials found on 'GalacticPolymath' drive
+#' - "?!" or "sl": invokes `[pick_lesson("sl")]` to pick from units on 'GP-Studio' and 'GP-LIVE'
 #'
 #' @param str is a string supplied as the WD parameter in a galacticPubs function. Often "?"
+#' @param use_wd_git passed to [pick_lesson()]; default=FALSE
 #' @param ... other parameters passed to [pick_lesson()]
 #' @return if str is not "?" or "??", it will return str. Otherwise, returns the result of [pick_lesson()]
 #' @export
 #'
 
-parse_wd <- \(str = NULL,...) {
-  if (is.null(str)) {
+parse_wd <- \(str = NULL,use_wd_git=FALSE,...) {
+  if (is.null(str)& !use_wd_git) {
     stop("Must supply a valid working directory path or '?'")
-  } else{
+  } else if (!use_wd_git){
     if (str == "?" | str == "?s") {
       user_choice <- pick_lesson("s",...)
     } else if (str == "??" | str == "?l") {
@@ -27,6 +28,8 @@ parse_wd <- \(str = NULL,...) {
     } else{
       user_choice <- str
     }
+  }else{
+    user_choice <- pick_lesson(use_wd_git=TRUE)
   }
 
 
