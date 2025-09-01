@@ -29,7 +29,7 @@ batch_get_fm <- \(
   } else{
     #recursive call to get all lessons
 
-    projects <- pick_lesson(shared_drive = WD, pick_all = TRUE)
+    projects <- parse_wd( WD, pick_all = TRUE)
 
   }
   project_names <- basename(projects)

@@ -58,7 +58,7 @@ compile_teach_it <- function(WD = "?",
                              c("Proto", "Hidden", "Beta", "Live", "Draft", "Upcoming"))#draft deprecated; Upcoming/Coming Soon confusion needs to be sorted out
     checkmate::assert_choice(gdrivehome, c("GP-Studio", "GP-LIVE"))
     # if (gdrivehome == "GP-Studio") {
-    #   tmID <- fm$GdriveTeachMatID
+    #   tmID <- fm$GdrivePublicID
     # } else{
     tmID <- fm$GdrivePublicID
     # }

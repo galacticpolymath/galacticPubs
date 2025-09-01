@@ -1,6 +1,7 @@
 #' lesson_go_live
 #'
-#' Stage a lesson for final public access. Does the following:
+#' A helper function for [organize_teach_it()], which is part of [compile_teach_it()]. Moves/organizes lessons listed as "live" for final public access.
+#' Does the following:
 #' 1. Move lesson project directory from GP-Studio to GP-LIVE (Making it admin-access only)
 #' 2. Move teaching-materials/ content from GP-LIVE to GalacticPolymath Shared Drive (Read-Only access)
 #' 3. Create shortcut to teaching-materials/ in GP-LIVE
@@ -30,7 +31,7 @@ lesson_go_live <- \(WD = "?") {
   dirID <- get_fm("GdriveDirID", WD)
   projDirName <- get_fm("GdriveDirName", WD)
   gpID <- get_fm("GdrivePublicID", WD)
-  tmID <- get_fm("GdriveTeachMatID", WD)
+  tmID <- get_fm("GdrivePublicID", WD)
   dir_drib <- drive_find_path(dirID)
 
   checkmate::assert_character(
@@ -50,7 +51,7 @@ lesson_go_live <- \(WD = "?") {
     null.ok = F,
     all.missing = FALSE,
     min.chars = 6,
-    .var.name = "teaching material google ID (GdriveTeachMatID)"
+    .var.name = "teaching material google ID (GdrivePublicID)"
   )
   test_not_published <- checkmate::test_scalar_na(gpID)
   checkmate::assert_data_frame(
@@ -173,7 +174,7 @@ lesson_go_live <- \(WD = "?") {
           WD = WD,
           change_this = list(
             GdrivePublicID = unname(gpID),
-            GdriveTeachMatID = NA
+            GdrivePublicID = NA
           )
         )
         test_fm2 <-
@@ -225,7 +226,7 @@ lesson_go_live <- \(WD = "?") {
       paste0(
         "update_fm(): GdrivePublicID='",
         gpID,
-        "' and GdriveTeachMatID= NA"
+        "' and GdrivePublicID= NA"
       ),
       "compile_unit()"
     )

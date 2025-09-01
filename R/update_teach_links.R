@@ -52,7 +52,7 @@ update_teach_links <- function(WD = "?",
   short_title <- fm$ShortTitle
   GdriveHome <- fm$GdriveHome
   if (GdriveHome == "GP-Studio") {
-    tm_dir_id <- fm$GdriveTeachMatID
+    tm_dir_id <- fm$GdrivePublicID
   } else{
     tm_dir_id <- fm$GdrivePublicID
   }

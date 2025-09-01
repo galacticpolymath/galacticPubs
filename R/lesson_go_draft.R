@@ -1,5 +1,6 @@
 #' lesson_go_draft
 #'
+#' A helper function for [organize_teach_it()], which is part of [compile_teach_it()].
 #' Unstage a lesson (i.e. remove public access and make it editable again). Does the following:
 #' 1. Move lesson project directory from GP-LIVE to GP-Studio (Making it editable to those with access to GP-Studio)
 #' 2. Move lesson teaching-materials from GalacticPolymath Shared Drive
@@ -156,12 +157,12 @@ lesson_go_draft <- \(WD = "?") {
           WD = WD,
           change_this = list(
             GdrivePublicID = NA,
-            GdriveTeachMatID =
+            GdrivePublicID =
               unname(tmID)
           )
         )
         test_fm2 <-
-          checkmate::test_character(get_fm("GdriveTeachMatID", WD = WD), all.missing = FALSE)
+          checkmate::test_character(get_fm("GdrivePublicID", WD = WD), all.missing = FALSE)
       } else if (!is.na(draft_success) & !draft_success) {
         test_fm2 <- FALSE
       } else{
@@ -206,7 +207,7 @@ lesson_go_draft <- \(WD = "?") {
         tmPath
       ),
       paste0(
-        "update_fm(): GdrivePublicID=NA and GdriveTeachMatID='",
+        "update_fm(): GdrivePublicID=NA and GdrivePublicID='",
         gpID,
         "'"
       ),

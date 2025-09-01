@@ -469,7 +469,7 @@ update_fm <-
     }
 
 
-    # Fill in GdriveTeachMatPath and GdriveTeachMatID or GdrivePublicID if BOTH are missing------------
+    # Fill in GdriveTeachMatPath and GdrivePublicID or GdrivePublicID if BOTH are missing------------
     # All refer to teaching-materials/ but are found and named different things depending
     # on PublicationStatus; IDs are Gdrive IDs for the Drive API; Path is a local, virtualized path
     # Draft teaching materials are found on GP-Studio
@@ -498,7 +498,7 @@ update_fm <-
           zget_drive_id(
             "../teaching-materials/",
             drive_root = new_yaml$GdriveDirID,
-            fm_key = "GdriveTeachMatID"
+            fm_key = "GdrivePublicID"
           )
         # pubID <- NA
 
@@ -527,7 +527,7 @@ update_fm <-
         stop("teaching-materials not found at:\n", tm_path_full)
       }
       new_yaml$GdriveTeachMatPath <- tm_path
-      new_yaml$GdriveTeachMatID <- tmID
+      new_yaml$GdrivePublicID <- tmID
       new_yaml$GdrivePublicID <- pubID
 
       tm_res <-
@@ -535,7 +535,7 @@ update_fm <-
           success = convert_T_to_check(c(test_tmPath, test_tmID, test_pubID)),
           item = c(
             "GdriveTeachMatPath",
-            "GdriveTeachMatID",
+            "GdrivePublicID",
             "GdrivePublicID"
           ),
           ID = c(tm_path, tmID, pubID)
@@ -583,13 +583,13 @@ update_fm <-
     new_yaml$numID <- as.integer(new_yaml$numID)
 
 
-    # quick fix to deprecate barroque GdriveTeachMatID logic -------------------
-    if (!is.na(new_yaml$GdriveTeachMatID) &
+    # quick fix to deprecate barroque GdrivePublicID logic -------------------
+    if (!is.na(new_yaml$GdrivePublicID) &
         is.na(new_yaml$GdrivePublicID)) {
-      #if GdriveTeachMatID is set, but GdrivePublicID is not, then set GdrivePublicID to GdriveTeachMatID
-      message("GdrivePublicID not set, setting it to GdriveTeachMatID")
+      #if GdrivePublicID is set, but GdrivePublicID is not, then set GdrivePublicID to GdrivePublicID
+      message("GdrivePublicID not set, setting it to GdrivePublicID")
     }
-    new_yaml$GdrivePublicID <- new_yaml$GdriveTeachMatID
+    new_yaml$GdrivePublicID <- new_yaml$GdrivePublicID
 
 
 

@@ -194,9 +194,9 @@ lesson_init <- \(recover=FALSE,WD="?") {
     }
 
     #get GdriveID for teaching-material gdrive folder
-    GdriveTeachMatID <-
-      get_fm("GdriveTeachMatID", WD_git = WD_git, WD = WD)
-    checkmate::assert_character(GdriveTeachMatID,
+    GdrivePublicID <-
+      get_fm("GdrivePublicID", WD_git = WD_git, WD = WD)
+    checkmate::assert_character(GdrivePublicID,
                                 min.chars = 10,
                                 all.missing = FALSE)
 
@@ -208,7 +208,7 @@ lesson_init <- \(recover=FALSE,WD="?") {
       lapply(gpaths,
              \(lesson_path_x) {
                dest_path_x <-
-                 drive_find_path(lesson_path_x, drive_root = GdriveTeachMatID)
+                 drive_find_path(lesson_path_x, drive_root = GdrivePublicID)
                #copy teacher worksheet template into the folder
                if (inputs$bool_teach)
                  drive_new_from_template(

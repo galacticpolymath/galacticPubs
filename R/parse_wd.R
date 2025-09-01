@@ -9,7 +9,7 @@
 #' @param str is a string supplied as the WD parameter in a galacticPubs function. Often "?"
 #' @param use_wd_git passed to [pick_lesson()]; default=FALSE
 #' @param ... other parameters passed to [pick_lesson()]
-#' @return if str is not "?" or "??", it will return str. Otherwise, returns the result of [pick_lesson()]
+#' @return if str is not "?", "??","???",or "?!", it will return str. Otherwise, returns the result of [pick_lesson()]
 #' @export
 #'
 
