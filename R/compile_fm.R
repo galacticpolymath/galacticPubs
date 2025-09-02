@@ -11,15 +11,18 @@
 #' - versions.json
 #'
 #' @param WD working directory, passed to [parse_wd()]
+#' @param upload if TRUE (default), will upload any local assets to the cloud with [upload_assets()]
 #' @export
 #' @return logical of success
 
-compile_fm <- \(WD = "?") {
+compile_fm <- \(WD = "?",
+                upload=FALSE) {
   WD <- parse_wd(WD)
   WD_git <- get_wd_git(WD = WD)
   #just make sure everything's updated in the cloud
-
+ if(upload){
   upload_assets(WD = WD)
+ }
   json_dir <- fs::path(WD_git, "JSONs")
   fm <- get_fm(WD_git = WD_git)
   fm_keys <- get_fm_names()
@@ -453,6 +456,7 @@ compile_fm <- \(WD = "?") {
   } else{
     message("FAILURE! UNIT.json not regenerated for '", basename(WD), "'")
   }
+  return(invisible(test_compile))
 }
 
 #' fm_compile

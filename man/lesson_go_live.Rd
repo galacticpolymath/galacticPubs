@@ -10,7 +10,8 @@ lesson_go_live(WD = "?")
 \item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \code{\link[=pick_lesson]{pick_lesson()}}; default is WD=getwd()}
 }
 \description{
-Stage a lesson for final public access. Does the following:
+A helper function for \code{\link[=organize_teach_it]{organize_teach_it()}}, which is part of \code{\link[=compile_teach_it]{compile_teach_it()}}. Moves/organizes lessons listed as "live" for final public access.
+Does the following:
 \enumerate{
 \item Move lesson project directory from GP-Studio to GP-LIVE (Making it admin-access only)
 \item Move teaching-materials/ content from GP-LIVE to GalacticPolymath Shared Drive (Read-Only access)

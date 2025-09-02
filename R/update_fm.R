@@ -315,7 +315,7 @@ update_fm <-
     )
     checkmate::assert_choice(
       new_yaml$PublicationStatus,
-      choices = c("Proto", "Hidden", "Beta", "Coming Soon", "Live", "Draft"),
+      choices = c("Proto", "Hidden", "Beta", "Upcoming", "Live"),
       #draft deprecated
       .var.name = "front-matter.yml: PublicationStatus"
     )
@@ -333,14 +333,20 @@ update_fm <-
         "LearningChart_params_centralText",
         "LearningChart_params_caption",
         "LearningChart_params_captionN",
-        "LearningObj"
+        "LearningObj",
+        "GdriveTeachMatID",
+        "LsnStatuses"
       )
+
     remove_deez <- which(names(new_yaml) %in% deprecated)
     if (length(remove_deez) > 0) {
-      message(
+      if(save_output){
+      #Only print this message if they're actually saving the output
+        message(
         "The following deprecated entries were removed from your front-matter.yml:\n -",
         paste0(names(new_yaml)[remove_deez], collapse = "\n -")
       )
+      }
       new_yaml <- new_yaml[-remove_deez]
 
     }
@@ -533,11 +539,7 @@ update_fm <-
       tm_res <-
         dplyr::tibble(
           success = convert_T_to_check(c(test_tmPath, test_tmID, test_pubID)),
-          item = c(
-            "GdriveTeachMatPath",
-            "GdrivePublicID",
-            "GdrivePublicID"
-          ),
+          item = c("GdriveTeachMatPath", "GdrivePublicID", "GdrivePublicID"),
           ID = c(tm_path, tmID, pubID)
         )
 
@@ -639,39 +641,47 @@ update_fm <-
       # Backup front matter before writing, if requested ------------------------
       if (backup) {
         test_backup <- fm_backup(WD = WD)
-        if (!test_backup) {
+        if (identical(test_backup, FALSE)) {
           warning("front-matter.yml backup failed for ",
                   basename(WD),
                   "Aborting update_fm().")
           return(FALSE)
         }
-      }else{test_backup <- NA}
+      } else{
+        test_backup <- NA
+      }
 
       test_write <-
         yaml::write_yaml(new_yaml, yaml_write_path) %>% catch_err()
 
-      message("\n@ update_fm() for '", proj, ":")
+
       if (test_write) {
         success <- TRUE
-        message("- old front-matter.yml backed up: ", convert_T_to_check(test_backup))
-        message("- new front-matter.yml saved    : ", convert_T_to_check(test_write))
+
       } else{
         warning("\n meta/front-matter.yml failed to save")
         success <- FALSE
-        message("- old front-matter.yml backed up: ", convert_T_to_check(test_backup))
-        message("- new front-matter.yml saved    : ", convert_T_to_check(test_write))
       }
     } else{
       #assume successful if it makes it here, until I write a better validity test
+      test_backup <- test_write <- NA
       success <- TRUE
     }
 
     if (identical(TRUE, success & recompile)) {
       message("Recompiling front-matter to JSON")
-      compile_fm(WD = WD)
+      test_recompile <- compile_fm(WD = WD,upload=FALSE)#already uploaded
 
+    }else{
+      test_recompile <- NA
     }
-
+    message("\n@ update_fm() for '", proj, ":")
+    message("- old front-matter.yml backed up: ",
+            convert_T_to_check(test_backup))
+    message("- new front-matter.yml saved    : ",
+            convert_T_to_check(test_write))
+    message("- recompile unit json           : ",
+            convert_T_to_check(test_recompile))
 
     if (return_fm) {
       new_yaml

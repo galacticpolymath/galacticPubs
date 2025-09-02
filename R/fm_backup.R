@@ -3,7 +3,7 @@
 #' This function keeps 40 of the most recent backup copies of the front matter file
 #'
 #' @param WD Working directory
-#' @return logical; success of the backup
+#' @return logical; success of the backup. NA if no backup needed
 #' @export
 
 fm_backup <- \(WD = "?") {
@@ -72,7 +72,7 @@ fm_backup <- \(WD = "?") {
 
     if (same) {
       message("No changes to front matter since last backup; skipping backup")
-      return(TRUE)
+      return(NA)
     } else{
       changes <- waldo::compare(last_saved_fm, curr_fm)
       # New backup

@@ -1,6 +1,6 @@
 #' Copy updated assets in a specific folder to a destination
 #'
-#' Helper for [upload_assets()]. Not really intended for use by user. Looks for a pattern in a given path within a working directory and copies those files to the dest_folder, usually /published
+#' Helper for [upload_assets()]. Not really intended for use by user. Looks for a pattern in a given path within a working directory and copies those files to the dest_folder, usually /published. IMPORTANT: does not support subdirectories within rel_path. e.g. a folder inside _other-media-to-publish *will not* be copied.
 #'
 #' @param WD what's the project working directory? passed to parse_wd()
 #' @param rel_path what's the subfolder path within WD? e.g."assets/_learning-plots"

@@ -264,7 +264,7 @@ upload_assets <- \(WD = "?",
 
 
     # Check that all assets in cloud now --------------------------------------
-    uploaded_now <- gcs_contents(WD = WD, detail = "more")
+    uploaded_now <- gcs_contents(WD = WD, detail = "more",show_all=FALSE)
     test_uploaded <-
       sum(assets$cloud_path %in% uploaded_now$name) == nrow(assets)
 

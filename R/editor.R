@@ -34,7 +34,7 @@
 
 editor <- function(WD = "?",
                    system_browser = TRUE,
-                   run_in_bg = TRUE) {
+                   run_in_bg = FALSE) {
   if (!interactive())
     stop("This function is only available in interactive mode.")
 

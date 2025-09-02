@@ -10,6 +10,7 @@ lesson_go_draft(WD = "?")
 \item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \verb{[pick_lesson(shared_drive = "l")]}; default is WD=getwd()}
 }
 \description{
+A helper function for \code{\link[=organize_teach_it]{organize_teach_it()}}, which is part of \code{\link[=compile_teach_it]{compile_teach_it()}}.
 Unstage a lesson (i.e. remove public access and make it editable again). Does the following:
 \enumerate{
 \item Move lesson project directory from GP-LIVE to GP-Studio (Making it editable to those with access to GP-Studio)

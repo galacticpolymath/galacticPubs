@@ -13,7 +13,7 @@ backup_fm(WD = "?")
 \item{WD}{Working directory}
 }
 \value{
-logical; success of the backup
+logical; success of the backup. NA if no backup needed
 }
 \description{
 This function keeps 40 of the most recent backup copies of the front matter file

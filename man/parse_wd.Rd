@@ -14,7 +14,7 @@ parse_wd(str = NULL, use_wd_git = FALSE, ...)
 \item{...}{other parameters passed to \code{\link[=pick_lesson]{pick_lesson()}}}
 }
 \value{
-if str is not "?" or "??", it will return str. Otherwise, returns the result of \code{\link[=pick_lesson]{pick_lesson()}}
+if str is not "?", "??","???",or "?!", it will return str. Otherwise, returns the result of \code{\link[=pick_lesson]{pick_lesson()}}
 }
 \description{
 Helper function to handle Working Directory strings. Here's what happens when you supply the following:

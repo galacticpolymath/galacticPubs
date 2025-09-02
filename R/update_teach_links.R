@@ -515,10 +515,10 @@ update_teach_links <- function(WD = "?",
                           ifelse(
                             is_empty(d_i$`_lsn`),
                             "",
-                            paste0("(Lesson ", d_i$`_lsn`, ")")
+                            d_i$`_lsn`
                           ),
                           collapse = " ") %>%
-                stringr::str_to_title()
+                stringr::str_to_title() #ensure title case
             } else{
               d_i$`_filename`
             }

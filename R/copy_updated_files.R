@@ -22,12 +22,15 @@ copy_updated_files<-function(paths,dest_folder,clear=FALSE,verbose=TRUE, WD="?")
 
     viable <- file.exists(REF_FILE) & fs::is_file(REF_FILE)
     newPath <- fs::path(dest_folder, basename(REF_FILE))
+
+    test_sync <- suppressWarnings(inSync(path1=newPath, path2=REF_FILE,WD=WD,full_results=TRUE))
+
     # if file exists...
     if (viable) {
       #if we didn't delete dest. directory contents...
       if (!clear) {
 
-        test_sync <- suppressWarnings(inSync(path1=newPath, path2=REF_FILE,WD=WD,full_results=TRUE))
+
         if (identical(test_sync$success, TRUE)) {
           status <- "Up-to-Date"
           toCopy <- FALSE
@@ -53,7 +56,7 @@ copy_updated_files<-function(paths,dest_folder,clear=FALSE,verbose=TRUE, WD="?")
     }
 
     #make summary entry
-    if(missing(test_sync)){
+    if(!exists("test_sync")){
       browser()
     }
     test_sync$data %>% dplyr::mutate(log=status) %>% dplyr::relocate("log",.after="up_to_date")

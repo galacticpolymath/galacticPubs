@@ -702,9 +702,16 @@ server <- function(input, output, session) {
       checkmate::assert_string(vals$current_data$EstUnitTime)
     )
 
+    #try fm_backup(). If it doesn't work, don't write YAML
+    test_backup <- fm_backup(WD=WD()) %>% catch_err()
+
+    if(identical(test_backup,TRUE)){
     #write current data
     yaml::write_yaml(vals$current_data,
                      yaml_path)
+    }else{
+      stop("Not saved because fm_backup() failed.")
+    }
 
     vals$saved <- TRUE
     #synchronize saved and current_data

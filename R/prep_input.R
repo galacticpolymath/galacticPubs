@@ -33,7 +33,8 @@ prep_input <- function(input,
       save_output = FALSE,
       return_fm = TRUE,
       reorder = TRUE,
-      recompile = FALSE
+      recompile = FALSE,
+      backup = FALSE
     ) %>% catch_err(keep_results = TRUE)
 
   #fm_updated is what we want to merge into "current" to trigger a Template needs update message
@@ -41,8 +42,8 @@ prep_input <- function(input,
   if (test_updated$success) {
     fm_updated <- test_updated$result
   } else{
-    stop("update_fm() failed for some reason in prep_input() for WD=",
-         WD)
+    #output NULL if update_failed
+    fm_updated <- NULL
   }
 
   # Read in the input data --------------------------------------------------

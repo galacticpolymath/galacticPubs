@@ -4,7 +4,7 @@
 \alias{editor}
 \title{Launch the Galactic Polymath Editor Shiny App}
 \usage{
-editor(WD = "?", system_browser = TRUE, run_in_bg = TRUE)
+editor(WD = "?", system_browser = TRUE, run_in_bg = FALSE)
 }
 \arguments{
 \item{WD}{Character. A local virtualized path to a lesson folder where Google Drive (Web) path
