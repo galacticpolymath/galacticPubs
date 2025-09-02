@@ -1,4 +1,4 @@
-#' lesson_go_draft
+#' make_teaching_mat_private
 #'
 #' A helper function for [organize_teach_it()], which is part of [compile_teach_it()].
 #' Unstage a lesson (i.e. remove public access and make it editable again). Does the following:
@@ -13,7 +13,7 @@
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke `[pick_lesson(shared_drive = "l")]`; default is WD=getwd()
 #' @export
 
-lesson_go_draft <- \(WD = "?") {
+make_teaching_mat_private <- \(WD = "?") {
   #Force picking from live shared drive
   if (grepl("\\?", WD)) {
     WD <- pick_lesson(shared_drive = "l")
@@ -63,7 +63,7 @@ lesson_go_draft <- \(WD = "?") {
 
 
     message(
-      "lesson_go_draft(): \n-------------------\nARE YOU SURE you want to:\n 1. move this project back to GP-Studio?: ",
+      "make_teaching_mat_private(): \n-------------------\nARE YOU SURE you want to:\n 1. move this project back to GP-Studio?: ",
       basename(WD)
     )
     message(" 2. return teaching materials to project folder from GalacticPolymath/ shared drive")
@@ -214,7 +214,7 @@ lesson_go_draft <- \(WD = "?") {
       "compile_unit()"
     )
   )
-  message("lesson_go_draft() summary:")
+  message("make_teaching_mat_private() summary:")
   print(out)
 
 }

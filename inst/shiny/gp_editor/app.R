@@ -1215,12 +1215,12 @@ server <- function(input, output, session) {
     #If a change in location has been selected, trigger the appropriate function
     if (input$dummy_PublicationStatus != vals$current_data$PublicationStatus) {
       if (input$dummy_PublicationStatus == "Live") {
-        lesson_go_live(WD = WD())
+        make_teaching_mat_public(WD = WD())
         #reassign WD reactiveVal to the new location
         WD(gsub("GP-Studio", "GP-LIVE", WD(), fixed = T))#new value)
       } else{
         #reassign WD reactiveVal to the new location
-        lesson_go_draft(WD = WD())
+        make_teaching_mat_private(WD = WD())
         WD(gsub("GP-LIVE", "GP-Studio", WD(), fixed = T))#new value
       }
     }
