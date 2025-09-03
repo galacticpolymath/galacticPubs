@@ -500,13 +500,28 @@ update_fm <-
             "teaching-materials"
           )
 
+        tm_dev_path <-
+          fs::path(
+            new_yaml$GdriveHome,
+            "Edu",
+            "Lessons",
+            new_yaml$GdriveDirName,
+            "teaching-materials_DEV"
+          )
+
         pubID <- tmID <-
           zget_drive_id(
             "../teaching-materials/",
             drive_root = new_yaml$GdriveDirID,
             fm_key = "GdrivePublicID"
           )
-        # pubID <- NA
+
+        tm_dev_ID <-
+          zget_drive_id(
+            "../teaching-materials_DEV/",
+            drive_root = new_yaml$GdriveDirID,
+            fm_key = "GdriveTeachMatDevID"
+          )
 
 
         # Differential logic for paths of LIVE projects ---------------------------
@@ -523,11 +538,20 @@ update_fm <-
         pubID <- tmID <-
           zget_drive_id(fs::path("GalacticPolymath", new_yaml$MediumTitle),
                         fm_key = "GdrivePublicID")
+        #tm_DEV pattern always the same
+        tm_dev_ID <-
+          zget_drive_id(
+            "../teaching-materials_DEV/",
+            drive_root = new_yaml$GdriveDirID,
+            fm_key = "GdriveTeachMatDevID"
+          )
       }
 
       test_tmPath <- checkmate::test_directory_exists(tm_path_full)
       test_pubID <- checkmate::test_character(pubID, min.chars = 6)
       test_tmID <- checkmate::test_character(tmID, min.chars = 6)
+      #expected to be NA often for units that don't have Live and Proto versions
+      test_tmDevID <- checkmate::test_character(tm_dev_ID, all.missing = TRUE)
 
       if (!test_tmPath) {
         stop("teaching-materials not found at:\n", tm_path_full)
@@ -535,6 +559,7 @@ update_fm <-
       new_yaml$GdriveTeachMatPath <- tm_path
       new_yaml$GdrivePublicID <- tmID
       new_yaml$GdrivePublicID <- pubID
+      new_yaml$GdriveTeachMatDevID <- tm_dev_ID
 
       tm_res <-
         dplyr::tibble(

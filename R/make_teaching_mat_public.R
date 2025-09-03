@@ -129,7 +129,6 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
   # live lessons
   live_lsns <- uinfo %>% dplyr::filter(.data$lsnStatus == "Live")
 
-  print(uinfo %>% dplyr::select("lsn", "lsnStatus", "lsnTitle"))
 
   #If no live lessons, nothing to do
   if (nrow(live_lsns) == 0) {
@@ -144,35 +143,68 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
     return(FALSE)
   }
 
-  # nonlive lessons
-  nonlive_lsns <- uinfo %>% dplyr::filter(.data$lsnStatus != "Live")
 
-  #Check for actual non-live lessons in teaching-materials/ folder
-  if (nrow(nonlive_lsns) > 0) {
-    tm_drib_contents <-
-      googledrive::drive_ls(
-        tm_drib,
-        type = "folder",
-        recursive = TRUE,
-        n_max = Inf,
-        pattern = "^L"
-      ) %>%
-      dplyr::mutate(lsn = gsub("^L(\\d+).*", "\\1", .data$name))
-    #which (if any nonlive lessons need to be moved to /teaching-materials_DEV/?)
-    real_nonlive_lsns <- dplyr::inner_join(nonlive_lsns, tm_drib_contents, by =
-                                             "lsn")
-  } else{
-    real_nonlive_lsns <- data.frame()
+  # Get contents of /teaching-materials/ folder
+  tm_drib_contents <-
+    googledrive::drive_ls(
+      tm_drib,
+      type = "folder",
+      recursive = TRUE,
+      n_max = Inf,
+      pattern = "^L"
+    ) %>%
+    dplyr::mutate(lsn = gsub("^L(\\d+).*", "\\1", .data$name))
+
+  checkmate::assert_data_frame(tm_drib_contents,
+                               min.rows = 0,
+                               .var.name = "Contents of /teaching-materials/ folder")
+
+  # merge drib_contents with uinfo to get lesson statuses
+  comb_tm_contents <-
+    dplyr::left_join(tm_drib_contents, uinfo, by = "lsn") %>%
+    dplyr::select("lsn", "lsnStatus", "lsnTitle", "name", "id") %>%
+    dplyr::arrange(.data$lsn)
+
+  message("Lessons found in teaching-materials for '", projDirName, "':\n")
+  message("LsnStatus pulled from teach-it.gsheet")
+  print(comb_tm_contents)
+  #if any NAs in LsnStatus, warn user
+  if (any(is.na(comb_tm_contents$lsnStatus))) {
+    message(
+      "These lessons in /teaching-materials/ do not have a status in teach-it.gsheet! Please update the gsheet for Lessons: ",
+      paste(comb_tm_contents$lsn[is.na(comb_tm_contents$lsnStatus)], collapse = ", ")
+    )
+    #open the gsheet for them
+    utils::browseURL(paste0("https://docs.google.com/spreadsheets/d/", teachitID))
+    # ask user if they want to proceed (and we'll treat these as non-live lessons and copy to /teaching-materials_DEV/) or cancel
+    message("You can update the gsheet now, then cancel and re-run this function.")
+    message("OR proceed with move, treating these as non-live lessons?")
+    proceed <- readline("Do you want to proceed (y/n) > ")
+    if (proceed != "y") {
+      warning("Move CANCELED")
+      return(FALSE)
+    }
+    #modify comb_tm_contents to treat these as non-live lessons
+    comb_tm_contents <- comb_tm_contents %>%
+      dplyr::mutate(lsnStatus = ifelse(is.na(.data$lsnStatus), "Proto", .data$lsnStatus))
+    #apply warning to remind them to document the lessons in question in gsheet
+    warning(
+      "Please update teach-it.gsheet to document the status of lessons: ",
+      paste(comb_tm_contents$lsn[is.na(comb_tm_contents$lsnStatus)], collapse = ", ")
+    )
+
   }
 
 
+  # Handle all non-"live" lessons --- --------
+  nonlive_lsns <- comb_tm_contents %>% dplyr::filter(.data$lsnStatus != "Live")
 
 
 
   # Check for existence of /teaching-materials_DEV/ folder if needed
-  if (nrow(real_nonlive_lsns) > 0 & is.null(tm_dev_drib)) {
+  if (nrow(nonlive_lsns) > 0 & is.null(tm_dev_drib)) {
     message(
-      "make_teaching_mat_public(): Non-live lessons found on 'teach-it.gsheet!Titles' but no /teaching-materials_DEV/ folder found! Need to create it."
+      "make_teaching_mat_public(): Non-live lessons found, but no /teaching-materials_DEV/ folder found! I'll create it."
     )
     must_create_TM_dev <- TRUE
   } else{
@@ -192,10 +224,10 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
   )
   #Enumerate tasks for user to verify
   # move nonlive (proto, hidden, upcoming) lessons to /teaching-materials_DEV/
-  if (nrow(real_nonlive_lsns) > 0) {
+  if (nrow(nonlive_lsns) > 0) {
     message(
       " * move non-'live' Lesson(s) ",
-      paste(real_nonlive_lsns$lsn, collapse = ", "),
+      paste(nonlive_lsns$lsn, collapse = ", "),
       " to /teaching-materials_DEV/*"
     )
   }
@@ -205,75 +237,89 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
     paste(live_lsns$lsn, collapse = ", "),
     "  in /teaching-materials/* to GalacticPolymath/ shared drive"
   )
-  message(" * rename GalacticPolymath/teaching-materials to ",
-          newTitle)
+  message(" * rename GalacticPolymath/teaching-materials to ", newTitle)
   message(" NOTE: This will remove almost everyone's edit access ****")
   continue <- readline("(y/n) > ")
 
   if (continue != "y") {
     warning("Move CANCELED")
     return(FALSE)
-    # Move folder to GP-LIVE -----------------------------------------------------------
-  } else{
-    # test_move_to_live <-
-    #   drive_move(from = dir_drib,
-    #              to = "GP-LIVE/Edu/Lessons",
-    #              prompt_user = FALSE) %>% catch_err(keep_results = TRUE)
-    # live_success <- test_move_to_live$success
-
-    # Move teaching-materials to GalacticPolymath -----------------------------
-
-    # if (test_move_to_live$success) {
-    test_move_to_gp <-
-      drive_move(
-        from = tm_drib,
-        to = "GalacticPolymath/",
-        name = newTitle,
-        shortcut_name = "teaching-materials",
-        drop_shortcut = TRUE,
-        make_public = TRUE,
-        prompt_user = FALSE
-      ) %>% catch_err(keep_results = TRUE)
-
-
-    gp_success <- test_move_to_gp$success
-    shortcut_success <- test_move_to_gp$result$shortcut_made[1]
-    made_public_success <- test_move_to_gp$result$made_public[1]
   }
 
-  #
-  #   } else{
-  #     gp_success <-
-  #       shortcut_success <-
-  #       made_public_success <- update_success <-
-  #       FALSE
-  #   }
+
+  # If needed, create teaching-materials_DEV --------------------------------
+  if (must_create_TM_dev) {
+    tm_dev_drib <-
+      googledrive::drive_mkdir(
+        "teaching-materials_DEV",
+        path = dir_drib,
+        description = paste0(
+          "Holds non-live lessons for ",
+          projDirName,
+          "; created ",
+          Sys.Date()
+        )
+      ) %>% catch_err(keep_results = TRUE)
+
+    if (tm_dev_drib$success) {
+      message("Created /teaching-materials_DEV/ folder")
+      teachMatDevID <- tm_dev_drib$result$id
+      tm_dev_drib <- tm_dev_drib$result
+      tm_dev_move_success  <- TRUE
+    } else{
+      warning("Failed to create /teaching-materials_DEV/ folder")
+      return(FALSE)
+    }
+  }
+
+  # Move non-live lessons to teaching-materials_DEV -------------------------
+  if (nrow(nonlive_lsns) > 0) {
+    dev_move_results <- pbapply::pblapply(1:nrow(nonlive_lsns), \(i) {
+      message("Moving non-live lesson ", nonlive_lsns$lsn[i])
+      test_move <- drive_move(
+        from = nonlive_lsns$id[i],
+        to = tm_dev_drib,
+        prompt_user = FALSE
+      ) %>% catch_err(keep_results = TRUE)
+      dplyr::tibble(lsn = nonlive_lsns$lsn[i], move_success = test_move$success)
+    }) %>% dplyr::bind_rows()
+
+    tm_dev_move_success <- all(dev_move_results$move_success, na.rm = TRUE)
+
+
+  } else{
+    tm_dev_move_success  <- NA
+  }
 
 
 
+  # Move teaching-materials to GalacticPolymath -----------------------------
+
+  test_move_to_gp <-
+    drive_move(
+      from = tm_drib,
+      to = "GalacticPolymath/",
+      name = newTitle,
+      shortcut_name = "teaching-materials",
+      drop_shortcut = TRUE,
+      make_public = TRUE,
+      prompt_user = FALSE
+    ) %>% catch_err(keep_results = TRUE)
+
+
+  gp_success <- test_move_to_gp$success
+  shortcut_success <- test_move_to_gp$result$shortcut_made[1]
+  made_public_success <- test_move_to_gp$result$made_public[1]
 
 
 
   # Update front-matter -----------------------------------------------------
-  WD0 <- WD
-  # WD <- gsub("GP-Studio", "GP-LIVE", WD, fixed = T)#new value
-  # # Let's wait until it's recognized locally
-  # message("Waiting for Google Drive for Desktop to find the new working directory at: ",
-  #         WD)
-  # checkmate::assert(fs::is_dir(WD), .var.name = "fs::is_dir()") %>%
-  #   catch_err(try_harder = T, waits = c(2, 5, 10, 15, 30))
-  #
-  # #Test the teaching materials are found and set the new path
-  # tmPath_full <-
-  #   fs::path(lessons_get_path("gp"),
-  #            newTitle)
-  # message("Now checking that teaching-materials found at: ",tmPath_full)
-  # checkmate::assert_directory_exists(tmPath_full) %>% catch_err(try_harder = T, waits =
-  #                                                            c(2, 5, 1, 9))
-
-
+  change_list <- list(GdriveTeachMatPath = tmPath)
+  if(!is.na(tm_dev_move_success) & tm_dev_move_success){
+    change_list$GdriveTeachMatDevID <- as.character(teachMatDevID)
+  }
   test_fm <- update_fm(WD = WD,
-                       change_this = list(GdriveTeachMatPath = tmPath)) %>% catch_err()
+                       change_this = change_list) %>% catch_err()
 
 
 
@@ -285,7 +331,7 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
       made_public_success,
       test_fm)
 
-  SUCCESS <- all(successes,na.rm=TRUE)
+  SUCCESS <- all(successes, na.rm = TRUE)
   if (SUCCESS) {
     message("make_teaching_mat_public() SUCCESS for project '",
             projDirName,
