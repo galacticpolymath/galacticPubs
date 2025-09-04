@@ -39,7 +39,7 @@ drive_new_from_template(
 Create a new Galactic Polymath Google Drive file from a template file.
 }
 \details{
-If you're wanting to copy meta/ google sheets, check out \code{\link[=init_lesson_meta]{init_lesson_meta()}}
+If you're wanting to copy meta/ google sheets, check out \code{\link[=init_unit_meta]{init_unit_meta()}}
 }
 \seealso{
 Other Google Drive Functions: 
@@ -50,7 +50,7 @@ Other Google Drive Functions:
 \code{\link{drive_get_info}()},
 \code{\link{drive_inSync}()},
 \code{\link{drive_open}()},
-\code{\link{init_lesson_meta}()},
+\code{\link{init_unit_meta}()},
 \code{\link{update_teach_links}()}
 }
 \concept{Google Drive Functions}

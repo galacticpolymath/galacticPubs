@@ -2,7 +2,7 @@
 #'
 #' Create a new Galactic Polymath Google Drive file from a template file.
 #'
-#' If you're wanting to copy meta/ google sheets, check out [init_lesson_meta()]
+#' If you're wanting to copy meta/ google sheets, check out [init_unit_meta()]
 #'
 #' @param template_path i.e. the FROM path; a text string of a path to a template to pass to [drive_find_path()]
 #' @param dest_path i.e. the TO path; text string of a path where you want to file to go

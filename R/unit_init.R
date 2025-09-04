@@ -1,4 +1,4 @@
-#' lesson_init
+#' unit_init
 #'
 #' Set up a new Galactic Polymath lesson or mini-unit project folder. Create folder structure in 'GP-Studio'/Edu/Lessons Google Shared Drive and add meta/files
 #'
@@ -10,11 +10,11 @@
 #' @export
 #'
 
-lesson_init <- \(recover=FALSE,WD="?") {
+unit_init <- \(recover=FALSE,WD="?") {
 
   # Get details for new lesson with helper shiny app ------------------------
   if(!recover){
-  inputs <- lesson_init_helper()
+  inputs <- unit_init_helper()
   checkmate::assert_list(inputs, all.missing = FALSE)
   }else{
   inputs <- get_fm(WD=WD)
@@ -171,9 +171,9 @@ lesson_init <- \(recover=FALSE,WD="?") {
 
   # use identical to be more resilient to missing
   if (identical(TRUE,inputs$bool_init_meta)) {
-    init_lesson_meta_success <- init_lesson_meta(WD = WD)
+    init_unit_meta_success <- init_unit_meta(WD = WD)
   } else{
-    init_lesson_meta_success = NA
+    init_unit_meta_success = NA
   }
 
 
@@ -258,7 +258,7 @@ lesson_init <- \(recover=FALSE,WD="?") {
         WD_git_success,
         init_fm_success,
         update_fm_success,
-        init_lesson_meta_success,
+        init_unit_meta_success,
         template_success
       ),
       task = c(
@@ -280,9 +280,9 @@ lesson_init <- \(recover=FALSE,WD="?") {
 
 }
 
-#' init_lesson
+#' init_unit
 #'
-#' @describeIn lesson_init alias for init_lesson
+#' @describeIn unit_init alias for init_unit
 #' @export
 
-init_lesson <- lesson_init
+init_unit <- unit_init

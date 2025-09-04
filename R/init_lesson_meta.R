@@ -1,4 +1,4 @@
-#' init_lesson_meta()
+#' init_unit_meta()
 #'
 #' Add galacticPubs Google Workspace working documents to a given lesson's */meta* folder. You *must have access to GP-Studio shared drive*.
 #'
@@ -12,7 +12,7 @@
 #' @returns logical of success; T=template gsheets copied to meta/ and front-matter updated with [update_fm()]
 #' @export
 
-init_lesson_meta <- function(WD = "?",
+init_unit_meta <- function(WD = "?",
                              overwrite = FALSE,
                              template = NULL,
                              override = FALSE) {
@@ -36,7 +36,7 @@ init_lesson_meta <- function(WD = "?",
     message("GdriveDirName, GdriveMetaID, or ShortTitle not found in front-matter.yml. Running update_fm() to update front-matter.yml.")
     test_update <- update_fm(WD = WD, drive_reconnect = TRUE,recompile = FALSE)
     if (!test_update) {
-      stop("update_fm() failed. Cannot continue with init_lesson_meta().")
+      stop("update_fm() failed. Cannot continue with init_unit_meta().")
     }
     # Re-assign after update
     GdriveDirName <- get_fm("GdriveDirName", WD = WD, checkWD = FALSE)
@@ -104,7 +104,7 @@ init_lesson_meta <- function(WD = "?",
 
     continue <- readline("(y/n) > ")
     if (continue != "y") {
-      stop("init_lesson_meta() cancelled.")
+      stop("init_unit_meta() cancelled.")
     }
     test_delete <- fs::file_delete(to_delete$full) %>% catch_err()
     if (test_delete) {
@@ -180,10 +180,10 @@ init_lesson_meta <- function(WD = "?",
 }
 
 
-#' lesson_init_meta
+#' unit_init_meta
 #'
-#' @describeIn init_lesson_meta
+#' @describeIn init_unit_meta
 #'
 #' @export
 #'
-lesson_init_meta <- init_lesson_meta
+unit_init_meta <- init_unit_meta

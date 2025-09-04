@@ -234,7 +234,7 @@ upgrade_meta_spreadsheet <- \(WD = "?",
 
 
       test_reinit <-
-        init_lesson_meta(WD = WD,
+        init_unit_meta(WD = WD,
                          template = "standards",
                          override = TRUE)
 
@@ -474,7 +474,7 @@ upgrade_meta_spreadsheet <- \(WD = "?",
 
 
       test_reinit <-
-        init_lesson_meta(WD = WD,
+        init_unit_meta(WD = WD,
                          template = "teach-it",
                          override = TRUE)
 

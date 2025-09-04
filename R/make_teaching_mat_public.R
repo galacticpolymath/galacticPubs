@@ -82,6 +82,7 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
   # Read in unit info tab of teaching-materials.gsheet ----------------------
   # Get lesson statuses
   if (is.null(uinfo)) {
+
     uinfo <-
       googlesheets4::read_sheet(
         googledrive::as_id(teachitID),
@@ -89,6 +90,7 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
         skip = 1,
         col_types = "c"
       )
+
   }
   checkmate::assert_data_frame(uinfo, min.rows = 0, .var.name = "teach-it.gsheet!Titles")
 
@@ -124,10 +126,63 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
   }
 
 
-  # Figure out tasks to be done ---------------------------------------------
 
+  # Get contents of /teaching-materials/ folder
+  tm_drib_contents <-
+    googledrive::drive_ls(
+      tm_drib,
+      type = "folder",
+      recursive = TRUE,
+      n_max = Inf,
+      pattern = "^L"
+    ) %>%
+    dplyr::mutate(location = "teach-materials",
+                  lsn = gsub("^L(\\d+).*", "\\1", .data$name))
+
+  checkmate::assert_data_frame(tm_drib_contents,
+                               min.rows = 0,
+                               .var.name = "Contents of /teaching-materials/ folder")
+
+  # merge drib_contents with uinfo to get lesson statuses
+  tm_drib_contents$lsnStatus <- NA
+  tm_drib_contents$lsnTitle <- NA
+
+  comb_tm_contents0 <-
+    hard_left_join(tm_drib_contents,uinfo, by = "lsn") %>%
+    dplyr::select("lsn", "lsnStatus", "lsnTitle", "location", "id") %>%
+    dplyr::arrange(.data$lsn)
+
+
+
+  # Now check for lessons in teaching-materials_DEV -------------------------
+  #if dev_drib exists, check for lessons to merge with gsheet statuses
+  if (!is.null(tm_dev_drib)) {
+    tm_dev_drib_contents <-
+      googledrive::drive_ls(
+        tm_dev_drib,
+        type = "folder",
+        recursive = TRUE,
+        n_max = Inf,
+        pattern = "^L"
+      ) %>%
+      dplyr::mutate(location = "teach-materials_DEV",
+                    lsn = gsub("^L(\\d+).*", "\\1", .data$name))
+
+    checkmate::assert_data_frame(tm_dev_drib_contents,
+                                 min.rows = 0,
+                                 .var.name = "Contents of /teaching-materials_DEV/ folder")
+
+    # make final comb_tm_contents by merging with tm_dev_drib_contents
+    comb_tm_contents <-
+      hard_left_join( comb_tm_contents0,tm_dev_drib_contents, by = "lsn") %>%
+      dplyr::arrange(.data$lsn)
+  } else{
+    comb_tm_contents <- comb_tm_contents0
+  }
+
+  # Split into live and non-live lessons
   # live lessons
-  live_lsns <- uinfo %>% dplyr::filter(.data$lsnStatus == "Live")
+  live_lsns <- comb_tm_contents %>% dplyr::filter(.data$lsnStatus == "Live")
 
 
   #If no live lessons, nothing to do
@@ -144,54 +199,30 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
   }
 
 
-  # Get contents of /teaching-materials/ folder
-  tm_drib_contents <-
-    googledrive::drive_ls(
-      tm_drib,
-      type = "folder",
-      recursive = TRUE,
-      n_max = Inf,
-      pattern = "^L"
-    ) %>%
-    dplyr::mutate(lsn = gsub("^L(\\d+).*", "\\1", .data$name))
-
-  checkmate::assert_data_frame(tm_drib_contents,
-                               min.rows = 0,
-                               .var.name = "Contents of /teaching-materials/ folder")
-
-  # merge drib_contents with uinfo to get lesson statuses
-  comb_tm_contents <-
-    dplyr::left_join(tm_drib_contents, uinfo, by = "lsn") %>%
-    dplyr::select("lsn", "lsnStatus", "lsnTitle", "name", "id") %>%
-    dplyr::arrange(.data$lsn)
-
-  message("Lessons found in teaching-materials for '", projDirName, "':\n")
+  # Summarize merge results -------------------------------------------------
+  message("Lessons found in teaching-materials(& _DEV) for '",
+          projDirName,
+          "':\n")
   message("LsnStatus pulled from teach-it.gsheet")
   print(comb_tm_contents)
   #if any NAs in LsnStatus, warn user
   if (any(is.na(comb_tm_contents$lsnStatus))) {
     message(
-      "These lessons in /teaching-materials/ do not have a status in teach-it.gsheet! Please update the gsheet for Lessons: ",
+      "These lessons in /teaching-materials(_DEV)/ do not have a status in teach-it.gsheet! Please update the gsheet for Lessons: ",
       paste(comb_tm_contents$lsn[is.na(comb_tm_contents$lsnStatus)], collapse = ", ")
     )
-    #open the gsheet for them
-    utils::browseURL(paste0("https://docs.google.com/spreadsheets/d/", teachitID))
-    # ask user if they want to proceed (and we'll treat these as non-live lessons and copy to /teaching-materials_DEV/) or cancel
-    message("You can update the gsheet now, then cancel and re-run this function.")
-    message("OR proceed with move, treating these as non-live lessons?")
-    proceed <- readline("Do you want to proceed (y/n) > ")
-    if (proceed != "y") {
+
+    # ask user if they want to 1. open up gsheet and cancel the script or continue, treating these as non-live lessons and copy to /teaching-materials_DEV/) or cancel
+    message("How would you like to proceed?")
+    message("1-You can cancel, update the gsheet now, then re-run this function.")
+    message("2-Proceed, moving undocumented lessons to teaching-materials_DEV/?")
+    proceed <- readline("option > ")
+    if (proceed != "2") {
       warning("Move CANCELED")
+      #open the gsheet for them
+      utils::browseURL(paste0("https://docs.google.com/spreadsheets/d/", teachitID))
       return(FALSE)
     }
-    #modify comb_tm_contents to treat these as non-live lessons
-    comb_tm_contents <- comb_tm_contents %>%
-      dplyr::mutate(lsnStatus = ifelse(is.na(.data$lsnStatus), "Proto", .data$lsnStatus))
-    #apply warning to remind them to document the lessons in question in gsheet
-    warning(
-      "Please update teach-it.gsheet to document the status of lessons: ",
-      paste(comb_tm_contents$lsn[is.na(comb_tm_contents$lsnStatus)], collapse = ", ")
-    )
 
   }
 
@@ -201,7 +232,7 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
 
 
 
-  # Check for existence of /teaching-materials_DEV/ folder if needed
+  # Check for existence of /teaching-materials_DEV/ folder if needed for first time
   if (nrow(nonlive_lsns) > 0 & is.null(tm_dev_drib)) {
     message(
       "make_teaching_mat_public(): Non-live lessons found, but no /teaching-materials_DEV/ folder found! I'll create it."
@@ -210,6 +241,8 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
   } else{
     must_create_TM_dev <- FALSE
   }
+
+
 
 
 
@@ -276,11 +309,9 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
   if (nrow(nonlive_lsns) > 0) {
     dev_move_results <- pbapply::pblapply(1:nrow(nonlive_lsns), \(i) {
       message("Moving non-live lesson ", nonlive_lsns$lsn[i])
-      test_move <- drive_move(
-        from = nonlive_lsns$id[i],
-        to = tm_dev_drib,
-        prompt_user = FALSE
-      ) %>% catch_err(keep_results = TRUE)
+      test_move <- drive_move(from = nonlive_lsns$id[i],
+                              to = tm_dev_drib,
+                              prompt_user = FALSE) %>% catch_err(keep_results = TRUE)
       dplyr::tibble(lsn = nonlive_lsns$lsn[i], move_success = test_move$success)
     }) %>% dplyr::bind_rows()
 
@@ -315,11 +346,10 @@ make_teaching_mat_public <- \(WD = "?", uinfo = NULL) {
 
   # Update front-matter -----------------------------------------------------
   change_list <- list(GdriveTeachMatPath = tmPath)
-  if(!is.na(tm_dev_move_success) & tm_dev_move_success){
+  if (!is.na(tm_dev_move_success) & tm_dev_move_success) {
     change_list$GdriveTeachMatDevID <- as.character(teachMatDevID)
   }
-  test_fm <- update_fm(WD = WD,
-                       change_this = change_list) %>% catch_err()
+  test_fm <- update_fm(WD = WD, change_this = change_list) %>% catch_err()
 
 
 

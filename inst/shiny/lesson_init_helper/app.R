@@ -3,7 +3,7 @@
 #
 
 library(shiny)
-numID <- .GlobalEnv$.lesson_init_num
+numID <- .GlobalEnv$.unit_init_num
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   titlePanel("Initialize a new Galactic Polymath Mini-Unit"),

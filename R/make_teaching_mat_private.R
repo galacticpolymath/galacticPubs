@@ -14,6 +14,12 @@
 # Reverse operations for make_teaching_mat_public()
 make_teaching_mat_private <- \(WD = "?!") {
   WD <- parse_wd(WD)
+
+  #authenticate with default email for this user
+  oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
+  checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
+  googledrive::drive_auth(email = oauth_email)
+
   #Check if anything needs to be done (if teaching-materials are not already at GalacticPolymath)
   gdrive_teach_mat_curr_path <- get_fm("GdriveTeachMatPath", WD)
   if (grepl("^GP-Studio", gdrive_teach_mat_curr_path)) {
@@ -30,10 +36,7 @@ make_teaching_mat_private <- \(WD = "?!") {
   tmID <- get_fm("GdrivePublicID", WD) #/teaching-materials folder Google Drive ID
   dir_drib <- drive_find_path(dirID)
   teachitID <- get_fm("GdriveTeachItID", WD) #ID of the teach-it_*.gsheet
-  new_gdrive_dest <- fs::path("GP-Studio", "Edu", "Lessons", projDirName)
-
-  checkmate::assert_directory_exists(new_gdrive_dest, .var.name = "WD")
-  new_gdrive_path <- fs::path(newgdrive_dest, "teaching-materials")
+  new_gdrive_path <- fs::path("GP-Studio", "Edu", "Lessons", projDirName, "teaching-materials")
 
 
   checkmate::assert_character(
@@ -61,12 +64,12 @@ make_teaching_mat_private <- \(WD = "?!") {
 
 
   message(
-    "make_teaching_mat_private(): \n-------------------\nARE YOU SURE you want to make Teaching-Materials public?: ",
+    "make_teaching_mat_private(): \n-------------------\nARE YOU SURE you want to make Teaching-Materials private?: ",
     basename(WD),
     " and:"
   )
   message(" * return teaching materials to project folder from GalacticPolymath/ shared drive")
-  message(" * rename '", MediumTitle, "' back to '/teaching-materials/'")
+  message(" * rename '", tm_drib$name, "' back to '/teaching-materials/'")
   message("NOTE: This will return edit access to folks with access to the parent folder & GP-Studio ")
   continue <- readline("(y/n) > ")
 
@@ -77,7 +80,7 @@ make_teaching_mat_private <- \(WD = "?!") {
   }
   # Move teaching-materials from GalacticPolymath -----------------------------
 
-  if (test_move_to_studio$success) {
+
     test_move_tm <-
       drive_move(
         from = tm_drib,
@@ -90,9 +93,9 @@ make_teaching_mat_private <- \(WD = "?!") {
     tm_success <- test_move_tm$success
 
 
-  } else{
-    tm_success <-  FALSE
-  }
+
+
+
 
   # Clean up shortcuts ------------------------------------------------------
 
@@ -109,7 +112,7 @@ make_teaching_mat_private <- \(WD = "?!") {
   # Update front-matter -----------------------------------------------------
   #update front-matter for new location of teaching materials
   test_update_fm <- update_fm(WD = WD,
-                              change_this = list(GdriveTeachMatPath = new_gdrive_path)) %>% catch_err()
+                              change_this = list(GdriveTeachMatPath = new_gdrive_path)) %>% catch_err(keep_results = TRUE)
 
   update_fm_success <- test_update_fm$success
 
@@ -136,10 +139,10 @@ make_teaching_mat_private <- \(WD = "?!") {
     task = c(
       "move /teaching-materials/ back to project folder",
       "delete shortcut to 'GalacticPolymath/teaching-materials/'",
-      paste0("update_fm(): GdriveTeachMatPath=", new_gdrive_path)
+      paste0("update_fm(): GdriveTeachMatPath")
     )
   )
-  print(format(out, justify = "left"), row.names = FALSE)
+  print(out, row.names = FALSE,right=FALSE)
   return(SUCCESS)
 }
 

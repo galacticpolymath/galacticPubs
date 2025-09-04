@@ -4,13 +4,13 @@
 \alias{make_teaching_mat_private}
 \title{make_teaching_mat_private}
 \usage{
-make_teaching_mat_private(WD = "?")
+make_teaching_mat_private(WD = "?!")
 }
 \arguments{
-\item{WD}{is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke \verb{[pick_lesson(shared_drive = "l")]}; default is WD=getwd()}
+\item{WD}{is working directory of the project; default is "?!", passed to \code{\link[=parse_wd]{parse_wd()}}}
 }
 \description{
-A helper function for \code{\link[=organize_teach_it]{organize_teach_it()}}, which is part of \code{\link[=compile_teach_it]{compile_teach_it()}}.
+A helper function for \code{\link[=organize_teach_it]{organize_teach_it()}}, which is part of \code{\link[=compile_teach_it]{compile_teach_it()}}. Basically the reverse of \code{\link[=make_teaching_mat_public]{make_teaching_mat_public()}}.
 Unstage a lesson (i.e. remove public access and make it editable again). Does the following:
 \enumerate{
 \item Move lesson project directory from GP-LIVE to GP-Studio (Making it editable to those with access to GP-Studio)
@@ -18,9 +18,7 @@ Unstage a lesson (i.e. remove public access and make it editable again). Does th
 \item Rename from "MediumTitle" in public folder back to "teaching-materials"
 \item Make the following updates to front-matter:
 \itemize{
-\item PublicationStatus: 'Draft'
-\item GdriveHome: 'GP-Studio'
-\item GdrivePublicID: NA
+\item GdriveTeachMatPath: 'GP-Studio/Edu/Lessons/ProjName/teaching-materials'
 }
 }
 }

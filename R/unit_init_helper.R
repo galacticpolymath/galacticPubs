@@ -1,4 +1,4 @@
-#' Run lesson_init_helper Shiny app
+#' Run unit_init_helper Shiny app
 #'
 #' Lets you set the following values for your lesson:
 #' - ShortName
@@ -6,11 +6,11 @@
 #' - Country
 #' - LsnCount
 #'
-#' Selections are passed to the global environment and interpreted by [lesson_init()]
+#' Selections are passed to the global environment and interpreted by [unit_init()]
 #'
 #' @export
 
-lesson_init_helper <- function(){
+unit_init_helper <- function(){
 
 
 #need to write logic to assign the next number to this lesson
@@ -24,14 +24,14 @@ next_num <- batch_get_fm(c("numID","isTestRepo")) %>%
   # excluded <- c(999)
   # next_num <- (numIDs[which(!numIDs %in% excluded) ]%>% max(na.rm=TRUE))+1
   checkmate::assert_number(next_num,na.ok=FALSE,.var.name="next unit numID")
-  .GlobalEnv$.lesson_init_num <- next_num
+  .GlobalEnv$.unit_init_num <- next_num
 
-  on.exit(rm(list=c(".lesson_init_num"),envir=.GlobalEnv))
+  on.exit(rm(list=c(".unit_init_num"),envir=.GlobalEnv))
   # This next resetting working directory is necessary bc it kept getting set to the Home user directory for unknown reasons.
 
   on.exit(setwd(rstudioapi::getActiveProject()))
 
 
 
-  shiny::runApp(system.file("shiny","lesson_init_helper",package="galacticPubs"),launch.browser = .rs.invokeShinyWindowViewer)
+  shiny::runApp(system.file("shiny","unit_init_helper",package="galacticPubs"),launch.browser = .rs.invokeShinyWindowViewer)
 }

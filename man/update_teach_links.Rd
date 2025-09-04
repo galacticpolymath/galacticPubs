@@ -50,6 +50,6 @@ Other Google Drive Functions:
 \code{\link{drive_inSync}()},
 \code{\link{drive_new_from_template}()},
 \code{\link{drive_open}()},
-\code{\link{init_lesson_meta}()}
+\code{\link{init_unit_meta}()}
 }
 \concept{Google Drive Functions}
