@@ -5,7 +5,7 @@
 #' Will fail if ShortTitle duplicates an existing name found in GP-Studio or GP-Live
 #'
 #' @param recover logical; do you want to try to finish initializing a unit that didn't complete due to some error? default=FALSE
-#' @param WD working directory, passed to [parse_wd()]; default="?"; only used if recover=T
+#' @param WD working directory, passed to [parse_wd()]; default="?"; NOTE: only used if recover=T
 #'
 #' @export
 #'
