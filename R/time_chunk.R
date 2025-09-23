@@ -91,7 +91,7 @@ time_chunk <- function(WD=getwd()){
       ggplot2::annotate("text",x=chunkMid,y=0.6,label=paste0(chunkDur," ",t_unit),
                         size=9,fontface=2,vjust=0,
                         colour=gpColors("hydro"))+
-      galacticEdTools::theme_galactic() +
+      galacticEdTools::theme_galactic(font="sans") +
       ggplot2::theme(
         axis.text.y = ggplot2::element_blank(),
         axis.text.x = ggplot2::element_text(size = 24, colour = "#090816"),
