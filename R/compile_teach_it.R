@@ -341,6 +341,7 @@ compile_teach_it <- function(WD = "?",
       if (!test_zget_proc$success) {
         message("FAILED to compile procedures")
         warning("FAILED to compile procedures")
+        warning(test_zget_proc$result)
         proc_data <- NULL
         stop()
 

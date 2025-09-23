@@ -19,9 +19,9 @@ if str is not "?", "??","???",or "?!", it will return str. Otherwise, returns th
 \description{
 Helper function to handle Working Directory strings. Here's what happens when you supply the following:
 \itemize{
-\item "?" or "?s": invokes \verb{[pick_lesson("s")]} to choose from among lessons in the 'GP-Studio' shared drive.
-\item "??" or "?l": invokes \verb{[pick_lesson("l")]} to pick a path to lessons on the 'GP-LIVE' drive.
-\item "???" or "?gp": gives you \verb{[pick_lesson("gp")]} to pick a path to lesson teaching materials found on 'GalacticPolymath' drive
+\item "?" or "s": invokes \verb{[pick_lesson("s")]} to choose from among lessons in the 'GP-Studio' shared drive.
+\item "??" or "l": invokes \verb{[pick_lesson("l")]} to pick a path to lessons on the 'GP-LIVE' drive.
+\item "???" or "gp": gives you \verb{[pick_lesson("gp")]} to pick a path to lesson teaching materials found on 'GalacticPolymath' drive
 \item "?!" or "sl": invokes \verb{[pick_lesson("sl")]} to pick from units on 'GP-Studio' and 'GP-LIVE'
 }
 }

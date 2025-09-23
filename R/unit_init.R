@@ -10,14 +10,13 @@
 #' @export
 #'
 
-unit_init <- \(recover=FALSE,WD="?") {
-
+unit_init <- \(recover = FALSE, WD = "?") {
   # Get details for new lesson with helper shiny app ------------------------
-  if(!recover){
-  inputs <- unit_init_helper()
-  checkmate::assert_list(inputs, all.missing = FALSE)
-  }else{
-  inputs <- get_fm(WD=WD)
+  if (!recover) {
+    inputs <- unit_init_helper()
+    checkmate::assert_list(inputs, all.missing = FALSE)
+  } else{
+    inputs <- get_fm(WD = WD)
   }
 
   #add locale to inputs
@@ -47,10 +46,10 @@ unit_init <- \(recover=FALSE,WD="?") {
                                      .var.name = "GP-Studio/Edu/Lessons")
 
   #Test for name redundancy if not recovering
-  if(!recover){
-  existing_units <- list.files(gp_lessons_dir)
-  is_unique <- !unit_name %in% existing_units
-  checkmate::assert_true(is_unique, .var.name = "Unique Unit/lesson name. Cannot match existing 'gp-lessons' project.")
+  if (!recover) {
+    existing_units <- list.files(gp_lessons_dir)
+    is_unique <- !unit_name %in% existing_units
+    checkmate::assert_true(is_unique, .var.name = "Unique Unit/lesson name. Cannot match existing 'gp-lessons' project.")
 
   }
 
@@ -58,8 +57,10 @@ unit_init <- \(recover=FALSE,WD="?") {
   WD <- fs::path(studio_lessons_dir, unit_name)
   WD_exists <- checkmate::test_directory_exists(WD)
 
-  if(WD_exists){
-    message("Unit '",unit_name,"' Already exists in on GP-Studio/Edu/Lessons")
+  if (WD_exists) {
+    message("Unit '",
+            unit_name,
+            "' Already exists in on GP-Studio/Edu/Lessons")
   }
 
 
@@ -95,7 +96,7 @@ unit_init <- \(recover=FALSE,WD="?") {
     fs::path(WD, "teaching-materials", teach_mat_envir_dirs)
 
   #Add Assessment folder
-  assess_dir <- fs::path(path_parent_dir( teach_mat_dir),"assessments")
+  assess_dir <- fs::path(path_parent_dir(teach_mat_dir), "assessments")
 
   #Add Subfolders with Lx if we've specified more than 1 lesson in this unit
   if (inputs$LsnCount > 1) {
@@ -120,7 +121,7 @@ unit_init <- \(recover=FALSE,WD="?") {
 
 
   # Now Create all subfolders -----------------------------------------------
-  all_paths <- c(asset_dirs, teach_dirs,assess_dir, other_dirs)
+  all_paths <- c(asset_dirs, teach_dirs, assess_dir, other_dirs)
   WD_success <-
     fs::dir_create(all_paths, recurse = TRUE) %>% catch_err()
 
@@ -129,9 +130,7 @@ unit_init <- \(recover=FALSE,WD="?") {
   # Make paired entry in gp-lessons repo folder -----------------------------
   WD_git <- fs::path(gp_lessons_dir, unit_name)
   #Other folders to create:
-  other_dirs <- c("code",
-                  "JSONs",
-                  "saves")
+  other_dirs <- c("code", "JSONs", "saves")
   WD_git_newpaths <- fs::path(WD_git, other_dirs)
   WD_git_success <- fs::dir_create(WD_git_newpaths) %>% catch_err()
 
@@ -160,28 +159,56 @@ unit_init <- \(recover=FALSE,WD="?") {
       WD_git = WD_git,
       recompile = F,
       change_this = inputs2[common_keys],
-      try_harder=TRUE
+      try_harder = TRUE
     ))
   }
 
   # Initialize the meta template files --------------------------------------
-  if(recover){
-    inputs$bool_init_meta <- inputs$bool_teach<- inputs$bool_pres <- TRUE
+  if (recover) {
+    inputs$bool_init_meta <- inputs$bool_teach <- inputs$bool_pres <- TRUE
   }
 
   # use identical to be more resilient to missing
-  if (identical(TRUE,inputs$bool_init_meta)) {
+  if (identical(TRUE, inputs$bool_init_meta)) {
     init_unit_meta_success <- init_unit_meta(WD = WD)
   } else{
     init_unit_meta_success = NA
   }
 
 
+  # Copy Project Doc template to project root gdrive dir --------------------
+  if (!WD_success) {
+    client_docs_success <- FALSE
+  } else{
+    # Get GdriveDirID for project folder
+    GdriveDirID <- get_fm("GdriveDirID", WD_git = WD_git)
+
+    proj_doc_success <-
+      drive_new_from_template(
+        template_path =
+          googledrive::drive_get(id = "1FI81DuT65Xj4q6vIWaf3ufi957XT7CQaupfeXlU23eA"),
+        dest_path= drive_get(id=GdriveDirID),
+        new_name = paste0(inputs$ShortTitle,"_","Project Doc")) %>% catch_err(try_harder = T)
+
+    #Now add the project updates slideshow to the same root
+    proj_updatesID <- "11lQXhqfTtY_kjgRcaVLju-0c7js8ST43jhVLLYwTap0"
+
+    proj_updates_success <-
+      drive_new_from_template(
+        template_path = googledrive::drive_get(id = proj_updatesID),
+        dest_path= drive_get(id=GdriveDirID),
+        new_name = paste0(inputs$ShortTitle,"_","Project Updates")
+      ) %>% catch_err(try_harder = T)
+
+      client_docs_success <- all(c(proj_doc_success, proj_updates_success))
+  }
+
   # Handle copying of teach-mat templates -----------------------------------
   #only if there's more than 0 lessons and templates requested
 
-  if (identical(TRUE,inputs$LsnCount > 0 &
-      (inputs$bool_teach | inputs$bool_pres) )) {
+  if (identical(TRUE,
+                inputs$LsnCount > 0 &
+                (inputs$bool_teach | inputs$bool_pres))) {
     #resolve template dribbles as needed
     if (inputs$bool_teach) {
       teach_template <-
@@ -205,35 +232,34 @@ unit_init <- \(recover=FALSE,WD="?") {
     gpaths <-
       fs::path_rel(teach_dirs, fs::path(WD, "teaching-materials")) %>% fs::path("..", .)
     template_cp_dribs <-
-      lapply(gpaths,
-             \(lesson_path_x) {
-               dest_path_x <-
-                 drive_find_path(lesson_path_x, drive_root = GdrivePublicID)
-               #copy teacher worksheet template into the folder
-               if (inputs$bool_teach)
-                 drive_new_from_template(
-                   template_path = teach_template,
-                   dest_path = dest_path_x,
-                   new_name = paste_valid(
-                     inputs$ShortTitle,
-                     basename(lesson_path_x),
-                     "Worksheet (TEACHER)"
-                   )
-                 )
+      lapply(gpaths, \(lesson_path_x) {
+        dest_path_x <-
+          drive_find_path(lesson_path_x, drive_root = GdrivePublicID)
+        #copy teacher worksheet template into the folder
+        if (inputs$bool_teach)
+          drive_new_from_template(
+            template_path = teach_template,
+            dest_path = dest_path_x,
+            new_name = paste_valid(
+              inputs$ShortTitle,
+              basename(lesson_path_x),
+              "Worksheet (TEACHER)"
+            )
+          )
 
-               #copy presentation template into the folder
-               if (inputs$bool_pres) {
-                 drive_new_from_template(
-                   template_path = pres_template,
-                   dest_path = dest_path_x,
-                   new_name = paste_valid(
-                     inputs$ShortTitle,
-                     basename(lesson_path_x),
-                     "Presentation"
-                   )
-                 )
-               }
-             })
+        #copy presentation template into the folder
+        if (inputs$bool_pres) {
+          drive_new_from_template(
+            template_path = pres_template,
+            dest_path = dest_path_x,
+            new_name = paste_valid(
+              inputs$ShortTitle,
+              basename(lesson_path_x),
+              "Presentation"
+            )
+          )
+        }
+      })
     #Test if dribbles (i.e. pointers to copied template files)
     #were created for every gpath
     successes <-
@@ -259,7 +285,8 @@ unit_init <- \(recover=FALSE,WD="?") {
         init_fm_success,
         update_fm_success,
         init_unit_meta_success,
-        template_success
+        template_success,
+        client_docs_success
       ),
       task = c(
         "create GP-Studio Project (WD)",
@@ -267,7 +294,8 @@ unit_init <- \(recover=FALSE,WD="?") {
         "initialize front-matter.yml at WD_git",
         "update FM based on user entries",
         "create meta/ google sheets for teach-it & stnds",
-        "copy requested teaching-material templates"
+        "copy requested teaching-material templates",
+        "copy project doc & updates to WD Google Drive root"
       )
     )
   res2$success <- res2$success %>% convert_T_to_check()
