@@ -25,7 +25,7 @@ update_teach_links_lsnHelper<-function(dribble,set_grades=NULL,set_envir=NULL,se
         checkmate::test_data_frame(P_ls, all.missing = FALSE)
 
   if(test_P_ls){
-  P_ls_info<-P_ls %>% drive_get_info(set_lsn=set_lsn,set_grades=set_grades,set_envir=set_envir)
+  P_ls_info<-P_ls %>% drive_get_info(set_lsn=set_lsn,set_grades=set_grades,set_envir=set_envir,include_shared_drive = TRUE)
   }else{P_ls_info <- NULL}
   P_ls_info
 }

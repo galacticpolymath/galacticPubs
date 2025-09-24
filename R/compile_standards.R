@@ -313,7 +313,7 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
           ! x %in% supported_subjects)
 
       if (!(sum(check_all_req) == length(req_subjects))) {
-        warning(
+        message(
           "Not fully interdisciplinary lesson. Subjects found: \n",
           paste(
             utils::capture.output(check_all_req, type = "output"),

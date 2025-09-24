@@ -13,10 +13,13 @@ lessons_get_path <- function(shared_drive = "s") {
   which_path <-
     switch(shared_drive,
            s = "galacticPubs_gdrive_studio_lessons_dir",
+           "GP-Studio"= "galacticPubs_gdrive_studio_lessons_dir",
            "?"= "galacticPubs_gdrive_studio_lessons_dir",
            "??"= "galacticPubs_gdrive_live_lessons_dir",
            l = "galacticPubs_gdrive_live_lessons_dir",
+           "GP-Live"= "galacticPubs_gdrive_live_lessons_dir",
            gp = "galacticPubs_gdrive_galacticpolymath_lessons_dir",
+           "GalacticPolymath"= "galacticPubs_gdrive_galacticpolymath_lessons_dir",
            git= "galacticPubs_git_gp_lessons_dir",
            NA)
 

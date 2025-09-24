@@ -98,7 +98,7 @@ report_user_stats <- function(verbosity = 1,
 
   #define theme
   report_theme <-
-    galacticEdTools::theme_galactic(base.theme = "bw") +ggplot2::theme(
+    galacticEdTools::theme_galactic(base.theme = "bw",font="sans") +ggplot2::theme(
       axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = -20)),
       axis.title.y = ggplot2::element_text(margin = ggplot2::margin(r = -10))
     )

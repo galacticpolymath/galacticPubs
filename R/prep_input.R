@@ -27,7 +27,7 @@ prep_input <- function(input,
   }
 
   #update front-matter without saving to prompt user if they want to update
-  test_updated <-
+  suppressMessages(test_updated <-
     update_fm(
       WD = WD,
       save_output = FALSE,
@@ -35,7 +35,7 @@ prep_input <- function(input,
       reorder = TRUE,
       recompile = FALSE,
       backup = FALSE
-    ) %>% catch_err(keep_results = TRUE)
+    ) %>% catch_err(keep_results = TRUE))
 
   #fm_updated is what we want to merge into "current" to trigger a Template needs update message
   #Also add other missing things, etc.

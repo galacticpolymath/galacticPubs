@@ -139,8 +139,11 @@ zget_grade_bands <- \(df_i, proc_data, lesson_statuses, fm, uinfo, assess) {
 #' @family Internal helper functions
 #'
 zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
+
+
   #get sequence of lessons (including upcoming (that have no teaching materials in df_i))
-  lessons <- 1:max(df_i$`_lsn`, uinfo$lsn, na.rm = TRUE) %>% as.numeric()
+  #minimum required for special case where dev environment doesn't contain lesson 1
+  lessons <- min(df_i$`_lsn`,na.rm=TRUE):max(df_i$`_lsn`, uinfo$lsn, na.rm = TRUE) %>% as.numeric()
   #lesson tiles
   tiles <- fm$LessonTiles
   tiles_initialized <- !is_empty(tiles)
@@ -172,22 +175,9 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
       }
 
 
-      # if(not_built){
-      #   message("No teaching materials found for L", i, "\n Probably b/c it is upcoming?'")
-      #  return(c(
-      #   title = uinfo$lsnTitle[i],
-      #   as.vector(lsn_status_info_i),
-      #   tags = list(lsn_i_tags),
-      #   gradeVarNote=gradeVarNote_i,
-      #   preface = df_lsn_i$lsnPreface[1],
-      #   tile = tile_i,
-      #   itemList = NULL,
-      #   proc_data_i
-      # ))
-      # }
       #Get info for the subfolder
       df_lsn_i <- df_i %>% dplyr::filter(`_lsn` == i)
-
+      if(is_empty(df_lsn_i)){browser()}
       #handle tiles
       if (tiles_initialized &
           i %in% tile_Ls) {
@@ -212,7 +202,7 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
       }
 
       #get items for real entries, not for upcoming, placeholder entries
-      if (df_lsn_i$`_itemType`[1] == "placeholder") {
+      if (identical(df_lsn_i$`_itemType`[1], "placeholder")) {
         items_i <- NULL
 
       } else{
@@ -275,6 +265,7 @@ zget_items <- \(df, fm) {
   df0 <- df
 
 
+
   #Sort so presentation is first
   df <- df0 %>% dplyr::arrange(
     !.data$`_fileType` == "presentation",
@@ -302,6 +293,11 @@ zget_items <- \(df, fm) {
 
       #Text to label the link on the teaching-materials section of lesson plan
       #allow for flexible item types extracted from file names (e.g. if somebody puts handout worksheet)
+      if(is_empty(df_item_i$`_fileType`)){
+       print("No items...this should not happen")
+        browser()
+      }
+
       if ((
         grepl("handout", df_item_i$`_itemType`) |
         grepl("worksheet", df_item_i$`_itemType`) |

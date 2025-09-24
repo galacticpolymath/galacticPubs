@@ -10,7 +10,8 @@ drive_get_info(
   set_envir = NULL,
   set_grades = NULL,
   validate = FALSE,
-  all_info = FALSE
+  all_info = FALSE,
+  include_shared_drive = FALSE
 )
 }
 \arguments{
@@ -22,7 +23,11 @@ drive_get_info(
 
 \item{set_grades}{set grade bands manually (not from file name); passed as a string (e.g. "5-9")}
 
-\item{validate}{logical; do you want to throw an error if any of the following are missing? default= FALSE
+\item{validate}{logical; do you want to throw an error if any of the following are missing? default= FALSE}
+
+\item{all_info}{logical; keep the full drive_resources list with all the dribble meta info for each row item? default=FALSE}
+
+\item{include_shared_drive}{logical; do you want to include the name of the shared drive (if any) that the file is in? default=FALSE. If TRUE, will add a column: _sharedDrive (takes a little longer with another call to Google Drive API)
 \itemize{
 \item shortTitle
 \item title
@@ -31,11 +36,20 @@ drive_get_info(
 \item \verb{_itemType}
 \item \verb{_fileType}
 }}
-
-\item{all_info}{logical; keep the full drive_resources list with all the dribble meta info for each row item? default=FALSE}
 }
 \value{
-a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
+a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename. Possible outputs:
+\itemize{
+\item shortTitle: ShortTitle from filename (e.g. "femalesSing")
+\item _lsn:
+\item _grades: grade band (e.g. "5-9")
+\item _itemType: guessed item type (e.g. "worksheet", "handout", "presentation", "card", "table", "overview", "assessment")
+\item _fileType: Google Drive file type (e.g. "Google Docs", "PDF", "JPEG", "MP4 video", "Google Slides", "Google Sheets", "audio")
+\item _envir: guessed environment (e.g. "classroom", "remote", or NA)
+\item _SvT: guessed Student vs Teacher (e.g. "student", "teacher", or NA)
+\item _link: Google Drive link (with edit? or view? removed)
+\item modTime: modification datetime (POSIXct)
+}
 }
 \description{
 Extract galacticPubs-relevant information from a GP lesson file, with an expected format of \emph{ShortTitle_L1_G5-9_wksht (TEACHER)}

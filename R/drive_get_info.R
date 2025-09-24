@@ -9,6 +9,7 @@
 #' @param set_envir set envir output manually (not from file name); partial string matching of options "classroom", "remote", "assessments"
 #' @param set_grades set grade bands manually (not from file name); passed as a string (e.g. "5-9")
 #' @param validate logical; do you want to throw an error if any of the following are missing? default= FALSE
+#' @param include_shared_drive logical; do you want to include the name of the shared drive (if any) that the file is in? default=FALSE. If TRUE, will add a column: _sharedDrive (takes a little longer with another call to Google Drive API)
 #' - shortTitle
 #' - title
 #' - `_lsn`
@@ -17,7 +18,17 @@
 #' - `_fileType`
 #' @param all_info logical; keep the full drive_resources list with all the dribble meta info for each row item? default=FALSE
 #'
-#' @returns a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename
+#' @returns a tibble with a row corresponding to each row in dribble input, with title and other information extracted from filename. Possible outputs:
+#' - shortTitle: ShortTitle from filename (e.g. "femalesSing")
+#' - _lsn:
+#' - _grades: grade band (e.g. "5-9")
+#' - _itemType: guessed item type (e.g. "worksheet", "handout", "presentation", "card", "table", "overview", "assessment")
+#' - _fileType: Google Drive file type (e.g. "Google Docs", "PDF", "JPEG", "MP4 video", "Google Slides", "Google Sheets", "audio")
+#' - _envir: guessed environment (e.g. "classroom", "remote", or NA)
+#' - _SvT: guessed Student vs Teacher (e.g. "student", "teacher", or NA)
+#' - _link: Google Drive link (with edit? or view? removed)
+#' - modTime: modification datetime (POSIXct)
+#'
 #' @examples
 #' \dontrun{
 #'   drive_find_path("GP-Studio/Edu/Lessons/assumptionsMatter_femalesSing_math/teaching-materials/classroom/classroom_5-6/handouts/Females Sing_P1_G5-6 wksht (STUDENT)_classroom.gdoc")
@@ -31,12 +42,15 @@ drive_get_info <- function(dribble,
                            set_envir = NULL,
                            set_grades = NULL,
                            validate = FALSE,
-                           all_info = FALSE) {
+                           all_info = FALSE,
+                           include_shared_drive = FALSE) {
   #Make sure a dribble
   checkmate::assert(checkmate::check_class(dribble, "dribble"))
 
   #useful later for figuring out filetypes of dribble listings
   mimeKey <- googledrive::drive_mime_type(googledrive::expose())
+
+
 
   out <- lapply(1:nrow(dribble), function(i) {
     dribble_i <- dribble[i, ]
@@ -47,22 +61,22 @@ drive_get_info <- function(dribble,
 
     #hackish solution for undocumented audio filetypes
 
-    if(is_empty(fileType)){
-      if(grepl("audio",dribble_i$drive_resource[[1]]$mimeType)){
-        fileType<-"audio"
+    if (is_empty(fileType)) {
+      if (grepl("audio", dribble_i$drive_resource[[1]]$mimeType)) {
+        fileType <- "audio"
       }
     }
 
-    if(is_empty(fileType)){
-    message("drive_get_info() | undocumented filetype:", fileType)
-    warning("drive_get_info() | undocumented filetype:", fileType)
+    if (is_empty(fileType)) {
+      message("drive_get_info() | undocumented filetype:", fileType)
+      warning("drive_get_info() | undocumented filetype:", fileType)
     }
     #If it's a shortcut, resolve shortcut
     dribble_i_0 <- dribble_i #backup
-    if(fileType=="shortcut"){
+    if (fileType == "shortcut") {
       dribble_i <- googledrive::shortcut_resolve(dribble_i)
-       fileType <-
-      mimeKey$human_type[match(dribble_i$drive_resource[[1]]$mimeType, mimeKey$mime_type)]
+      fileType <-
+        mimeKey$human_type[match(dribble_i$drive_resource[[1]]$mimeType, mimeKey$mime_type)]
     }
     #iterate over all rows in dribble provided
     nom <- dribble_i[1, 1] %>% as.character()
@@ -171,7 +185,7 @@ drive_get_info <- function(dribble,
     }
 
     #Guess environment
-    envir_names <- c("classroom", "remote", "assessments")
+    envir_names <- c("classroom", "remote", "assessments","dev")
     if (is.null(set_envir)) {
       is_classroom <- grepl(pattern = envir_names[1], x = remain)
       is_remote <- grepl(pattern = envir_names[2], x = remain)
@@ -232,6 +246,19 @@ drive_get_info <- function(dribble,
       checkmate::assert_character(link, any.missing = F)
     }
 
+    if (!is_empty(link) & include_shared_drive) {
+      #Get name of _sharedDrive
+      sharedDrive <- googledrive::shared_drive_get(id = dribble_i$drive_resource[[1]]$driveId)
+      if (nrow(sharedDrive) > 0) {
+        sharedDriveName <- sharedDrive$name[1]
+      } else{
+        sharedDriveName <- NA
+      }
+    } else{
+      sharedDriveName <- NA
+    }
+
+
     #Get Mod Date
     modTime <-
       dribble$drive_resource[[1]]$modifiedTime %>% lubridate::as_datetime()
@@ -251,9 +278,9 @@ drive_get_info <- function(dribble,
       `_lsn` = lsn,
       `_SvT` = SvT,
       description = NA,
+      `_sharedDrive` = sharedDriveName,
       `_link` = link,
       modTime = modTime
-
     )
     if (all_info) {
       row_i_out$drive_resource <- list(dribble$drive_resource[[1]])

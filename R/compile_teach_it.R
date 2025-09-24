@@ -419,7 +419,9 @@ compile_teach_it <- function(WD = "?",
   if (!teach_it_prepared) {
     success <-  FALSE
   } else{
+    if(test_zget_envir$success){
     test_save <- save_json(out, outFile) %>% catch_err()
+    }else{test_save <- FALSE}
     # summarize success based on all tests
     success <- all(test_zget_envir$success,
                    test_zget_proc$success,
