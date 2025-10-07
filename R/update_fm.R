@@ -226,6 +226,8 @@ update_fm <-
     #Add URL for this locale
     if (is_empty(new_yaml$URL) |
         is_empty(new_yaml$ShortURL) | force_upgrade) {
+      checkmate::assert_character(new_yaml$locale, any.missing = FALSE)
+      checkmate::assert_number(as.numeric(new_yaml$numID), na.ok = FALSE)
       new_yaml$URL <-
         paste0(
           c(
@@ -237,6 +239,7 @@ update_fm <-
         )
 
       #Add bitly (short URL)
+      browser()
       test_assign <- urlshorteneR::bitly_create_bitlink(long_url = utils::URLencode(new_yaml$URL),
                                                         title = new_yaml$MediumTitle) %>% catch_err(keep_results = TRUE)
 
@@ -246,10 +249,12 @@ update_fm <-
 
         new_yaml$ShortURL <- test_assign$result$link[1]
       } else{
-        message("Bit.ly creation failed for ",
+        warning_msg <- paste0("Bit.ly creation failed for ",
                 new_yaml$MediumTitle,
                 ":\n @",
                 new_yaml$URL)
+        message(warning_msg)
+        warning(warning_msg)
       }
 
     }
@@ -362,11 +367,10 @@ update_fm <-
       drive_reconnect
     ) &
     !is_gPubs) {
-
-    oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
-    checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
-    googledrive::drive_auth(email = oauth_email)
-    googlesheets4::gs4_auth(email = oauth_email)
+      oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
+      checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
+      googledrive::drive_auth(email = oauth_email)
+      googlesheets4::gs4_auth(email = oauth_email)
 
       #try to find path for the project name
       message(
@@ -573,7 +577,7 @@ update_fm <-
 
         checkmate::assert_character(pubID, min.chars = 6)
         checkmate::assert_character(new_yaml$GdriveTeachMatPath, any.missing = FALSE)
-         checkmate::assert_character(tm_dev_ID, all.missing = TRUE)
+        checkmate::assert_character(tm_dev_ID, all.missing = TRUE)
 
 
         new_yaml$GdriveTeachMatPath <- tm_drivepath
@@ -584,7 +588,10 @@ update_fm <-
 
         tm_res <-
           dplyr::tibble(
-            success = convert_T_to_check(sapply(c(tm_drivepath,tm_drivepath_dev,pubID,tm_dev_ID),\(x) !is_empty(x))),
+            success = convert_T_to_check(sapply(
+              c(tm_drivepath, tm_drivepath_dev, pubID, tm_dev_ID),
+              \(x) ! is_empty(x)
+            )),
             item = c(
               "GdriveTeachMatPath",
               "GdriveTeachMatDevPath",
@@ -605,142 +612,139 @@ update_fm <-
     }
 
 
-      # Print out updates to Gdrive* keys ---------------------------------------
-      if (output_gdrive_summ) {
-        message(
-          "Summary of front-matter.yml 'Gdrive*' key additions for [",
-          new_yaml$ShortTitle,
-          "]:"
-        )
-        print(gdrive_summ)
-      }
-
-      #test if it's a new Template version
-      version_bumped <-
-        old_yaml$TemplateVer != galacticPubs_template$TemplateVer
-      if (!version_bumped) {
-        # message("\nfront-matter.yml template v.",old_yaml$TemplateVer," is up-to-date with galacticPubs v.",as.character(utils::packageVersion("galacticPubs")))
-
-        #otherwise change TemplateVer and let user know it's been upgraded
-      } else{
-        #reassign new templatever
-        new_yaml$TemplateVer <- galacticPubs_template$TemplateVer
-        message(
-          "\nfront-matter.yml template will be upgraded upon save: ",
-          old_yaml$TemplateVer,
-          "->",
-          new_yaml$TemplateVer
-        )
-      }
-
-
-      # enforce certain classes -------------------------------------------------
-      new_yaml$numID <- as.integer(new_yaml$numID)
-
-
-      # quick fix to deprecate barroque GdrivePublicID logic -------------------
-      if (!is.na(new_yaml$GdrivePublicID) &
-          is.na(new_yaml$GdrivePublicID)) {
-        #if GdrivePublicID is set, but GdrivePublicID is not, then set GdrivePublicID to GdrivePublicID
-        message("GdrivePublicID not set, setting it to GdrivePublicID")
-      }
-      new_yaml$GdrivePublicID <- new_yaml$GdrivePublicID
-
-
-
-      #save updated file if requested
-      if (save_output) {
-        #Change LastUpdated field
-
-        new_yaml$LastUpdated <- Sys.time() %>% round.POSIXt(units = "secs") %>%  as.character()
-        # need to find yaml_path in git hub gp-lessons folder
-        if (is.null(WD_git)) {
-          WD_git <- get_wd_git(WD = WD)
-        }
-        checkmate::assert_directory_exists(WD_git)
-        # make assertions on basic properties of new_yaml
-        checkmate::assert_list(
-          new_yaml,
-          .var.name = "front-matter.yml",
-          all.missing = FALSE,
-          min.len = 40
-        )
-        #assert that basic keys are present
-        checkmate::assert_names(
-          names(new_yaml),
-          must.include = c(
-            "Title",
-            "ShortTitle",
-            "GdriveDirName",
-            "GdriveDirID",
-            "GdriveHome",
-            "PublicationStatus",
-            "Language",
-            "Country",
-            "locale",
-            "numID",
-            "MediumTitle",
-            "_id",
-            "TemplateVer",
-            "galacticPubsVer"
-          ),
-          .var.name = "front-matter.yml keys"
-        )
-
-        yaml_write_path <-
-          fs::path(WD_git, "front-matter.yml")
-
-
-        # Backup front matter before writing, if requested ------------------------
-        if (backup) {
-          test_backup <- fm_backup(WD = WD)
-          if (identical(test_backup, FALSE)) {
-            warning(
-              "front-matter.yml backup failed for ",
-              basename(WD),
-              "Aborting update_fm()."
-            )
-            return(FALSE)
-          }
-        } else{
-          test_backup <- NA
-        }
-
-        test_write <-
-          yaml::write_yaml(new_yaml, yaml_write_path) %>% catch_err()
-
-
-        if (test_write) {
-          success <- TRUE
-
-        } else{
-          warning("\n meta/front-matter.yml failed to save")
-          success <- FALSE
-        }
-      } else{
-        #assume successful if it makes it here, until I write a better validity test
-        test_backup <- test_write <- NA
-        success <- TRUE
-      }
-
-      if (identical(TRUE, success & recompile)) {
-        message("Recompiling front-matter to JSON")
-        test_recompile <- compile_fm(WD = WD, upload = FALSE)#already uploaded
-
-      } else{
-        test_recompile <- NA
-      }
-      message("\n@ update_fm() for '", proj, ":")
-      message("- old front-matter.yml backed up: ",
-              convert_T_to_check(test_backup))
-      message("- new front-matter.yml saved    : ",
-              convert_T_to_check(test_write))
-      message("- recompile unit json           : ",
-              convert_T_to_check(test_recompile))
-
-      if (return_fm) {
-        new_yaml
-      } else{
-        success
-      }
+    # Print out updates to Gdrive* keys ---------------------------------------
+    if (output_gdrive_summ) {
+      message(
+        "Summary of front-matter.yml 'Gdrive*' key additions for [",
+        new_yaml$ShortTitle,
+        "]:"
+      )
+      print(gdrive_summ)
     }
+
+    #test if it's a new Template version
+    version_bumped <-
+      old_yaml$TemplateVer != galacticPubs_template$TemplateVer
+    if (!version_bumped) {
+      # message("\nfront-matter.yml template v.",old_yaml$TemplateVer," is up-to-date with galacticPubs v.",as.character(utils::packageVersion("galacticPubs")))
+
+      #otherwise change TemplateVer and let user know it's been upgraded
+    } else{
+      #reassign new templatever
+      new_yaml$TemplateVer <- galacticPubs_template$TemplateVer
+      message(
+        "\nfront-matter.yml template will be upgraded upon save: ",
+        old_yaml$TemplateVer,
+        "->",
+        new_yaml$TemplateVer
+      )
+    }
+
+
+    # enforce certain classes -------------------------------------------------
+    new_yaml$numID <- as.integer(new_yaml$numID)
+
+
+    # quick fix to deprecate barroque GdrivePublicID logic -------------------
+    if (!is.na(new_yaml$GdrivePublicID) &
+        is.na(new_yaml$GdrivePublicID)) {
+      #if GdrivePublicID is set, but GdrivePublicID is not, then set GdrivePublicID to GdrivePublicID
+      message("GdrivePublicID not set, setting it to GdrivePublicID")
+    }
+    new_yaml$GdrivePublicID <- new_yaml$GdrivePublicID
+
+
+
+    #save updated file if requested
+    if (save_output) {
+      #Change LastUpdated field
+
+      new_yaml$LastUpdated <- Sys.time() %>% round.POSIXt(units = "secs") %>%  as.character()
+      # need to find yaml_path in git hub gp-lessons folder
+      if (is.null(WD_git)) {
+        WD_git <- get_wd_git(WD = WD)
+      }
+      checkmate::assert_directory_exists(WD_git)
+      # make assertions on basic properties of new_yaml
+      checkmate::assert_list(
+        new_yaml,
+        .var.name = "front-matter.yml",
+        all.missing = FALSE,
+        min.len = 40
+      )
+      #assert that basic keys are present
+      checkmate::assert_names(
+        names(new_yaml),
+        must.include = c(
+          "Title",
+          "ShortTitle",
+          "GdriveDirName",
+          "GdriveDirID",
+          "GdriveHome",
+          "PublicationStatus",
+          "Language",
+          "Country",
+          "locale",
+          "numID",
+          "MediumTitle",
+          "_id",
+          "TemplateVer",
+          "galacticPubsVer"
+        ),
+        .var.name = "front-matter.yml keys"
+      )
+
+      yaml_write_path <-
+        fs::path(WD_git, "front-matter.yml")
+
+
+      # Backup front matter before writing, if requested ------------------------
+      if (backup) {
+        test_backup <- fm_backup(WD = WD)
+        if (identical(test_backup, FALSE)) {
+          warning("front-matter.yml backup failed for ",
+                  basename(WD),
+                  "Aborting update_fm().")
+          return(FALSE)
+        }
+      } else{
+        test_backup <- NA
+      }
+
+      test_write <-
+        yaml::write_yaml(new_yaml, yaml_write_path) %>% catch_err()
+
+
+      if (test_write) {
+        success <- TRUE
+
+      } else{
+        warning("\n meta/front-matter.yml failed to save")
+        success <- FALSE
+      }
+    } else{
+      #assume successful if it makes it here, until I write a better validity test
+      test_backup <- test_write <- NA
+      success <- TRUE
+    }
+
+    if (identical(TRUE, success & recompile)) {
+      message("Recompiling front-matter to JSON")
+      test_recompile <- compile_fm(WD = WD, upload = FALSE)#already uploaded
+
+    } else{
+      test_recompile <- NA
+    }
+    message("\n@ update_fm() for '", proj, ":")
+    message("- old front-matter.yml backed up: ",
+            convert_T_to_check(test_backup))
+    message("- new front-matter.yml saved    : ",
+            convert_T_to_check(test_write))
+    message("- recompile unit json           : ", convert_T_to_check(test_recompile))
+
+    if (return_fm) {
+      new_yaml
+    } else{
+      success
+    }
+  }
