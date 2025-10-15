@@ -1,6 +1,5 @@
 ## code to prepare `gpPal` dataset goes here
-# to update, use run de below
-# usethis::use_data(gpPal, overwrite = TRUE)
+
 #GP Palette
 gpPal = list(
   main =
@@ -12,7 +11,8 @@ gpPal = list(
         "atomic blue",
         "burst purple",
         "galactic black",
-        "sparkle white"
+        "sparkle white",
+        "plus"
       ),
       hex = c(
         "#2c83c3",
@@ -21,7 +21,8 @@ gpPal = list(
         "#6812d1",
         "#cb1f8e",
         "#363636",
-        "#f0f4ff"
+        "#f0f4ff",
+        "#1826bc"
       ),
       rgb = c(
         "rgb(44,131,195,maxColorValue=255)",
@@ -30,7 +31,8 @@ gpPal = list(
         "rgb(104,18,209,maxColorValue=255)",
         "rgb(203,31,142,maxColorValue=255)",
         "rgb(54,54,54,maxColorValue=255)",
-        "rgb(240,244,255,maxColorValue=255)"
+        "rgb(240,244,255,maxColorValue=255)",
+        "rgb(24,38,188,maxColorValue=255)"
       )
     ),
   extended = data.frame(
@@ -111,3 +113,6 @@ gpPal = list(
     rgb=NA
   )
 )
+
+# to update, use run de below
+ usethis::use_data(gpPal, overwrite = TRUE)

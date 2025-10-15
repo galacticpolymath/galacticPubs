@@ -239,7 +239,7 @@ update_fm <-
         )
 
       #Add bitly (short URL)
-      browser()
+
       test_assign <- urlshorteneR::bitly_create_bitlink(long_url = utils::URLencode(new_yaml$URL),
                                                         title = new_yaml$MediumTitle) %>% catch_err(keep_results = TRUE)
 
@@ -253,8 +253,9 @@ update_fm <-
                 new_yaml$MediumTitle,
                 ":\n @",
                 new_yaml$URL)
-        message(warning_msg)
+        message(test_assign$result)
         warning(warning_msg)
+        warning("Maybe you already have a bitlink for URL? ",new_yaml$URL)
       }
 
     }
