@@ -1,21 +1,30 @@
-# Editable table embeddable module (UI)
+# UI function -------------------------------------------------------------
+
 ediTable <- function(id, ...) {
   ns <- shiny::NS(id)
   rhandsontable::rHandsontableOutput(outputId = ns("hot"), ...)
 }
 
-# Server logic
-ediTable_server <- function(id,
-                            rd,
-                            col_settings = NULL, # named list of settings per column
-                            allowRowEdit = TRUE,
-                            allowColumnEdit = FALSE,
-                            manualRowMove = TRUE,
-                            width = "'100%'",
-                            height = "100%",
-                            ...) {
+
+# Server function ---------------------------------------------------------
+
+ediTable_server <- function(
+    id,
+    rd,
+    col_settings = NULL,    # optional list of column settings, e.g. list(colname = list(type="dropdown", source=c("A","B")))
+    allowRowEdit = TRUE,
+    allowColumnEdit = FALSE,
+    manualRowMove = TRUE,
+    width = "100%",
+    height = "100%",
+    ...
+) {
   shiny::moduleServer(id, function(input, output, session) {
 
+    # reactive to store original column classes
+    original_classes <- shiny::reactiveVal(NULL)
+
+    # render the editable table ------------------------------------------------
     shiny::observe({
       if (!is.null(rd)) {
         output$hot <- rhandsontable::renderRHandsontable({
@@ -26,7 +35,12 @@ ediTable_server <- function(id,
             tmp0 <- dplyr::as_tibble(tmp0)
           }
 
-          # replace NAs with empty string for stability
+          # record column classes once (on first render)
+          if (is.null(original_classes())) {
+            original_classes(purrr::map_chr(tmp0, class))
+          }
+
+          # replace NAs with "" to prevent rendering errors
           tmp <- tmp0 %>%
             dplyr::mutate(dplyr::across(
               dplyr::everything(),
@@ -36,7 +50,7 @@ ediTable_server <- function(id,
           # reset rownames
           rownames(tmp) <- NULL
 
-          # initialize table
+          # create table
           hot <- rhandsontable::rhandsontable(
             tmp,
             allowRowEdit = allowRowEdit,
@@ -48,7 +62,7 @@ ediTable_server <- function(id,
             ...
           )
 
-          # apply per-column settings (dropdowns, numeric, etc.)
+          # apply per-column settings if provided
           if (!is.null(col_settings)) {
             for (col in names(col_settings)) {
               settings <- col_settings[[col]]
@@ -61,9 +75,47 @@ ediTable_server <- function(id,
       }
     })
 
-    # push edited data back to reactiveVal
+
+    # capture edits and restore original classes -------------------------------
     shiny::observeEvent(input$hot, {
       tmp <- rhandsontable::hot_to_r(input$hot)
+      classes <- original_classes()
+
+      if (!is.null(classes)) {
+        for (col in names(classes)) {
+          cls <- classes[[col]]
+
+          if ("Date" %in% cls) {
+            tmp[[col]] <- tryCatch({
+              parsed <- lubridate::parse_date_time(
+                tmp[[col]],
+                orders = c(
+                  "Ymd", "mdY", "dmy", "BdY",
+                  "b d, Y", "B d, Y", "m/d/Y", "Y/m/d"
+                ),
+                quiet = TRUE
+              )
+              as.Date(parsed)
+            }, error = function(e) {
+              warning(sprintf("Could not parse date column '%s': %s", col, e$message))
+              tmp[[col]]
+            })
+
+          } else if ("numeric" %in% cls) {
+            tmp[[col]] <- suppressWarnings(as.numeric(tmp[[col]]))
+
+          } else if ("integer" %in% cls) {
+            tmp[[col]] <- suppressWarnings(as.integer(tmp[[col]]))
+
+          } else if ("logical" %in% cls) {
+            tmp[[col]] <- tmp[[col]] %in% c(TRUE, "TRUE", "true", "1", 1)
+
+          } else {
+            tmp[[col]] <- as.character(tmp[[col]])
+          }
+        }
+      }
+
       rd(tmp)
     })
   })

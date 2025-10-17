@@ -23,7 +23,7 @@ lang: ''
 lng: ''
 locale: 'en-US'
 DefaultLocale: 'en-US'
-TemplateVer: 0.8.9
+TemplateVer: 0.9.2
 galacticPubsVer: ''
 URL: ''
 ShortURL: ''
@@ -94,6 +94,9 @@ Versions:
   - .na
 Description: ''
 QuickPrep: ''
+JobVizConnections:
+  job: .na
+  relevance: .na
 Bonus: ''
 Extensions: ''
 Background: ''

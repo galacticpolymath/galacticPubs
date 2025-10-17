@@ -263,8 +263,13 @@ ui <- navbarPage(
     ),
 
     htmlOutput("supporting_media"),
-
     hr(class = "blhr"),
+
+    #JobViz Connections
+    h3("JobViz Connections"),
+    ediTable(id = "JobViz"),
+    hr(class = "blhr"),
+
     h3("But wait, there's more!"),
     md_input_ui(
       id="Bonus",
@@ -545,9 +550,10 @@ server <- function(input, output, session) {
     credits_content()})
 
 
-   #initialize values
+   #initialize values for editable table inputs
   #define initial reactive values for ediTable
   accessibility_data <- reactiveVal(y$Accessibility)
+  jobviz_data <- reactiveVal(y$JobVizConnections)
   ack_data <- reactiveVal(y$Acknowledgments)
   versions_data <- reactiveVal(y$Versions)
 
@@ -555,8 +561,18 @@ server <- function(input, output, session) {
   #id must match ediTable id in UI section and the key in front-matter.yml (i.e. an item in get_fm())
   #This step prevents trying to load this before data is available
   ediTable_server(id = "Accessibility", rd = accessibility_data)
+  #JobViz connections
+  job_options <- paste0(jobs$data$soc_code,"_",jobs$data$title)
+  ediTable_server(id = "JobViz", rd = jobviz_data)
+                  # col_settings=list(
+                  #   job=list(type="dropdown",source=job_options),
+                  #   relevance=list(type="character")
+                  # ))
   ediTable_server(id = "Acknowledgments", rd = ack_data)
-  ediTable_server(id = "Versions", rd = versions_data)
+  ediTable_server(id = "Versions", rd = versions_data,
+                  col_settings=list(
+                    date=list(type="date",dateFormat="MMMM D, YYYY",correctformat=TRUE)
+                  ))
 
 
 
@@ -641,7 +657,7 @@ server <- function(input, output, session) {
             data_check$current_data$TemplateVer
           )
         } else{
-          browser()
+
           vals$yaml_update_txt <- ("Not saved, yo ->")
           message("Unsaved changes: ")
           print(outOfDate)

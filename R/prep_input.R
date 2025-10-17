@@ -74,14 +74,17 @@ prep_input <- function(input,
       #Since this is a handsontable item
       ## This will avoid issues of saved_data and current_data not being identical for
       ## saved check in editor()
-      saved[[fm_key]] <- saved[[fm_key]] %>% as.data.frame()
-      table_i <- rhandsontable::hot_to_r(Y0[[hot_names[i]]])
+      if(fm_key %in% names(saved)){
+      saved[[fm_key]] <- saved[[fm_key]] %>% dplyr::as_tibble()
+      }
+      table_i <- rhandsontable::hot_to_r(Y0[[hot_names[i]]]) %>% dplyr::as_tibble()
       #replace blanks with NA to match saved data
-      table_i <- table_i %>% dplyr::mutate(dplyr::across(dplyr::everything(), ~ dplyr::na_if(., "")))
+      table_i <- table_i %>% dplyr::mutate(dplyr::across(dplyr::everything(), ~ ifelse(.=="",NA,.)))
       #make all columns characters to avoid NA being interpreted as logical, annoyingly
       # table_i <- table_i %>% dplyr::mutate(dplyr::across(dplyr::everything(),as.character))
 
-      Y0[[fm_key]] <- if(is_empty(table_i)){NULL}else{table_i}
+      # Y0[[fm_key]] <- if(is_empty(table_i,names_meaningful = TRUE)){NULL}else{table_i}
+      Y0[[fm_key]] <- table_i
     }
   }
 
