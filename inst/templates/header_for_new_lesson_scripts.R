@@ -10,7 +10,7 @@ unit_name <- basename(wd_git)
 message("Unit: ",unit_name,"\nTrying to connect this file to its Gdrive working directory.")
 WD <- get_unit_path(unit_name)
 data_path <- fs::path(WD,"data")
-
+fs::dir_ls(data_path)
 
 # Import Data -------------------------------------------------------------
 # Read in data from the data folder in the Gdrive working directory

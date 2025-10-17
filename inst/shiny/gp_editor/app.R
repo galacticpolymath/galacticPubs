@@ -641,7 +641,10 @@ server <- function(input, output, session) {
             data_check$current_data$TemplateVer
           )
         } else{
+          browser()
           vals$yaml_update_txt <- ("Not saved, yo ->")
+          message("Unsaved changes: ")
+          print(outOfDate)
         }
         vals$saved <- FALSE
       } else if (substr(vals$yaml_update_txt, 1, 1) == "N") {
