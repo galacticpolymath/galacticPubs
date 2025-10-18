@@ -5,6 +5,8 @@
 source("helpers.R")
 source("modules.R")
 source("md_input_module.R")
+source("jobPicker.R")
+
 pacman_test <-
   tryCatch(
     require(pacman),
@@ -26,6 +28,7 @@ if (!"error" %in% class(pacman_test)) {
 
 # WD is the Rstudio project folder, which is different from the Shiny app's working directory
 WD0 <- path <- Sys.getenv("editor_path")
+job_options <- paste0(jobs$data$soc_code,"_",jobs$data$title) %>% unlist() %>% as.character() %>% unname()
 if (is_empty(WD0)) {
   stop("Editor path not found. Maybe you didn't run the app using editor()?")
 }
@@ -267,7 +270,8 @@ ui <- navbarPage(
 
     #JobViz Connections
     h3("JobViz Connections"),
-    ediTable(id = "JobViz"),
+    jobPicker_ui("jp"),
+    ediTable(id = "JobVizConnections"),
     hr(class = "blhr"),
 
     h3("But wait, there's more!"),
@@ -562,12 +566,9 @@ server <- function(input, output, session) {
   #This step prevents trying to load this before data is available
   ediTable_server(id = "Accessibility", rd = accessibility_data)
   #JobViz connections
-  job_options <- paste0(jobs$data$soc_code,"_",jobs$data$title)
-  ediTable_server(id = "JobViz", rd = jobviz_data)
-                  # col_settings=list(
-                  #   job=list(type="dropdown",source=job_options),
-                  #   relevance=list(type="character")
-                  # ))
+
+  jobPicker_server("jp", jobs$data)
+  ediTable_server(id = "JobVizConnections", rd = jobviz_data   )
   ediTable_server(id = "Acknowledgments", rd = ack_data)
   ediTable_server(id = "Versions", rd = versions_data,
                   col_settings=list(
