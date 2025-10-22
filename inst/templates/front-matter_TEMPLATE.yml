@@ -3,7 +3,7 @@ _id: ''
 numID: ''
 ShortTitle: 'NameMe'
 PublicationStatus: 'Proto'
-TemplateVer: 0.9.3
+TemplateVer: 0.9.4
 galacticPubsVer: ''
 Language: 'English'
 Country: 'United States'
@@ -95,9 +95,8 @@ Versions:
 Description: ''
 QuickPrep: ''
 JobVizConnections:
-  job: .na
+  job_title: .na
   soc_code: .na
-  relevance: .na
 Bonus: ''
 Extensions: ''
 Background: ''

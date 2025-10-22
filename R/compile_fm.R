@@ -202,9 +202,7 @@ compile_fm <- \(WD = "?",
     #might want to add more complex image handling later),
     SteamEpaulette_vert = fm$LearningEpaulette_vert[1],
     Accessibility = list(fm$Accessibility),
-    Tags = lapply(fm$Tags, function(x) {
-      list(Value = x)
-    }),
+    UnitTags = fm$Tags, #previously was value=key list and called Tags. Changed for consistency
     versions = ver_out0
 
   )
@@ -243,6 +241,20 @@ compile_fm <- \(WD = "?",
   )
   save_json(bonus_web, filename = fs::path(json_dir, "bonus", ext = "json"))
 
+  #JOBVIZ connections
+  JobViz <- get_fm("JobVizConnections", WD = WD)
+  if(is_empty(JobViz)) {
+    JobViz <- NULL
+  }
+
+  jobviz_web <- list(
+    `__component` = "lesson-plan.collapsible-text-section",
+    SectionTitle = "JobVIZ Connections",
+    Content = JobViz,
+    #allow smooth-scrolling to in-page references
+    InitiallyExpanded = TRUE
+  )
+  save_json(jobviz_web, filename = fs::path(json_dir, "jobvizConnections", ext = "json"))
 
   # extensions.json ---------------------------------------------------------
 

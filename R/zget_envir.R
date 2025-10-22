@@ -29,7 +29,7 @@ zget_envir <- \(tlinks, proc_data, lesson_statuses, uinfo, fm) {
       assess <- list(
         lsn = 100,
         title = "Assessments",
-        tags = NULL,
+        lsnTags = NULL,
         preface = "Editable assessments for evaluating student understanding & STEM identity",
         tile = "https://storage.googleapis.com/gp-cloud/icons/assessment%20icon.png",
         itemList = zget_items(df_assess, fm = fm)
@@ -234,7 +234,7 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
       c(
         title = df_lsn_i$lsnTitle[1],
         as.vector(lsn_status_info_i),
-        tags = list(lsn_i_tags),
+        lsnTags = list(lsn_i_tags),
         gradeVarNote = gradeVarNote_i,
         preface = df_lsn_i$lsnPreface[1],
         tile = tile_i,

@@ -427,14 +427,14 @@ server <- function(input, output, session) {
   # working directory that may change
   output$banner_and_logos <- renderUI({
     tagList(
-      checkboxGroupInput(
-        "UnitBanner",
-        label = "Lesson Banner (found in assets/_banners_logos_etc)",
-        choices = matching_files(rel_path = "assets/_banners_logos_etc/",
-                                 pattern = "[Bb]anner.*\\.[png|PNG|jpeg|jpg]",
-                                 WD()),
-        selected = y$UnitBanner
-      ),
+      # checkboxGroupInput(
+      #   "UnitBanner",
+      #   label = "Lesson Banner (found in assets/_banners_logos_etc)",
+      #   choices = matching_files(rel_path = "assets/_banners_logos_etc/",
+      #                            pattern = "[Bb]anner.*\\.[png|PNG|jpeg|jpg]",
+      #                            WD()),
+      #   selected = y$UnitBanner
+      # ),
       selectizeInput(
         "SponsorName",
         label = "Sponsor Name(s) for Search Index:",
