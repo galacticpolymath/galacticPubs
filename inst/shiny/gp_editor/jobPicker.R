@@ -47,21 +47,22 @@ jobPicker_server <- function(id, job_df) {
     )
 
     # Populate selectize choices with job titles
-    shiny::updateSelectizeInput(
+    isolate(shiny::updateSelectizeInput(
       session,
       "job_select",
       choices = sort(unique(job_df$title)),
       server = TRUE,
       selected=character(0)
-    )
+    ))
 
     # Observe selection, copy corresponding data.frame
     shiny::observeEvent(input$job_select, {
+      req(input$job_select)
       selected_title <- input$job_select
 
       if (is.null(selected_title) || selected_title == "") {
-        output$copy_status <- shiny::renderText("⚠️ No job selected")
-        return()
+        # output$copy_status <- shiny::renderText("⚠️ No job selected")
+         return()
       }
 
       # Filter corresponding row
@@ -75,6 +76,13 @@ jobPicker_server <- function(id, job_df) {
       output$copy_status <- shiny::renderText({
         paste0("✅ Copied ", selected_row$title, " (", selected_row$soc_code, ")")
       })
+      #reset selected to NOTHING after copied
+      shiny::isolate(shiny::updateSelectizeInput(
+      session,
+      "job_select",
+      selected=NULL
+    ))
+
     })
   })
 }

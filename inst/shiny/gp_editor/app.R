@@ -15,7 +15,7 @@ pacman_test <-
     }
   )
 if (!"error" %in% class(pacman_test)) {
-  p_load(shiny, shinythemes, sortable, rhandsontable,galacticPubs)
+  p_load(shiny, shinythemes, sortable, rhandsontable, galacticPubs)
 } else{
   library(shiny)
   library(shinythemes)
@@ -28,19 +28,20 @@ if (!"error" %in% class(pacman_test)) {
 
 # WD is the Rstudio project folder, which is different from the Shiny app's working directory
 WD0 <- path <- Sys.getenv("editor_path")
-job_options <- paste0(jobs$data$soc_code,"_",jobs$data$title) %>% unlist() %>% as.character() %>% unname()
+job_line_items <- jobs$data %>% dplyr::filter(.data$occupation_type == "Line item"&!is.na(.data$median_annual_wage))
+job_options <- paste0(job_line_items$soc_code, "_", job_line_items$title) %>% unlist() %>% as.character() %>% unname()
 if (is_empty(WD0)) {
   stop("Editor path not found. Maybe you didn't run the app using editor()?")
 }
 
 meta_path <- fs::path(WD0, "meta")
 
-  #Get path to front-matter path
-  proj <- basename(WD0)
-  # need to find paired yaml_path in github gp-lessons folder
-  WD_git <- get_wd_git(WD=WD0)
+#Get path to front-matter path
+proj <- basename(WD0)
+# need to find paired yaml_path in github gp-lessons folder
+WD_git <- get_wd_git(WD = WD0)
 
-  yaml_path <- fs::path(WD_git,"front-matter.yml")
+yaml_path <- fs::path(WD_git, "front-matter.yml")
 
 
 y <- get_fm(WD = WD0)
@@ -72,9 +73,7 @@ ui <- navbarPage(
       uiOutput("yaml_update_msg"),
       #save button
       actionButton('save', div(
-        class = "header_button_container",
-        img(src = "rsrc/gpicon.ico"),
-        p(strong("Save"))
+        class = "header_button_container", img(src = "rsrc/gpicon.ico"), p(strong("Save"))
       ))
     )
   ),
@@ -97,22 +96,18 @@ ui <- navbarPage(
       a("markdown formatting", href = "https://www.markdownguide.org/basic-syntax/")
     ),
     shiny::selectizeInput(
-        inputId = "PublicationStatus",
-        label = "Publication Status",
-        choices = c("Proto","Hidden","Live", "Upcoming"),
-        selected = y$PublicationStatus,
-        width = "150"
-      ),
+      inputId = "PublicationStatus",
+      label = "Publication Status",
+      choices = c("Proto", "Hidden", "Live", "Upcoming"),
+      selected = y$PublicationStatus,
+      width = "150"
+    ),
     shiny::checkboxGroupInput(
-            "ReadyToCompile",
-            "(Which items are ready to be compiled?)",
-            choices = c(
-              "Standards Alignment",
-              "Teaching Materials",
-              "Procedure"
-            ),
-            selected = y$ReadyToCompile
-          ),
+      "ReadyToCompile",
+      "(Which items are ready to be compiled?)",
+      choices = c("Standards Alignment", "Teaching Materials", "Procedure"),
+      selected = y$ReadyToCompile
+    ),
     div(
       class = "inline-fields",
 
@@ -276,7 +271,7 @@ ui <- navbarPage(
 
     h3("But wait, there's more!"),
     md_input_ui(
-      id="Bonus",
+      id = "Bonus",
       label = "Bonus Material (Easter eggs and tidbits that aren't a whole extension lesson)",
       placeholder = "Optional.",
       value = y$Bonus,
@@ -284,7 +279,7 @@ ui <- navbarPage(
       width = "100%"
     ),
     md_input_ui(
-      id="Extensions",
+      id = "Extensions",
       label = "Extensions (Full spin-off lessons, activities, and assessments)",
       placeholder = "Optional.",
       value = y$Extensions,
@@ -296,7 +291,7 @@ ui <- navbarPage(
     #Research background
     #Connection to Research
     md_input_ui(
-      id="ConnectionToResearch",
+      id = "ConnectionToResearch",
       label = "Connection to Research",
       placeholder = "#### Lesson Connections to This Research\nExplain in clear, concise language how students are interacting with this authentic data or following in the footsteps of scientists to develop critical thinking skills.",
       value = y$ConnectionToResearch,
@@ -304,7 +299,7 @@ ui <- navbarPage(
       width = "100%"
     ),
     md_input_ui(
-      id="Background",
+      id = "Background",
       label = "Research Background:",
       placeholder = "![Journal article image](ScreenShotOfStudy.png)\n[Link to Original Study](StudyURL)\n#### Scientific Background\nVery accessible explanation of this line of research and why it matters.\n#### Further Reading\n- [Link to relevant thing 1](url1)\n- [Link to relevant thing 2](url2)",
       value = y$Background,
@@ -316,7 +311,7 @@ ui <- navbarPage(
     h3("Feedback & Credits"),
     #Feedback
     md_input_ui(
-      id="Feedback",
+      id = "Feedback",
       label = "Feedback",
       placeholder = "### Got suggestions or feedback?\n#### We want to know what you think!\n[Please share your thoughts using this form](Add form link) and we will use it to improve this and other future lessons.",
       value = y$Feedback,
@@ -346,14 +341,10 @@ ui <- navbarPage(
 
   # TAB 2: COMPILE ----------------------------------------------------------
 
-  tabPanel("Compile",
-           htmlOutput("compile"),
-           div(class = "spacer")),
+  tabPanel("Compile", htmlOutput("compile"), div(class = "spacer")),
   # TAB 3: PREVIEW ----------------------------------------------------------
 
-  tabPanel("Preview",
-           htmlOutput("preview"),
-           div(class = "spacer")),
+  tabPanel("Preview", htmlOutput("preview"), div(class = "spacer")),
   # TAB 4: PUBLISH ----------------------------------------------------------
 
   tabPanel(
@@ -366,10 +357,9 @@ ui <- navbarPage(
     ),
     actionButton(
       'StageForPublication',
-      label = div(icon("file-import"),
-                  p(strong(
-                    "Stage for Publication"
-                  ))),
+      label = div(icon("file-import"), p(strong(
+        "Stage for Publication"
+      ))),
       class = "publish-button"
     ),
     div(textOutput("stageStatus")),
@@ -406,6 +396,11 @@ server <- function(input, output, session) {
   #Stop the app if you close the window.
   session$onSessionEnded(function() {
     shiny::stopApp()
+      # Detach galacticPubs so namespace isn't locked
+  pkg <- "galacticPubs"
+  if (pkg %in% loadedNamespaces()) {
+    try(detach(paste0("package:", pkg), unload = TRUE, character.only = TRUE), silent = TRUE)
+  }
   })
 
   #Finish generating all frontend items
@@ -450,16 +445,47 @@ server <- function(input, output, session) {
         width = "100%",
         height = 150
       ),
-
-      sortable::rank_list(
-        input_id = "SponsorLogo",
-        text = "Sponsor Logo(s)— (add images w/ 'logo' in name to 'assets/_banners_logos_etc')",
-        labels = matching_files(
-          rel_path = "assets/_banners_logos_etc",
-          pattern = "^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
-          WD = WD()
-        )
+      div(
+        style = "text-align:center;margin-top:-10px;margin-bottom:10px;",
+        h4("Half-assed Preview"),
+        p(
+          "Add sponsor logos and banner images to 'assets/_banners_logos_etc' with suffix '_logo' and '_banner'."
+        ),
+      ),
+      div(
+        class = "lesson-preview-shadow",
+        robust_img(
+          class = c("lesson-banner", "max-width-300"),
+          src = y$UnitBanner,
+          label = "Lesson Banner"
+        ),
+        div(class = "sponsor-section", h4("Sponsored by:"), lapply(1:max(
+          length(y$SponsoredBy), length(y$SponsorLogo)
+        ), function(i) {
+          div(
+            class = "sponsor",
+            span(class = "sponsor-text", md_txt("", y$SponsoredBy[i])),
+            div(
+              class = "sponsor-logo-container",
+              robust_img(
+                class = "sponsor-logo",
+                src = y$SponsorLogo[i],
+                "Sponsor Logo"
+              )
+            )
+          )
+        }))
       )
+
+      # sortable::rank_list(
+      #   input_id = "SponsorLogo",
+      #   text = "Sponsor Logo(s)— (add images w/ 'logo' in name to 'assets/_banners_logos_etc')",
+      #   labels = matching_files(
+      #     rel_path = "assets/_banners_logos_etc",
+      #     pattern = "^.*[Ll]ogo.*\\.[png|PNG|jpeg|jpg]",
+      #     WD = WD()
+      #   )
+      # )
     )
   })
 
@@ -476,14 +502,13 @@ server <- function(input, output, session) {
           height = 150,
           width = "100%"
         ),
-        div(class = "char-count",
-            renderText(
-              paste0(
-                "Character Count= ",
-                nchar(input$TheGist),
-                " of 280 characters"
-              )
-            ))
+        div(class = "char-count", renderText(
+          paste0(
+            "Character Count= ",
+            nchar(input$TheGist),
+            " of 280 characters"
+          )
+        ))
       ),
       div(
         class = "text-block",
@@ -500,8 +525,7 @@ server <- function(input, output, session) {
         ),
         textAreaInput(
           "EssentialQ",
-          a("Essential question(s) (What's the broader point?)",
-            href = "https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
+          a("Essential question(s) (What's the broader point?)", href = "https://www.authenticeducation.org/ae_bigideas/article.lasso?artid=53"),
           y$EssentialQ,
           width = "100%",
           height = 100
@@ -543,18 +567,23 @@ server <- function(input, output, session) {
     bonus_content()
   })
   output$extensions_output <- shiny::renderText({
-    extensions_content()})
+    extensions_content()
+  })
   output$connection_output <- shiny::renderText({
-    connection_content()})
+    connection_content()
+  })
   output$background_output <- shiny::renderText({
-    background_content()})
+    background_content()
+  })
   output$feedback_output <- shiny::renderText({
-    feedback_content()})
+    feedback_content()
+  })
   output$credits_output <- shiny::renderText({
-    credits_content()})
+    credits_content()
+  })
 
 
-   #initialize values for editable table inputs
+  #initialize values for editable table inputs
   #define initial reactive values for ediTable
   accessibility_data <- reactiveVal(y$Accessibility)
   jobviz_data <- reactiveVal(y$JobVizConnections)
@@ -568,11 +597,16 @@ server <- function(input, output, session) {
   #JobViz connections
 
   jobPicker_server("jp", jobs$data)
-  ediTable_server(id = "JobVizConnections", rd = jobviz_data   )
+  ediTable_server(id = "JobVizConnections", rd = jobviz_data)
   ediTable_server(id = "Acknowledgments", rd = ack_data)
-  ediTable_server(id = "Versions", rd = versions_data,
-                  col_settings=list(
-                    date=list(type="date",dateFormat="MMMM D, YYYY",correctformat=TRUE)
+  ediTable_server(id = "Versions",
+                  rd = versions_data,
+                  col_settings = list(
+                    date = list(
+                      type = "date",
+                      dateFormat = "MMMM D, YYYY",
+                      correctformat = TRUE
+                    )
                   ))
 
 
@@ -587,12 +621,11 @@ server <- function(input, output, session) {
     # versions_data must not be changed or this can royally screw up the file upon save
     if (isolate(!is.null(versions_data))) {
       data_check <-
-        prep_input(input,
-                   WD = WD())
+        prep_input(input, WD = WD())
       #save updated current_data and saved_data to reactive values
 
-        vals$current_data <- data_check$current_data
-        vals$saved_data <- data_check$saved_data
+      vals$current_data <- data_check$current_data
+      vals$saved_data <- data_check$saved_data
 
 
       if (!identical(length(data_check[[1]]), length(data_check[[2]]))) {
@@ -621,13 +654,15 @@ server <- function(input, output, session) {
         # (unlist necessary to avoid narrow issue w/ <NA> vs `NA` names)
         #
         probs <- lapply(1:length(data_check[[1]]), function(i) {
-          !(identical(
-            unlist(data_check[[1]][i], use.names = FALSE),
-            unlist(data_check[[2]][i], use.names = FALSE)
-          ) |
-            #or any variety of mismatched "", NULL, NA,etc (empties)
-            (is_empty(data_check[[1]][[i]]) &
-               is_empty(data_check[[2]][[i]])))
+          !(
+            identical(
+              unlist(data_check[[1]][i], use.names = FALSE),
+              unlist(data_check[[2]][i], use.names = FALSE)
+            ) |
+              #or any variety of mismatched "", NULL, NA,etc (empties)
+              (is_empty(data_check[[1]][[i]]) &
+                 is_empty(data_check[[2]][[i]]))
+          )
         }) %>% unlist() %>% which()
         prob_names <- names(data_check[[1]])[probs]
 
@@ -658,7 +693,6 @@ server <- function(input, output, session) {
             data_check$current_data$TemplateVer
           )
         } else{
-
           vals$yaml_update_txt <- ("Not saved, yo ->")
           message("Unsaved changes: ")
           print(outOfDate)
@@ -703,18 +737,20 @@ server <- function(input, output, session) {
   #######################################
   # Save YAML when save button clicked -------------------------------------------
   observe({
-
     template_upgraded <-
       vals$current_data$TemplateVer > vals$saved_data$TemplateVer
     # if template upgraded, trigger rebuild of all materials in compile_unit
 
     if (template_upgraded) {
       vals$current_data$RebuildAllMaterials <- TRUE
-  }
+    }
 
     #assert that some basic fields are filled before saving
     checkmate::assert(
-      checkmate::check_choice(vals$current_data$PublicationStatus, c("Proto","Hidden","Live", "Upcoming")),
+      checkmate::check_choice(
+        vals$current_data$PublicationStatus,
+        c("Proto", "Hidden", "Live", "Upcoming")
+      ),
       checkmate::check_string(vals$current_data$ShortTitle),
       checkmate::assert_date(vals$current_data$ReleaseDate),
       checkmate::assert_string(vals$current_data$Title),
@@ -723,13 +759,12 @@ server <- function(input, output, session) {
     )
 
     #try fm_backup(). If it doesn't work, don't write YAML
-    test_backup <- fm_backup(WD=WD()) %>% catch_err()
+    test_backup <- fm_backup(WD = WD()) %>% catch_err()
 
-    if(identical(test_backup,TRUE)){
-    #write current data
-    yaml::write_yaml(vals$current_data,
-                     yaml_path)
-    }else{
+    if (identical(test_backup, TRUE)) {
+      #write current data
+      yaml::write_yaml(vals$current_data, yaml_path)
+    } else{
       stop("Not saved because fm_backup() failed.")
     }
 
@@ -803,138 +838,150 @@ server <- function(input, output, session) {
     #generate UI output
     tagList(
       h3("Step 2: Compile working documents and lesson assets"),
-      fluidPage(column(
-        width = 4,
-        #choose scripts to run
-        div(
-          class = "compile-section",
-          h4("Run R Scripts to Generate Lesson Assets"),
-          checkboxGroupInput(
-            "ScriptsToRun",
-            "Uncheck to skip:",
-            choices = scriptFiles,
-            selected = isolate(scriptFiles[which(scriptFiles %in% vals$current_data$ScriptsToRun)])
-          ),
-          actionButton("run_lesson_scripts", "Run Lesson Scripts", class =
-                         "compile-button")
-        ),
-        #choose which elements are completed
-        div(
-          class = "compile-section",
-          h4("What to include:"),
-          checkboxGroupInput(
-            "ReadyToCompile",
-            "(Which items are ready to be compiled?)",
-            choices = c(
-              "Standards Alignment",
-              "Teaching Materials",
-              "Procedure"
+      fluidPage(
+        column(
+          width = 4,
+          #choose scripts to run
+          div(
+            class = "compile-section",
+            h4("Run R Scripts to Generate Lesson Assets"),
+            checkboxGroupInput(
+              "ScriptsToRun",
+              "Uncheck to skip:",
+              choices = scriptFiles,
+              selected = isolate(scriptFiles[which(scriptFiles %in% vals$current_data$ScriptsToRun)])
             ),
-            selected = isolate(vals$current_data$ReadyToCompile)
+            actionButton("run_lesson_scripts", "Run Lesson Scripts", class =
+                           "compile-button")
           ),
-          radioButtons(
-            "PullStandardsInfoFrom",
-            label = "Match alignment codes to which set of standards?",
-            choices = c("myFile", "standardX"),
-            selected = isolate(vals$current_data$PullStandardsInfoFrom)
-          ),
-          p(
-            style = "color:gray;margin-top:-5px;font-size:1rem;",
-            "Uncheck the above for custom, partial standards alignments."
-          ),
-          actionButton("compile", "Save & Compile Lesson", class = "compile-button")
-        )
-      ),  #end left pane
-
-
-      ### COMPILE PREVIEWS
-      #preview pane for tweaking learning plots
-      column(width = 8, {
-        #test if standards alignment ready & has already been compiled b4 trying to render images
-        stndrds_saved <-
-          file.exists(fs::path(WD_git,"saves", "standards.RDS"))
-
-        #Begin conditional pane
-        if ("Standards Alignment" %in% isolate(vals$current_data$ReadyToCompile) &
-            stndrds_saved) {
-          tagList(
-            div(
-              class = "preview-ep",
-              h3("Learning Epaulette Preview"),
-              fluidRow(
-                class = "ep-container",
-                div(class = "ep-horiz space-top",
-                    img(src=isolate(vals$current_data$LearningEpaulette),alt="No learning epaulette found")),
-                    #imageOutput("epaulette_fig", inline = T)),
-                div(class = "ep-vert space-top",
-                    img(src=isolate(vals$current_data$LearningEpaulette_vert),alt="No learning epaulette found"))
-                    #imageOutput("epaulette_fig_vert", inline = T))
-              ),
-              # LEARNING EPAULETTE COMPILE PREVIEW
-              div(
-                class = "inline-fields space-top",
-                sliderInput(
-                  "LearningEpaulette_params_heightScalar",
-                  label = "Crop bottom of image to fit ggrepel labels",
-                  value = isolate(
-                    vals$current_data$LearningEpaulette_params_heightScalar
-                  ),
-                  min = 0.3,
-                  max = 1.8,
-                  step = 0.05,
-                  width = 200
-                ),
-                numericInput(
-                  "LearningEpaulette_params_randomSeed",
-                  label = "Random Seed for ggrepel",
-                  value = isolate(
-                    vals$current_data$LearningEpaulette_params_randomSeed
-                  ),
-                  min = 0,
-                  max = 500,
-                  step = 1,
-                  width = 110
-                )
-              ),
-              actionButton("remake_ep", "Update Epaulette")
+          #choose which elements are completed
+          div(
+            class = "compile-section",
+            h4("What to include:"),
+            checkboxGroupInput(
+              "ReadyToCompile",
+              "(Which items are ready to be compiled?)",
+              choices = c("Standards Alignment", "Teaching Materials", "Procedure"),
+              selected = isolate(vals$current_data$ReadyToCompile)
             ),
-
-            # LEARNING CHART COMPILE PREVIEW
-            div(
-              class = "preview-chart",
-              h3("Learning Chart Preview"),
-              uiOutput("chart_fig_disclaimer"),
-              img(src=isolate(vals$current_data$LearningChart),alt="No Learning Chart Found"),
-              # plotOutput("chart_fig", width = "500px", height = "300px"),
-              textInput(
-                "LearningChart_params_caption",
-                "Manual caption:",
-                value = isolate(vals$current_data$LearningChart_params_caption)
-              ),
-              textInput(
-                "LearningChart_params_centralText",
-                "Central Text Manual caption:",
-                value = isolate(vals$current_data$LearningChart_params_centralText)
-              ),
-              checkboxInput(
-                "LearningChart_params_captionN",
-                "Add standards count?",
-                width = 150,
-                value = isolate(vals$current_data$LearningChart_params_captionN)
-              ),
-              actionButton("remake_chart", "Regenerate Chart")
-            )
-
-
+            radioButtons(
+              "PullStandardsInfoFrom",
+              label = "Match alignment codes to which set of standards?",
+              choices = c("myFile", "standardX"),
+              selected = isolate(vals$current_data$PullStandardsInfoFrom)
+            ),
+            p(
+              style = "color:gray;margin-top:-5px;font-size:1rem;",
+              "Uncheck the above for custom, partial standards alignments."
+            ),
+            actionButton("compile", "Save & Compile Lesson", class = "compile-button")
           )
-          #end conditional panel
-        } else{
-          tagList(div(
-            class = "info",
-            h3("Compile standards to generate learning plots.")
-          ))
-        }
-      }))
+        ),
+        #end left pane
+
+
+        ### COMPILE PREVIEWS
+        #preview pane for tweaking learning plots
+        column(width = 8, {
+          #test if standards alignment ready & has already been compiled b4 trying to render images
+          stndrds_saved <-
+            file.exists(fs::path(WD_git, "saves", "standards.RDS"))
+
+          #Begin conditional pane
+          if ("Standards Alignment" %in% isolate(vals$current_data$ReadyToCompile) &
+              stndrds_saved) {
+            tagList(
+              div(
+                class = "preview-ep",
+                h3("Learning Epaulette Preview"),
+                fluidRow(
+                  class = "ep-container",
+                  div(
+                    class = "ep-horiz space-top",
+                    img(
+                      src = isolate(vals$current_data$LearningEpaulette),
+                      alt = "No learning epaulette found"
+                    )
+                  ),
+                  #imageOutput("epaulette_fig", inline = T)),
+                  div(
+                    class = "ep-vert space-top",
+                    img(
+                      src = isolate(vals$current_data$LearningEpaulette_vert),
+                      alt = "No learning epaulette found"
+                    )
+                  )
+                  #imageOutput("epaulette_fig_vert", inline = T))
+                ),
+                # LEARNING EPAULETTE COMPILE PREVIEW
+                div(
+                  class = "inline-fields space-top",
+                  sliderInput(
+                    "LearningEpaulette_params_heightScalar",
+                    label = "Crop bottom of image to fit ggrepel labels",
+                    value = isolate(
+                      vals$current_data$LearningEpaulette_params_heightScalar
+                    ),
+                    min = 0.3,
+                    max = 1.8,
+                    step = 0.05,
+                    width = 200
+                  ),
+                  numericInput(
+                    "LearningEpaulette_params_randomSeed",
+                    label = "Random Seed for ggrepel",
+                    value = isolate(
+                      vals$current_data$LearningEpaulette_params_randomSeed
+                    ),
+                    min = 0,
+                    max = 500,
+                    step = 1,
+                    width = 110
+                  )
+                ),
+                actionButton("remake_ep", "Update Epaulette")
+              ),
+
+              # LEARNING CHART COMPILE PREVIEW
+              div(
+                class = "preview-chart",
+                h3("Learning Chart Preview"),
+                uiOutput("chart_fig_disclaimer"),
+                img(
+                  src = isolate(vals$current_data$LearningChart),
+                  alt = "No Learning Chart Found"
+                ),
+                # plotOutput("chart_fig", width = "500px", height = "300px"),
+                textInput(
+                  "LearningChart_params_caption",
+                  "Manual caption:",
+                  value = isolate(vals$current_data$LearningChart_params_caption)
+                ),
+                textInput(
+                  "LearningChart_params_centralText",
+                  "Central Text Manual caption:",
+                  value = isolate(vals$current_data$LearningChart_params_centralText)
+                ),
+                checkboxInput(
+                  "LearningChart_params_captionN",
+                  "Add standards count?",
+                  width = 150,
+                  value = isolate(vals$current_data$LearningChart_params_captionN)
+                ),
+                actionButton("remake_chart", "Regenerate Chart")
+              )
+
+
+            )
+            #end conditional panel
+          } else{
+            tagList(div(
+              class = "info",
+              h3("Compile standards to generate learning plots.")
+            ))
+          }
+        })
+      )
     )
 
   })
@@ -947,7 +994,7 @@ server <- function(input, output, session) {
   observe({
     isolate({
       #Save selections
-      current_data <- prep_input(input,  WD = WD())$current_data
+      current_data <- prep_input(input, WD = WD())$current_data
       yaml::write_yaml(current_data, yaml_path)
 
       scripts <-
@@ -961,48 +1008,46 @@ server <- function(input, output, session) {
   observe({
     #Save data before compiling
     vals$current_data <-
-      prep_input(input,  WD = WD())$current_data
-    yaml::write_yaml(vals$current_data,
-                     yaml_path)
+      prep_input(input, WD = WD())$current_data
+    yaml::write_yaml(vals$current_data, yaml_path)
     vals$current_data <-
       compile_unit(choices = input$ReadyToCompile, WD = WD())
     #resave
-    yaml::write_yaml(vals$current_data,
-                     yaml_path)
+    yaml::write_yaml(vals$current_data, yaml_path)
   }) %>% bindEvent(input$compile)
 
 
   #Update Epaulette Previews if remake button pushed
   observe({
     # output$epaulette_fig <- renderImage({
-      isolate({
-        #generate new epaulette image
-        learningEpaulette(
-          WD = WD(),
-          showPlot = FALSE,
-          heightScalar = input$LearningEpaulette_params_heightScalar,
-          randomSeed = input$LearningEpaulette_params_randomSeed
-        )
-        # #update filenames
-        # vals$current_data$LearningEpaulette <-
-        #   fs::path("assets",
-        #            "_learning-plots",
-        #            paste0(formals(learningEpaulette)$fileName, ".png"))
-        # vals$current_data$LearningEpaulette_vert <-
-        #   fs::path("assets",
-        #            "_learning-plots",
-        #            paste0(formals(learningEpaulette)$fileName, "_vert.png"))
-      })
+    isolate({
+      #generate new epaulette image
+      learningEpaulette(
+        WD = WD(),
+        showPlot = FALSE,
+        heightScalar = input$LearningEpaulette_params_heightScalar,
+        randomSeed = input$LearningEpaulette_params_randomSeed
+      )
+      # #update filenames
+      # vals$current_data$LearningEpaulette <-
+      #   fs::path("assets",
+      #            "_learning-plots",
+      #            paste0(formals(learningEpaulette)$fileName, ".png"))
+      # vals$current_data$LearningEpaulette_vert <-
+      #   fs::path("assets",
+      #            "_learning-plots",
+      #            paste0(formals(learningEpaulette)$fileName, "_vert.png"))
+    })
 
-      # #copy image to www folder
-      # isolate({
-      #   copy_updated_files(fs::path(WD(),
-      #                               c((vals$current_data$LearningEpaulette),
-      #                                 (vals$current_data$LearningEpaulette_vert)
-      #                               )), img_loc)
-      # })
+    # #copy image to www folder
+    # isolate({
+    #   copy_updated_files(fs::path(WD(),
+    #                               c((vals$current_data$LearningEpaulette),
+    #                                 (vals$current_data$LearningEpaulette_vert)
+    #                               )), img_loc)
+    # })
 
-      # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
+    # updateNumericInput(session,"LearningEpaulette_params_heightScalar",value=input$LearningEpaulette_params_heightScalar)
 
     #   #return file info to UI
     #   list(src = fs::path("www", basename(
@@ -1010,13 +1055,13 @@ server <- function(input, output, session) {
     #   )), alt = "Compile Standards to generate epaulette previews")
     #
     # }, deleteFile = TRUE)
-#
-#     #Render vertical epaulette
-#     output$epaulette_fig_vert <- renderImage({
-#       list(src = fs::path("www", basename(
-#         isolate(vals$current_data$LearningEpaulette_vert)
-#       )), alt = "vert_epaulette")
-#     }, deleteFile = TRUE)
+    #
+    #     #Render vertical epaulette
+    #     output$epaulette_fig_vert <- renderImage({
+    #       list(src = fs::path("www", basename(
+    #         isolate(vals$current_data$LearningEpaulette_vert)
+    #       )), alt = "vert_epaulette")
+    #     }, deleteFile = TRUE)
   }) %>% bindEvent(input$remake_ep,
                    ignoreInit = T,
                    ignoreNULL = F)
@@ -1078,7 +1123,7 @@ server <- function(input, output, session) {
   # 3. Output the preview of the lesson plan
   output$preview <- renderUI({
     current_data <-
-      prep_input(input,  vals$current_data, WD = WD())$current_data
+      prep_input(input, vals$current_data, WD = WD())$current_data
 
     stage_assets(current_data, WD(), img_loc, clear = TRUE)
 
@@ -1087,8 +1132,7 @@ server <- function(input, output, session) {
 
     sponsoredByTxt <- if (grepl("^-", current_data$SponsoredBy)) {
       parsed <- tryCatch(
-        stringr::str_extract_all(current_data$SponsoredBy,
-                                 pattern = "(?<=^- |\\n- )(.*?(\\n|$))") %>% unlist(),
+        stringr::str_extract_all(current_data$SponsoredBy, pattern = "(?<=^- |\\n- )(.*?(\\n|$))") %>% unlist(),
         error = function(e) {
           e
         }
@@ -1118,25 +1162,23 @@ server <- function(input, output, session) {
           src = basename(current_data$UnitBanner),
           label = "Lesson Banner"
         ),
-        div(class = "sponsor-section",
-            h4("Sponsored by:"),
-            lapply(1:max(
-              length(sponsoredByTxt),
-              length(current_data$SponsorLogo)
-            ), function(i) {
-              div(
-                class = "sponsor",
-                span(class = "sponsor-text", md_txt("", sponsoredByTxt[i])),
-                div(
-                  class = "sponsor-logo-container",
-                  robust_img(
-                    class = "sponsor-logo",
-                    src = basename(current_data$SponsorLogo[i]),
-                    "Sponsor Logo"
-                  )
-                )
+        div(class = "sponsor-section", h4("Sponsored by:"), lapply(1:max(
+          length(sponsoredByTxt),
+          length(current_data$SponsorLogo)
+        ), function(i) {
+          div(
+            class = "sponsor",
+            span(class = "sponsor-text", md_txt("", sponsoredByTxt[i])),
+            div(
+              class = "sponsor-logo-container",
+              robust_img(
+                class = "sponsor-logo",
+                src = basename(current_data$SponsorLogo[i]),
+                "Sponsor Logo"
               )
-            })),
+            )
+          )
+        })),
         ## 1. OVERVIEW
         div(class = "section", h3("1. Overview")),
         div(
@@ -1147,12 +1189,10 @@ server <- function(input, output, session) {
               class = "triad border-right",
               md_txt('Target subject', current_data$TargetSubject)
             ),
-            div(class = "triad border-right",
-                md_txt('Grades', current_data$ForGrades)),
-            div(
-              class = "triad",
-              md_txt("Est. Unit Time", current_data$EstUnitTime)
-            )
+            div(class = "triad border-right", md_txt('Grades', current_data$ForGrades)),
+            div(class = "triad", md_txt(
+              "Est. Unit Time", current_data$EstUnitTime
+            ))
           ),
           robust_img(
             class = "learning-epaulette",
@@ -1229,7 +1269,7 @@ server <- function(input, output, session) {
   observe({
     #Reconcile input and yaml saved data before finalizing
     current_data <-
-      prep_input(input,  vals$current_data, WD = WD())$current_data
+      prep_input(input, vals$current_data, WD = WD())$current_data
     yaml::write_yaml(current_data, yaml_path)
 
     #If a change in location has been selected, trigger the appropriate function
@@ -1287,12 +1327,9 @@ server <- function(input, output, session) {
           "Commit message (what're you updating?):",
           value = NULL
         ),
-        actionButton('Publish',
-                     label = div(
-                       img(src = 'rsrc/gpicon.ico'),
-                       p(strong("Publish!"))
-                     ),
-                     class = "publish-button"),
+        actionButton('Publish', label = div(
+          img(src = 'rsrc/gpicon.ico'), p(strong("Publish!"))
+        ), class = "publish-button"),
         htmlOutput('publishReport')
       )
     }
@@ -1305,11 +1342,8 @@ server <- function(input, output, session) {
     #we update the reactive value, which should supercede the now outdated input$LastUpdated
 
     vals$current_data <-
-      overwrite_matching(safe_read_yaml(
-        yaml_path,
-        standardize_NA = F
-      ),
-      vals$current_data)
+      overwrite_matching(safe_read_yaml(yaml_path, standardize_NA = F),
+                         vals$current_data)
 
     if (pub_status$SUCCESS == "\u2713") {
       output$publishReport <-

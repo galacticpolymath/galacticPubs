@@ -7,7 +7,7 @@
 get_wd_git(WD = NULL)
 }
 \arguments{
-\item{WD}{default=NULL; this is}
+\item{WD}{default=NULL; this will give you the root of wd_git directory. Otherwise, passed to \code{\link[=parse_wd]{parse_wd()}}}
 }
 \value{
 virtualized path to Google Shared Drives location

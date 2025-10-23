@@ -59,7 +59,7 @@ batch_get_fm <- \(
   key0 <- key
 
   res0 <-  purrr::map(1:length(valid_projects), \(i) {
-    print(paste0("Processing i=",i,": ", basename(valid_projects[i])))
+    # print(paste0("Processing i=",i,": ", basename(valid_projects[i])))
     if (exclude_TEST) {
       isTestNotRequested <- !"isTestRepo" %in% key
       if (isTestNotRequested) {

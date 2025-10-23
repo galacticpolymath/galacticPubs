@@ -11,6 +11,10 @@ body{
   border: 3px solid #ECECE2;
 }
 
+.max-width-300{
+  max-width: 300px;
+}
+
 .char-count *{
     margin-top: -1rem;
     padding-bottom: 1rem;

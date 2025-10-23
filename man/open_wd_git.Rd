@@ -7,7 +7,7 @@
 open_wd_git(WD = "?")
 }
 \arguments{
-\item{WD}{the working directory for the virtualized lesson path; default=getwd() if you're working in the lesson's .Rproj. If "?" is supplied, it will invoke \code{\link[=pick_lesson]{pick_lesson()}}}
+\item{WD}{the working directory for the virtualized lesson path; default="?" is supplied, passed to \code{\link[=pick_lesson]{pick_lesson()}}}
 }
 \description{
 For given project, navigates to local file system in finder/explorer. This is where project code and JSONs are found. Separate from Google Drive working documents and heavy assets (like images, videos, and raw Illustrator files). For these use \code{\link[=open_proj_folder_drive]{open_proj_folder_drive()}}
