@@ -4,7 +4,7 @@
 #'
 #' Also checks the assertion that directory exists. before outputting.
 #'
-#' @param WD default=NULL; this is
+#' @param WD default=NULL; this will give you the root of wd_git directory. Otherwise, passed to [parse_wd()]
 #' @return virtualized path to Google Shared Drives location
 #'
 #' @export
