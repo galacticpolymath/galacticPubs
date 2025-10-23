@@ -52,7 +52,7 @@ jobPicker_server <- function(id, job_df) {
       "job_select",
       choices = sort(unique(job_df$title)),
       server = TRUE,
-      selected=NULL
+      selected=character(0)
     )
 
     # Observe selection, copy corresponding data.frame

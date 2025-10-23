@@ -245,11 +245,14 @@ compile_fm <- \(WD = "?",
   JobViz <- get_fm("JobVizConnections", WD = WD)
   if(is_empty(JobViz)) {
     JobViz <- NULL
+  }else{
+    JobViz <- JobViz$JobVizConnections
+    JobViz <-lapply(1:length(JobViz$job_title),\(i) {list(job_title=JobViz$job_title[i],soc_code=JobViz$soc_code[i])})
   }
 
   jobviz_web <- list(
     `__component` = "lesson-plan.collapsible-text-section",
-    SectionTitle = "JobVIZ Connections",
+    SectionTitle = "JobViz Career Connections",
     Content = JobViz,
     #allow smooth-scrolling to in-page references
     InitiallyExpanded = TRUE

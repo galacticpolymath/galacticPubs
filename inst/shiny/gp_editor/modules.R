@@ -39,7 +39,10 @@ ediTable_server <- function(
           tmp <- tmp0 %>%
             dplyr::mutate(dplyr::across(dplyr::everything(), ~ ifelse(is.na(.x), "", .x)))
 
-          rownames(tmp) <- NULL
+          # #If there are no rownames, make them numbered
+          # if(is.null(rownames(tmp))){
+          #  rownames(tmp) <- 1:nrow(tmp)
+          # }
 
           hot <- rhandsontable::rhandsontable(
             tmp,

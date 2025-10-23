@@ -61,20 +61,32 @@ pick_lesson <- function(shared_drive = "s",
 
     # Lookup numID and publication date ---------------------------------------
 
-    projects <- batch_get_fm(
+    test_batch_get_fm <- batch_get_fm(
       key = c("numID", "ReleaseDate", "LastUpdated"),
       projects0,
       output_tibble = TRUE,
       exclude_TEST = exclude_TEST,
       print_result= FALSE
-    )
-    path_tib <- dplyr::tibble(unit = basename(projects0), path = projects0)
+    ) %>% catch_err(keep_results=TRUE)
+
+    if(!test_batch_get_fm$success){
+       warning("Error in retrieving front-matter.yml data from projects. Reverted to simpler output.")
+      message(test_batch_get_fm$result)
+      message("Trying to do a simpler output")
+       projects_sorted <- dplyr::tibble(unit = basename(projects0), path = projects0)
+
+    } else{
+     projects <- test_batch_get_fm$result
+         path_tib <- dplyr::tibble(unit = basename(projects0), path = projects0)
 
     projects <- dplyr::left_join(projects, path_tib, by = "unit")
-
-    # Sort by sort_col --------------------------------------------------------
+        # Sort by sort_col --------------------------------------------------------
     projects_sorted <- projects[order(unlist(projects[, sort_col]), decreasing =
                                         sort_decr), ]
+    }
+
+
+
   }
 
   d <- projects_sorted %>% dplyr::mutate(CHOICE = 1:nrow(.)) %>%

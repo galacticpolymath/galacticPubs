@@ -59,6 +59,7 @@ batch_get_fm <- \(
   key0 <- key
 
   res0 <-  purrr::map(1:length(valid_projects), \(i) {
+    print(paste0("Processing i=",i,": ", basename(valid_projects[i])))
     if (exclude_TEST) {
       isTestNotRequested <- !"isTestRepo" %in% key
       if (isTestNotRequested) {
@@ -67,7 +68,15 @@ batch_get_fm <- \(
 
     }
 
-    out <- get_fm(key = key, WD = valid_projects[i])
+    fm_test <- get_fm(key = key, WD = valid_projects[i]) %>% catch_err(keep_results = TRUE)
+   if(fm_test$success){
+     out <- fm_test$result
+   } else{
+     out <- NULL
+     stop("Error reading front matter for: ",
+             basename(valid_projects[i]),"\n",
+             fm_test$result)
+   }
     if (is.null(out)) {
       warning("Possibly corrupted front matter for: ",
               basename(valid_projects[i]))
