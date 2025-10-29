@@ -8,6 +8,8 @@ get_unit_path(str, pull_path = TRUE)
 }
 \arguments{
 \item{str}{a (regex) string that matches the name of a project in one of the shared drives GP-LIVE or GP-Studio}
+
+\item{pull_path}{logical; if TRUE (default) returns the full path(s) to the unit(s); if FALSE returns a tibble of matching units and paths}
 }
 \value{
 path(s) for the match(es) to the string you supplied

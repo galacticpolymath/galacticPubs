@@ -13,7 +13,7 @@
 gp_api_batch_unit_replace <- \(shared_drive = "?",
                                dev = NULL,
                                verbosity=1) {
-  if (library("tictoc",logical.return = T)) {
+  if (requireNamespace("tictoc", quietly = TRUE)) {
     tictoc::tic()
     timer <- TRUE
   }

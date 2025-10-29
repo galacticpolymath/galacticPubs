@@ -4,6 +4,8 @@
 #'
 #' @param prompt_user logical; ask user before deleting and replacing the unit? default=TRUE
 #' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
+#' @param unit_id character; if supplied, queries users for this specific unit id. Default=NULL
+#' @param WD character; working directory string passed to [parse_wd()]; default="?"
 #' @param verbosity passed to [httr2::req_perform()]; default=1
 #' @family GP API
 #' @export

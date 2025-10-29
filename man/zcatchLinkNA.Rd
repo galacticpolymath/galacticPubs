@@ -6,6 +6,11 @@
 \usage{
 zcatchLinkNA(linkText, url)
 }
+\arguments{
+\item{linkText}{text for the link (describing what it connects to)}
+
+\item{url}{the link URL}
+}
 \description{
 Internal helpers for \code{\link[=compile_teach_it]{compile_teach_it()}}. Change linktext if URL is empty.
 }

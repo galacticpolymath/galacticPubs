@@ -1,6 +1,6 @@
 #' make_teaching_mat_public
 #'
-#' A helper function for [organize_teach_it()], which is part of [compile_teach_it()]. Moves/organizes teaching-materials folder to the GalacticPolymath/ shared drive, where it is viewable and copyable by GP+ members.
+#' A helper function for [compile_teach_it()]. Moves/organizes teaching-materials folder to the GalacticPolymath/ shared drive, where it is viewable and copyable by GP+ members.
 #' Does the following:
 #' 1. Move teaching-materials/ content from the WD (project working directory on GP-Studio) to GalacticPolymath Shared Drive (Read-Only access)
 #' 2. Create shortcut to teaching-materials/ in place of the moved folder

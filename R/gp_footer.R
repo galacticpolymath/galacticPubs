@@ -16,8 +16,11 @@
 #' @param logo_scale on a scale of 0 to 1 (npc units), how high to make the logo in footer? default=0.7
 #' @param border_col_graph color of border around main plot. default="#363636"; put "transparent" to remove border
 #' @param border_col_foot color of border around plot footer. default="#363636"; put "transparent" to remove border
+#' @param border_width_graph width of border around main plot. default=1
+#' @param border_width_foot width of border around footer. default=1
 #' @param fill_col fill color for caption at bottom; default is "gray90"
 #' @param show_plot logical; plot resulting figure? default=T
+#' @param clear_cache logical; clear cached logo file? default=FALSE
 #'
 #' @export
 
@@ -32,7 +35,7 @@ gp_footer <- function(obj,
                       border_col_foot = "#363636",
                       border_width_graph= 1,
                       border_width_foot=1,
-                      text_col = "#363636",
+                      text_color = "#363636",
                       data_attrib = NULL,
                       data_attrib_prefix="Data: ",
                       data_attrib_scale = 0.9,

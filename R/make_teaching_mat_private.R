@@ -1,6 +1,6 @@
 #' make_teaching_mat_private
 #'
-#' A helper function for [organize_teach_it()], which is part of [compile_teach_it()]. Basically the reverse of [make_teaching_mat_public()].
+#' A helper function for [compile_teach_it()]. Basically the reverse of [make_teaching_mat_public()].
 #' Unstage a lesson (i.e. remove public access and make it editable again). Does the following:
 #' 1. Move lesson project directory from GP-LIVE to GP-Studio (Making it editable to those with access to GP-Studio)
 #' 2. Move lesson teaching-materials from GalacticPolymath Shared Drive

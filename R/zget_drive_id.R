@@ -5,7 +5,7 @@
 #' Primary usage is to populate 'Gdrive*ID' keys in the front-matter.yml. These are used to go between the virtualized "local" paths of the Google Drive for Desktop and the web paths used in the Web-based Google Drive API needed to create Google Drive files.
 #'
 #' @param drive_path passed to [drive_find_path()]
-#' @param drive_path passed to [drive_find_path()]; default=NULL
+#' @param drive_root passed to [drive_find_path()]; default=NULL
 #' @param exact_match passed to [drive_find_path()]; default=TRUE
 #' @param fm_key name of the front-matter key you're trying to fill; used in error messaging and naming output
 #' @param missing_val what to return if key not matched. default=NA

@@ -3,6 +3,7 @@
 #' Similar to [pick_lesson()], except it expects you to supply a ShortTitle or exact project title with _locale suffix
 #'
 #' @param str a (regex) string that matches the name of a project in one of the shared drives GP-LIVE or GP-Studio
+#' @param pull_path logical; if TRUE (default) returns the full path(s) to the unit(s); if FALSE returns a tibble of matching units and paths
 #' @returns path(s) for the match(es) to the string you supplied
 #' @export
 

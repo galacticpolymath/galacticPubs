@@ -79,11 +79,12 @@ report_user_stats <- function(verbosity = 1,
     n_teachers = num_teacher_users,
     class_size = tot_class_size,
     n_states = length(unique_sans_na(users$state)),
+    n_countries= length(unique_sans_na(users$country)),
     active_users = num_active_users,
     inactive_users = num_inactive_users
 
   )
-
+browser()
   users2 <- users %>%
     dplyr::mutate(createdAt_date = as.Date(.data$createdAt, format = "%d-%b-%Y")) %>%
     dplyr::mutate(Year = lubridate::year(.data$createdAt_date)) %>%
@@ -157,11 +158,13 @@ report_user_stats <- function(verbosity = 1,
   plot(KPIs)
 
   if (view_data) {
-    View(users2)
+    utils::View(users2)
   }
   # Return a list with the data, graph, and summary
   out <- list(data = users2,
-       graph = KPIs,
+       graph_class_size = running_tot_students,
+       graph_user_growth = user_growth,
+       graph_combined = KPIs,
        summary = summary)
   print(out)
     # summary stats -----------------------------------------------------------
@@ -176,6 +179,12 @@ report_user_stats <- function(verbosity = 1,
           length(unique_sans_na(users$state)),
           " (",
           paste0(sort(unique_sans_na(users$state)), collapse = ", "),
+          ")")
+  #message unique countries represented
+  message("- countries represented: ",
+          length(unique_sans_na(users$country)),
+          " (",
+          paste0(sort(unique_sans_na(users$country)), collapse = ", "),
           ")")
 
  invisible(out)

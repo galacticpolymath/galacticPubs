@@ -730,7 +730,7 @@ compile_standards <- function(WD = "?", targetSubj = NULL) {
 
         #Make a custom dimAbbrev tibble for sets supported for learning Chart
         supported_dims <-
-          a_master %>% dplyr::select(subject, dimension) %>% dplyr::distinct(.data$dimension, .keep_all = T) %>% dplyr::arrange(.data$subject, .data$dimension)
+          a_master %>% dplyr::select("subject", "dimension") %>% dplyr::distinct(.data$dimension, .keep_all = T) %>% dplyr::arrange(.data$subject, .data$dimension)
 
         #Manual abbreviations for long dimensions
         supported_dims$dimAbbrev <-

@@ -6,6 +6,11 @@
 \usage{
 open_wd(WD = "?", subpath = NULL)
 }
+\arguments{
+\item{WD}{working directory; passed to \code{\link[=parse_wd]{parse_wd()}}.}
+
+\item{subpath}{subpath to concat to WD path e.g.c("assets","data","teaching-materials"); default=NULL}
+}
 \description{
 open_wd
 }

@@ -6,7 +6,7 @@
 #' - anything that has 'scrap' in the name
 #'
 #' @param WD is working directory of the project; easiest way to supply a different lesson is with "?", which will invoke [parse_wd()]; default is WD=getwd()
-#' @param return NULL
+#' @return nothing (NULL)
 #' @export
 
 sweep_teaching_materials <- \(WD=get_wd()){

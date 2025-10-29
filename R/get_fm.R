@@ -185,6 +185,7 @@ get_fm <-
           "Versions",
           "Authors",
           "Credits",
+          "JobVizConnections",
           #deprecated
           "Acknowledgments",
           "GoogleCloudStorage"

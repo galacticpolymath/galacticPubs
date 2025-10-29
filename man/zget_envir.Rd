@@ -13,7 +13,7 @@ zget_grade_bands(df_i, proc_data, lesson_statuses, fm, uinfo, assess)
 
 zget_lessons(df_i, proc_data, lesson_statuses, uinfo, fm)
 
-zget_items(df, fm)
+zget_items(df_i, fm)
 }
 \arguments{
 \item{tlinks}{a tibble of the tlinks of imported teach-it.gsheet}
@@ -26,25 +26,20 @@ zget_items(df, fm)
 
 \item{fm}{front matter info from \code{\link[=get_fm]{get_fm()}}}
 
+\item{df_i}{tibble of filtered tlinks for current environment}
+
 \item{assess}{tibble of assessment info passed from \code{\link[=zget_envir]{zget_envir()}}}
 }
 \description{
 Internal helpers for \code{\link[=compile_teach_it]{compile_teach_it()}}. Used to pull out highly structured hierarchical JSON from the teach-it.gsheet
+
+get all lesson teaching materials
 
 Helper function for \code{\link[=compile_teach_it]{compile_teach_it()}} that extracts different kinds of share links for the webpage. For example, makes preview links for google presentations and PDF download links for other documents
 }
 \details{
 Not intended for use outside functions.
 }
-\section{Functions}{
-\itemize{
-\item \code{zget_grade_bands()}: 
-
-\item \code{zget_lessons()}: 
-
-\item \code{zget_items()}: 
-
-}}
 \seealso{
 Other Internal helper functions: 
 \code{\link{make_yt_embed}()},

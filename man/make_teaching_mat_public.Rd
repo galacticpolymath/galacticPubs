@@ -15,7 +15,7 @@ make_teaching_mat_public(WD = "?", uinfo = NULL)
 A logical TRUE/FALSE indicating overall success. NA if no action was needed (i.e. teaching-materials already at GalacticPolymath)
 }
 \description{
-A helper function for \code{\link[=organize_teach_it]{organize_teach_it()}}, which is part of \code{\link[=compile_teach_it]{compile_teach_it()}}. Moves/organizes teaching-materials folder to the GalacticPolymath/ shared drive, where it is viewable and copyable by GP+ members.
+A helper function for \code{\link[=compile_teach_it]{compile_teach_it()}}. Moves/organizes teaching-materials folder to the GalacticPolymath/ shared drive, where it is viewable and copyable by GP+ members.
 Does the following:
 \enumerate{
 \item Move teaching-materials/ content from the WD (project working directory on GP-Studio) to GalacticPolymath Shared Drive (Read-Only access)

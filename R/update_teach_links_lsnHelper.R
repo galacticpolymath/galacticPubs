@@ -5,7 +5,7 @@
 #' @param dribble the dribble for a "lesson" subfolder of a lesson
 #' @param set_grades passed to[drive_get_info()]
 #' @param set_envir passed to [drive_get_info()]
-#' #' @param set_envir passed to [drive_get_info()]
+#' @param set_lsn passed to [drive_get_info()]
 #'
 #' @export
 

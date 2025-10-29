@@ -20,9 +20,7 @@ batch_get_fm <- \(
   exclude_TEST = TRUE,
   print_result = TRUE
 ) {
-  if (!is.null(WD_git)) {
-    WD <- get_wd(WD_git = WD_git)
-  }
+
 
   if (sum(fs::is_absolute_path(WD)) == length(WD)) {
     projects <- WD

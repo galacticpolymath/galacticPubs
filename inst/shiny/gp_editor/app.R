@@ -15,7 +15,7 @@ pacman_test <-
     }
   )
 if (!"error" %in% class(pacman_test)) {
-  p_load(shiny, shinythemes, sortable, rhandsontable, galacticPubs)
+  p_load(shiny, shinythemes, sortable, rhandsontable)
 } else{
   library(shiny)
   library(shinythemes)
@@ -396,11 +396,7 @@ server <- function(input, output, session) {
   #Stop the app if you close the window.
   session$onSessionEnded(function() {
     shiny::stopApp()
-      # Detach galacticPubs so namespace isn't locked
-  pkg <- "galacticPubs"
-  if (pkg %in% loadedNamespaces()) {
-    try(detach(paste0("package:", pkg), unload = TRUE, character.only = TRUE), silent = TRUE)
-  }
+
   })
 
   #Finish generating all frontend items

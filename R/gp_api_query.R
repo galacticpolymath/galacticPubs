@@ -25,7 +25,7 @@ gp_api_query <- \(
   if (!is.null(numID) & !is.null(id)) {
     stop("Only supply numID OR _id.")
   }
-  if (library("tictoc", logical.return = T)) {
+  if (requireNamespace("tictoc", quietly = TRUE)) {
     timer <- TRUE
     tictoc::tic()
   } else{

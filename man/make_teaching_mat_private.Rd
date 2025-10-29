@@ -10,7 +10,7 @@ make_teaching_mat_private(WD = "?!")
 \item{WD}{is working directory of the project; default is "?!", passed to \code{\link[=parse_wd]{parse_wd()}}}
 }
 \description{
-A helper function for \code{\link[=organize_teach_it]{organize_teach_it()}}, which is part of \code{\link[=compile_teach_it]{compile_teach_it()}}. Basically the reverse of \code{\link[=make_teaching_mat_public]{make_teaching_mat_public()}}.
+A helper function for \code{\link[=compile_teach_it]{compile_teach_it()}}. Basically the reverse of \code{\link[=make_teaching_mat_public]{make_teaching_mat_public()}}.
 Unstage a lesson (i.e. remove public access and make it editable again). Does the following:
 \enumerate{
 \item Move lesson project directory from GP-LIVE to GP-Studio (Making it editable to those with access to GP-Studio)

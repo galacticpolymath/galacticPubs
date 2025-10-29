@@ -35,7 +35,7 @@ batch_update_fm <-
 
 
     # If Suggested tictoc package is available, time how long the rebuild takes
-    if (library("tictoc",logical.return = T)) {
+    if (requireNamespace("tictoc", quietly = TRUE)) {
       tictoc::tic()
       timer <- TRUE
     }

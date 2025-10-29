@@ -16,8 +16,9 @@ update_teach_links_lsnHelper(
 
 \item{set_grades}{passed to\code{\link[=drive_get_info]{drive_get_info()}}}
 
-\item{set_envir}{passed to \code{\link[=drive_get_info]{drive_get_info()}}
-#' @param set_envir passed to \code{\link[=drive_get_info]{drive_get_info()}}}
+\item{set_envir}{passed to \code{\link[=drive_get_info]{drive_get_info()}}}
+
+\item{set_lsn}{passed to \code{\link[=drive_get_info]{drive_get_info()}}}
 }
 \description{
 Helper function for \code{\link[=update_teach_links]{update_teach_links()}} that extracts information for each lesson (if found). Only intended for internal use in update_teach_links.

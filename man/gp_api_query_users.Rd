@@ -13,6 +13,10 @@ gp_api_query_users(
 )
 }
 \arguments{
+\item{WD}{character; working directory string passed to \code{\link[=parse_wd]{parse_wd()}}; default="?"}
+
+\item{unit_id}{character; if supplied, queries users for this specific unit id. Default=NULL}
+
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 
 \item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}

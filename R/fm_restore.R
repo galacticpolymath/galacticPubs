@@ -19,7 +19,7 @@ fm_restore <- \(){
     backup_savedates <- purrr::map_chr(backups, "save_date")
     backup_comb <- dplyr::tibble(N=1:length(backups),save_date=backup_savedates)
     message("Opening backup info")
-    View(backups)
+    utils::View(backups)
     # Ask user which save to restore
     to_print <- backup_comb %>% dplyr::select(N, save_date)
     message("#### Front-Matter.yml versions for unit ",basename(WD_git))

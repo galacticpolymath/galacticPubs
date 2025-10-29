@@ -9,6 +9,7 @@
 #' @param lesson_statuses lesson_statuses
 #' @param uinfo unit info
 #' @param fm front matter info from [get_fm()]
+#' @rdname zget_envir
 #' @export
 #' @family Internal helper functions
 
@@ -71,9 +72,14 @@ zget_envir <- \(tlinks, proc_data, lesson_statuses, uinfo, fm) {
 
 #' zget_grade_bands
 #'
+#' @param df_i tibble of filtered tlinks for current environment
 #' @param assess tibble of assessment info passed from [zget_envir()]
+#' @param proc_data proc_data
+#' @param lesson_statuses lesson_statuses
+#' @param uinfo unit info
+#' @param fm front matter info from [get_fm()]
 #'
-#' @describeIn zget_envir
+#' @rdname zget_envir
 #'
 #' @export
 #' @family Internal helper functions
@@ -133,8 +139,9 @@ zget_grade_bands <- \(df_i, proc_data, lesson_statuses, fm, uinfo, assess) {
 
 #' zget_lessons
 #'
-#' @describeIn zget_envir
+#' get all lesson teaching materials
 #'
+#' @rdname zget_envir
 #' @export
 #' @family Internal helper functions
 #'
@@ -256,13 +263,12 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
 #'
 #' Helper function for [compile_teach_it()] that extracts different kinds of share links for the webpage. For example, makes preview links for google presentations and PDF download links for other documents
 #'
-#' @describeIn zget_envir
-#'
+#' @rdname zget_envir
 #' @export
 #' @family Internal helper functions
 #'
-zget_items <- \(df, fm) {
-  df0 <- df
+zget_items <- \(df_i, fm) {
+  df0 <- df_i
 
 
 
@@ -427,6 +433,8 @@ zget_items <- \(df, fm) {
 #'
 #' Internal helpers for [compile_teach_it()]. Change linktext if URL is empty.
 #'
+#' @param linkText text for the link (describing what it connects to)
+#' @param url the link URL
 #' @export
 #' @family Internal helper functions
 zcatchLinkNA <- function(linkText, url) {

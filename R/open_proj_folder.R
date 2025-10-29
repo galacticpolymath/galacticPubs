@@ -4,6 +4,7 @@
 #'
 #' @param subpath subpath to concat to WD path e.g.c("assets","data","teaching-materials"); default=NULL
 #' @param WD working directory; passed to [parse_wd()].
+#' @rdname open_proj_folder
 #' @export
 #'
 
@@ -21,6 +22,8 @@ open_proj_folder <- \(WD="?",
 
 #' open_wd
 #'
+#' @param subpath subpath to concat to WD path e.g.c("assets","data","teaching-materials"); default=NULL
+#' @param WD working directory; passed to [parse_wd()].
 #' @describeIn open_wd Alias for [open_proj_folder]
 #' @export
 #'

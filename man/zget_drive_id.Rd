@@ -13,7 +13,9 @@ zget_drive_id(
 )
 }
 \arguments{
-\item{drive_path}{passed to \code{\link[=drive_find_path]{drive_find_path()}}; default=NULL}
+\item{drive_path}{passed to \code{\link[=drive_find_path]{drive_find_path()}}}
+
+\item{drive_root}{passed to \code{\link[=drive_find_path]{drive_find_path()}}; default=NULL}
 
 \item{exact_match}{passed to \code{\link[=drive_find_path]{drive_find_path()}}; default=TRUE}
 

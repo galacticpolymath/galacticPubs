@@ -23,7 +23,7 @@ batch_compile <-
            drive_reconnect= FALSE) {
     timer <- FALSE
     #If Suggested tictoc package is available, time how long the rebuild takes
-    if (library("tictoc",logical.return = T)) {
+    if (requireNamespace("tictoc", quietly = TRUE)) {
       tictoc::tic()
       timer <- TRUE
     }
