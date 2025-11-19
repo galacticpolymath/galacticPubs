@@ -4,10 +4,20 @@
 \alias{report_user_stats}
 \title{Report information about GP users}
 \usage{
-report_user_stats(verbosity = 1, view_data = TRUE, dev = FALSE)
+report_user_stats(
+  verbosity = 1,
+  start_date = Sys.Date() - 90,
+  end_date = Sys.Date(),
+  view_data = FALSE,
+  dev = FALSE
+)
 }
 \arguments{
 \item{verbosity}{passed to \code{\link[httr2:req_perform]{httr2::req_perform()}}; default=1}
+
+\item{start_date}{Date; start date for report; default=Sys.Date()-30}
+
+\item{end_date}{Date; end date for report; default=Sys.Date()}
 
 \item{view_data}{logical; do you want to open retrieved user data with \code{\link[=View]{View()}}? Default=TRUE}
 

@@ -1,4 +1,4 @@
-#' lesson_rename
+#' unit_rename
 #'
 #' Scenario where working title changes midway through project development.
 #'  Does several things:
@@ -26,7 +26,7 @@
 #' @export
 #'
 
-lesson_rename <- function(new_ShortTitle,
+unit_rename <- function(new_ShortTitle,
                           new_proj_name,
                           WD="?",
                           curr_ShortTitle,
@@ -60,7 +60,7 @@ lesson_rename <- function(new_ShortTitle,
   #make sure we're not running this from the R project we want to change
   in_volatile_dir<-getwd()==WD
     if(in_volatile_dir){
-    stop("You seem to be in the project you want to modify. You need to run lesson_rename() from a different RStudio project.")
+    stop("You seem to be in the project you want to modify. You need to run unit_rename() from a different RStudio project.")
   }
 
   curr_proj_name <- basename(WD)
@@ -391,3 +391,12 @@ summ <- dplyr::tibble(result=convert_T_to_check(tests),test=c("Checked Working D
 return(list(change_log = change_log, summary = summ))
 
 }
+
+#Add alias rename_unit
+
+#' rename_unit
+#'
+#' @describeIn unit_rename alias
+#' @export
+
+rename_unit <- unit_rename

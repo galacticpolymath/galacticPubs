@@ -14,7 +14,7 @@ gh_rename_repo(WD, gh_proj_name, prompt_user = TRUE)
 \item{prompt_user}{do you want to ask user if they def want to rename this before doing so? default=TRUE}
 }
 \description{
-Helper function for \code{\link[=lesson_rename]{lesson_rename()}}. This function is to catch GitHub up to speed with a locally renamed project. Uses the gh command line interface (which needs to be set up) and \code{\link[gh:gh]{gh::gh()}} to check existence of the repo and change it online.
+Helper function for \code{\link[=unit_rename]{unit_rename()}}. This function is to catch GitHub up to speed with a locally renamed project. Uses the gh command line interface (which needs to be set up) and \code{\link[gh:gh]{gh::gh()}} to check existence of the repo and change it online.
 }
 \details{
 This function doesn't give you a free parameter for the new name. It will use the WD folder name to make sure the remote GitHub repo has the same name. Think of this as syncing local and GitHub remote names of the project.

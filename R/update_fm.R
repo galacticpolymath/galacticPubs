@@ -250,12 +250,12 @@ update_fm <-
         new_yaml$ShortURL <- test_assign$result$link[1]
       } else{
         warning_msg <- paste0("Bit.ly creation failed for ",
-                new_yaml$MediumTitle,
-                ":\n @",
-                new_yaml$URL)
+                              new_yaml$MediumTitle,
+                              ":\n @",
+                              new_yaml$URL)
         message(test_assign$result)
         warning(warning_msg)
-        warning("Maybe you already have a bitlink for URL? ",new_yaml$URL)
+        warning("Maybe you already have a bitlink for URL? ", new_yaml$URL)
       }
 
     }
@@ -511,13 +511,14 @@ update_fm <-
 
       #If teaching-materials/ found in the working directory (on GP-Studio or GP-LIVE), set the path
       if (tm_local_is_dir) {
+        #define short cloud path; tm_local is local path to virtualized folder
         tm_drivepath <- fs::path(
-          new_yaml$GdriveHome,
-          "Edu",
-          "Lessons",
-          new_yaml$GdriveDirName,
-          "teaching-materials"
-        )
+            "GP-Studio",
+            "Edu",
+            "Lessons",
+            new_yaml$GdriveDirName,
+            "teaching-materials"
+          )
         tm_is_public <- FALSE #not on GalacticPolymath drive
       } else{
         #Otherwise, try to find on GalacticPolymath/ drive with MediumTitle
@@ -563,8 +564,9 @@ update_fm <-
               fm_key = "GdrivePublicID"
             )
         }
+        checkmate::assert_character(pubID, min.chars = 6)
 
-        #If Teaching-material local found, get the drive ID for it
+        #If dev Teaching-material local found, get the drive ID for it
         if (tm_dev_local_is_dir) {
           tm_dev_ID <-
             zget_drive_id(
@@ -575,40 +577,42 @@ update_fm <-
         } else{
           tm_dev_ID <- NA
         }
-
-        checkmate::assert_character(pubID, min.chars = 6)
-        checkmate::assert_character(new_yaml$GdriveTeachMatPath, any.missing = FALSE)
         checkmate::assert_character(tm_dev_ID, all.missing = TRUE)
-
-
-        new_yaml$GdriveTeachMatPath <- tm_drivepath
         new_yaml$GdriveTeachMatDevPath <- tm_drivepath_dev
-        # new_yaml$GdrivePublicID <- tmID
         new_yaml$GdrivePublicID <- pubID
         new_yaml$GdriveTeachMatDevID <- tm_dev_ID
+      }
+      #Always should have valid path to teaching materials folder
+      checkmate::assert_character(new_yaml$GdriveTeachMatPath, any.missing = FALSE)
+      new_yaml$GdriveTeachMatPath <- tm_drivepath
 
-        tm_res <-
-          dplyr::tibble(
-            success = convert_T_to_check(sapply(
-              c(tm_drivepath, tm_drivepath_dev, pubID, tm_dev_ID),
-              \(x) ! is_empty(x)
-            )),
-            item = c(
-              "GdriveTeachMatPath",
-              "GdriveTeachMatDevPath",
-              "GdrivePublicID",
-              "GdriveTeachMatDevID"
-            ),
-            ID = c(tm_drivepath, tm_drivepath_dev, pubID, tm_dev_ID)
-          )
 
-        if (output_gdrive_summ) {
-          gdrive_summ <- gdrive_summ %>% dplyr::add_row(tm_res)
-        } else{
-          gdrive_summ <- tm_res
-          output_gdrive_summ <- TRUE
-        }
+      tm_res <-
+        dplyr::tibble(
+          success = convert_T_to_check(sapply(
+            c(new_yaml$GdriveTeachMatPath,
+                 new_yaml$GdriveTeachMatDevPath,
+                 new_yaml$GdrivePublicID,
+                 new_yaml$GdriveTeachMatDevID),
+            \(x) ! is_empty(x)
+          )),
+          item = c(
+            "GdriveTeachMatPath",
+            "GdriveTeachMatDevPath",
+            "GdrivePublicID",
+            "GdriveTeachMatDevID"
+          ),
+          ID = c(new_yaml$GdriveTeachMatPath,
+                 new_yaml$GdriveTeachMatDevPath,
+                 new_yaml$GdrivePublicID,
+                 new_yaml$GdriveTeachMatDevID)
+        )
 
+      if (output_gdrive_summ) {
+        gdrive_summ <- gdrive_summ %>% dplyr::add_row(tm_res)
+      } else{
+        gdrive_summ <- tm_res
+        output_gdrive_summ <- TRUE
       }
     }
 

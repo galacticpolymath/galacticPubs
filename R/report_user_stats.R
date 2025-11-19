@@ -3,6 +3,8 @@
 #' Provide basic information about users
 #'
 #' @param verbosity passed to [httr2::req_perform()]; default=1
+#' @param start_date Date; start date for report; default=Sys.Date()-30
+#' @param end_date Date; end date for report; default=Sys.Date()
 #' @param view_data logical; do you want to open retrieved user data with [View()]? Default=TRUE
 #' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
 #' @returns Summary tibble
@@ -10,7 +12,9 @@
 #'
 
 report_user_stats <- function(verbosity = 1,
-                              view_data = TRUE,
+                              start_date=Sys.Date()-90,
+                              end_date=Sys.Date(),
+                              view_data = FALSE,
                               dev=FALSE) {
   # Get the user data
   users <- gp_api_query_users(verbosity = verbosity, dev=dev)
@@ -84,9 +88,9 @@ report_user_stats <- function(verbosity = 1,
     inactive_users = num_inactive_users
 
   )
-browser()
+
   users2 <- users %>%
-    dplyr::mutate(createdAt_date = as.Date(.data$createdAt, format = "%d-%b-%Y")) %>%
+    dplyr::mutate(createdAt_date = as.Date(.data$createdAt, format = "%d-%b")) %>%
     dplyr::mutate(Year = lubridate::year(.data$createdAt_date)) %>%
     dplyr::mutate(Month = sprintf("%02d", lubridate::month(.data$createdAt_date))) %>%
     dplyr::mutate(Created = paste0(sprintf(.data$Month, fmt = ), "-", .data$Year))
@@ -107,6 +111,8 @@ browser()
   #ggplot stuff
   user_growth <- users2 %>%
     dplyr::filter(!is.na(.data$createdAt_date)) %>%
+    dplyr::filter(.data$createdAt_date >= start_date &
+                    .data$createdAt_date <= end_date) %>%
     ggplot2::ggplot(ggplot2::aes(x = .data$Created)) +
     report_theme+
     ggplot2::geom_bar(fill=gpColors("dark lightning purple")) +
@@ -114,7 +120,7 @@ browser()
     ggplot2::geom_text(
       stat = "count",
       y = 0,
-      colour = "white",
+      colour = "gray30",
       size = 5,
       ggplot2::aes(label =
                      ggplot2::after_stat(.data$count)),
@@ -132,6 +138,8 @@ browser()
 
 
   running_tot_students <- users2 %>%
+    dplyr::filter(.data$createdAt_date >= start_date &
+                    .data$createdAt_date <= end_date) %>%
     dplyr::group_by(.data$Created) %>%
     dplyr::summarise(total_class_size = sum(.data$classSize, na.rm = TRUE)) %>%
     dplyr::mutate(running_total = cumsum(.data$total_class_size))%>%

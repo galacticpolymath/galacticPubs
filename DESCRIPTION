@@ -72,7 +72,7 @@ Suggests:
     waldo (>= 0.6.2),
     zipcodeR (>= 0.3.5)
 Authors@R: person("Wilkins","Matthew R",email="matt@galacticpolymath.com",role=c("aut","cre"))   
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Depends: 
     R (>= 3.5.0)
 Config/testthat/edition: 3

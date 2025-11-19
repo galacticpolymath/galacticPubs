@@ -257,7 +257,7 @@ lesson_new_locale <-
                   perl = TRUE
                 ) %>% catch_err()
               # test_renaming <-
-              #   lesson_rename(
+              #   unit_rename(
               #     new_proj_name = new_proj_name,
               #     WD = new_proj_path,
               #     new_ShortTitle = new_proj_base,

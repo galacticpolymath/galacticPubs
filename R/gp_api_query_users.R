@@ -133,7 +133,8 @@ gp_api_query_users <- \(
     "gtorionnotion@gmail.com",
     "mrwilkins06@gmail.com",
     "ellahoulihan9@gmail.com",
-    "matthew.greig.cowan@gmail.com"
+    "matthew.greig.cowan@gmail.com",
+    "andrew@bsfcolorado.org"
   )
   excluded_emails <-  lapply(out0$email, \(email_i) {
     is_excluded_i <- sum(stringr::str_detect(email_i, exclude_patt), na.rm =
