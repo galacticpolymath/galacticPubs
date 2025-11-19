@@ -41,7 +41,7 @@ compile_unit <-
       recompile = FALSE,
       drive_reconnect = drive_reconnect
     )
-    #run compile_fm & upload_assets to make sure there's nothing new
+    #run compile_fm
     compile_fm(WD = WD)
 
     if (missing(current_data)) {

@@ -8,6 +8,7 @@ update_fm(
   WD = "?",
   WD_git = NULL,
   change_this = NULL,
+  upload = TRUE,
   save_output = TRUE,
   return_fm = FALSE,
   reorder = TRUE,
@@ -24,6 +25,8 @@ update_fm(
 \item{WD_git}{default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.}
 
 \item{change_this}{A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when \code{\link[=compile_unit]{compile_unit()}} is run and change the Language and locale.}
+
+\item{upload}{default=TRUE. Do you want to run \code{\link[=upload_assets]{upload_assets()}} to make sure logos, banners, etc. are in the cloud and links added to front matter?}
 
 \item{save_output}{do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE}
 

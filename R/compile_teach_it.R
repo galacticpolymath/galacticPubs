@@ -318,6 +318,7 @@ compile_teach_it <- function(WD = "?",
       test_zget_proc <- list(success = NA, result = NULL)
       proc_data <- list()
       proc_data$lessonDur <- NULL
+      nlessons <- max(tlinks$`_lsn`,uinfo$lsn,na.rm=TRUE) %>% as.numeric()
       proc_data$lessons <- purrr::map(1:nlessons, \(i) {
         list(
           lsnNum = i,

@@ -5,14 +5,12 @@
 \alias{fm_compile}
 \title{compile_fm}
 \usage{
-compile_fm(WD = "?", upload = FALSE)
+compile_fm(WD = "?", upload = TRUE)
 
-fm_compile(WD = "?", upload = FALSE)
+fm_compile(WD = "?", upload = TRUE)
 }
 \arguments{
 \item{WD}{working directory, passed to \code{\link[=parse_wd]{parse_wd()}}}
-
-\item{upload}{if TRUE (default), will upload any local assets to the cloud with \code{\link[=upload_assets]{upload_assets()}}}
 }
 \value{
 logical of success

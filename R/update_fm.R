@@ -7,6 +7,7 @@
 #' @param WD working directory; default=getwd(); if "?" supplied, will invoke [pick_lesson()]. The basename of this working directory will then be used to find a match in the gp-lessons git project folder by calling [get_wd_git()]. It's a little roundabout, but is consistent with lookups centering on the Google Drive project working directory.
 #' @param change_this A list of values to change in the front matter. Default=NULL. Example: list(RebuildAllMaterials=TRUE,Language="Italian) will trigger a full lesson rebuild when [compile_unit()] is run and change the Language and locale.
 #' @param WD_git default=NULL. If you already know the path to the gp-lessons folder, this is more efficient.
+#' @param upload default=TRUE. Do you want to run [upload_assets()] to make sure logos, banners, etc. are in the cloud and links added to front matter?
 #' @param save_output do you want to save the updated front-matter to WD/meta/front-matter.yml? Default=TRUE
 #' @param return_fm logical; if TRUE, returns the the updated front-matter; if FALSE (default), returns TRUE/FALSE of success
 #' @param reorder do you want to reorder the resulting list, based on template order? default=TRUE
@@ -23,6 +24,7 @@ update_fm <-
   function(WD = "?",
            WD_git = NULL,
            change_this = NULL,
+           upload = TRUE,
            save_output = TRUE,
            return_fm = FALSE,
            reorder = TRUE,
@@ -45,6 +47,11 @@ update_fm <-
       WD <- parse_wd(WD)
     }
     . = NULL
+
+    #just make sure everything's updated in the cloud
+    if (upload) {
+      upload_assets(WD = WD)
+    }
 
     checkmate::assert_logical(drive_reconnect, all.missing = FALSE)
     proj <- basename(WD)
@@ -512,13 +519,11 @@ update_fm <-
       #If teaching-materials/ found in the working directory (on GP-Studio or GP-LIVE), set the path
       if (tm_local_is_dir) {
         #define short cloud path; tm_local is local path to virtualized folder
-        tm_drivepath <- fs::path(
-            "GP-Studio",
-            "Edu",
-            "Lessons",
-            new_yaml$GdriveDirName,
-            "teaching-materials"
-          )
+        tm_drivepath <- fs::path("GP-Studio",
+                                 "Edu",
+                                 "Lessons",
+                                 new_yaml$GdriveDirName,
+                                 "teaching-materials")
         tm_is_public <- FALSE #not on GalacticPolymath drive
       } else{
         #Otherwise, try to find on GalacticPolymath/ drive with MediumTitle
@@ -590,10 +595,12 @@ update_fm <-
       tm_res <-
         dplyr::tibble(
           success = convert_T_to_check(sapply(
-            c(new_yaml$GdriveTeachMatPath,
-                 new_yaml$GdriveTeachMatDevPath,
-                 new_yaml$GdrivePublicID,
-                 new_yaml$GdriveTeachMatDevID),
+            c(
+              new_yaml$GdriveTeachMatPath,
+              new_yaml$GdriveTeachMatDevPath,
+              new_yaml$GdrivePublicID,
+              new_yaml$GdriveTeachMatDevID
+            ),
             \(x) ! is_empty(x)
           )),
           item = c(
@@ -602,10 +609,12 @@ update_fm <-
             "GdrivePublicID",
             "GdriveTeachMatDevID"
           ),
-          ID = c(new_yaml$GdriveTeachMatPath,
-                 new_yaml$GdriveTeachMatDevPath,
-                 new_yaml$GdrivePublicID,
-                 new_yaml$GdriveTeachMatDevID)
+          ID = c(
+            new_yaml$GdriveTeachMatPath,
+            new_yaml$GdriveTeachMatDevPath,
+            new_yaml$GdrivePublicID,
+            new_yaml$GdriveTeachMatDevID
+          )
         )
 
       if (output_gdrive_summ) {
@@ -735,7 +744,7 @@ update_fm <-
 
     if (identical(TRUE, success & recompile)) {
       message("Recompiling front-matter to JSON")
-      test_recompile <- compile_fm(WD = WD, upload = FALSE)#already uploaded
+      test_recompile <- compile_fm(WD = WD)
 
     } else{
       test_recompile <- NA
