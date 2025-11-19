@@ -270,8 +270,8 @@ upload_assets <- \(WD = "?",
 
     if (test_uploaded) {
       message("All assets in the cloud")
-    }
-
+      out <- NULL
+    }else{
 
     # Create download links ---------------------------------
     url_prefix <- paste0("https://storage.googleapis.com/",
@@ -294,7 +294,7 @@ upload_assets <- \(WD = "?",
       })
 
     test_fm_update <-
-      update_fm(WD = WD, change_this = fm_update_list,recompile = FALSE,backup=FALSE)
+      update_fm(WD = WD, change_this = fm_update_list,recompile = FALSE,backup=FALSE,upload=FALSE)
 
     summ <-
       dplyr::tibble(
@@ -305,6 +305,8 @@ upload_assets <- \(WD = "?",
         )
       )
     print(summ)
+    }#end upload summary
+
   }#End big else
 
   invisible(out)
