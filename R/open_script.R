@@ -11,12 +11,13 @@ open_script <- \(WD="?",WD_git=NULL){
   }
 
     scripts <- fs::dir_ls(fs::path(WD_git,"code"),regexp = "\\.R$", all = TRUE)
+
     if(length(scripts) == 0){
       message("No scripts found in ", WD_git)
       return()
     }
     #ask user to pick
-    script_picked <- utils::menu(scripts, graphics = TRUE, title = "Select a script to open")
+    script_picked <- utils::menu(choices=basename(scripts), graphics = FALSE, title = "Select a script to open")
     if(script_picked == 0){
       message("No script selected.")
       return()

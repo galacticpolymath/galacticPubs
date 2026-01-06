@@ -144,7 +144,7 @@ report_user_stats <- function(verbosity = 1,
                      ggplot2::after_stat(.data$count)),
       vjust = 1.5
     ) +
-    ggplot2::scale_y_continuous(expand=ggplot2::expansion(c(0.1,0.1)))+
+    ggplot2::scale_y_continuous(n.breaks = 3,expand=ggplot2::expansion(c(0.1,0.1)))+
 
     ggplot2::labs(
       subtitle = paste0("GP User accounts created per month (Tot=", nrow(users2), ")"),
