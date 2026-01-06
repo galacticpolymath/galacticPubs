@@ -228,11 +228,11 @@ learningChart = function(WD = "?",
             # not sure why this correction is necessary, but without it, the plot is not centered
             #axis.line.y=element_line(colour="grey"),
             axis.ticks.y = ggplot2::element_blank(),
-            panel.grid.major.y = ggplot2::element_line(size = .2, colour =
+            panel.grid.major.y = ggplot2::element_line(linewidth =  .2, colour =
                                                          "grey"),
-            panel.grid.minor.y = ggplot2::element_line(size = 1.5, colour =
+            panel.grid.minor.y = ggplot2::element_line(linewidth = 1.5, colour =
                                                          "grey"),
-            panel.grid.major.x = ggplot2::element_line(size = .2, colour =
+            panel.grid.major.x = ggplot2::element_line(linewidth = .2, colour =
                                                          "grey"),
             axis.text.y = ggplot2::element_blank(),
             axis.text.x = ggplot2::element_blank(),

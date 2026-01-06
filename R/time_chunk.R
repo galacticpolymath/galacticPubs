@@ -101,9 +101,9 @@ time_chunk <- function(WD=getwd()){
           hjust = 0,
           colour=gpColors("galactic black")
         ),
-        axis.line.x = ggplot2::element_line(colour = "#090816", size = 1),
+        axis.line.x = ggplot2::element_line(colour = "#090816", linewidth = 1),
         axis.ticks.y = ggplot2::element_blank(),
-        axis.ticks.x = ggplot2::element_line(colour = "#090816", size = .5),
+        axis.ticks.x = ggplot2::element_line(colour = "#090816", linewidth = .5),
         axis.ticks.length = ggplot2::unit(6, "pt"),
         panel.grid.major.y = ggplot2::element_blank(),
         panel.grid.minor.y = ggplot2::element_blank(),
@@ -111,7 +111,6 @@ time_chunk <- function(WD=getwd()){
         panel.grid.major.x = ggplot2::element_blank(),
         panel.border = ggplot2::element_blank(),
         panel.background = ggplot2::element_rect(fill = "#f0f4ff"),
-        #panel.grid.major.x=element_line(size=.5,colour="#090816"),
         plot.margin = ggplot2::margin(c(5, 5, bottomMargin, -30), unit = "pt")
 
       )

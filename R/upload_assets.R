@@ -19,10 +19,12 @@
 #' @family google cloud storage
 #' @export
 
-upload_assets <- \(WD = "?",
-                   bucket = "gp-cloud",
-                   clear = FALSE,
-                   backup=FALSE) {
+upload_assets <- \(
+  WD = "?",
+  bucket = "gp-cloud",
+  clear = FALSE,
+  backup = FALSE
+) {
   WD <- parse_wd(WD)
 
   test_init <- init_gcs(bucket = bucket)
@@ -57,19 +59,19 @@ upload_assets <- \(WD = "?",
       "2",
       "UnitBanner",
       "assets/_banners_logos_etc",
-      paste0("(?!old)_?[Bb]anner[^\\.]*",img_patt,collapse="|"),
+      paste0("(?!old)_?[Bb]anner[^\\.]*", img_patt, collapse = "|"),
       "help.txt|_OLD|_old",
 
       "3",
       "LessonTiles",
       "assets/_banners_logos_etc",
-      paste0("_?[Tt]ile[^\\.]*",img_patt,collapse="|"),
+      paste0("_?[Tt]ile[^\\.]*", img_patt, collapse = "|"),
       "help.txt",
 
       "4",
       "UnitCard",
       "assets/_banners_logos_etc",
-      paste0("^(?![Oo]ld_).*[Cc]ard.*",img_patt,collapse="|"),
+      paste0("^(?![Oo]ld_).*[Cc]ard.*", img_patt, collapse = "|"),
       "help.txt",
 
       "5",
@@ -122,7 +124,6 @@ upload_assets <- \(WD = "?",
 
   # Stage assets: aggregate and copy to published/ --------------------------
   assets <- purrr::map(1:nrow(tasks), \(i) {
-
     df_i <- tasks[i, ]
     if (is.na(df_i$exclude)) {
       ex <- NULL
@@ -142,8 +143,8 @@ upload_assets <- \(WD = "?",
         pattern = patt,
         exclude = ex
       )
-    if (!is_empty(res_i$result) & !inherits(res_i$result,"error")) {
-
+    if (!is_empty(res_i$result) &
+        !inherits(res_i$result, "error")) {
       res_i$result %>% dplyr::mutate(key = df_i$key) %>% dplyr::relocate("key")
     }
   })
@@ -155,16 +156,16 @@ upload_assets <- \(WD = "?",
 
 
     #local TZ
-      loc_tz <-  Sys.timezone()
+    loc_tz <-  Sys.timezone()
     #add modified date to assets
     assets$updated <- fs::file_info(assets$path)$modification_time
     #reassign to local timezone (for some weird reason, CST timestamps are in future)
-     assets$updated <-
-        lubridate::force_tz(assets$updated, tz = "UTC")
+    assets$updated <-
+      lubridate::force_tz(assets$updated, tz = "UTC")
 
 
-      assets$updated <-
-        lubridate::with_tz(assets$updated, tz = loc_tz)
+    assets$updated <-
+      lubridate::with_tz(assets$updated, tz = loc_tz)
 
 
     #add expected cloud_path
@@ -190,12 +191,13 @@ upload_assets <- \(WD = "?",
   } else{
     # DELETE STUFF ------------------------------------------------------------
     # See what's already in the cloud
-    upload_try <- gcs_contents(WD = WD, detail = "more") %>% catch_err(keep_results = TRUE)
-    if(upload_try$success){
-      uploaded <- upload_try$result
-    }else{uploaded <- NA}
+    ls_try <- gcs_contents(WD = WD, detail = "more") %>% catch_err(keep_results = TRUE)
+    if (ls_try$success) {
+      uploaded <- ls_try$result
+    } else{
+      uploaded <- NA
+    }
     if (!is_empty(uploaded)) {
-
       if (clear) {
         to_del <- uploaded %>% dplyr::rename(cloud_path = .data$name)
         #figure out what's missing
@@ -209,8 +211,7 @@ upload_assets <- \(WD = "?",
       #if there's anything to delete, delete it
       if (nrow(to_del) > 0) {
         delete_L <-
-          gcs_delete(cloud_path = to_del$cloud_path,
-                     bucket = bucket) %>% catch_err(keep_results = TRUE)
+          gcs_delete(cloud_path = to_del$cloud_path, bucket = bucket) %>% catch_err(keep_results = TRUE)
         message("the following items deleted from the cloud: \n")
         print(delete_L$result)
 
@@ -260,41 +261,54 @@ upload_assets <- \(WD = "?",
                           key = to_upload$key) %>% catch_err(keep_results = TRUE)
       message("the following missing assets uploaded to the cloud: \n")
       print(upload_L$result)
+
+
+
+      # Check that all assets in cloud now --------------------------------------
+      uploaded_now <- gcs_contents(WD = WD,
+                                   detail = "more",
+                                   show_all = FALSE)
+      test_uploaded <-
+        sum(assets$cloud_path %in% uploaded_now$name) == nrow(assets)
+    } else{
+      test_uploaded <- TRUE
     }
 
 
-    # Check that all assets in cloud now --------------------------------------
-    uploaded_now <- gcs_contents(WD = WD, detail = "more",show_all=FALSE)
-    test_uploaded <-
-      sum(assets$cloud_path %in% uploaded_now$name) == nrow(assets)
-
-    if (test_uploaded) {
-      message("All assets in the cloud")
-      out <- NULL
-    }else{
-
     # Create download links ---------------------------------
-    url_prefix <- paste0("https://storage.googleapis.com/",
-                         bucket,
-                         "/")
+    url_prefix <- paste0("https://storage.googleapis.com/", bucket, "/")
     out <-
       assets %>% dplyr::select("key", "name", "log", "cloud_path") %>%
       dplyr::mutate(download_url =
                       paste0(url_prefix, .data$cloud_path))
 
+    # Test if front matter keys don't match the cloud paths -------------------
+    fm_stored <- get_fm(assets$key, WD = WD)
+    test_all_assets_stored <- all(out$download_url %in% fm_stored)
 
-    #  assign keys with update_fm -----------------------------------------
-    #Always go ahead and re-assign. It's instantaneous anyway
-    keys <- unique_sans_na(out$key)
+    if (test_uploaded & test_all_assets_stored) {
+      message("All assets in the cloud")
+      out <- NULL
+      test_fm_update <- NA
+    } else{
+      #  assign keys with update_fm -----------------------------------------
 
-    fm_update_list <- purrr::set_names(keys) %>%
-      purrr::map(., \(x) {
-        df_x <- out %>% dplyr::filter(.data$key == x)
-        df_x$download_url
-      })
+      keys <- unique_sans_na(out$key)
+      fm_update_list <- purrr::set_names(keys) %>%
+        purrr::map(., \(x) {
+          df_x <- out %>% dplyr::filter(.data$key == x)
+          df_x$download_url
+        })
 
-    test_fm_update <-
-      update_fm(WD = WD, change_this = fm_update_list,recompile = FALSE,backup=FALSE,upload=FALSE)
+      test_fm_update <-
+        update_fm(
+          WD = WD,
+          change_this = fm_update_list,
+          recompile = FALSE,
+          backup = FALSE,
+          upload = FALSE
+        )
+    }
 
     summ <-
       dplyr::tibble(
@@ -305,11 +319,11 @@ upload_assets <- \(WD = "?",
         )
       )
     print(summ)
-    }#end upload summary
 
-  }#End big else
 
-  invisible(out)
+}#End big else
+
+invisible(out)
 
 }
 

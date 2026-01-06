@@ -309,11 +309,13 @@ compile_unit <-
       #after run, reset rebuild-all trigger
       message("* Running update_fm()")
       test_update <- update_fm(WD_git = WD_git,
-                               change_this = list(RebuildAllMaterials = FALSE)) %>% catch_err()
+                               change_this = list(RebuildAllMaterials = FALSE),
+                               upload=FALSE) %>% catch_err()
 
       SUCCESS <- success&test_update
     }else{
-      test_update <- update_fm(WD_git = WD_git)
+      test_update <- update_fm(WD_git = WD_git,
+                               upload=FALSE)
       SUCCESS <- success&test_update
     }
 
