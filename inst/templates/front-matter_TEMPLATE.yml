@@ -3,7 +3,7 @@ _id: ''
 numID: ''
 ShortTitle: 'NameMe'
 PublicationStatus: 'Proto'
-TemplateVer: 0.9.6
+TemplateVer: 0.9.8
 galacticPubsVer: ''
 Language: 'English'
 Country: 'United States'
@@ -119,6 +119,17 @@ Feedback: |
   - [For teachers]()
   - To share student learning and feedback, please use the digital assessment (Google Form) in the Assessments section. Then share the link to results with feedback@galacticpolymath.com.
 Credits: ''
+Authors:
+  First: .na
+  Middle: .na
+  Last: .na
+  Contribution: .na
+  Title: .na
+  Affiliation: .na
+  Location: .na
+  Link: .na
+  Email: .na
+  GPID: .na
 Acknowledgments:
   Role:
   - .na

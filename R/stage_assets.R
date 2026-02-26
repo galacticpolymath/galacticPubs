@@ -101,7 +101,7 @@ stage_assets <-
 
         }) %>% dplyr::bind_rows()
 
-        if (sum(test_rename$renamed) == nrow(rename_results)) {
+        if (sum(rename_results$renamed) == nrow(rename_results)) {
           message("Successfully renamed the following files to change spaces into '-':")
           for_output <-
             rename_results %>% dplyr::mutate(renamed = convert_T_to_check(.data$renamed))

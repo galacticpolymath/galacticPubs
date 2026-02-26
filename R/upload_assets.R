@@ -152,13 +152,13 @@ upload_assets <- \(
   if (!is_empty(assets)) {
     assets <- assets  %>%
       dplyr::bind_rows() %>%
-      dplyr::rename(path = .data$path1)
+      dplyr::rename(local_path = .data$path1)
 
 
     #local TZ
     loc_tz <-  Sys.timezone()
     #add modified date to assets
-    assets$updated <- fs::file_info(assets$path)$modification_time
+    assets$updated <- fs::file_info(assets$local_path)$modification_time
     #reassign to local timezone (for some weird reason, CST timestamps are in future)
     assets$updated <-
       lubridate::force_tz(assets$updated, tz = "UTC")
@@ -191,7 +191,7 @@ upload_assets <- \(
   } else{
     # DELETE STUFF ------------------------------------------------------------
     # See what's already in the cloud
-    ls_try <- gcs_contents(WD = WD, detail = "more") %>% catch_err(keep_results = TRUE)
+    ls_try <- gcs_contents(WD = WD, detail = "more",silent=TRUE) %>% catch_err(keep_results = TRUE)
     if (ls_try$success) {
       uploaded <- ls_try$result
     } else{
@@ -199,13 +199,13 @@ upload_assets <- \(
     }
     if (!is_empty(uploaded)) {
       if (clear) {
-        to_del <- uploaded %>% dplyr::rename(cloud_path = .data$name)
+        to_del <- uploaded %>% dplyr::rename(cloud_path = .data$path)
         #figure out what's missing
       } else{
         to_del <-
-          dplyr::anti_join(uploaded[, "name"], assets[, "cloud_path"], by = c("name" =
+          dplyr::anti_join(uploaded[, "path"], assets[, "cloud_path"], by = c("path" =
                                                                                 "cloud_path")) %>%
-          dplyr::rename(cloud_path = .data$name)
+          dplyr::rename(cloud_path = .data$path)
 
       }
       #if there's anything to delete, delete it
@@ -239,9 +239,9 @@ upload_assets <- \(
 
       merged_mod_times <-
         dplyr::left_join(
-          assets[, c("cloud_path", "updated", "path", "key")],
-          uploaded[, c("name", "updated")],
-          by = c("cloud_path" = "name"),
+          assets[, c("cloud_path", "updated", "local_path", "key")],
+          uploaded[, c("path", "updated")],
+          by = c("cloud_path" = "path"),
           suffix = c(".local", ".cloud")
         )
 
@@ -267,6 +267,7 @@ upload_assets <- \(
       # Check that all assets in cloud now --------------------------------------
       uploaded_now <- gcs_contents(WD = WD,
                                    detail = "more",
+                                   silent=TRUE,
                                    show_all = FALSE)
       test_uploaded <-
         sum(assets$cloud_path %in% uploaded_now$name) == nrow(assets)
@@ -283,8 +284,12 @@ upload_assets <- \(
                       paste0(url_prefix, .data$cloud_path))
 
     # Test if front matter keys don't match the cloud paths -------------------
-    fm_stored <- get_fm(assets$key, WD = WD)
-    test_all_assets_stored <- all(out$download_url %in% fm_stored)
+    keys_sans_na <- assets$key %>% unique_sans_na()
+    fm_stored <- get_fm(keys_sans_na, WD = WD) %>% unlist() %>% unname()
+    # URLs expected to be stored (sometimes, we don't have keys in the fm
+    # and we just want shit in the cloud for convenience)
+    cloud_stored <- out %>% dplyr::filter(!is.na(.data$key)) %>% dplyr::pull("download_url")
+    test_all_assets_stored <- all(cloud_stored %in% fm_stored)
 
     if (test_uploaded & test_all_assets_stored) {
       message("All assets in the cloud")
@@ -318,6 +323,7 @@ upload_assets <- \(
           "updated all URLs in front-matter"
         )
       )
+    message("upload_assets():")
     print(summ)
 
 

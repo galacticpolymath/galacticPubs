@@ -327,11 +327,16 @@ ui <- navbarPage(
       width = "100%"
     ),
     hr(class = "blhr"),
+    #Authors
+    h3("Authors"),
+    ediTable(id = "Authors"),
+    hr(class = "blhr"),
+
     #Acknowledgments
     h3("Acknowledgments"),
     ediTable(id = "Acknowledgments"),
     hr(class = "blhr"),
-    #Acknowledgments
+    #Version Info
     h3("Version Info"),
     ediTable(id = "Versions"),
     hr(class = "blhr"),
@@ -583,6 +588,7 @@ server <- function(input, output, session) {
   #define initial reactive values for ediTable
   accessibility_data <- reactiveVal(y$Accessibility)
   jobviz_data <- reactiveVal(y$JobVizConnections)
+  author_data <- reactiveVal(y$Authors)
   ack_data <- reactiveVal(y$Acknowledgments)
   versions_data <- reactiveVal(y$Versions)
 
@@ -594,6 +600,7 @@ server <- function(input, output, session) {
 
   jobPicker_server("jp", jobs$data)
   ediTable_server(id = "JobVizConnections", rd = jobviz_data)
+  ediTable_server(id = "Authors", rd = author_data)
   ediTable_server(id = "Acknowledgments", rd = ack_data)
   ediTable_server(id = "Versions",
                   rd = versions_data,

@@ -4,7 +4,6 @@
 #'
 #' @param prompt_user logical; ask user before deleting and replacing the unit? default=TRUE
 #' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
-#' @param unit_id character; if supplied, queries users for this specific unit id. Default=NULL
 #' @param WD character; working directory string passed to [parse_wd()]; default="?"
 #' @param verbosity passed to [httr2::req_perform()]; default=1
 #' @family GP API
@@ -14,7 +13,6 @@
 
 gp_api_query_users <- \(
   WD = "?",
-  unit_id = NULL,
   prompt_user = TRUE,
   dev = FALSE,
   verbosity = 1
@@ -121,7 +119,7 @@ gp_api_query_users <- \(
     #format date so important info doesn't get truncated when printed
     dplyr::mutate(account_age = today - as.Date(.data$createdAt)) %>%
     dplyr::mutate(createdAt = format(as.Date(.data$createdAt), "%d-%b-%Y")) %>%
-    dplyr::as_tibble() %>% dplyr::select(-c(.data$`_id`, .data$document.id)) %>% dplyr::relocate(cols_of_interest)
+    dplyr::as_tibble() %>% dplyr::select(-c( .data$document.id)) %>% dplyr::relocate(cols_of_interest)
 
   out0
 

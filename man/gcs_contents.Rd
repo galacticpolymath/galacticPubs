@@ -10,7 +10,8 @@ gcs_contents(
   bucket = "gp-cloud",
   detail = "summary",
   pattern = NULL,
-  show_all = FALSE,
+  show_all = TRUE,
+  silent = FALSE,
   ...
 )
 }
@@ -25,7 +26,9 @@ gcs_contents(
 
 \item{pattern}{default=NULL; pattern for filtering rows}
 
-\item{show_all}{default=FALSE; if TRUE, will show all rows (may take a while)}
+\item{show_all}{default=TRUE; if FALSE, will show all rows (may take a while)}
+
+\item{silent}{default=FALSE; if TRUE, doesn't print the resulting tibble to the console}
 
 \item{...}{other parameters passed to \code{\link[googleCloudStorageR:gcs_list_objects]{googleCloudStorageR::gcs_list_objects()}}}
 }

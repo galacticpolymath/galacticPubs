@@ -103,13 +103,13 @@ gp_footer <- function(obj,
       label = caption,
       x = x, y = 0.5,
       just = c("left", "center"),
-      gp = grid::gpar(col = text_col, fontsize = text_size, fontface = "bold")
+      gp = grid::gpar(col = text_color, fontsize = text_size, fontface = "bold")
     ),
     if (!is.null(data_attrib)) grid::textGrob(
       label = paste_valid(data_attrib_prefix, data_attrib,collapse = ""),
       x = data_attrib_x, y = 0.5,
       just = c("right", "center"),
-      gp = grid::gpar(col = text_col, fontsize = text_size * data_attrib_scale)
+      gp = grid::gpar(col = text_color, fontsize = text_size * data_attrib_scale)
     ),
     logo_grob
   )

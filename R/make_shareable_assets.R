@@ -39,7 +39,7 @@ make_shareable_assets <- \(WD = "?", open_file = TRUE) {
   links <- paste0("https://storage.googleapis.com/",
                   "gp-cloud",
                   "/",
-                  cloud_assets$name)
+                  cloud_assets$path)
 
   # Make divs for each GP-Cloud image ---------------------------------------
   thumbs <- lapply(1:length(links), \(i) {

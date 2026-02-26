@@ -7,7 +7,8 @@
 #' @param bucket default="GP-Studio"; which bucket do you want to pick?
 #' @param detail the detail parameter for [googleCloudStorageR::gcs_list_objects()]; options= c("summary", "more", "full"); default="more"
 #' @param pattern default=NULL; pattern for filtering rows
-#' @param show_all default=FALSE; if TRUE, will show all rows (may take a while)
+#' @param show_all default=TRUE; if FALSE, will show all rows (may take a while)
+#' @param silent default=FALSE; if TRUE, doesn't print the resulting tibble to the console
 #' @param ... other parameters passed to [googleCloudStorageR::gcs_list_objects()]
 #' @returns a Tibble with success, filenames and download links
 #' @family google cloud storage
@@ -19,7 +20,8 @@ gcs_contents <- \(
   bucket = "gp-cloud",
   detail = "summary",
   pattern = NULL,
-  show_all = FALSE,
+  show_all = TRUE,
+  silent = FALSE,
   ...
 ) {
   if (!is.null(WD) & is.null(cloud_dir)) {
@@ -41,7 +43,9 @@ gcs_contents <- \(
   url_prefix <- paste0("https://storage.googleapis.com/", bucket, "/")
 
   out0 <- res$result %>%
-    dplyr::mutate(link = paste0(url_prefix, .data$name)) %>%
+    dplyr::mutate(path=.data$name,name=basename(.data$name),
+                  link = paste0(url_prefix, .data$name)) %>%
+    dplyr::relocate(.data$name) %>%
     dplyr::relocate(.data$link, .after = 2)
 
   if (!is.null(pattern)) {
@@ -55,6 +59,8 @@ gcs_contents <- \(
   } else{
     nr <- 5
   }
+  if(!silent){
   print(out, n = nr)
+  }
   invisible(out)
 }

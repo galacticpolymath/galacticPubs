@@ -4,18 +4,10 @@
 \alias{gp_api_query_users}
 \title{Get GP user profile info}
 \usage{
-gp_api_query_users(
-  WD = "?",
-  unit_id = NULL,
-  prompt_user = TRUE,
-  dev = FALSE,
-  verbosity = 1
-)
+gp_api_query_users(WD = "?", prompt_user = TRUE, dev = FALSE, verbosity = 1)
 }
 \arguments{
 \item{WD}{character; working directory string passed to \code{\link[=parse_wd]{parse_wd()}}; default="?"}
-
-\item{unit_id}{character; if supplied, queries users for this specific unit id. Default=NULL}
 
 \item{prompt_user}{logical; ask user before deleting and replacing the unit? default=TRUE}
 

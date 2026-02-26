@@ -58,8 +58,8 @@ editor <- function(WD = "?",
 
         shiny::runApp(
           appDir = app_dir,
-          host = "127.0.0.1",
-          port = 8080,
+          # host = "127.0.0.1",
+          # port = 8080,
           launch.browser = FALSE
         )
       },
@@ -101,8 +101,8 @@ editor <- function(WD = "?",
      Sys.setenv(editor_path = WD)
     shiny::runApp(
       appDir = system.file("shiny", "gp_editor", package = "galacticPubs"),
-      host = "127.0.0.1",
-      port = 8080,
+      # host = "127.0.0.1",
+      # port = 8080,
       launch.browser = system_browser
     )
     invisible(NULL)
