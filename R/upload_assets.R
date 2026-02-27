@@ -270,9 +270,10 @@ upload_assets <- \(
                                    silent=TRUE,
                                    show_all = FALSE)
       test_uploaded <-
-        sum(assets$cloud_path %in% uploaded_now$name) == nrow(assets)
+        sum(assets$cloud_path %in% uploaded_now$path) == nrow(assets)
     } else{
       test_uploaded <- TRUE
+      uploaded_now <- uploaded
     }
 
 
@@ -285,13 +286,22 @@ upload_assets <- \(
 
     # Test if front matter keys don't match the cloud paths -------------------
     keys_sans_na <- assets$key %>% unique_sans_na()
-    fm_stored <- get_fm(keys_sans_na, WD = WD) %>% unlist() %>% unname()
+    fm_stored <- get_fm(keys_sans_na, WD = WD) %>% unlist()
     # URLs expected to be stored (sometimes, we don't have keys in the fm
     # and we just want shit in the cloud for convenience)
     cloud_stored <- out %>% dplyr::filter(!is.na(.data$key)) %>% dplyr::pull("download_url")
+    #Test if all URLs in cloud are found in front matter
     test_all_assets_stored <- all(cloud_stored %in% fm_stored)
 
-    if (test_uploaded & test_all_assets_stored) {
+
+
+# Test reverse, if fm contains outdated urls not in cloud--------------------
+orphan_URLs <- fm_stored[which(!fm_stored %in% uploaded_now$link)]
+fm_outdated <-!is_empty(orphan_URLs)
+
+
+
+    if (test_uploaded & test_all_assets_stored & !fm_outdated) {
       message("All assets in the cloud")
       out <- NULL
       test_fm_update <- NA
@@ -304,6 +314,7 @@ upload_assets <- \(
           df_x <- out %>% dplyr::filter(.data$key == x)
           df_x$download_url
         })
+
 
       test_fm_update <-
         update_fm(

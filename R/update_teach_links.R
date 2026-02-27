@@ -540,11 +540,6 @@ update_teach_links <- function(WD = "?",
             if (test_valid_inferred_info) {
               paste_valid(d_i$`_SvT`,
                           d_i$`_itemType`,
-                          ifelse(
-                            is_empty(d_i$`_lsn`),
-                            "",
-                            paste0("(Lesson ", d_i$`_lsn`, ")")
-                          ),
                           collapse = " ") %>%
                 stringr::str_to_title()
             } else{

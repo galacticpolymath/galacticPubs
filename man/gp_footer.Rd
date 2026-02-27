@@ -10,6 +10,7 @@ gp_footer(
   x = 0.015,
   y = 0.05,
   text_size = 9,
+  add_border = TRUE,
   border_col_graph = "#363636",
   border_col_foot = "#363636",
   border_width_graph = 1,
@@ -36,6 +37,8 @@ gp_footer(
 \item{y}{y height of box as a fraction; default=0.08;}
 
 \item{text_size}{text size; default=9;}
+
+\item{add_border}{logical; add border around main plot? default=TRUE}
 
 \item{border_col_graph}{color of border around main plot. default="#363636"; put "transparent" to remove border}
 

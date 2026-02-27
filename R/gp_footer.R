@@ -14,6 +14,7 @@
 #' @param data_attrib_x where do you want to place the right edge of the data attribution text (0 to 1); default= 0.75
 #' @param logo default="black"; which GP logo do you want to use?
 #' @param logo_scale on a scale of 0 to 1 (npc units), how high to make the logo in footer? default=0.7
+#' @param add_border logical; add border around main plot? default=TRUE
 #' @param border_col_graph color of border around main plot. default="#363636"; put "transparent" to remove border
 #' @param border_col_foot color of border around plot footer. default="#363636"; put "transparent" to remove border
 #' @param border_width_graph width of border around main plot. default=1
@@ -31,6 +32,7 @@ gp_footer <- function(obj,
                       x = 0.015,
                       y = 0.05,
                       text_size = 9,
+                      add_border=TRUE,
                       border_col_graph = "#363636",
                       border_col_foot = "#363636",
                       border_width_graph= 1,
@@ -115,15 +117,19 @@ gp_footer <- function(obj,
   )
 
   # Add the border to the ggplot object itself
-  obj_with_border <- obj +
+  if(add_border){
+  obj2 <- obj +
     theme(
       # plot.margin = unit(c(1, 1, 1, 1), "lines"),  # Add margin around the plot
       plot.background = element_rect(color = border_col_graph, size = border_width_graph)  # Border color and size
     )
+  }else{
+    obj2 <- obj
+  }
 
   # Combine the plot with the footer
   combined_plot <- gridExtra::grid.arrange(
-    obj_with_border, footer_grob,
+    obj2, footer_grob,
     nrow = 2,  # Only two rows: plot with border and footer
     heights = grid::unit.c(
       grid::unit(1, "npc") - grid::unit(y, "npc"),  # Plot height minus footer height

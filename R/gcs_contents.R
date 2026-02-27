@@ -44,7 +44,7 @@ gcs_contents <- \(
 
   out0 <- res$result %>%
     dplyr::mutate(path=.data$name,name=basename(.data$name),
-                  link = paste0(url_prefix, .data$name)) %>%
+                  link = paste0(url_prefix, .data$path)) %>%
     dplyr::relocate(.data$name) %>%
     dplyr::relocate(.data$link, .after = 2)
 
