@@ -13,7 +13,7 @@ gp_footer(
   add_border = TRUE,
   border_col_graph = "#363636",
   border_col_foot = "#363636",
-  border_width_graph = 1,
+  border_width_graph = 3,
   border_width_foot = 1,
   text_color = "#363636",
   data_attrib = NULL,

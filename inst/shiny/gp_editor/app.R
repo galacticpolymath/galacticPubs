@@ -598,7 +598,7 @@ server <- function(input, output, session) {
   ediTable_server(id = "Accessibility", rd = accessibility_data)
   #JobViz connections
 
-  jobPicker_server("jp", jobs$data)
+  jobPicker_server("jp", job_line_items)
   ediTable_server(id = "JobVizConnections", rd = jobviz_data)
   ediTable_server(id = "Authors", rd = author_data)
   ediTable_server(id = "Acknowledgments", rd = ack_data)

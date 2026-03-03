@@ -16,6 +16,7 @@ gpsave(
   open = FALSE,
   bg = "transparent",
   units = "in",
+  gp_footer_border_width = 3,
   ...
 )
 }
@@ -41,6 +42,8 @@ gpsave(
 \item{bg}{background color (default= "transparent")}
 
 \item{units}{default= "in"; options c("in", "cm", "mm", "px")}
+
+\item{gp_footer_border_width}{multiplier; default=1. if using \code{\link[=gp_footer]{gp_footer()}}, used to scale output of the plot border. Kind of futzy, might need to play around with numbers}
 
 \item{...}{other parameters from \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}}}
 }

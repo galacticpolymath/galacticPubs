@@ -15,6 +15,7 @@
 #' @param dpi dots per inch resolution (default= 300); note changing this will unfortunately also change the output relative text size
 #' @param bg background color (default= "transparent")
 #' @param units default= "in"; options c("in", "cm", "mm", "px")
+#' @param gp_footer_border_width multiplier; default=1. if using [gp_footer()], used to scale output of the plot border. Kind of futzy, might need to play around with numbers
 #' @param ... other parameters from [ggplot2::ggsave()]
 #' @export
 
@@ -30,9 +31,13 @@ gpsave <- function(filename,
                    open = FALSE,
                    bg = "transparent",
                    units = "in",
+                   gp_footer_border_width = 3,
                    ...) {
-  WD = parse_wd(WD)
-  showtext::showtext_auto()
+
+  WD <- parse_wd(WD)
+  if (requireNamespace("showtext", quietly = TRUE)) {
+    showtext::showtext_auto(enable = TRUE)
+  }
 
   if (is.null(obj)) {
     message("You might need to specify 'obj'")
@@ -44,40 +49,27 @@ gpsave <- function(filename,
   }
   checkmate::assert_access(path_parent_dir(fn), access = "w")
 
+  # Validate object types
+  is_grob_list <- FALSE
+  isgraf <- FALSE
 
-  if (is.list(obj)&!inherits(obj,c("graf_w_footer", "ggplot"))) {
-    isgraf <- FALSE
-    grob_list_tests <- lapply(1:length(obj), \(i) {
-      isgraf <- inherits(obj[[i]], what = c("grob"))
-      if (!isgraf) {
-        stop("The supplied list must contain all grob layers (nothing else).")
-      }
-      return(isgraf)
-    })
-    is_grob_list <- all(unlist(grob_list_tests))
-  } else if(inherits(obj, what = c("graf_w_footer", "ggplot", "grob"))){
+  if (is.list(obj) && !inherits(obj, c("graf_w_footer", "ggplot", "grob", "patchwork", "gp_footer_obj"))) {
+    grob_list_tests <- vapply(obj, inherits, logical(1), what = "grob")
+    if (!all(grob_list_tests)) stop("The supplied list must contain all grob layers (nothing else).")
+    is_grob_list <- TRUE
+  } else if (inherits(obj, c("graf_w_footer", "ggplot", "grob", "patchwork", "gp_footer_obj"))) {
     isgraf <- TRUE
-    is_grob_list <- FALSE
   }
 
-  if (!isgraf & !is_grob_list) {
-    stop("The object must be either a ggplot, a grob, or a list of grobs.")
+  if (!isgraf && !is_grob_list) {
+    stop("The object must be either a ggplot, patchwork, grob, gp_footer_obj, or a list of grobs.")
   }
 
-  # Set default width if no dims supplied
-  if (is.null(height) & is.null(width)) {
-    width = 7
-  }
+  # Dimensions
+  if (is.null(height) && is.null(width)) width <- 7
+  if (is.null(height)) height <- width / aspect
+  if (is.null(width))  width  <- height * aspect
 
-  if (is.null(height)) {
-    height = width / aspect
-  }
-
-  if (is.null(width)) {
-    width = height * aspect
-  }
-
-  # Save file
   test_save <- {
     png(
       filename = fn,
@@ -88,22 +80,89 @@ gpsave <- function(filename,
       units = units,
       type = "quartz"
     )
-    if (is_grob_list) {
-      #if object is a graf_w_footer, treat as one object, else go through layers
 
-        message("Trying to draw list of objects with grid::grid.draw()")
-        grid::grid.newpage()
-        lapply(1:length(obj), \(i) grid::grid.draw(obj[[i]]))
+    grid::grid.newpage()
 
-    } else{
+    # ---- Special case: gp_footer output ----
+    if (inherits(obj, "gp_footer_obj")) {
 
-      plot(obj)
+      # pull metadata
+      y <- attr(obj, "gp_y", exact = TRUE)
+      if (is.null(y)) y <- 0.05
+
+      add_plot_border <- isTRUE(attr(obj, "gp_add_plot_border", exact = TRUE))
+
+      border_col_graph <- attr(obj, "gp_border_col_graph", exact = TRUE)
+      if (is.null(border_col_graph)) border_col_graph <- "#363636"
+
+      border_width_graph <- attr(obj, "gp_border_width_graph", exact = TRUE)
+      if (is.null(border_width_graph)) border_width_graph <- 3
+
+      # arrangeGrob stores children in obj$grobs (typically plot then footer)
+      if (is.null(obj$grobs) || length(obj$grobs) < 2) {
+
+        # fallback (shouldn't happen)
+        grid::grid.draw(obj)
+
+      } else {
+
+        plot_grob <- obj$grobs[[1]]
+        footer_grob <- obj$grobs[[2]]
+
+        # Draw in the same 2-row layout
+        grid::pushViewport(grid::viewport(layout = grid::grid.layout(
+          nrow = 2, ncol = 1,
+          heights = grid::unit.c(grid::unit(1 - y, "npc"), grid::unit(y, "npc"))
+        )))
+
+        # Top row: plot
+        grid::pushViewport(grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
+        grid::grid.draw(plot_grob)
+
+        if (add_plot_border) {
+          # --- DPI-stable border width using pixel quantization ---
+          # baseline (points) -> pixels at ~96 dpi
+          px_base <- border_width_graph * 96 / 72
+          # apply multiplier and snap to integer pixels (ensures visible changes)
+          px_target <- max(1, round(px_base * gp_footer_border_width))
+          # pixels at output dpi -> points for grid
+          lwd_saved <- px_target * 72 / dpi
+
+          grid::grid.draw(grid::rectGrob(
+            x = 0.5, y = 0.5, width = 1, height = 1,
+            gp = grid::gpar(col = border_col_graph, fill = NA, lwd = lwd_saved)
+          ))
+        }
+
+        grid::upViewport()
+
+        # Bottom row: footer
+        grid::pushViewport(grid::viewport(layout.pos.row = 2, layout.pos.col = 1))
+        grid::grid.draw(footer_grob)
+        grid::upViewport(2)
+      }
+
+    } else if (is_grob_list) {
+
+      for (i in seq_along(obj)) grid::grid.draw(obj[[i]])
+
+    } else if (inherits(obj, "patchwork")) {
+
+      grid::grid.draw(patchwork::patchworkGrob(obj))
+
+    } else if (inherits(obj, "grob")) {
+
+      grid::grid.draw(obj)
+
+    } else {
+
+      print(obj)
+
     }
+
     dev.off()
   } %>% catch_err()
 
-
-  # Check if save was successful
   if (test_save) {
     message("@Saved: ", fn)
     message(
