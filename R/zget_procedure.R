@@ -107,18 +107,20 @@ if(is.null(WD_git)){
       stop("The following vocab entries don't have an = sign:\n -",
            paste0(vocab_df0[!has_equal,"x"]))
     }else if(sum(has_too_many_equal)>0){
-      stop("The following vocab entries have more than one = sign per line. Need to make a new line inside the cell with ALT + ENTER. :\n -",
+      warning("The following vocab entries have more than one = sign per line. Might need to make a new line inside the cell with ALT + ENTER if you're defining math like 2+2=4. :\n -",
            paste0(vocab_df0[has_too_many_equal,"x"]))
     }
 
-    vocab_df <- vocab_df0 %>%
-      tidyr::separate_wider_delim(
-      cols = 1,
-      delim = stringr::regex(" *= *"),
-      names = c("term", "definition")
-    ) %>%
-      #remove repeated definitions, in case repeated in procedure
-      dplyr::distinct(.data$term, .keep_all = T) %>% catch_err(keep_results=TRUE)
+    vocab_df <- vocab_df0
+    # %>%
+    #   tidyr::separate_wider_delim(
+    #   cols = 1,
+    #   #make a delim to catch only the first = sign, in case somebody used = in the definition (e.g. for math)
+    #   delim = stringr::regex("$*=*"),
+    #   names = c("term", "definition")
+    # ) %>%
+    #   #remove repeated definitions, in case repeated in procedure
+    #   dplyr::distinct(.data$term, .keep_all = T) %>% catch_err(keep_results=TRUE)
 
     #Parse vocab for Procedure section (change shorthand into reasonably formatted markdown with bullets)
     proc$Vocab <- formatVocab(proc$Vocab)

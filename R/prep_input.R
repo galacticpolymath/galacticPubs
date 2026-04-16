@@ -43,6 +43,8 @@ prep_input <- function(input,
     fm_updated <- test_updated$result
   } else{
     #output NULL if update_failed
+    message("prep_input()| FAILED to update_fm() for ",basename(WD)," ")
+    print(test_updated$result)
     fm_updated <- NULL
   }
 

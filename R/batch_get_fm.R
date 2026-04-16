@@ -33,7 +33,7 @@ batch_get_fm <- \(
   project_names <- basename(projects)
 
   if (exclude_TEST) {
-    excluded <- c("TEST", "TEST2")
+    excluded <- c("TEST", "TEST2","JobViz_Free-Materials")
   } else{
     excluded <- ""
   }

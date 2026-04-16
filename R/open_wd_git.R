@@ -13,7 +13,7 @@ open_wd_git <- \(WD="?"){
   }else{proj <- NULL}
 
   # if WD supplied, need to find yaml_path in git hub gp-lessons folder
-  gp_lessons_dir <- get_wd_git(WD=WD)
+  gp_lessons_dir <- get_wd_git(WD=NULL)
   wd_git_path <- fs::path(gp_lessons_dir,"Lessons")
   if(!is.null(proj)){
 

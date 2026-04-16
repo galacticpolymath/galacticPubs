@@ -42,7 +42,7 @@ update_teach_links <- function(WD = "?",
     return(NULL)
   }
   gID <- fm$GdriveDirID
-  meta_id <-fm$GdriveMetaID
+  meta_id <- fm$GdriveMetaID
   proj_dir <- fm$GdriveDirName
   status <- fm$PublicationStatus
   #teaching materials are located in different shared drives depending
@@ -96,13 +96,13 @@ update_teach_links <- function(WD = "?",
   #If PublicationStatus=="Draft", found on 'GP-Studio'
   #Else, found on 'GalacticPolymath'
 
-  tm_local <-fs::path(get_shared_drive_path(),GdriveTeachMatPath)
+  tm_local <- fs::path(get_shared_drive_path(), GdriveTeachMatPath)
   checkmate::assert(fs::is_dir(tm_local), .var.name = "fs::is_dir()")
   #if tm_dev path is not null, assert that's it's a directory in the home drive
-  if(is_empty(GdriveTeachMatDevPath)){
+  if (is_empty(GdriveTeachMatDevPath)) {
     tm_dev_local <- NULL
   } else{
-    tm_dev_local <- fs::path(get_shared_drive_path(),GdriveTeachMatDevPath)
+    tm_dev_local <- fs::path(get_shared_drive_path(), GdriveTeachMatDevPath)
     checkmate::assert(fs::is_dir(tm_dev_local), .var.name = "fs::is_dir()")
   }
 
@@ -123,7 +123,7 @@ update_teach_links <- function(WD = "?",
     teach_dir %>% drive_contents %>% dplyr::filter(stringr::str_detect(name, "remote|classroom|assess"))
 
   #If there's a dev folder, add to teach_dir_ls to pass into pbapply
-  if(!is_empty(GdriveTeachMatDevID)){
+  if (!is_empty(GdriveTeachMatDevID)) {
     teach_dir_dev <-
       drive_find_path(GdriveTeachMatDevID)
     teach_dir_ls <- dplyr::bind_rows(teach_dir_ls, teach_dir_dev)
@@ -142,9 +142,8 @@ update_teach_links <- function(WD = "?",
   #Make top-level download link entry to build on (for the TeachMatLinks tab of teach-it.gsheet)
 
   teach_dir_info <-
-    teach_dir %>% drive_get_info(include_shared_drive=TRUE) %>% dplyr::mutate(title = med_title,
-                                                                              `_itemType` =
-                                                       "teachMatDir")
+    teach_dir %>% drive_get_info(include_shared_drive = TRUE) %>% dplyr::mutate(title = med_title, `_itemType` =
+                                                                                  "teachMatDir")
 
 
 
@@ -153,94 +152,106 @@ update_teach_links <- function(WD = "?",
           proj_dir,
           "]\n")
   variant_info_list <-
-    pbapply::pblapply(1:nrow(teach_dir_ls), FUN=function(i) {
+    pbapply::pblapply(
+      1:nrow(teach_dir_ls),
+      FUN = function(i) {
+        dir_i <- teach_dir_ls[i, ]
+        print(dir_i$name)
+        #manually set classroom in dev folder (which doesn't have parent folder name info)
+        if (dir_i$name == "teaching-materials_DEV") {
+          envir_type = "classroom"
+        } else{
+          envir_type <-
+            gsub("([^_ -]*)[_ -]?.*", "\\1", dir_i$name) #extract (first part of name before "_,-, or [space]")
+        }
+        item_type <-
+          switch(
+            envir_type,
+            "remote" = "variantDir",
+            "classroom" = "variantDir",
+            "assessments" = "assessDir",
+            ""
+          )
+        dir_i_info <-
+          dir_i %>% drive_get_info(include_shared_drive = TRUE, set_envir =
+                                     item_type)  %>% dplyr::mutate(`_itemType` = item_type, `_envir` = envir_type)
 
-      dir_i <- teach_dir_ls[i, ]
-      print(dir_i$name)
-      #manually set classroom in dev folder (which doesn't have parent folder name info)
-      if(dir_i$name=="teaching-materials_DEV"){
-        envir_type="classroom"
-      }else{
-      envir_type <-
-        gsub("([^_ -]*)[_ -]?.*", "\\1", dir_i$name) #extract (first part of name before "_,-, or [space]")
-      }
-      item_type <-
-        switch(
-          envir_type,
-          "remote" = "variantDir",
-          "classroom" = "variantDir",
-          "assessments" = "assessDir",
-          ""
-        )
-      dir_i_info <-
-        dir_i %>% drive_get_info(include_shared_drive=TRUE,set_envir =item_type )  %>% dplyr::mutate(`_itemType` = item_type, `_envir` = envir_type)
+        if (dir_i$name == "teaching-materials_DEV") {
+          message(
+            "Using front-matter ForGrades value of ",
+            fm$ForGrades,
+            " for dev teaching materials"
+          )
+          dir_i_info$`_grades` <- fm$ForGrades
 
-      if(dir_i$name=="teaching-materials_DEV"){
-        message("Using front-matter ForGrades value of ",fm$ForGrades," for dev teaching materials")
-        dir_i_info$`_grades` <- fm$ForGrades
-
-      }
-
-
-
-      #Go into Lesson subfolders if they exist
-      dir_i_ls <- dir_i %>% drive_contents()
-
-      #get subfolder list, ignore scrap(s) folders
-      dir_i_subfolders <-
-        dir_i_ls %>% dplyr::filter(googledrive::is_folder(dir_i_ls) &
-                                     !startsWith(tolower(name), "scrap"))
-
-      #get all files
-      dir_i_files <-
-        dir_i_ls %>% dplyr::filter(!googledrive::is_folder(dir_i_ls))
-
-      test_dir_i_files <-
-        checkmate::test_data_frame(dir_i_files, all.missing = FALSE)
-      #get info for files if there's no subdirectory
-      if (test_dir_i_files) {
-        dir_i_files_info <-
-          dir_i_files %>% drive_get_info(set_envir = dir_i_info$`_envir`, include_shared_drive=TRUE)
-      } else{
-        dir_i_files_info <- NULL
-      }
+        }
 
 
-      # Now gather info from Lesson subdirectories --------------------------------
 
-      if (nrow(dir_i_subfolders) > 0) {
-        dir_i_subfolders_info <-
-          lapply(1:nrow(dir_i_subfolders), function(ii) {
-            lsn_i <- stringr::str_extract(dir_i_subfolders$name[ii],"^.(\\d*)",group=1)
-            out_ii <- update_teach_links_lsnHelper(
-              dribble = dir_i_subfolders[ii, ],
-              set_grades = dir_i_info$`_grades`,
-              set_envir = envir_type,
-              set_lsn= lsn_i
+        #Go into Lesson subfolders if they exist
+        dir_i_ls <- dir_i %>% drive_contents()
+
+        #get subfolder list, ignore scrap(s) folders
+        dir_i_subfolders <-
+          dir_i_ls %>% dplyr::filter(googledrive::is_folder(dir_i_ls) &
+                                       !startsWith(tolower(name), "scrap"))
+
+        #get all files
+        dir_i_files <-
+          dir_i_ls %>% dplyr::filter(!googledrive::is_folder(dir_i_ls))
+
+        test_dir_i_files <-
+          checkmate::test_data_frame(dir_i_files, all.missing = FALSE)
+        #get info for files if there's no subdirectory
+        if (test_dir_i_files) {
+          dir_i_files_info <-
+            dir_i_files %>% drive_get_info(
+              set_envir = dir_i_info$`_envir`,
+              include_shared_drive = TRUE,
+              set_grades = dir_i_info$`_grades`
             )
-            out_ii
-          }) %>% dplyr::bind_rows()
-      } else{
-        dir_i_subfolders_info <- NULL
-      }
+        } else{
+          dir_i_files_info <- NULL
+        }
 
-      #make everything as.character to avoid rbind issue, but only if not null
-      if (!is.null(dir_i_info)) {
-        dir_i_info <- dir_i_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
-      }
 
-      if (!is.null(dir_i_files_info)) {
-        dir_i_files_info <- dir_i_files_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
-      }
+        # Now gather info from Lesson subdirectories --------------------------------
 
-      if (!is.null(dir_i_subfolders_info)) {
-        dir_i_subfolders_info <- dir_i_subfolders_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
-      }
-      #combine all info at this level
-      dir_i_INFO <- dplyr::bind_rows(dir_i_info, dir_i_files_info, dir_i_subfolders_info)
-    })
+        if (nrow(dir_i_subfolders) > 0) {
+          dir_i_subfolders_info <-
+            lapply(1:nrow(dir_i_subfolders), function(ii) {
+              lsn_i <- stringr::str_extract(dir_i_subfolders$name[ii], "^.(\\d*)", group =
+                                              1)
+              out_ii <- update_teach_links_lsnHelper(
+                dribble = dir_i_subfolders[ii, ],
+                set_grades = dir_i_info$`_grades`,
+                set_envir = envir_type,
+                set_lsn = lsn_i
+              )
+              out_ii
+            }) %>% dplyr::bind_rows()
+        } else{
+          dir_i_subfolders_info <- NULL
+        }
 
-  variant_info <-variant_info_list %>% dplyr::bind_rows()
+        #make everything as.character to avoid rbind issue, but only if not null
+        if (!is.null(dir_i_info)) {
+          dir_i_info <- dir_i_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
+        }
+
+        if (!is.null(dir_i_files_info)) {
+          dir_i_files_info <- dir_i_files_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
+        }
+
+        if (!is.null(dir_i_subfolders_info)) {
+          dir_i_subfolders_info <- dir_i_subfolders_info %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character))
+        }
+        #combine all info at this level
+        dir_i_INFO <- dplyr::bind_rows(dir_i_info, dir_i_files_info, dir_i_subfolders_info)
+      }
+    )
+
+  variant_info <- variant_info_list %>% dplyr::bind_rows()
 
 
   # Now combine it all for output -------------------------------------------
@@ -280,18 +291,18 @@ update_teach_links <- function(WD = "?",
     }) %>% unlist()
 
 
-# # Add Dev Teaching Materials to Inferred Teach It -------------------------
-# if(!is_empty(GdriveTeachMatDevID)){
-#     teach_dir_dev <-
-#       drive_find_path(GdriveTeachMatDevID)
-#     teach_dir_dev_ls <-
-#       teach_dir_dev %>% drive_contents() %>% drive_get_info() %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>%
-#     dplyr::select(-"shortTitle", -"short_title")
-#     #combine dev and main teaching-materials folders into one dribble
-#     inferred_teach_it0 <- inferred_teach_it #backup for comparison downstream
-#     inferred_teach_it <- hard_left_join(inferred_teach_it, teach_dir_dev_ls,by="_link")
-#   }
-#
+  # # Add Dev Teaching Materials to Inferred Teach It -------------------------
+  # if(!is_empty(GdriveTeachMatDevID)){
+  #     teach_dir_dev <-
+  #       drive_find_path(GdriveTeachMatDevID)
+  #     teach_dir_dev_ls <-
+  #       teach_dir_dev %>% drive_contents() %>% drive_get_info() %>% dplyr::mutate(dplyr::across(dplyr::everything(), as.character)) %>%
+  #     dplyr::select(-"shortTitle", -"short_title")
+  #     #combine dev and main teaching-materials folders into one dribble
+  #     inferred_teach_it0 <- inferred_teach_it #backup for comparison downstream
+  #     inferred_teach_it <- hard_left_join(inferred_teach_it, teach_dir_dev_ls,by="_link")
+  #   }
+  #
 
   # #most recent modTime
   # last_teach_it_change_time <- max(inferred_teach_it$modTime)
@@ -397,7 +408,6 @@ update_teach_links <- function(WD = "?",
 
   # Begin logic for clean parameter (merge or overwrite .gsheet?-----------------
   if (clean) {
-
     #Assign the inferred data for output if clean==T
     #Do hard_left_join on empty teach_it_in0 to keep .gsheet structure,
     #but none of the data; sort
@@ -426,15 +436,26 @@ update_teach_links <- function(WD = "?",
 
     #adding envir + grade levels to LINKS allows duplicating resources
     #across differentiated units
-    DF1 <- teach_it_in %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(.data$`_envir`,.data$`_grades`,
-        .data$`_lsn`, .data$`_link`, .data$extLink
-      ))
-    DF2 <-  inferred_teach_it %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(.data$`_envir`,.data$`_grades`,.data$`_lsn`, .data$`_link`))
+    DF1 <- teach_it_in %>% dplyr::rowwise() %>% dplyr::mutate(
+      LINKS = paste_valid(
+        .data$`_envir`,
+        .data$`_grades`,
+        .data$`_lsn`,
+        .data$`_link`,
+        .data$extLink
+      )
+    )
+    DF2 <-  inferred_teach_it %>% dplyr::rowwise() %>% dplyr::mutate(LINKS = paste_valid(
+      .data$`_envir`,
+      .data$`_grades`,
+      .data$`_lsn`,
+      .data$`_link`
+    ))
 
 
     test_teach_it_out <- hard_left_join(
       df1 = DF1,
-      df2 =DF2,
+      df2 = DF2,
       by = "LINKS",
       df1_cols_to_keep = c("title", "description", "extLink"),
       as_char = TRUE
@@ -532,15 +553,11 @@ update_teach_links <- function(WD = "?",
           } else{
             test_valid_inferred_info <-
               sum(
-                !is_empty(d_i$`_SvT`),
-                !is_empty(d_i$`_itemType`),
-                !is_empty(d_i$`_lsn`)
+                !is_empty(d_i$`_SvT`),!is_empty(d_i$`_itemType`),!is_empty(d_i$`_lsn`)
               ) > 1
             #Only guess title if we have at least 2 bits of inferred info; otherwise put filename as title
             if (test_valid_inferred_info) {
-              paste_valid(d_i$`_SvT`,
-                          d_i$`_itemType`,
-                          collapse = " ") %>%
+              paste_valid(d_i$`_SvT`, d_i$`_itemType`, collapse = " ") %>%
                 stringr::str_to_title()
             } else{
               d_i$`_filename`

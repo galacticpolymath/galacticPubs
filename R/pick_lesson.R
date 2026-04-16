@@ -53,7 +53,8 @@ pick_lesson <- function(shared_drive = "s",
     if (shared_drive != "gp") {
       projects0 <-
         projects00[which(!grepl("^.*Lessons[\\/]~", projects00) &
-                           !grepl("OLD_", projects00))]
+                           !grepl("OLD_", projects00)&
+                           !grepl("JobViz_Free-Materials",projects00))]
     } else{
       projects0 <- projects00
     }

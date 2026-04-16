@@ -92,21 +92,17 @@ update_fm <-
     if ("EstLessonTime" %in% names(old_yaml)) {
       new_yaml$EstUnitTime <- old_yaml$EstLessonTime
     }
-    #
-    # if ("UniqueID" %in% names(old_yaml)) {
-    #   new_yaml$`_id` <- old_yaml$UniqueID
-    # }
-    #
-    # if (is_empty(new_yaml$LsnCount)) {
-    #   count_extracted <- stringr::str_extract(new_yaml$EstUnitTime, "[^\\d]?(\\d*).*",group = 1) %>% as.integer()
-    #   if(is_empty(count_extracted)){
-    #     warning("You should manually add LsnCount to front matter. Unable to extract from EstUnitTime for: '",new_yaml$GdriveDirName,"'")
-    #   }else{
-    #     new_yaml$LsnCount <- count_extracted
-    #   }
-    # }else{
-    #   new_yaml$LsnCount <- new_yaml$LsnCount %>% as.integer()
-    # }
+
+    if (is_empty(new_yaml$LsnCount)) {
+      count_extracted <- stringr::str_extract(new_yaml$EstUnitTime, "[^\\d]?(\\d*).*",group = 1) %>% as.integer()
+      if(is_empty(count_extracted)){
+        warning("You should manually add LsnCount to front matter. Unable to extract from EstUnitTime for: '",new_yaml$GdriveDirName,"'")
+      }else{
+        new_yaml$LsnCount <- count_extracted
+      }
+    }else{
+      new_yaml$LsnCount <- new_yaml$LsnCount %>% as.integer()
+    }
 
 
     #add NAs for new keys that aren't present in old_yaml
@@ -229,6 +225,7 @@ update_fm <-
     #Add/Update the locale and lang fields with a nonexported internal function parse_locale()
     # overwrites existing lang and locale fields and returns the modified current_data list
     new_yaml <- new_yaml %>% parse_locale()
+    unit_name <- basename(WD)
 
     #Add URL for this locale
     if (is_empty(new_yaml$URL) |
@@ -246,41 +243,46 @@ update_fm <-
         )
 
       #Add bitly (short URL)
-
-      test_assign <- urlshorteneR::bitly_create_bitlink(long_url = utils::URLencode(new_yaml$URL),
-                                                        title = new_yaml$MediumTitle) %>% catch_err(keep_results = TRUE)
-
-      if (test_assign$success) {
-        message("Bit.ly created for this unit:\n @",
-                test_assign$result$link[1])
-
-        new_yaml$ShortURL <- test_assign$result$link[1]
-      } else{
-        warning_msg <- paste0("Bit.ly creation failed for ",
-                              new_yaml$MediumTitle,
-                              ":\n @",
-                              new_yaml$URL)
-        message(test_assign$result)
-        warning(warning_msg)
-        warning("Maybe you already have a bitlink for URL? ", new_yaml$URL)
-      }
+      # #Deprecating bitly creation altogether
+      # if (new_yaml$Title != "Title Me!") {
+      #   test_assign <- urlshorteneR::bitly_create_bitlink(
+      #     long_url = utils::URLencode(new_yaml$URL),
+      #     title = new_yaml$MediumTitle
+      #   ) %>% catch_err(keep_results = TRUE)
+      #
+      #   if (test_assign$success) {
+      #     message("Bit.ly created for this unit:\n @",
+      #             test_assign$result$link[1])
+      #
+      #     new_yaml$ShortURL <- test_assign$result$link[1]
+      #   } else{
+      #     warning_msg <- paste0("Bit.ly creation failed for ",
+      #                           new_yaml$MediumTitle,
+      #                           ":\n @",
+      #                           new_yaml$URL)
+      #     message(test_assign$result)
+      #     warning(warning_msg)
+      #     warning("Maybe you already have a bitlink for URL? ", new_yaml$URL)
+      #   }
+      #
+      # }
 
     }
 
-    #Make a QR code
-    unit_name <- basename(WD)
-    qr_path <- fs::path(WD,
-                        "assets",
-                        "_banners_logos_etc",
-                        paste0(unit_name, "__QR-code.png"))
-
-    if (!file.exists(qr_path) | force_upgrade) {
-      grDevices::png(qr_path)
-      plot(qrcode::qr_code(new_yaml$URL))
-      grDevices::dev.off()
-      message("QR Code generated for ", unit_name, " at:\n", qr_path, "\n")
-    }
-
+    # #Make a QR code (DEPRECATED)
+    #
+    # qr_path <- fs::path(WD,
+    #                     "assets",
+    #                     "_banners_logos_etc",
+    #                     paste0(unit_name, "__QR-code.png"))
+    #
+    # if (!file.exists(qr_path) | force_upgrade) {
+    #   grDevices::png(qr_path)
+    #   plot(qrcode::qr_code(new_yaml$URL))
+    #   grDevices::dev.off()
+    #   message("QR Code generated for ", unit_name, " at:\n", qr_path, "\n")
+    # }
+    #
     #make a unique `_id` combining numID & locale
     if (!is_empty(new_yaml$numID)) {
       new_yaml$`_id` <-

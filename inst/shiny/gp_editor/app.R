@@ -656,6 +656,8 @@ server <- function(input, output, session) {
         # if out-of-date, each element of the list should not be identical
         # (unlist necessary to avoid narrow issue w/ <NA> vs `NA` names)
         #
+        checkmate::assert_list(data_check[[2]],all.missing=FALSE,.var.name="current_data")
+        checkmate::assert_list(data_check[[1]],all.missing=FALSE,.var.name="saved_data")
         probs <- lapply(1:length(data_check[[1]]), function(i) {
           !(
             identical(
@@ -688,7 +690,8 @@ server <- function(input, output, session) {
         data_check$current_data$TemplateVer > data_check$saved_data$TemplateVer
 
       if (count_outOfDate > 0) {
-        if (template_upgraded) {
+
+        if (isTRUE(template_upgraded)) {
           vals$yaml_update_txt <- paste0(
             "Save & Upgrade template:\n",
             data_check$saved_data$TemplateVer,
@@ -698,6 +701,7 @@ server <- function(input, output, session) {
         } else{
           vals$yaml_update_txt <- ("Not saved, yo ->")
           message("Unsaved changes: ")
+
           print(outOfDate)
         }
         vals$saved <- FALSE
@@ -1373,3 +1377,4 @@ server <- function(input, output, session) {
 
 # Run the application
 shinyApp(ui = ui, server = server)
+

@@ -275,7 +275,7 @@ compile_fm <- \(WD = "?",
             filename = fs::path(json_dir, "extensions", ext = "json"))
 
 
-  # background.json ---------------------------------------------------------
+  # bauthground.json ---------------------------------------------------------
   #Combine Sci Background and Lesson Connections to Research
   # markdown links to supporting materials allowed
   # expand_md_links takes relative links in [](x.jpg) format and makes a full path to GP catalog
@@ -339,6 +339,20 @@ compile_fm <- \(WD = "?",
             filename = fs::path(json_dir, "credits", ext = "json"))
 
 
+# authors.json ------------------------------------------------------------
+
+auth <-
+    get_fm("Authors",
+           WD = WD,
+           standardize_NA = T)[[1]] %>% dplyr::as_tibble()
+
+
+  if (is_empty(auth, names_meaningful = F)) {
+    auth_out0 <- NULL
+  } else{
+    auth_out0<- lapply(1:nrow(auth),\(i){as.list(auth[i,])})
+
+  }
 
   # acknowledgments.json ----------------------------------------------------
   #
@@ -394,6 +408,13 @@ compile_fm <- \(WD = "?",
   }
 
   # Prefix with component and title, and nest output in Data if structuring for web deployment
+
+  auth_out <- list(`__component` = "lesson-plan.authors",
+                   SectionTitle = "Authors",
+                   Data = auth_out0)
+
+  save_json(auth_out, fs::path(json_dir, "authors.json"))
+
   ack_out <-  list(`__component` = "lesson-plan.acknowledgments",
                    SectionTitle = "Acknowledgments",
                    Data = ack_out0)

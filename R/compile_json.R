@@ -43,6 +43,7 @@ compile_json <- function(WD = "?",
       "bonus",
       "background",
       "standards",
+      "authors",
       "credits",
       "acknowledgments"
     )

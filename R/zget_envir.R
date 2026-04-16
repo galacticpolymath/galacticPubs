@@ -150,6 +150,10 @@ zget_lessons <- \(df_i, proc_data, lesson_statuses, uinfo, fm) {
 
   #get sequence of lessons (including upcoming (that have no teaching materials in df_i))
   #minimum required for special case where dev environment doesn't contain lesson 1
+  if (nrow(df_i) == 0) {
+    message("No lessons found for this grade band. This may be because the first lesson has not yet been started. Returning an empty list of lessons for this grade band.")
+    return(NULL)
+  }
   lessons <- min(df_i$`_lsn`,na.rm=TRUE):max(df_i$`_lsn`, uinfo$lsn, na.rm = TRUE) %>% as.numeric()
   #lesson tiles
   tiles <- fm$LessonTiles
