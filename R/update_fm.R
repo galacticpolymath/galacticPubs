@@ -93,16 +93,19 @@ update_fm <-
       new_yaml$EstUnitTime <- old_yaml$EstLessonTime
     }
 
-    if (is_empty(new_yaml$LsnCount)) {
-      count_extracted <- stringr::str_extract(new_yaml$EstUnitTime, "[^\\d]?(\\d*).*",group = 1) %>% as.integer()
-      if(is_empty(count_extracted)){
-        warning("You should manually add LsnCount to front matter. Unable to extract from EstUnitTime for: '",new_yaml$GdriveDirName,"'")
-      }else{
-        new_yaml$LsnCount <- count_extracted
-      }
-    }else{
-      new_yaml$LsnCount <- new_yaml$LsnCount %>% as.integer()
+    #Always reassign lsn count based on EstUnitTime, since this is the most likely to be accurate and we want to make sure it's filled in for older files. If EstUnitTime is missing or can't be parsed, then LsnCount will be NA and user will have to fill in manually.
+    try_count_extracted <- stringr::str_extract(new_yaml$EstUnitTime, "[^\\d]?(\\d*).*", group = 1) %>% as.integer() %>% catch_err(keep_results = TRUE)
+    count_extracted <- try_count_extracted$result
+    if (is_empty(count_extracted)) {
+      warning(
+        "You should manually add LsnCount to front matter. Unable to extract from EstUnitTime for: '",
+        new_yaml$GdriveDirName,
+        "'"
+      )
+    } else{
+      new_yaml$LsnCount <- count_extracted
     }
+
 
 
     #add NAs for new keys that aren't present in old_yaml
