@@ -182,7 +182,7 @@ init_unit_meta <- function(WD = "?",
 
 #' unit_init_meta
 #'
-#' @describeIn init_unit_meta
+#' @describeIn init_unit_meta  alias
 #'
 #' @export
 #'

@@ -149,7 +149,7 @@ pick_lesson <- function(shared_drive = "s",
 
 #' lesson_pick
 #'
-#' @describeIn pick_lesson
+#' @describeIn pick_lesson alias
 #'
 #' @export
 #provide alias

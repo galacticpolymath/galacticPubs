@@ -41,20 +41,8 @@ Helper function for \code{\link[=compile_teach_it]{compile_teach_it()}} that ext
 Not intended for use outside functions.
 }
 \seealso{
-Other Internal helper functions: 
-\code{\link{make_yt_embed}()},
-\code{\link{zcatchLinkNA}()}
-
-Other Internal helper functions: 
-\code{\link{make_yt_embed}()},
-\code{\link{zcatchLinkNA}()}
-
-Other Internal helper functions: 
-\code{\link{make_yt_embed}()},
-\code{\link{zcatchLinkNA}()}
-
-Other Internal helper functions: 
-\code{\link{make_yt_embed}()},
-\code{\link{zcatchLinkNA}()}
+Other Internal helper functions:
+\code{\link[=make_yt_embed]{make_yt_embed()}},
+\code{\link[=zcatchLinkNA]{zcatchLinkNA()}}
 }
 \concept{Internal helper functions}

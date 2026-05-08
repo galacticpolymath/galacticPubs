@@ -66,6 +66,6 @@ Interactively lets you pick from a list of published Galactic Polymath units and
 }
 \section{Functions}{
 \itemize{
-\item \code{lesson_pick()}: 
+\item \code{lesson_pick()}: alias
 
 }}

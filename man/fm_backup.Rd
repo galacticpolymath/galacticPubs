@@ -20,6 +20,6 @@ This function keeps 40 of the most recent backup copies of the front matter file
 }
 \section{Functions}{
 \itemize{
-\item \code{backup_fm()}: 
+\item \code{backup_fm()}: alias
 
 }}

@@ -29,8 +29,8 @@ Ex: 2:
 }
 }
 \seealso{
-Other markdown: 
-\code{\link{fixAnchorLinks}()},
-\code{\link{parseGPmarkdown}()}
+Other markdown:
+\code{\link[=fixAnchorLinks]{fixAnchorLinks()}},
+\code{\link[=parseGPmarkdown]{parseGPmarkdown()}}
 }
 \concept{markdown}

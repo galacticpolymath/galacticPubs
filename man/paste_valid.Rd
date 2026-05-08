@@ -17,8 +17,8 @@ paste_valid(..., sep = "", collapse = "_")
 Given a set of character objects, combine all non-empty variables into a single string. Uses \code{\link[=is_empty]{is_empty()}} to test validity, so should be robust to all kinds of missingness. It will remove both NA and NULL.
 }
 \seealso{
-Other simple text string manipulation functions: 
-\code{\link{string_capitalize_first}()},
-\code{\link{string_parseCamel}()}
+Other simple text string manipulation functions:
+\code{\link[=string_capitalize_first]{string_capitalize_first()}},
+\code{\link[=string_parseCamel]{string_parseCamel()}}
 }
 \concept{simple text string manipulation functions}

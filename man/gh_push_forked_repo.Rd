@@ -21,7 +21,7 @@ This function expects that:
 }
 }
 \seealso{
-Other GitHub Functions: 
-\code{\link{gh_reset_remote}()}
+Other GitHub Functions:
+\code{\link[=gh_reset_remote]{gh_reset_remote()}}
 }
 \concept{GitHub Functions}

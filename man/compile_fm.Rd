@@ -33,6 +33,6 @@ Produces the following json outputs in github project \verb{gp-lessons/Lessons/[
 }
 \section{Functions}{
 \itemize{
-\item \code{fm_compile()}: 
+\item \code{fm_compile()}: alias
 
 }}

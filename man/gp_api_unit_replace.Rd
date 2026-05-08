@@ -37,11 +37,11 @@ Completely deletes and re-inserts a UNIT.json for the mini-unit on the MongoDB d
 Which catalog you're modifying is controlled by the dev parameter. Default is to modify both (so they don't get out of sync). Shallow wrapper for internal functions \code{\link[=gp_api_unit_delete]{gp_api_unit_delete()}} and \code{\link[=gp_api_unit_insert]{gp_api_unit_insert()}}
 }
 \seealso{
-Other GP API: 
-\code{\link{gp_api_get_token}()},
-\code{\link{gp_api_query}()},
-\code{\link{gp_api_query_users}()},
-\code{\link{gp_api_unit_delete}()},
-\code{\link{gp_api_unit_insert}()}
+Other GP API:
+\code{\link[=gp_api_get_token]{gp_api_get_token()}},
+\code{\link[=gp_api_query]{gp_api_query()}},
+\code{\link[=gp_api_query_users]{gp_api_query_users()}},
+\code{\link[=gp_api_unit_delete]{gp_api_unit_delete()}},
+\code{\link[=gp_api_unit_insert]{gp_api_unit_insert()}}
 }
 \concept{GP API}

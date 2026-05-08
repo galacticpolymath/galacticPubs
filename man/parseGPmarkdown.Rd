@@ -23,8 +23,8 @@ formatted replacement text
 Functions to replace custom expressions with appropriate links or text. Custom tags include "\{vid 1\}", "\{vid 2\}" or "\{item 1\}", "\{item 2\}" more generally. Both have the same effect, but vid is clearer when reading and enforces video type, while item is more flexible. Symbols for media types: 'video'= ▶, 'pdf' or default= ➚. Special case for media titles with keyword "Cards"= ♧
 }
 \seealso{
-Other markdown: 
-\code{\link{expand_md_links}()},
-\code{\link{fixAnchorLinks}()}
+Other markdown:
+\code{\link[=expand_md_links]{expand_md_links()}},
+\code{\link[=fixAnchorLinks]{fixAnchorLinks()}}
 }
 \concept{markdown}

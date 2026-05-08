@@ -42,15 +42,15 @@ Create a new Galactic Polymath Google Drive file from a template file.
 If you're wanting to copy meta/ google sheets, check out \code{\link[=init_unit_meta]{init_unit_meta()}}
 }
 \seealso{
-Other Google Drive Functions: 
-\code{\link{drive_contents}()},
-\code{\link{drive_copy_missing_files}()},
-\code{\link{drive_cp_dir}()},
-\code{\link{drive_find_path}()},
-\code{\link{drive_get_info}()},
-\code{\link{drive_inSync}()},
-\code{\link{drive_open}()},
-\code{\link{init_unit_meta}()},
-\code{\link{update_teach_links}()}
+Other Google Drive Functions:
+\code{\link[=drive_contents]{drive_contents()}},
+\code{\link[=drive_copy_missing_files]{drive_copy_missing_files()}},
+\code{\link[=drive_cp_dir]{drive_cp_dir()}},
+\code{\link[=drive_find_path]{drive_find_path()}},
+\code{\link[=drive_get_info]{drive_get_info()}},
+\code{\link[=drive_inSync]{drive_inSync()}},
+\code{\link[=drive_open]{drive_open()}},
+\code{\link[=init_unit_meta]{init_unit_meta()}},
+\code{\link[=update_teach_links]{update_teach_links()}}
 }
 \concept{Google Drive Functions}

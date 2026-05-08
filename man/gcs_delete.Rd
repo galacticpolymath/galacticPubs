@@ -21,9 +21,9 @@ A shallow wrapper for \code{\link[googleCloudStorageR:gcs_delete_object]{googleC
 }
 }
 \seealso{
-Other google cloud storage: 
-\code{\link{gcs_add}()},
-\code{\link{gcs_contents}()},
-\code{\link{upload_assets}()}
+Other google cloud storage:
+\code{\link[=gcs_add]{gcs_add()}},
+\code{\link[=gcs_contents]{gcs_contents()}},
+\code{\link[=upload_assets]{upload_assets()}}
 }
 \concept{google cloud storage}

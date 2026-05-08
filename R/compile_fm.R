@@ -495,7 +495,7 @@ auth <-
 #'
 #' alias for for [compile_fm()]
 #'
-#' @describeIn compile_fm
+#' @describeIn compile_fm alias
 #'
 #' @export
 

@@ -52,11 +52,11 @@ Constructs a query and requests selected information from the from the galacticp
 
 }}
 \seealso{
-Other GP API: 
-\code{\link{gp_api_get_token}()},
-\code{\link{gp_api_query_users}()},
-\code{\link{gp_api_unit_delete}()},
-\code{\link{gp_api_unit_insert}()},
-\code{\link{gp_api_unit_replace}()}
+Other GP API:
+\code{\link[=gp_api_get_token]{gp_api_get_token()}},
+\code{\link[=gp_api_query_users]{gp_api_query_users()}},
+\code{\link[=gp_api_unit_delete]{gp_api_unit_delete()}},
+\code{\link[=gp_api_unit_insert]{gp_api_unit_insert()}},
+\code{\link[=gp_api_unit_replace]{gp_api_unit_replace()}}
 }
 \concept{GP API}

@@ -64,15 +64,15 @@ Also extracts the modification datetime and drive link. 'title' and 'description
 
 }
 \seealso{
-Other Google Drive Functions: 
-\code{\link{drive_contents}()},
-\code{\link{drive_copy_missing_files}()},
-\code{\link{drive_cp_dir}()},
-\code{\link{drive_find_path}()},
-\code{\link{drive_inSync}()},
-\code{\link{drive_new_from_template}()},
-\code{\link{drive_open}()},
-\code{\link{init_unit_meta}()},
-\code{\link{update_teach_links}()}
+Other Google Drive Functions:
+\code{\link[=drive_contents]{drive_contents()}},
+\code{\link[=drive_copy_missing_files]{drive_copy_missing_files()}},
+\code{\link[=drive_cp_dir]{drive_cp_dir()}},
+\code{\link[=drive_find_path]{drive_find_path()}},
+\code{\link[=drive_inSync]{drive_inSync()}},
+\code{\link[=drive_new_from_template]{drive_new_from_template()}},
+\code{\link[=drive_open]{drive_open()}},
+\code{\link[=init_unit_meta]{init_unit_meta()}},
+\code{\link[=update_teach_links]{update_teach_links()}}
 }
 \concept{Google Drive Functions}

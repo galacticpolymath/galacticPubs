@@ -345,7 +345,7 @@ invisible(SUCCESS)
 
 #' unit_compile
 #'
-#' @describeIn compile_unit
+#' @describeIn compile_unit alias
 #'
 #' @export
 

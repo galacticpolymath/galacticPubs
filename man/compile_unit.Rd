@@ -55,6 +55,6 @@ Intended for a single lesson in the current RStudio project. Use \code{\link[=ba
 }
 \section{Functions}{
 \itemize{
-\item \code{unit_compile()}: 
+\item \code{unit_compile()}: alias
 
 }}

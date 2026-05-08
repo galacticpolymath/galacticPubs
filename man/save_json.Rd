@@ -15,20 +15,20 @@ save_json(
 )
 }
 \arguments{
-\item{out}{a data frame to be output (passed to \code{\link[jsonlite:fromJSON]{jsonlite::toJSON()}})}
+\item{out}{a data frame to be output (passed to \code{\link[jsonlite:toJSON]{jsonlite::toJSON()}})}
 
 \item{filename}{output filename (including path)}
 
 \item{pretty}{logical; prettify output or make an unreadable, ugly json? default=TRUE}
 
-\item{auto_unbox}{logical param from \code{\link[jsonlite:fromJSON]{jsonlite::toJSON()}}; default=TRUE}
+\item{auto_unbox}{logical param from \code{\link[jsonlite:toJSON]{jsonlite::toJSON()}}; default=TRUE}
 
 \item{na}{how to print NA values; default= "null"}
 
 \item{null}{how to print null values; default= "null"}
 
-\item{...}{other arguments to \code{\link[jsonlite:fromJSON]{jsonlite::toJSON()}}}
+\item{...}{other arguments to \code{\link[jsonlite:toJSON]{jsonlite::toJSON()}}}
 }
 \description{
-A shallow wrapper for \code{\link[jsonlite:fromJSON]{jsonlite::toJSON()}}
+A shallow wrapper for \code{\link[jsonlite:toJSON]{jsonlite::toJSON()}}
 }

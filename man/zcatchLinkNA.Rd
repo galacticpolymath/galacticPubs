@@ -15,8 +15,8 @@ zcatchLinkNA(linkText, url)
 Internal helpers for \code{\link[=compile_teach_it]{compile_teach_it()}}. Change linktext if URL is empty.
 }
 \seealso{
-Other Internal helper functions: 
-\code{\link{make_yt_embed}()},
-\code{\link{zget_envir}()}
+Other Internal helper functions:
+\code{\link[=make_yt_embed]{make_yt_embed()}},
+\code{\link[=zget_envir]{zget_envir()}}
 }
 \concept{Internal helper functions}

@@ -15,8 +15,8 @@ Converts \verb{(blah)[#tag]} notation to react component: \verb{<AnchorLink href
 \seealso{
 \code{\link[=parseGPmarkdown]{parseGPmarkdown()}}
 
-Other markdown: 
-\code{\link{expand_md_links}()},
-\code{\link{parseGPmarkdown}()}
+Other markdown:
+\code{\link[=expand_md_links]{expand_md_links()}},
+\code{\link[=parseGPmarkdown]{parseGPmarkdown()}}
 }
 \concept{markdown}

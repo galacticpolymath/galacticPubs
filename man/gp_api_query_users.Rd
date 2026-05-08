@@ -22,11 +22,11 @@ success (logical)
 Gets a summary of galacticpolymath.com user accounts through the GP API (needs authenticated user)
 }
 \seealso{
-Other GP API: 
-\code{\link{gp_api_get_token}()},
-\code{\link{gp_api_query}()},
-\code{\link{gp_api_unit_delete}()},
-\code{\link{gp_api_unit_insert}()},
-\code{\link{gp_api_unit_replace}()}
+Other GP API:
+\code{\link[=gp_api_get_token]{gp_api_get_token()}},
+\code{\link[=gp_api_query]{gp_api_query()}},
+\code{\link[=gp_api_unit_delete]{gp_api_unit_delete()}},
+\code{\link[=gp_api_unit_insert]{gp_api_unit_insert()}},
+\code{\link[=gp_api_unit_replace]{gp_api_unit_replace()}}
 }
 \concept{GP API}

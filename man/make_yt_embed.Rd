@@ -24,8 +24,8 @@ make_yt_embed("https://www.youtube.com/embed/A2FBO8ofEac")
 
 }
 \seealso{
-Other Internal helper functions: 
-\code{\link{zcatchLinkNA}()},
-\code{\link{zget_envir}()}
+Other Internal helper functions:
+\code{\link[=zcatchLinkNA]{zcatchLinkNA()}},
+\code{\link[=zget_envir]{zget_envir()}}
 }
 \concept{Internal helper functions}

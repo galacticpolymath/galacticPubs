@@ -133,7 +133,7 @@ fm_backup <- \(WD = "?") {
 
 #' backup_fm
 #'
-#' @describeIn fm_backup
+#' @describeIn fm_backup alias
 #'
 #' @export
 

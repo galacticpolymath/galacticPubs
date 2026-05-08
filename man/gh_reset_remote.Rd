@@ -27,7 +27,7 @@ Change the GitHub URL associated with this project (i.e. after you rename the re
 Will run some validation checks and let you know whether the new_proj_name repo exists on the web. May also prompt to run \code{\link[=editor]{editor()}} to initialize some fields.
 }
 \seealso{
-Other GitHub Functions: 
-\code{\link{gh_push_forked_repo}()}
+Other GitHub Functions:
+\code{\link[=gh_push_forked_repo]{gh_push_forked_repo()}}
 }
 \concept{GitHub Functions}

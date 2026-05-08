@@ -18,7 +18,7 @@ discard_changes(
 
 \item{lessons_dir}{path to the virtualized folder Edu/lessons, where all the lessons are found; default="/Volumes/GoogleDrive/My Drive/Edu/Lessons"}
 
-\item{include_untracked}{logical; Stash (discard) changes to untracked files? Passed to \code{\link[gert:git_stash]{gert::git_stash_save()}}. default=FALSE}
+\item{include_untracked}{logical; Stash (discard) changes to untracked files? Passed to \code{\link[gert:git_stash_save]{gert::git_stash_save()}}. default=FALSE}
 }
 \value{
 logical. TRUE if changes succeeded and clear git change list; FALSE if change list not empty.

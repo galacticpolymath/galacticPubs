@@ -39,9 +39,9 @@ a Tibble with success, filenames and download links
 A shallow wrapper for \code{\link[googleCloudStorageR:gcs_list_objects]{googleCloudStorageR::gcs_list_objects()}}. If WD supplied, it will only show objects for that project.
 }
 \seealso{
-Other google cloud storage: 
-\code{\link{gcs_add}()},
-\code{\link{gcs_delete}()},
-\code{\link{upload_assets}()}
+Other google cloud storage:
+\code{\link[=gcs_add]{gcs_add()}},
+\code{\link[=gcs_delete]{gcs_delete()}},
+\code{\link[=upload_assets]{upload_assets()}}
 }
 \concept{google cloud storage}

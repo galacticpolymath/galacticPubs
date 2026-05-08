@@ -13,8 +13,8 @@ string_capitalize_first(x)
 Does what it says
 }
 \seealso{
-Other simple text string manipulation functions: 
-\code{\link{paste_valid}()},
-\code{\link{string_parseCamel}()}
+Other simple text string manipulation functions:
+\code{\link[=paste_valid]{paste_valid()}},
+\code{\link[=string_parseCamel]{string_parseCamel()}}
 }
 \concept{simple text string manipulation functions}

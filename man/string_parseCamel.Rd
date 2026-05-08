@@ -21,9 +21,9 @@ This function takes a string e.g. "HelloWorld" and returns a regex expression "H
 [ ]: R:\%20
 }
 \seealso{
-Other simple text string manipulation functions: 
-\code{\link{paste_valid}()},
-\code{\link{string_capitalize_first}()}
+Other simple text string manipulation functions:
+\code{\link[=paste_valid]{paste_valid()}},
+\code{\link[=string_capitalize_first]{string_capitalize_first()}}
 }
 \concept{regex functions}
 \concept{simple text string manipulation functions}
