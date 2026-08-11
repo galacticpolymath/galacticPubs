@@ -10,12 +10,12 @@
 #' @export
 #'
 gp_api_get_token <- \(refresh = FALSE,
-                         dev = TRUE,
+                         dev = FALSE,
                       verbosity= 0) {
   oauth_sec <-
     httr2::obfuscated("LJZonP3Q0vVpNm_Z9vJp25gIZYvkKdHGUOGmZ0Y5qG36A9ssZNFweIl4cI1YPQ-3KBf-")
 
-
+  dev_string <- ifelse(dev,"dev.galacticpolymath.com","teach.galacticpolymath.com")
 
   # Get email associated with galacticPubs ----------------------------------
   email <- Sys.getenv("galacticPubs_gdrive_user")
@@ -30,10 +30,10 @@ gp_api_get_token <- \(refresh = FALSE,
   #if we're not already going to refresh, do a test to see if token is current
   #by posting no
 
-  if (!is_empty(token_stored) & !refresh) {
+  if (!is_empty(token_stored) && !refresh) {
     #Check that token is valid
     test_request <-
-      httr2::request("https://dev.galacticpolymath.com/api/jwt-expiration") %>%
+      httr2::request(paste0("https://",dev_string,"/api/jwt-expiration")) %>%
       httr2::req_method("POST") %>%
       httr2::req_body_json(list(accessToken = token_stored)) %>%
       # httr2::req_auth_bearer_token(accessToken = token_stored) %>%

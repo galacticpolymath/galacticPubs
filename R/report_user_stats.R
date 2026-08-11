@@ -6,6 +6,7 @@
 #' @param start_date Date; start date for report; default=Sys.Date()-30
 #' @param end_date Date; end date for report; default=Sys.Date()
 #' @param view_data logical; do you want to open retrieved user data with [View()]? Default=TRUE
+#' @param shape how do you want the data element to look? options = c("new","engaged"). Default "new" sorts by latest added users, and includes all. "engaged" Orders by totalSignIns and subsets only isTeacher==TRUE
 #' @param dev logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.
 #' @returns Summary tibble
 #' @export
@@ -14,8 +15,10 @@
 report_user_stats <- function(verbosity = 1,
                               start_date = Sys.Date() - 90,
                               end_date = Sys.Date(),
-                              view_data = FALSE,
+                              view_data = TRUE,
+                              shape = "new",
                               dev = FALSE) {
+  checkmate::assert_choice(shape,choices = c("new","engaged"))
   start_date0 <- start_date
   end_date0 <- end_date #backup if overwriting
   is_date_start <- lubridate::is.Date(start_date)
@@ -39,9 +42,10 @@ report_user_stats <- function(verbosity = 1,
   # Get the user data
   users <- gp_api_query_users(verbosity = verbosity, dev = dev)
   # Get the number of active users
-  users$active_in_30_days <- users$lastSignIn >= Sys.Date() - 30
+
+  users$active_in_30_days <- users$lastSignIn >= (Sys.Date() - 30)
   #Make NAs be inactive, cuz they would have this value if they'd signed in recently
-  users$active_in_30_days <- ifelse(is.na(users$active_in_30_days), FALSE, TRUE)
+  users$active_in_30_days[is.na(users$active_in_30_days)] <- FALSE
 
   # Get the number of users
   num_users <- nrow(users)
@@ -183,8 +187,7 @@ report_user_stats <- function(verbosity = 1,
       x = "",
       y = "Total class size"
 
-    )+
-    ggplot2::ylim(0,NA)
+    )
 
   # stacked combined plot
   KPIs <- patchwork::wrap_plots(
@@ -199,9 +202,6 @@ report_user_stats <- function(verbosity = 1,
 
   plot(KPIs)
 
-  if (view_data) {
-    utils::View(users2)
-  }
   # Return a list with the data, graph, and summary
   out <- list(
     data = users2,
@@ -241,6 +241,24 @@ report_user_stats <- function(verbosity = 1,
     paste0(sort(unique_sans_na(users$country)), collapse = ", "),
     ")"
   )
+
+
+# Reshape data output -----------------------------------------------------
+  if(shape!="new"){
+
+    if(shape=="engaged"){
+      out$data <- out$data %>% dplyr::mutate("lastSignIn"=format(as.Date(.data$lastSignIn),"%b-%d-%Y")) %>%
+        dplyr::relocate(1:3,"isTeacher","totalSignIns","lastSignIn","active_in_30_days","classSize") %>%
+                dplyr::arrange(desc(.data$totalSignIns)) %>% dplyr::filter(.data$isTeacher)
+    }
+  }
+
+
+# View Data if asked -----------------------------------------------------
+
+  if (view_data) {
+    View(out$data)
+  }
 
   invisible(out)
 }

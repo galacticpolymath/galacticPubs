@@ -53,20 +53,23 @@ if(is.null(WD_git)){
   # Expand markdown notation {vid1} -----------------------------------------
   #####
   #Parse all the text columns to expand {vidN} notation into full video links (including for Prep notes)
-  proc_parsed <- apply(proc[, c("StepQuickDescription",
+  proc_txt <- proc[, c("StepQuickDescription",
                    "StepDetails",
                    "VariantNotes",
-                   "TeachingTips")], 2, function(x)
+                   "TeachingTips")]
+  proc_parsed <- catch_err(keep_results=TRUE,apply(proc_txt, 2, function(x){
                      parseGPmarkdown(x,
                                      mlinks = mlinks,
-                                     force_lookup = FALSE))
+                                     force_lookup = FALSE)}))
+  #Handle badly written procedure in a graceful way by returning unparsed text and printing a warning with the error message
+  if(!proc_parsed$success){
+    warning("Problem parsing markdown in Procedure section. Returning unparsed text for now. Error message:\n",proc_parsed$result)
+    proc_parsed <- proc_txt
 
+  }else{
+    proc_parsed <- proc_parsed$result
+  }
 
-
-  proc[, c("StepQuickDescription",
-           "StepDetails",
-           "VariantNotes",
-           "TeachingTips")] <-proc_parsed
 
 
   #Differentiate tibbles with and without prep info for later

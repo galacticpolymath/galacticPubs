@@ -347,13 +347,13 @@ compile_teach_it <- function(WD = "?",
         stop()
 
 
-      } else if (identical(test_zget_proc$result$vocab$success, FALSE)) {
+      } else if (is.null(test_zget_proc$result$vocab)) {
         message("FAILED to compile procedures vocab")
         proc_data <- NULL
 
       } else{
         proc_data <- test_zget_proc$result
-        vocab <- test_zget_proc$result$vocab$result
+        vocab <- test_zget_proc$result$vocab
         #output gathered vocab as csv
         if (!is.null(vocab)) {
           vocab_outfile <-

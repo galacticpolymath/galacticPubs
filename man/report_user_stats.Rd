@@ -8,7 +8,8 @@ report_user_stats(
   verbosity = 1,
   start_date = Sys.Date() - 90,
   end_date = Sys.Date(),
-  view_data = FALSE,
+  view_data = TRUE,
+  shape = "new",
   dev = FALSE
 )
 }
@@ -20,6 +21,8 @@ report_user_stats(
 \item{end_date}{Date; end date for report; default=Sys.Date()}
 
 \item{view_data}{logical; do you want to open retrieved user data with \code{\link[=View]{View()}}? Default=TRUE}
+
+\item{shape}{how do you want the data element to look? options = c("new","engaged"). Default "new" sorts by latest added users, and includes all. "engaged" Orders by totalSignIns and subsets only isTeacher==TRUE}
 
 \item{dev}{logical; if FALSE (default), gets catalog from the production gp-catalog. Otherwise, from the dev catalog.}
 }

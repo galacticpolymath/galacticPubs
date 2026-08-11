@@ -15,8 +15,13 @@ unit_init <- \(recover = FALSE, WD = "?") {
   if (!recover) {
     inputs <- unit_init_helper()
     checkmate::assert_list(inputs, all.missing = FALSE)
+    checkmate::assert_numeric(inputs$LsnCount,lower=1)
   } else{
     inputs <- get_fm(WD = WD)
+    if(is.na(inputs$`_id`)){
+      stop("Not recoverable. Delete the unit folders on drive and WD_git and try again.")
+    }
+    checkmate::assert_numeric(inputs$LsnCount,lower=1,all.missing = FALSE)
   }
 
   #add locale to inputs
@@ -99,16 +104,14 @@ unit_init <- \(recover = FALSE, WD = "?") {
   assess_dir <- fs::path(path_parent_dir(teach_mat_dir), "assessments")
 
   #Add Subfolders with Lx if we've specified more than 1 lesson in this unit
-  if (inputs$LsnCount > 1) {
+
     #everything will write recursively, so we only have to specify the most specific paths,
     #intermediate folders will be created automatically
     teach_dirs <-
       sapply(1:inputs$LsnCount, \(i) {
         fs::path(teach_mat_dir, paste0("L", i))
       })
-  } else{
-    teach_dirs <- teach_mat_dir
-  }
+
 
   ### Other folders to create in the root project folder
   other_names <- c(
@@ -155,12 +158,14 @@ unit_init <- \(recover = FALSE, WD = "?") {
     common_keys <-
       fm_names[match(names(inputs2), fm_names)] %>% unique_sans_na()
 
-    update_fm_success <- suppressWarnings(update_fm(
+    update_fm_success <- update_fm(
       WD_git = WD_git,
-      recompile = F,
+      recompile = FALSE,
+      upload = FALSE,
+      drive_reconnect = FALSE,
       change_this = inputs2[common_keys],
       try_harder = TRUE
-    ))
+    ) %>% catch_err()
   }
 
   # Initialize the meta template files --------------------------------------

@@ -24,8 +24,8 @@ parseGPmarkdown <-
       WD <- parse_wd(WD)
       WD_git <- get_wd_git(WD = WD)
       #Look for multimedia in fm
-      if(is.null(mlinks)){
-      mlinks <- get_fm("FeaturedMultimedia", WD = WD)[[1]] %>% dplyr::as_tibble()
+      if (is.null(mlinks)) {
+        mlinks <- get_fm("FeaturedMultimedia", WD = WD)[[1]] %>% dplyr::as_tibble()
       }
     }
 
@@ -113,10 +113,45 @@ parseGPmarkdown <-
             replace
           })
 
-        vidReplaced <-
-          stringr::str_replace_all(x, "\\{[Vv]id[^\\{]*\\}", function(x) {
-            vidReplacements[match(x, names(vidReplacements))]
-          })
+        vidReplace_test <-
+          catch_err(
+            stringr::str_replace_all(
+              string = unname(x),
+              pattern = "\\{[Vv]id[^\\{]*\\}",
+              replacement = function(match_text) {
+                out <- match_text
+
+                not_na <- !is.na(match_text)
+
+                idx <- match(match_text[not_na], names(vidReplacements))
+
+                missing_real_refs <- is.na(idx)
+
+                if (any(missing_real_refs)) {
+                  warning("Missing replacement for: ",
+                          paste(unique(match_text[not_na][missing_real_refs]), collapse = ", "))
+                }
+
+                replaced <- unname(as.character(vidReplacements[idx]))
+
+                replaced[missing_real_refs] <- match_text[not_na][missing_real_refs]
+
+                out[not_na] <- replaced
+
+                out
+              }
+            ),
+            keep_results = TRUE
+          )
+
+        if (!vidReplace_test$success) {
+          warning("Error in replacing video tags: ",
+                  vidReplace_test$result)
+          warning("using original (unparsed) text: ", x)
+          vidReplaced <- x
+        } else{
+          vidReplaced <- vidReplace_test$result
+        }
       } else{
         vidReplaced <- x
       }

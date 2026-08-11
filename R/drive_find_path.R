@@ -101,15 +101,15 @@ drive_find_path <- function(drive_path,
         #FIRST part of path
         if (i == 1) {
           #if first part of path is short hand for mydrive drive_root, get its google ID
-          if (tolower(p[i]) == "drive_root" |
-              tolower(p[i]) == "my drive" |
-              p[i] == "~") {
+          if (isTRUE(tolower(p[i]) == "drive_root") |
+              isTRUE(tolower(p[i]) == "my drive") |
+              isTRUE(p[i] == "~")) {
             results[[i]] <-
               googledrive::drive_get(path = "~/")
             sharedDrive <- NULL
 
             #handle relative paths from a GP-Studio/Edu/Lessons dir
-          } else if (p[i] == "..") {
+          } else if (isTRUE(p[i] == "..")) {
             if (!is.null(WD)) {
               #make sure a valid lesson project directory provided
 

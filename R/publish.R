@@ -25,7 +25,7 @@ publish <- function(WD = "?",
   #but don't throw an error (e.g. if run from galacticPubs)
 
   #go ahead and renew token if necessary; get it outta the way
-  gp_api_get_token()
+  gp_api_get_token(dev=TRUE)
 
   is_galacticPubs <- grepl("galacticPubs", WD)
 

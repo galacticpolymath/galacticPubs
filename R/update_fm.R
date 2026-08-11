@@ -96,15 +96,19 @@ update_fm <-
     #Always reassign lsn count based on EstUnitTime, since this is the most likely to be accurate and we want to make sure it's filled in for older files. If EstUnitTime is missing or can't be parsed, then LsnCount will be NA and user will have to fill in manually.
     try_count_extracted <- stringr::str_extract(new_yaml$EstUnitTime, "[^\\d]?(\\d*).*", group = 1) %>% as.integer() %>% catch_err(keep_results = TRUE)
     count_extracted <- try_count_extracted$result
-    if (is_empty(count_extracted)) {
+
+    consensus_count <- max(unique_sans_na(c(new_yaml$LsnCount, count_extracted))) %>%
+      as.integer()
+    if (is_empty(consensus_count)) {
       warning(
         "You should manually add LsnCount to front matter. Unable to extract from EstUnitTime for: '",
         new_yaml$GdriveDirName,
         "'"
       )
     } else{
-      new_yaml$LsnCount <- count_extracted
+      new_yaml$LsnCount <- consensus_count #(Hopefully stable value for number of lessons if LsnCount or EstUnitTime is more up-to-date)
     }
+
 
 
 
@@ -245,47 +249,10 @@ update_fm <-
           collapse = "/"
         )
 
-      #Add bitly (short URL)
-      # #Deprecating bitly creation altogether
-      # if (new_yaml$Title != "Title Me!") {
-      #   test_assign <- urlshorteneR::bitly_create_bitlink(
-      #     long_url = utils::URLencode(new_yaml$URL),
-      #     title = new_yaml$MediumTitle
-      #   ) %>% catch_err(keep_results = TRUE)
-      #
-      #   if (test_assign$success) {
-      #     message("Bit.ly created for this unit:\n @",
-      #             test_assign$result$link[1])
-      #
-      #     new_yaml$ShortURL <- test_assign$result$link[1]
-      #   } else{
-      #     warning_msg <- paste0("Bit.ly creation failed for ",
-      #                           new_yaml$MediumTitle,
-      #                           ":\n @",
-      #                           new_yaml$URL)
-      #     message(test_assign$result)
-      #     warning(warning_msg)
-      #     warning("Maybe you already have a bitlink for URL? ", new_yaml$URL)
-      #   }
-      #
-      # }
 
     }
 
-    # #Make a QR code (DEPRECATED)
-    #
-    # qr_path <- fs::path(WD,
-    #                     "assets",
-    #                     "_banners_logos_etc",
-    #                     paste0(unit_name, "__QR-code.png"))
-    #
-    # if (!file.exists(qr_path) | force_upgrade) {
-    #   grDevices::png(qr_path)
-    #   plot(qrcode::qr_code(new_yaml$URL))
-    #   grDevices::dev.off()
-    #   message("QR Code generated for ", unit_name, " at:\n", qr_path, "\n")
-    # }
-    #
+
     #make a unique `_id` combining numID & locale
     if (!is_empty(new_yaml$numID)) {
       new_yaml$`_id` <-
@@ -378,8 +345,7 @@ update_fm <-
       is_empty(new_yaml$GdriveDirID) |
       is_empty(new_yaml$GdriveDirURL) |
       drive_reconnect
-    ) &
-    !is_gPubs) {
+    )) {
       oauth_email <- Sys.getenv("galacticPubs_gdrive_user")
       checkmate::assert_string(oauth_email, .var.name = "galacticPubs_gdrive_user")
       googledrive::drive_auth(email = oauth_email)
@@ -547,54 +513,56 @@ update_fm <-
           )
           return(FALSE)
         }
-
-        #Assign teaching-materials_DEV/ path if it exists
-        if (tm_dev_local_is_dir) {
-          tm_drivepath_dev <- fs::path(
-            "GP-Studio",
-            "Edu",
-            "Lessons",
-            new_yaml$GdriveDirName,
-            "teaching-materials_DEV"
-          )
-        } else{
-          tm_drivepath_dev <- NA
-        }
-
-        #Now lookup IDs for folders
-        if (tm_is_public) {
-          parent_folder <- fs::path("GalacticPolymath", old_yaml$MediumTitle)
-          pubID <-
-            zget_drive_id(parent_folder, fm_key = "GdrivePublicID")
-        } else{
-          pubID <-
-            zget_drive_id(
-              "../teaching-materials/",
-              drive_root = new_yaml$GdriveDirID,
-              fm_key = "GdrivePublicID"
-            )
-        }
-        checkmate::assert_character(pubID, min.chars = 6)
-
-        #If dev Teaching-material local found, get the drive ID for it
-        if (tm_dev_local_is_dir) {
-          tm_dev_ID <-
-            zget_drive_id(
-              "../teaching-materials_DEV/",
-              drive_root = new_yaml$GdriveDirID,
-              fm_key = "GdriveTeachMatDevID"
-            )
-        } else{
-          tm_dev_ID <- NA
-        }
-        checkmate::assert_character(tm_dev_ID, all.missing = TRUE)
-        new_yaml$GdriveTeachMatDevPath <- tm_drivepath_dev
-        new_yaml$GdrivePublicID <- pubID
-        new_yaml$GdriveTeachMatDevID <- tm_dev_ID
       }
+
+      #Assign teaching-materials_DEV/ path if it exists
+      if (tm_dev_local_is_dir) {
+        tm_drivepath_dev <- fs::path(
+          "GP-Studio",
+          "Edu",
+          "Lessons",
+          new_yaml$GdriveDirName,
+          "teaching-materials_DEV"
+        )
+      } else{
+        tm_drivepath_dev <- NA
+      }
+
+      #Now lookup IDs for folders
+      if (tm_is_public) {
+        parent_folder <- fs::path("GalacticPolymath", old_yaml$MediumTitle)
+        pubID <-
+          zget_drive_id(parent_folder, fm_key = "GdrivePublicID")
+      } else{
+        pubID <-
+          zget_drive_id(
+            "../teaching-materials/",
+            drive_root = new_yaml$GdriveDirID,
+            fm_key = "GdrivePublicID"
+          )
+      }
+      checkmate::assert_character(pubID, min.chars = 6)
+
+      #If dev Teaching-material local found, get the drive ID for it
+      if (tm_dev_local_is_dir) {
+        tm_dev_ID <-
+          zget_drive_id(
+            "../teaching-materials_DEV/",
+            drive_root = new_yaml$GdriveDirID,
+            fm_key = "GdriveTeachMatDevID"
+          )
+      } else{
+        tm_dev_ID <- NA
+      }
+      checkmate::assert_character(tm_dev_ID, all.missing = TRUE)
+      new_yaml$GdriveTeachMatDevPath <- tm_drivepath_dev
+      new_yaml$GdrivePublicID <- pubID
+      new_yaml$GdriveTeachMatDevID <- tm_dev_ID
+
       #Always should have valid path to teaching materials folder
-      checkmate::assert_character(new_yaml$GdriveTeachMatPath, any.missing = FALSE)
       new_yaml$GdriveTeachMatPath <- tm_drivepath
+      checkmate::assert_character(new_yaml$GdriveTeachMatPath, any.missing = FALSE)
+
 
 
       tm_res <-
